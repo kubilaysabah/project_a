@@ -67,6 +67,15 @@ The developer on this project is **Şahan** — the second developer from Moguls
 
 Honest revenue band: $500-$5,000; the real prize is living the full Steam cycle (page, capsule, demo, launch) once before Moguls ships.
 
+## Living docs (Claude Docs — shared, editable, commentable)
+
+Two living documents mirror this file for humans; keep BOTH in sync with this file when status or decisions change:
+
+- **Proje Hafızası** (session journal + decisions): https://claude.ai/code/artifact/00a0d343-6a47-48dc-807e-b671a03224c1
+- **Oyun Tasarım Belgesi** (concept, mechanics, roadmap, workflow): https://claude.ai/code/artifact/78f0fa6f-6087-497b-8492-4576f63bd6ee
+
+This repo's CLAUDE.md stays the canonical, binding session memory (it is what sessions auto-load); the docs are the readable/shareable layer on top.
+
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
 - 2026-09-20: Repo created (name pending, hence `project_a`). Unity 6.5.5f1 URP project generated and pushed ("Initial check-in") with standard Unity .gitignore/.gitattributes (LFS macros). Projects board #4 created by the user. CLAUDE.md written. **The 12-week plan is on GitHub as issues #1-#20** (#1-#8 graybox H1-2, #9-#12 art+Steam page H3-4, #13-#16 content H5-7, #17-#18 demo H8-9, #19-#20 launch H10-12); milestones + board attachment done by the user via a local `gh` script (MCP tooling in remote sessions cannot create milestones/board items — leave that step to the user each time it recurs). Next: name decision (issue #1) + Lesson 1 graybox (landing + stair loop + decision mechanic skeleton, issues #2-#4).
