@@ -195,7 +195,7 @@ public static class GrayboxKurucu
         Kutu("Ayakkabilik", t, new Vector3(1.05f, 0.3f, 0f), new Vector3(0.35f, 0.6f, 0.8f));
 
         // Ampul. "Yeşil ampul" anomalisi ileride sadece bu ışığın rengini değiştirecek.
-        AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.25f, 0f), 9f, 2.2f);
+        AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.25f, 0f), 9f, 2.2f, golgeAtsin: true);
 
         return kok;
     }
@@ -242,7 +242,8 @@ public static class GrayboxKurucu
 
         // Merdiven boşluğuna zayıf bir ampul: basamaklar tamamen karanlıkta kalmasın.
         AmpulKur("Ampul_Merdiven", t,
-                 new Vector3(0f, KatYuksekligi / 2f + 1.9f, MerdivenUzunluk / 2f), 8f, 1.4f);
+                 new Vector3(0f, KatYuksekligi / 2f + 1.9f, MerdivenUzunluk / 2f), 8f, 1.4f,
+                 golgeAtsin: false);
 
         return kok;
     }
@@ -266,7 +267,16 @@ public static class GrayboxKurucu
     }
 
     // Nokta ışık üretir. 1994 akkor ampulünün sıcak sarısı.
-    static void AmpulKur(string ad, Transform ebeveyn, Vector3 konum, float menzil, float siddet)
+    //
+    // GÖLGE PAHALIDIR. Bir nokta ışık her yöne yayıldığı için gölgesini
+    // ALTI ayrı yüzeye çizmek gerekir; yani gölge atan her ampul, sahneyi
+    // altı kez daha çizdirir. Başta beş ampulün beşi de gölge atıyordu:
+    // 30 gölge haritası. Unity bunları 2048'lik atlasa sığdıramayıp
+    // çözünürlüğü dörtte bire düşürdüğünü konsola yazıyordu.
+    // Artık sadece sahanlık ampulleri gölge atıyor; merdiven ampulleri
+    // yalnızca aydınlatıyor. Gözle fark edilmiyor, maliyet yarıdan aza indi.
+    static void AmpulKur(string ad, Transform ebeveyn, Vector3 konum,
+                         float menzil, float siddet, bool golgeAtsin)
     {
         GameObject g = new GameObject(ad);
         g.transform.SetParent(ebeveyn, false);
@@ -278,7 +288,7 @@ public static class GrayboxKurucu
         isik.range = menzil;                            // ışığın ulaştığı yarıçap
         isik.intensity = siddet;
         isik.color = new Color(1f, 0.92f, 0.76f);       // sıcak sarı
-        isik.shadows = LightShadows.Soft;               // yumuşak gölge
+        isik.shadows = golgeAtsin ? LightShadows.Soft : LightShadows.None;
     }
 
     // ---------- DAİRE KAPISI ----------
@@ -304,7 +314,32 @@ public static class GrayboxKurucu
 
         // Numaralık: göz hizasının biraz üstünde, küçük bir plaka.
         Kutu("Numaralik", k, new Vector3(kanatX + 0.04f, 1.78f, 0f),
-             new Vector3(0.02f, 0.14f, 0.20f));
+             new Vector3(0.02f, 0.16f, 0.26f));
+
+        // NUMARA YAZISI. Plakanın üstünde duran 3B yazı.
+        // KatYoneticisi her katta bu yazıyı günceller: 1. katta 1 ve 2,
+        // 2. katta 3 ve 4... Böylece oyuncu kaçıncı katta olduğunu
+        // ekranda bir sayaçtan değil, BİNANIN KENDİSİNDEN okur.
+        GameObject yaziNesne = new GameObject("Numara");
+        yaziNesne.transform.SetParent(k, false);
+        yaziNesne.transform.localPosition = new Vector3(kanatX + 0.06f, 1.78f, 0f);
+
+        // Kapı +x yönüne bakıyor; yazıyı da o yöne çeviriyoruz.
+        yaziNesne.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
+
+        // TextMesh: Unity'nin en basit 3B yazı bileşeni. Ekstra paket
+        // veya font kurulumu istemediği için graybox'a uygun.
+        TextMesh yazi = yaziNesne.AddComponent<TextMesh>();
+        yazi.text = "0";
+        yazi.anchor = TextAnchor.MiddleCenter;
+        yazi.alignment = TextAlignment.Center;
+        yazi.fontSize = 96;              // büyük üret, sonra küçült: kenarlar keskin çıkar
+        yazi.characterSize = 0.014f;   // rakam plakaya sığacak boyut
+        yazi.color = new Color(0.12f, 0.12f, 0.12f);
+        yazi.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        // Yazının kendi materyali fontun dokusunu kullanmalı.
+        yaziNesne.GetComponent<MeshRenderer>().sharedMaterial = yazi.font.material;
     }
 
     // ---------- PASPAS ----------

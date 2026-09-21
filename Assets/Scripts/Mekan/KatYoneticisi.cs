@@ -54,6 +54,10 @@ public class KatYoneticisi : MonoBehaviour
     private Light[] ampuller;             // sahnedeki bütün nokta ışıklar
     private Color[] ozgunRenkler;         // anomali/ceza öncesi renkleri
 
+    // Kapı numarası yazıları. A = oyuncunun bulunduğu sahanlık,
+    // B = merdivenin tepesindeki sahanlık (yani BİR ÜST kat).
+    private TextMesh aSolNumara, aSagNumara, bSolNumara, bSagNumara;
+
     // ---------- KURULUM ----------
 
     private void Awake()
@@ -78,6 +82,18 @@ public class KatYoneticisi : MonoBehaviour
 
         ozgunRenkler = new Color[ampuller.Length];
         for (int i = 0; i < ampuller.Length; i++) ozgunRenkler[i] = ampuller[i].color;
+
+        // Kapı numarası yazılarını bul.
+        aSolNumara = NumaraBul("Sahanlik_A/Kapi_Sol/Numara");
+        aSagNumara = NumaraBul("Sahanlik_A/Kapi_Sag/Numara");
+        bSolNumara = NumaraBul("Sahanlik_B/Kapi_Sol/Numara");
+        bSagNumara = NumaraBul("Sahanlik_B/Kapi_Sag/Numara");
+    }
+
+    private TextMesh NumaraBul(string yol)
+    {
+        GameObject g = GameObject.Find(yol);
+        return g != null ? g.GetComponent<TextMesh>() : null;
     }
 
     private void Start()
@@ -233,7 +249,30 @@ public class KatYoneticisi : MonoBehaviour
         // Elle test edebilmek için şart; #5'te veri güdümlü sistem bunun yerini alacak.
         AmpulleriBoya(anomali ? new Color(0.45f, 1f, 0.5f) : Color.clear);
 
+        KapiNumaralariniYaz();
+
         Debug.Log($"[KAT] {sayac.MevcutKat}. kat hazır — anomali: {(anomali ? "VAR" : "yok")}");
+    }
+
+    // ---------- KAPI NUMARALARI ----------
+    // Her katta iki daire var, numaralar baştan sona sıralı gider:
+    // 1. katta 1-2, 2. katta 3-4, ... 8. katta 15-16.
+    //
+    // Oyuncunun bulunduğu sahanlık (A) mevcut katı gösterir.
+    // Merdivenin tepesindeki sahanlık (B) BİR ÜST katı gösterir; oyuncu
+    // merdiveni çıkarken oraya baktığında numaraların arttığını görür.
+    // Işınlanma anında A, B'nin numaralarını devralır ve döngü sürer.
+    private void KapiNumaralariniYaz()
+    {
+        Yaz(aSolNumara, aSagNumara, sayac.MevcutKat);
+        Yaz(bSolNumara, bSagNumara, sayac.MevcutKat + 1);
+    }
+
+    private void Yaz(TextMesh sol, TextMesh sag, int kat)
+    {
+        // Kat 1 -> 1 ve 2. Kat 2 -> 3 ve 4. Formül: 2*kat-1 ve 2*kat.
+        if (sol != null) sol.text = (kat * 2 - 1).ToString();
+        if (sag != null) sag.text = (kat * 2).ToString();
     }
 
     // renk Color.clear verilirse özgün renge dönülür.
