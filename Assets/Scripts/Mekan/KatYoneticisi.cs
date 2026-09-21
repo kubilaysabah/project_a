@@ -45,11 +45,11 @@ public class KatYoneticisi : MonoBehaviour
     private KatSayaci sayac = new KatSayaci();
 
     private Vector3 baslangicKonumu;      // ceza sonrası dönülecek yer
-    private int sonYukariSayisi;          // döngü sayaçlarının en son görülen hali
-    private int sonAsagiSayisi;
     private bool cezaBekliyor;            // yanlış karar verildi, ışıklar sönmeyi bekliyor
     private bool cezaCalisiyor;           // ceza gösterisi şu an oynuyor
-    private Karar cezayaYolAcanKarar;     // ceza hangi yönde yürürken tetiklenecek
+
+    // Kararı ışınlanmadan değil, gerçekten kat edilen dikey mesafeden okuyan takipçi.
+    private KatIlerlemeTakipcisi ilerleme;
 
     private Light[] ampuller;             // sahnedeki bütün nokta ışıklar
     private Color[] ozgunRenkler;         // anomali/ceza öncesi renkleri
@@ -98,7 +98,28 @@ public class KatYoneticisi : MonoBehaviour
 
     private void Start()
     {
+        ilerleme = new KatIlerlemeTakipcisi(MekanOlculeri.DikeyOfset, SanalKot());
         YeniKatHazirla();
+    }
+
+    // ---------- SANAL KOT ----------
+    // Oyuncunun KURGUDAKİ yüksekliği: gerçek yüksekliği artı, şimdiye kadar
+    // yapılan ışınlanmaların telafisi.
+    //
+    // Işınlanma oyuncuyu bir kat aşağı taşır ama oyuncu aslında bir kat ÇIKMIŞTIR.
+    // Bu yüzden her yukarı döngüde bir kat ekliyor, her aşağı döngüde bir kat
+    // çıkarıyoruz. Sonuç, oyuncu tırmandıkça kesintisiz artan bir sayıdır;
+    // ışınlanmanın bu sayıya hiç etkisi olmaz. Karar mantığı işte buna bakar,
+    // çünkü ışınlanma bir görüntü hilesidir, oyuncunun kat ettiği yol değildir.
+    private float SanalKot()
+    {
+        if (oyuncu == null) return 0f;
+
+        int netDongu = (merdiven != null)
+            ? merdiven.yukariDonguSayisi - merdiven.asagiDonguSayisi
+            : 0;
+
+        return oyuncu.position.y + netDongu * MekanOlculeri.DikeyOfset;
     }
 
     // ---------- HER KARE ----------
@@ -110,18 +131,16 @@ public class KatYoneticisi : MonoBehaviour
         // Ceza gösterisi oynarken karar dinlemeyiz.
         if (cezaCalisiyor) return;
 
+        if (ilerleme == null) return;
+
+        float kot = SanalKot();
+
         // Ceza bekliyorsa, oyuncunun yarım kat yol almasını bekle.
+        // Yön bakmıyoruz: yukarı da inse aşağı da, yarım kat yol aldığında
+        // ışıklar sönmeye başlar. Mesafe mutlak değer olarak ölçülüyor.
         if (cezaBekliyor)
         {
-            // Yön önemli. Yukarı giderken oyuncu merdivenin ortasına ALTTAN yaklaşır,
-            // aşağı inerken ÜSTTEN. Tek bir ">=" koyarsak, aşağı inen oyuncu zaten
-            // ortanın üstünde olduğu için ceza anında patlar ve gecikme kaybolur.
-            float z = oyuncu.position.z;
-            bool yarimKatGecildi = (cezayaYolAcanKarar == Karar.Yukari)
-                ? (z >= MekanOlculeri.MerdivenOrtasiZ)
-                : (z <= MekanOlculeri.MerdivenOrtasiZ);
-
-            if (yarimKatGecildi)
+            if (ilerleme.SonKarardanBeriMesafe(kot) >= MekanOlculeri.DikeyOfset / 2f)
             {
                 cezaBekliyor = false;
                 // StartCoroutine: aşağıdaki fonksiyonu başlatır ama BİTMESİNİ BEKLEMEZ.
@@ -130,21 +149,10 @@ public class KatYoneticisi : MonoBehaviour
             return;
         }
 
-        KararlariDinle();
-    }
-
-    // Döngü sayaçlarındaki artışı karara çevirir.
-    private void KararlariDinle()
-    {
-        if (merdiven.yukariDonguSayisi > sonYukariSayisi)
+        // Oyuncu bir tam kat yüksekliği kadar yol aldıysa karar oluşur.
+        if (ilerleme.KararOlustuMu(kot, out Karar karar))
         {
-            sonYukariSayisi = merdiven.yukariDonguSayisi;
-            KarariIsle(Karar.Yukari);
-        }
-        else if (merdiven.asagiDonguSayisi > sonAsagiSayisi)
-        {
-            sonAsagiSayisi = merdiven.asagiDonguSayisi;
-            KarariIsle(Karar.Geri);
+            KarariIsle(karar);
         }
     }
 
@@ -167,7 +175,6 @@ public class KatYoneticisi : MonoBehaviour
                 Debug.Log($"[KAT] YANLIŞ karar ({karar}). Ceza yolda... " +
                           $"Toplam hata: {sayac.ToplamHata}");
                 cezaBekliyor = true;
-                cezayaYolAcanKarar = karar;
                 break;
 
             case KararSonucu.CatiyaUlasildi:
@@ -337,8 +344,8 @@ public class KatYoneticisi : MonoBehaviour
         if (cc != null) cc.enabled = true;
         Physics.SyncTransforms();
 
-        // Döngü sayaçları değişmiş olabilir; köprünün yanlış karar okumaması için eşitle.
-        sonYukariSayisi = merdiven.yukariDonguSayisi;
-        sonAsagiSayisi = merdiven.asagiDonguSayisi;
+        // Oyuncu başa alındı; ilerleme sayacı da yeni kotuna sıfırlanmalı.
+        // Yoksa ceza sırasında kat edilen yol bir sonraki karara sayılır.
+        ilerleme.Sifirla(SanalKot());
     }
 }
