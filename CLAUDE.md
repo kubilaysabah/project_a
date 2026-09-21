@@ -68,6 +68,8 @@ The developer on this project is **Şahan** — the second developer from Moguls
 
 ## Architecture decisions (agreed, mirrors Moguls principles)
 
+- **Door numbers stay tied to the floor counter. DO NOT "fix" this.** Şahan's decision, 2026-09-21, after testing it deliberately. Each landing's two doors show `2N-1` and `2N` for floor N, and the upper landing shows floor N+1. Because turning back on an anomaly floor counts as progress, the numbers rise while the player physically walks *down*, which looks contradictory at first glance. Şahan checked this specifically, understood the rule behind it and chose to keep it. Claude previously proposed making the numbers fixed per landing; that proposal was considered and **declined**. Reopen the question only if Şahan raises it.
+
 - **Game logic in plain C# classes**, separate from MonoBehaviours, for testability.
 - **CONTENT IS DATA:** every anomaly is a ScriptableObject card (`AnomalyCard`: id, tier, difficulty, what it changes on the landing). The landing is built/reset from data; adding anomaly #47 must require ZERO new code, only a new asset. This is the whole game — one landing + stair loop modeled once, 60+ data-driven variations.
 - Single modeled space: one landing + one stair flight, looped (player repositioned seamlessly). No open world, no walking nav beyond the loop.
