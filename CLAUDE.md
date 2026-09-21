@@ -10,7 +10,13 @@ A first-person **anomaly-loop horror** game ("The Exit 8" formula) set in a 1994
 
 - **Goal:** ship on Steam in 2-3 months at $4.99. This is Şahan's quick-ship title (GAME #2 in the Moguls two-developer split — Moguls' CLAUDE.md explicitly does NOT track this project; this repo is its own board and memory).
 - **Full concept document:** the user's `KAPICI-oyun-fikri.txt` (kept outside the repo); its content is summarized in this file and in the GitHub issues.
-- **Engine:** Unity 6.5 (6000.5.5f1), URP (URP template with PC/Mobile render pipeline assets), new Input System. Project lives at the repo root; local working copy `C:\Users\pc\unity\project_a`.
+- **Engine:** Unity 6.5 (6000.5.5f1), URP (URP template with PC/Mobile render pipeline assets), new Input System. Project lives at the repo root. Each developer's local clone path, hardware and personal preferences live in that developer's own **`CLAUDE.local.md`** (gitignored, auto-loaded by Claude Code) — never in this file.
+
+## Two developers, one shared memory
+
+- **Şahan** (bozsahan@gmail.com) — the developer being taught; owns the game, does all Editor-side work. **Kubilay** (`kubilaysabah`) — repo owner, Moguls lead, reviews and co-decides (name, budget, Steam).
+- Shared, project-wide facts and rules → this `CLAUDE.md` (committed). Machine- or person-specific facts (paths, GPU, installed tools, local AI, personal habits) → `CLAUDE.local.md` (gitignored; each dev keeps their own). Claude's per-machine memory directory is the third layer and is never committed.
+- When a rule here changes, the change is committed as `docs:` so the other developer's next session picks it up.
 
 ## Name decision (OPEN — one of the first work items, issue #1)
 
@@ -37,15 +43,25 @@ The developer on this project is **Şahan** — the second developer from Moguls
 - **NEVER add any AI signature, Co-Authored-By trailer, or "Generated with" attribution to commits or PRs.** Explicit standing instruction.
 - Commit at the end of each lesson once verified working. Remind the user to save the scene (Ctrl+S) first — unsaved Unity scene changes are invisible to git.
 - Settings-file churn (`ProjectSettings/` alone) goes in separate `chore` commits.
-- `.gitattributes` uses Git LFS macros for binaries (from the standard Unity template) — verify `git lfs install` has been run locally before the first binary asset lands.
+- `.gitattributes` uses Git LFS macros for binaries (from the standard Unity template) — verify `git lfs install` has been run locally before the first binary asset lands. **Known gap:** the initial check-in happened before LFS was active, so `Assets/TutorialInfo/Icons/URP.png` and `Layout.wlt` are raw blobs in history and show as "modified" on an LFS-enabled clone; fix = `git add --renormalize .` + `chore` commit (tracked as an issue), no history rewrite without both devs agreeing.
+- `CLAUDE.local.md` is gitignored (personal per-developer instructions). `.mcp.json` IS committed (shared Unity MCP config, path-independent).
 
 ## GitHub workflow (binding — all work lives on GitHub)
 
 - Repo: `kubilaysabah/project_a`. Task board: **GitHub Projects panel https://github.com/users/kubilaysabah/projects/4** + milestones for the 12-week plan.
 - Every work item is a GitHub issue: **English imperative title, Turkish body with Amaç / Kapsam / Kabul kriterleri**, attached to a milestone and the Projects board.
-- While working an issue: move its board Status (Todo → In progress → Done) and leave a progress comment (what changed, commit hashes, what remains).
+- While working an issue: move its board Status (Todo → In progress → Done), **assign the issue to the developer doing the work** (`gh issue edit N --add-assignee @me`) the moment it goes to In progress, and leave **detailed** progress comments (what changed and why, commit hashes, what was verified, what remains, any decision taken). One comment per meaningful step, not one per session.
 - Closing an issue requires user verification first; close with a final comment naming the verifying test.
 - New work that surfaces in conversation is opened as an issue in the same turn it is agreed.
+- All of this is done live from the terminal with the **GitHub CLI (`gh`)** — issues, comments, assignment, milestones, board status (`gh project item-edit`). Milestones and board items CAN be managed with a locally authenticated `gh`; only remote/MCP-only sessions lack that ability.
+
+## Tooling: gh CLI + Unity CLI + Claude (the working desk)
+
+- **GitHub CLI (`gh`)** — every issue/board/PR action. Must be authenticated per machine by the developer (`gh auth login`); Claude never enters credentials.
+- **Unity CLI (`unity`, experimental)** — installs/opens editors and, through the project's `com.unity.pipeline` package (in `Packages/manifest.json`), drives a *running* Editor from the terminal: `unity status` (is an Editor connected?), `unity command` (list Editor-exposed commands), `unity command eval '<C#>'`, `unity test`, `unity build`. The Editor must be open with this project for `command` to work; each dev signs in with `unity auth login`.
+- **Claude ↔ Unity:** the Unity CLI agent skill is installed per machine (`unity skill install claude-code` → `~/.claude/skills/unity-cli`), and the repo ships a project-level `.mcp.json` that starts `unity mcp` as an MCP server so Claude can inspect/modify the open scene directly. Claude may use these to inspect the hierarchy, check the Console for compile errors, or run tests — but **Editor-side lesson steps are still explained click-by-click and done by the user** (mentor rule); CLI automation is for verification and repetitive chores, not for skipping the teaching.
+- **Compile check via CLI:** after every code step, in addition to looking at the Console, Claude may run `unity command` to query the Editor for compile status; the rule (0 errors before moving on) is unchanged.
+- **Local AI (optional, per machine):** cheap, repetitive or bulk tasks (TR/EN string drafts, anomaly brainstorm lists, texture/decal drafts, log summaries) go to local models (Ollama / ComfyUI etc.) rather than Claude tokens. What is installed where is recorded in each dev's `CLAUDE.local.md`.
 
 ## Architecture decisions (agreed, mirrors Moguls principles)
 
@@ -79,3 +95,4 @@ This repo's CLAUDE.md stays the canonical, binding session memory (it is what se
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
 - 2026-09-20: Repo created (name pending, hence `project_a`). Unity 6.5.5f1 URP project generated and pushed ("Initial check-in") with standard Unity .gitignore/.gitattributes (LFS macros). Projects board #4 created by the user. CLAUDE.md written. **The 12-week plan is on GitHub as issues #1-#20** (#1-#8 graybox H1-2, #9-#12 art+Steam page H3-4, #13-#16 content H5-7, #17-#18 demo H8-9, #19-#20 launch H10-12); milestones + board attachment done by the user via a local `gh` script (MCP tooling in remote sessions cannot create milestones/board items — leave that step to the user each time it recurs). Next: name decision (issue #1) + Lesson 1 graybox (landing + stair loop + decision mechanic skeleton, issues #2-#4).
+- 2026-09-21 (Şahan's machine, first session): toolchain set up — GitHub CLI 2.101 installed (auth pending, user-side), Unity CLI 1.0.0-beta.8 signed in, project registered in Hub, `com.unity.pipeline 0.7.0-exp.1` added to the manifest, Unity CLI Claude skill installed, project `.mcp.json` added, `CLAUDE.local.md` introduced (gitignored) for per-developer info, Ollama installed for local LLM chores (no model pulled yet). Found the LFS gap (URP.png raw in history) — to be fixed as an issue. Sections added to this file: "Two developers, one shared memory", "Tooling", gh self-assignment rule. Next: `gh auth login` → open LFS-fix + tooling issues → name decision (#1) → Lesson 1.
