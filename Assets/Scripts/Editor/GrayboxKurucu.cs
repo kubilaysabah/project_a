@@ -39,7 +39,13 @@ public static class GrayboxKurucu
         {
             "Sahanlik_A", "Sahanlik_B",
             "Merdiven_Yukari", "Merdiven_Yukari2", "Merdiven_Asagi",
-            "Kapak_Ust", "Kapak_Alt"
+            "Kapak_Alt", "CatiBolumu",
+
+            // ESKİ İSİMLER. Bu araç bir zamanlar "Kapak_Ust" adlı bir duvar kuruyordu;
+            // yerini CatiBolumu aldı. Ama eski adı listeden ÇIKARIRSAK, daha önce
+            // kurulmuş sahnelerde o duvar silinmeden kalır ve çatı kapısının önünü keser.
+            // Kural: bu liste, aracın BUGÜNE KADAR ürettiği her ismi içerir.
+            "Kapak_Ust"
         };
 
         // foreach: dizideki her elemanı sırayla gez.
@@ -87,11 +93,13 @@ public static class GrayboxKurucu
         merdivenYukari2.transform.position =
             new Vector3(0f, DikeyOfset, SahanlikDerin / 2f + IleriOfset);
 
-        // Boşluğun iki ucunu kapatan duvarlar: hiçbir açıdan gökyüzü görünmesin.
-        KapakKur("Kapak_Ust",
-            new Vector3(0f, DikeyOfset * 2f + 1.5f,
-                        SahanlikDerin / 2f + IleriOfset + MerdivenUzunluk + DuvarKalin / 2f));
+        // En üstteki merdivenin bittiği yerde çatı bölümü: kapalı bir kapı,
+        // arkasında küçük bir çatı düzlüğü. Kapı kapalıyken gökyüzünü de kapatır,
+        // yani eski "Kapak_Ust" duvarının işini de görür.
+        CatiBolumuKur(new Vector3(0f, DikeyOfset * 2f,
+                                  SahanlikDerin / 2f + IleriOfset + MerdivenUzunluk));
 
+        // Alt uçtaki kapak: aşağı bakıldığında sahnenin dibi görünmesin.
         KapakKur("Kapak_Alt",
             new Vector3(0f, -DikeyOfset + 1.5f,
                         -(SahanlikDerin / 2f + MerdivenUzunluk + DuvarKalin / 2f)));
@@ -238,6 +246,62 @@ public static class GrayboxKurucu
         isik.intensity = siddet;
         isik.color = new Color(1f, 0.92f, 0.76f);       // sıcak sarı
         isik.shadows = LightShadows.Soft;               // yumuşak gölge
+    }
+
+    // ---------- ÇATI BÖLÜMÜ ----------
+    // Son merdivenin bittiği noktaya bir kapı duvarı ve arkasına küçük bir çatı düzlüğü kurar.
+    // "konum" = son merdivenin üst basamağının bittiği yer (zemin kotu).
+    //
+    // Kapı KAPALI başlar ve gökyüzünü kapatır. 8. kat hatasız geçildiğinde
+    // KatYoneticisi "CatiKapisi" nesnesini kapatır; kapı açılır, sabah görünür.
+    static void CatiBolumuKur(Vector3 konum)
+    {
+        GameObject kok = new GameObject("CatiBolumu");
+        kok.transform.position = konum;
+        Transform t = kok.transform;
+
+        const float KapiGen  = 1.0f;    // kapı boşluğunun genişliği
+        const float KapiYuk  = 2.05f;   // kapı boşluğunun yüksekliği
+        const float CatiBoy  = 3.4f;    // çatı düzlüğünün derinliği
+        const float Parapet  = 1.0f;    // çatı korkuluğunun yüksekliği
+
+        float duvarZ = DuvarKalin / 2f;                       // kapı duvarının yeri
+        float yanGen = (SahanlikGen - KapiGen) / 2f;          // kapının iki yanındaki dolu kısım
+
+        // Kapı duvarının sol ve sağ parçaları.
+        Kutu("Duvar_Sol", t,
+             new Vector3(-(KapiGen / 2f + yanGen / 2f), KapiYuk / 2f, duvarZ),
+             new Vector3(yanGen, KapiYuk, DuvarKalin));
+        Kutu("Duvar_Sag", t,
+             new Vector3(KapiGen / 2f + yanGen / 2f, KapiYuk / 2f, duvarZ),
+             new Vector3(yanGen, KapiYuk, DuvarKalin));
+
+        // Kapının üstünü ve merdiven boşluğunun tepesini kapatan parça.
+        Kutu("Duvar_Ust", t,
+             new Vector3(0f, KapiYuk + 2.5f, duvarZ),
+             new Vector3(SahanlikGen + 2f * DuvarKalin, 5f, DuvarKalin));
+
+        // KAPI. Açılması = bu nesnenin kapatılması.
+        Kutu("CatiKapisi", t,
+             new Vector3(0f, KapiYuk / 2f, duvarZ),
+             new Vector3(KapiGen, KapiYuk, DuvarKalin * 0.6f));
+
+        // Çatı düzlüğü. Üstü açık: kapı açılınca gökyüzü görünür.
+        Kutu("Cati_Zemin", t,
+             new Vector3(0f, -DuvarKalin / 2f, DuvarKalin + CatiBoy / 2f),
+             new Vector3(SahanlikGen + 3f, DuvarKalin, CatiBoy));
+
+        // Korkuluklar: oyuncu çatıdan düşmesin.
+        float yariGen = (SahanlikGen + 3f) / 2f;
+        Kutu("Parapet_Sol", t,
+             new Vector3(-yariGen, Parapet / 2f, DuvarKalin + CatiBoy / 2f),
+             new Vector3(DuvarKalin, Parapet, CatiBoy));
+        Kutu("Parapet_Sag", t,
+             new Vector3(yariGen, Parapet / 2f, DuvarKalin + CatiBoy / 2f),
+             new Vector3(DuvarKalin, Parapet, CatiBoy));
+        Kutu("Parapet_On", t,
+             new Vector3(0f, Parapet / 2f, DuvarKalin + CatiBoy),
+             new Vector3(SahanlikGen + 3f, Parapet, DuvarKalin));
     }
 
     // Sahnenin ucunu kapatan büyük duvar.

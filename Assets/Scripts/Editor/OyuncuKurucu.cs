@@ -89,6 +89,15 @@ public static class OyuncuKurucu
         // Oyuncuyu üst sahanlıktan alt sahanlığa sessizce taşıyan döngü.
         oyuncu.AddComponent<SonsuzMerdiven>();
 
+        // ---- KAT YÖNETİCİSİ ----
+        // Kat sayacı ile sahne arasındaki köprü. Ayrı bir nesnede durur,
+        // çünkü oyuncuya değil oyunun kendisine aittir.
+        GameObject eskiYonetici = GameObject.Find("KatYoneticisi");
+        if (eskiYonetici != null) Object.DestroyImmediate(eskiYonetici);
+
+        GameObject yonetici = new GameObject("KatYoneticisi");
+        yonetici.AddComponent<KatYoneticisi>();
+
         Selection.activeGameObject = oyuncu;   // Hierarchy'de seçili gelsin
 
         Debug.Log($"Oyuncu kuruldu. Boy: {BoyUzunlugu:0.00} m, göz hizası: {GozHizasi:0.00} m, " +

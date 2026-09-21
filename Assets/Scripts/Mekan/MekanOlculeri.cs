@@ -53,4 +53,11 @@ public static class MekanOlculeri
 
     // Aşağı inerken: oyuncu alt sahanlığın kenarını bu kadar geçtiğinde ileri taşınır.
     public const float AltIsinlanmaEsigi = -(SahanlikDerin / 2f + 0.2f);           // -1.20 m
+
+    /// <summary>
+    /// Merdivenin tam ortası. Gecikmeli ceza burada tetiklenir: oyuncu yanlış
+    /// karardan sonra yarım kat yol aldığında ışıklar sönmeye başlar.
+    /// Yukarı giderken bu noktaya ALTTAN, aşağı inerken ÜSTTEN yaklaşılır.
+    /// </summary>
+    public const float MerdivenOrtasiZ = SahanlikDerin / 2f + MerdivenUzunluk / 2f;  // 3.16 m
 }
