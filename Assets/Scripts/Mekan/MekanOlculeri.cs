@@ -20,7 +20,13 @@ public static class MekanOlculeri
     public const float KatYuksekligi   = 3.0f;    // iki sahanlık arasındaki dikey mesafe
     public const int   BasamakSayisi   = 16;      // bir kat merdivenindeki basamak adedi
     public const float BasamakDerinlik = 0.27f;   // basamağın ayak basılan derinliği
-    public const float SahanlikGen     = 2.6f;    // sahanlık genişliği (x ekseni)
+    // Sahanlık genişliği. Kapılar KARŞILIKLI iki duvara taşınınca 2.6 m dar kaldı:
+    // iki kapının paspasları arasında yürünecek yer kalmıyordu. 3.6 m rahat bir sahanlık.
+    public const float SahanlikGen     = 3.6f;    // sahanlık genişliği (x ekseni)
+
+    // Merdiven genişliği sahanlıktan AYRI tutulur. Sahanlığı genişletmek
+    // merdiveni genişletmemeli; dar merdiven boşluğu bu oyunun sıkışmışlık hissini taşıyor.
+    public const float MerdivenGen     = 2.6f;    // merdiven boşluğunun genişliği (x ekseni)
     // Sahanlık derinliği. 2.0 m ile başlamıştı ama iki daire kapısı o derinliğe
     // sığmıyordu: kapıların arasında ve kenarlarında birkaç santimlik duvar kalıyor,
     // mekân koridor gibi görünüyordu. 2.6 m gerçek bir apartman sahanlığına yakın.
@@ -28,9 +34,10 @@ public static class MekanOlculeri
     public const float SahanlikDerin   = 2.6f;    // sahanlık derinliği (z ekseni)
 
     // ---------- KAPI ÖLÇÜLERİ ----------
-    public const float KapiGen  = 0.85f;   // kapı boşluğunun genişliği
+    // Kapılar artık KARŞILIKLI: biri sol duvarda, biri sağ duvarda, ikisi de
+    // sahanlığın ortasında (z = 0) ve birbirine bakıyor.
+    public const float KapiGen  = 0.90f;   // kapı boşluğunun genişliği (z ekseni boyunca)
     public const float KapiYuk  = 2.05f;   // kapı boşluğunun yüksekliği
-    public const float KapiAraZ = 0.65f;   // iki kapının merkezden uzaklığı
     public const float DuvarYuksek     = 2.8f;    // sahanlıktaki tavan yüksekliği
     public const float DuvarKalin      = 0.2f;    // duvar ve döşeme kalınlığı
 
