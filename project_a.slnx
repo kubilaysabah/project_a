@@ -64,10 +64,12 @@
   <Project Path="Unity.InternalAPIEngineBridge.004.csproj" />
   <Project Path="Unity.InputSystem.DocCodeSamples.csproj" />
   <Project Path="Unity.RenderPipelines.Universal.Shaders.csproj" />
+  <Project Path="Huzur.Cekirdek.csproj" />
   <Project Path="Unity.InternalAPIEditorBridge.ShaderGraph.Editor.csproj" />
   <Project Path="Unity.VisualScripting.DocCodeExamples.csproj" />
   <Project Path="Unity.PlasticSCM.Editor.Entities.csproj" />
   <Project Path="Unity.Pipeline.CodeGen.csproj" />
+  <Project Path="Huzur.Cekirdek.Tests.csproj" />
   <Project Path="Unity.Rendering.LightTransport.Editor.csproj" />
   <Project Path="Unity.Collections.Editor.csproj" />
   <Project Path="Unity.Mathematics.csproj" />
