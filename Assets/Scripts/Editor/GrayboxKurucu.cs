@@ -7,30 +7,18 @@
 using UnityEngine;        // GameObject, Vector3, Transform gibi temel Unity tipleri buradan gelir.
 using UnityEditor;        // MenuItem ve Undo gibi SADECE editörde çalışan araçlar buradan gelir.
 
+// "using static": bir sınıfın içindeki değerleri, sınıf adını her seferinde
+// yazmadan kullanmamızı sağlar. Bu satır sayesinde aşağıda
+// "MekanOlculeri.KatYuksekligi" yerine sadece "KatYuksekligi" yazabiliyoruz.
+// Ölçülerin kendisi MekanOlculeri.cs dosyasında; burada kopyası YOK.
+using static MekanOlculeri;
+
 // "static" sınıf: içinden nesne üretilemez, sadece fonksiyonları çağrılır.
 // Bu sınıfın hiçbir hafızası yok; bir düğmeye basınca çalışan bir alet çantası gibi.
 public static class GrayboxKurucu
 {
-    // ---------- ÖLÇÜLER ----------
-    // "const" = derleme anında sabitlenen, bir daha asla değişmeyen değer.
-    // Hepsi metre cinsindendir; Unity'de 1 birim = 1 metredir.
-
-    const float KatYuksekligi   = 3.0f;    // iki sahanlık arasındaki dikey mesafe
-    const int   BasamakSayisi   = 16;      // bir kat merdivenindeki basamak adedi
-    const float BasamakDerinlik = 0.27f;   // basamağın ayak basılan derinliği
-    const float SahanlikGen     = 2.6f;    // sahanlığın genişliği (x ekseni)
-    const float SahanlikDerin   = 2.0f;    // sahanlığın derinliği (z ekseni)
-    const float DuvarYuksek     = 2.8f;    // sahanlıktaki tavan yüksekliği
-    const float DuvarKalin      = 0.2f;    // duvar ve döşeme kalınlığı
-
-    // Bu ikisi yukarıdakilerden HESAPLANIR; elle yazılmaz ki tutarsızlık olmasın.
-    const float BasamakYuksek   = KatYuksekligi / BasamakSayisi;      // 0.1875 m
-    const float MerdivenUzunluk = BasamakSayisi * BasamakDerinlik;    // 4.32 m
-
-    // Bir sahanlıktan bir üsttekine giderken uygulanacak KAYMA.
-    // Döngü scripti oyuncuyu tam olarak bu kadar geri taşıyacak.
-    public const float IleriOfset = SahanlikDerin + MerdivenUzunluk;  // 6.32 m
-    public const float DikeyOfset = KatYuksekligi;                    // 3.00 m
+    // Bütün ölçüler MekanOlculeri.cs dosyasındadır; yukarıdaki "using static"
+    // sayesinde buradan doğrudan adlarıyla kullanılıyorlar.
 
     // ---------- MENÜ GİRİŞİ ----------
     // [MenuItem] bir "öznitelik"tir: fonksiyonun üstüne yapıştırılan etikettir.

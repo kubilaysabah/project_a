@@ -85,6 +85,10 @@ public static class OyuncuKurucu
         seri.FindProperty("kamera").objectReferenceValue = kamera.transform;
         seri.ApplyModifiedProperties();   // değişikliği gerçekten yaz
 
+        // ---- SONSUZ MERDİVEN ----
+        // Oyuncuyu üst sahanlıktan alt sahanlığa sessizce taşıyan döngü.
+        oyuncu.AddComponent<SonsuzMerdiven>();
+
         Selection.activeGameObject = oyuncu;   // Hierarchy'de seçili gelsin
 
         Debug.Log($"Oyuncu kuruldu. Boy: {BoyUzunlugu:0.00} m, göz hizası: {GozHizasi:0.00} m, " +
