@@ -21,7 +21,16 @@ public static class MekanOlculeri
     public const int   BasamakSayisi   = 16;      // bir kat merdivenindeki basamak adedi
     public const float BasamakDerinlik = 0.27f;   // basamağın ayak basılan derinliği
     public const float SahanlikGen     = 2.6f;    // sahanlık genişliği (x ekseni)
-    public const float SahanlikDerin   = 2.0f;    // sahanlık derinliği (z ekseni)
+    // Sahanlık derinliği. 2.0 m ile başlamıştı ama iki daire kapısı o derinliğe
+    // sığmıyordu: kapıların arasında ve kenarlarında birkaç santimlik duvar kalıyor,
+    // mekân koridor gibi görünüyordu. 2.6 m gerçek bir apartman sahanlığına yakın.
+    // Bu sayı değişince döngü ofseti ve eşikler kendiliğinden yeniden hesaplanır.
+    public const float SahanlikDerin   = 2.6f;    // sahanlık derinliği (z ekseni)
+
+    // ---------- KAPI ÖLÇÜLERİ ----------
+    public const float KapiGen  = 0.85f;   // kapı boşluğunun genişliği
+    public const float KapiYuk  = 2.05f;   // kapı boşluğunun yüksekliği
+    public const float KapiAraZ = 0.65f;   // iki kapının merkezden uzaklığı
     public const float DuvarYuksek     = 2.8f;    // sahanlıktaki tavan yüksekliği
     public const float DuvarKalin      = 0.2f;    // duvar ve döşeme kalınlığı
 
@@ -53,6 +62,13 @@ public static class MekanOlculeri
 
     // Aşağı inerken: oyuncu alt sahanlığın kenarını bu kadar geçtiğinde ileri taşınır.
     public const float AltIsinlanmaEsigi = -(SahanlikDerin / 2f + 0.2f);           // -1.20 m
+
+    /// <summary>
+    /// Oyuncunun sahanlığa VARDIĞI nokta. Her ışınlanmadan sonra oyuncu tam burada belirir.
+    /// Oyunun başlangıç noktası da bu olmalı; başka bir yerde başlanırsa 1. kat
+    /// diğer yedi kattan farklı görünür ve döngünün "her kat aynı" iddiası ilk anda çatlar.
+    /// </summary>
+    public const float OyuncuBaslangicZ = UstIsinlanmaEsigi - IleriOfset;   // -1.12 m
 
     /// <summary>
     /// Merdivenin tam ortası. Gecikmeli ceza burada tetiklenir: oyuncu yanlış

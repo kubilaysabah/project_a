@@ -34,8 +34,9 @@ public static class OyuncuKurucu
         // ---- GÖVDE ----
         GameObject oyuncu = new GameObject("Oyuncu");
 
-        // Sahanlık A'nın üstünde, merdivene bakacak şekilde başlat.
-        oyuncu.transform.position = new Vector3(0f, 0.2f, -0.5f);
+        // Oyuncu, her ışınlanmadan sonra vardığı noktanın TAM AYNISINDA başlar.
+        // Başka bir yerde başlatırsak 1. kat diğer yedi kattan farklı görünür.
+        oyuncu.transform.position = new Vector3(0f, 0.2f, MekanOlculeri.OyuncuBaslangicZ);
 
         // CharacterController: Unity'nin hazır yürüyüş bileşeni.
         // Fizik motorunun tam simülasyonunu kullanmaz; bunun yerine

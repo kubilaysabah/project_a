@@ -27,6 +27,11 @@ public class KatYoneticisi : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float anomaliOlasiligi = 0.4f;
 
+    [Header("Test")]
+    [Tooltip("Ekranın köşesinde kat numarasını ve anomali durumunu gösterir. " +
+             "Sadece test içindir; gerçek oyunda kapalı olacak.")]
+    [SerializeField] private bool testGostergesi = true;
+
     [Header("Gecikmeli ceza")]
     [Tooltip("İki ışığın sönmesi arasındaki bekleme (saniye).")]
     [SerializeField] private float ampulAraligi = 0.35f;
@@ -156,6 +161,46 @@ public class KatYoneticisi : MonoBehaviour
                 CatiKapisiniAc();
                 break;
         }
+    }
+
+    // ---------- TEST GÖSTERGESİ ----------
+    // Ekranın köşesine kat numarasını ve anomali durumunu yazar.
+    // Bu, oyunun UI'ı DEĞİLDİR; sadece elle test yapabilmek içindir.
+    // Gerçek oyunda ekranda hiçbir yazı olmayacak — kural oyunun kendisidir.
+    //
+    // OnGUI, Unity'nin eski ve basit çizim yöntemidir. Yeni bir arayüz sistemi
+    // kurmadan ekrana yazı basmanın en kısa yolu olduğu için burada tercih edildi.
+    // Her karede birkaç kez çağrılır, o yüzden gerçek oyun arayüzünde kullanılmaz.
+    private void OnGUI()
+    {
+        if (!testGostergesi) return;
+
+        var stil = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = 20,
+            fontStyle = FontStyle.Bold
+        };
+        stil.normal.textColor = Color.white;
+
+        string durum = sayac.TurBitti
+            ? "ÇATI — tur bitti"
+            : $"Kat {sayac.MevcutKat} / {KatSayaci.CatiKati}   ·   " +
+              (sayac.AnomaliVar ? "ANOMALİ VAR (geri dön)" : "normal (yukarı devam)");
+
+        string alt = $"hata: {sayac.ToplamHata}" +
+                     (cezaBekliyor ? "   ·   ceza yolda…" : "") +
+                     (cezaCalisiyor ? "   ·   CEZA" : "");
+
+        // Arka plan kutusu, yazı beyaz duvarda kaybolmasın.
+        GUI.color = new Color(0f, 0f, 0f, 0.55f);
+        GUI.DrawTexture(new Rect(14, 12, 460, 62), Texture2D.whiteTexture);
+        GUI.color = Color.white;
+
+        GUI.Label(new Rect(24, 16, 450, 28), durum, stil);
+
+        stil.fontSize = 14;
+        stil.fontStyle = FontStyle.Normal;
+        GUI.Label(new Rect(24, 44, 450, 24), alt, stil);
     }
 
     // ---------- ÇATI KAPISI ----------

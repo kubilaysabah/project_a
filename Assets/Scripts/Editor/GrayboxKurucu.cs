@@ -133,10 +133,41 @@ public static class GrayboxKurucu
              new Vector3(0f, -DuvarKalin / 2f, 0f),
              new Vector3(SahanlikGen, DuvarKalin, SahanlikDerin));
 
-        // Sol duvar: daire kapıları bu duvardadır.
-        Kutu("Duvar_Sol", t,
-             new Vector3(-(SahanlikGen / 2f + DuvarKalin / 2f), DuvarYuksek / 2f, 0f),
-             new Vector3(DuvarKalin, DuvarYuksek, SahanlikDerin));
+        // SOL DUVAR — daire kapıları burada.
+        // Duvarı tek parça yapıp kapıları yüzüne yapıştırmak YANLIŞTI: kapılar
+        // duvardan dışarı taşan ince levhalar gibi görünüyordu. Gerçek bir kapı
+        // duvarın İÇİNE oturur. Bu yüzden duvarı kapı boşlukları bırakarak
+        // dört parça halinde kuruyoruz: iki kenar, ortadaki ayak ve üstteki lento.
+        float duvarX = -(SahanlikGen / 2f + DuvarKalin / 2f);
+
+        // Kapı boşluklarının z sınırları.
+        float kapi1Bas = -KapiAraZ - KapiGen / 2f;   // arka kapının başlangıcı
+        float kapi1Bit = -KapiAraZ + KapiGen / 2f;
+        float kapi2Bas =  KapiAraZ - KapiGen / 2f;
+        float kapi2Bit =  KapiAraZ + KapiGen / 2f;
+        float duvarUcu =  SahanlikDerin / 2f;
+
+        // Arka kenar parçası.
+        float kenarA = kapi1Bas - (-duvarUcu);
+        Kutu("Duvar_Sol_Kenar_A", t,
+             new Vector3(duvarX, KapiYuk / 2f, (-duvarUcu + kapi1Bas) / 2f),
+             new Vector3(DuvarKalin, KapiYuk, kenarA));
+
+        // İki kapının arasındaki ayak.
+        Kutu("Duvar_Sol_Ayak", t,
+             new Vector3(duvarX, KapiYuk / 2f, (kapi1Bit + kapi2Bas) / 2f),
+             new Vector3(DuvarKalin, KapiYuk, kapi2Bas - kapi1Bit));
+
+        // Ön kenar parçası.
+        float kenarB = duvarUcu - kapi2Bit;
+        Kutu("Duvar_Sol_Kenar_B", t,
+             new Vector3(duvarX, KapiYuk / 2f, (kapi2Bit + duvarUcu) / 2f),
+             new Vector3(DuvarKalin, KapiYuk, kenarB));
+
+        // Lento: kapıların üstünü tavana kadar kapatan parça.
+        Kutu("Duvar_Sol_Lento", t,
+             new Vector3(duvarX, (KapiYuk + DuvarYuksek) / 2f, 0f),
+             new Vector3(DuvarKalin, DuvarYuksek - KapiYuk, SahanlikDerin));
 
         // Sağ duvar: sağır duvar.
         Kutu("Duvar_Sag", t,
@@ -149,14 +180,16 @@ public static class GrayboxKurucu
              new Vector3(0f, DuvarYuksek + DuvarKalin / 2f, 0f),
              new Vector3(SahanlikGen + 2f * DuvarKalin, DuvarKalin, SahanlikDerin));
 
-        // İki daire kapısı. Sol duvarın yüzüne yapışık ince kutular.
-        float kapiX = -(SahanlikGen / 2f) + 0.04f;
-        Kutu("Kapi_Sol", t, new Vector3(kapiX, 1.025f, -0.5f), new Vector3(0.08f, 2.05f, 0.9f));
-        Kutu("Kapi_Sag", t, new Vector3(kapiX, 1.025f,  0.5f), new Vector3(0.08f, 2.05f, 0.9f));
+        // İki daire kapısı — duvarın içine, yüzünden 6 cm geride.
+        // Bu geri çekilme kapı kasası etkisi yaratır; kapı artık duvara
+        // yapıştırılmış bir levha değil, duvarın içindeki bir boşluk gibi okunur.
+        KapiKur("Kapi_Sol", t, -KapiAraZ);
+        KapiKur("Kapi_Sag", t,  KapiAraZ);
 
-        // Paspaslar. Anomalilerin en sık dokunacağı yer tutuculardan biri.
-        Kutu("Paspas_Sol", t, new Vector3(-0.85f, 0.015f, -0.5f), new Vector3(0.6f, 0.03f, 0.4f));
-        Kutu("Paspas_Sag", t, new Vector3(-0.85f, 0.015f,  0.5f), new Vector3(0.6f, 0.03f, 0.4f));
+        // Paspaslar. Kapının TAM ÖNÜNDE ve duvara dayalı olmalı;
+        // önceki hallerinde duvardan 40 cm uzakta, odanın ortasında duruyorlardı.
+        PaspasKur("Paspas_Sol", t, -KapiAraZ);
+        PaspasKur("Paspas_Sag", t,  KapiAraZ);
 
         // Ayakkabılık: Türk apartmanı kimliğinin en ucuz işareti.
         Kutu("Ayakkabilik", t, new Vector3(1.05f, 0.3f, 0f), new Vector3(0.35f, 0.6f, 0.8f));
@@ -246,6 +279,46 @@ public static class GrayboxKurucu
         isik.intensity = siddet;
         isik.color = new Color(1f, 0.92f, 0.76f);       // sıcak sarı
         isik.shadows = LightShadows.Soft;               // yumuşak gölge
+    }
+
+    // ---------- DAİRE KAPISI ----------
+    // Kapı, kasa, kol ve numaralık. Numaralık şimdiden konuyor çünkü
+    // "ters kapı numarası" en temel FISILTI anomalisi ve bir yere ihtiyacı var.
+    static void KapiKur(string ad, Transform ebeveyn, float z)
+    {
+        GameObject kapi = new GameObject(ad);
+        kapi.transform.SetParent(ebeveyn, false);
+        kapi.transform.localPosition = new Vector3(0f, 0f, z);
+        Transform k = kapi.transform;
+
+        float duvarYuzu = -(SahanlikGen / 2f);          // duvarın iç yüzü
+        float kanatX    = duvarYuzu - 0.09f;            // kanat 6 cm geride
+
+        // Kapı kanadı.
+        Kutu("Kanat", k, new Vector3(kanatX, KapiYuk / 2f, 0f),
+             new Vector3(0.06f, KapiYuk, KapiGen));
+
+        // Kol: kapının menteşesiz tarafında, bel hizasında.
+        Kutu("Kol", k, new Vector3(kanatX + 0.07f, 1.05f, KapiGen / 2f - 0.12f),
+             new Vector3(0.09f, 0.04f, 0.12f));
+
+        // Numaralık: göz hizasının biraz üstünde, küçük bir plaka.
+        Kutu("Numaralik", k, new Vector3(kanatX + 0.04f, 1.78f, 0f),
+             new Vector3(0.02f, 0.14f, 0.20f));
+    }
+
+    // ---------- PASPAS ----------
+    // Kapının tam önünde, duvara dayalı.
+    static void PaspasKur(string ad, Transform ebeveyn, float z)
+    {
+        const float PaspasEn  = 0.62f;   // duvardan içeri doğru uzunluk
+        const float PaspasBoy = 0.45f;   // kapı boyunca genişlik
+
+        float duvarYuzu = -(SahanlikGen / 2f);
+
+        Kutu(ad, ebeveyn,
+             new Vector3(duvarYuzu + PaspasEn / 2f, 0.015f, z),
+             new Vector3(PaspasEn, 0.03f, PaspasBoy));
     }
 
     // ---------- ÇATI BÖLÜMÜ ----------
