@@ -170,6 +170,21 @@ public static class GrayboxKurucu
              new Vector3(SahanlikGen / 2f - 0.18f, 0.3f, SahanlikDerin / 2f - 0.5f),
              new Vector3(0.35f, 0.6f, 0.8f));
 
+        // ---- DUVAR EŞYALARI ----
+        // Anomali sistemi (#5) ancak sahanlıkta BOZULACAK ŞEY kadar zengin olabilir.
+        // Bu parçaların her biri beş altı anomaliye kapı açıyor:
+        // sayaç durmuş, ilan değişmiş, ilan kaybolmuş, sayaç ters asılmış...
+
+        // Elektrik sayacı: sol duvarda, arka kenar parçasının üstünde.
+        Kutu("Elektrik_Sayaci", t,
+             new Vector3(-(SahanlikGen / 2f) + 0.05f, 1.55f, -(SahanlikDerin / 2f) + 0.45f),
+             new Vector3(0.10f, 0.28f, 0.22f));
+
+        // Yönetici ilanı: sağ duvarda, göz hizasında ince bir kağıt.
+        Kutu("Ilan", t,
+             new Vector3(SahanlikGen / 2f - 0.02f, 1.50f, -(SahanlikDerin / 2f) + 0.45f),
+             new Vector3(0.02f, 0.30f, 0.21f));
+
         // Ampul. "Yeşil ampul" anomalisi ileride sadece bu ışığın rengini değiştirecek.
         AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.25f, 0f), 9f, 2.2f, golgeAtsin: true);
 
@@ -371,6 +386,35 @@ public static class GrayboxKurucu
 
         // Yazının kendi materyali fontun dokusunu kullanmalı.
         yaziNesne.GetComponent<MeshRenderer>().sharedMaterial = yazi.font.material;
+
+        // ---- KAPI ÇEVRESİ EŞYALARI ----
+        // Anomalilerin çoğu bu küçük parçalara dokunacak. İsimleri sabittir;
+        // anomali kartları bu isimlerle hedef gösterecek.
+
+        // Zil: kapının kol tarafında, duvarda.
+        Kutu("Zil", k, new Vector3(duvarYuzu - yon * 0.025f, 1.35f, KapiGen / 2f + 0.12f),
+             new Vector3(0.05f, 0.08f, 0.06f));
+
+        // Kapı gözü (gözetleme deliği): kanadın ortasında, göz hizasında.
+        Kutu("Kapi_Gozu", k, new Vector3(kanatX - yon * 0.035f, 1.60f, 0f),
+             new Vector3(0.03f, 0.05f, 0.05f));
+
+        // Terlikler: paspasın üstünde bir çift. "Tek terlik" anomalisi
+        // bunlardan birini gizleyerek kurulacak, o yüzden ikisi ayrı nesne.
+        GameObject terlikler = new GameObject("Terlikler");
+        terlikler.transform.SetParent(k, false);
+        Kutu("Terlik_Sol", terlikler.transform,
+             new Vector3(duvarYuzu - yon * 0.32f, 0.045f, -0.11f),
+             new Vector3(0.26f, 0.06f, 0.10f));
+        Kutu("Terlik_Sag", terlikler.transform,
+             new Vector3(duvarYuzu - yon * 0.32f, 0.045f, 0.11f),
+             new Vector3(0.26f, 0.06f, 0.10f));
+
+        // Çöp poşeti: kapının yanında, yerde. Çöp toplama görevi (#7)
+        // bu nesneyi kullanacak; şimdilik sadece duruyor.
+        Kutu("Cop_Poseti", k,
+             new Vector3(duvarYuzu - yon * 0.26f, 0.16f, -(KapiGen / 2f) - 0.22f),
+             new Vector3(0.30f, 0.32f, 0.30f));
     }
 
     // ---------- PASPAS ----------
