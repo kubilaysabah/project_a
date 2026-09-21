@@ -108,8 +108,10 @@ public static class GrayboxKurucu
             new Vector3(0f, -DikeyOfset + 1.5f,
                         -(SahanlikDerin / 2f + MerdivenUzunluk + DuvarKalin / 2f)));
 
-        // Kameranın göz hizasına alınması (geçici; #3'te gerçek oyuncu gelecek).
-        if (Camera.main != null)
+        // Kamerayı göz hizasına al — AMA sadece başıboşsa.
+        // Kamera artık Oyuncu'nun çocuğuysa ona dokunmayız, yoksa
+        // graybox'ı her yeniden kurduğumuzda oyuncunun kafasını yerinden oynatırız.
+        if (Camera.main != null && Camera.main.transform.parent == null)
         {
             Camera.main.transform.position = new Vector3(0f, 1.7f, -0.6f);
             Camera.main.transform.rotation = Quaternion.Euler(5f, 0f, 0f);
