@@ -41,6 +41,7 @@ The developer on this project is **Şahan** — the second developer from Moguls
 ## Git conventions (strict)
 
 - Commit messages 100% English, Conventional Commits format.
+- **Every issue that gets finished is committed, and the commit names its issue** — `feat: add seamless stairwell loop (#2)`. Şahan's rule, 2026-09-21. A finished issue must never sit uncommitted in the working tree; commit and push before writing the closing comment, so the comment can quote a hash that actually exists on `main`. Work spanning several steps still commits per step; the last one carries the issue number.
 - **NEVER add any AI signature, Co-Authored-By trailer, or "Generated with" attribution to commits or PRs.** Explicit standing instruction.
 - Commit at the end of each lesson once verified working. Remind the user to save the scene (Ctrl+S) first — unsaved Unity scene changes are invisible to git.
 - Settings-file churn (`ProjectSettings/` alone) goes in separate `chore` commits.
@@ -52,7 +53,8 @@ The developer on this project is **Şahan** — the second developer from Moguls
 - Repo: `kubilaysabah/project_a`. Task board: **GitHub Projects panel https://github.com/users/kubilaysabah/projects/4** + milestones for the 12-week plan.
 - Every work item is a GitHub issue: **English imperative title, Turkish body with Amaç / Kapsam / Kabul kriterleri**, attached to a milestone and the Projects board.
 - While working an issue: move its board Status (Todo → In progress → Done), **assign the issue to the developer doing the work** (`gh issue edit N --add-assignee @me`) the moment it goes to In progress, and leave **detailed** progress comments (what changed and why, commit hashes, what was verified, what remains, any decision taken). One comment per meaningful step, not one per session.
-- Closing an issue requires user verification first; close with a final comment naming the verifying test.
+- **An issue is closed only when it is COMPLETELY done.** Şahan's rule, 2026-09-21: if a single acceptance criterion or scope bullet is unmet, the issue stays OPEN — no "mostly done", no closing with a note about leftovers. Leave it open, leave the unmet boxes unchecked, and say plainly in a comment what is missing and what it is waiting on. Splitting the leftover into its own issue is allowed only if Şahan agrees to it first.
+- Closing also requires user verification; close with a final comment naming the verifying test and the commit hash.
 - New work that surfaces in conversation is opened as an issue in the same turn it is agreed.
 - All of this is done live from the terminal with the **GitHub CLI (`gh`)** — issues, comments, assignment, milestones, board status (`gh project item-edit`). Milestones and board items CAN be managed with a locally authenticated `gh`; only remote/MCP-only sessions lack that ability.
 
