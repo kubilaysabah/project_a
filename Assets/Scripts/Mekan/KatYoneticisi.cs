@@ -180,6 +180,12 @@ public class KatYoneticisi : MonoBehaviour
 
         if (ilerleme == null) return;
 
+        // Tur bittiyse artık karar dinlemiyoruz. Bu satır olmadan, çatıya
+        // ulaşan oyuncu çatıya doğru yürümeye devam ettikçe bir kat daha
+        // yol alıyor, karar mantığı yeniden tetikleniyor ve zaten açılmış
+        // olan çatı kapısını ikinci kez açmaya çalışıp konsola uyarı basıyordu.
+        if (sayac.TurBitti) return;
+
         float kot = SanalKot();
 
         // Ceza bekliyorsa, oyuncunun yarım kat yol almasını bekle.
