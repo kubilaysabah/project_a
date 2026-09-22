@@ -68,6 +68,8 @@ The developer on this project is **Şahan** — the second developer from Moguls
 
 ## Architecture decisions (agreed, mirrors Moguls principles)
 
+- **Doors open INWARD, and a POSITIVE Y angle on `Kapi_*/Mentese` is what opens them.** Şahan's correction, 2026-09-22: they were swinging into the corridor, which no real apartment door does and which would block the stairwell. The two hinges are deliberately **mirrored** (right-wall door hinged at its −z edge, left-wall door at its +z edge) precisely so one sign works for both; if they shared a side, every card author would have to remember which sign belongs to which door and a corridor-opening door would eventually slip through. Behind each doorway sits `Daire_Ici`, a sealed 1.2 m hall of five boxes using the shared dark material `Assets/Materials/Daire_Karanlik.mat` — without it an ajar door shows the void, and ambient skylight makes plain white boxes too bright to read as "inside". No flat interior beyond that hall is modelled or planned.
+
 - **Door numbers stay tied to the floor counter. DO NOT "fix" this.** Şahan's decision, 2026-09-21, after testing it deliberately. Each landing's two doors show `2N-1` and `2N` for floor N, and the upper landing shows floor N+1. Because turning back on an anomaly floor counts as progress, the numbers rise while the player physically walks *down*, which looks contradictory at first glance. Şahan checked this specifically, understood the rule behind it and chose to keep it. Claude previously proposed making the numbers fixed per landing; that proposal was considered and **declined**. Reopen the question only if Şahan raises it.
 
 - **Game logic in plain C# classes**, separate from MonoBehaviours, for testability.
