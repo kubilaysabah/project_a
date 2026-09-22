@@ -11975,6 +11975,8 @@ MonoBehaviour:
   merdiven: {fileID: 0}
   oyuncu: {fileID: 0}
   anomaliOlasiligi: 0.4
+  ilkKatHepNormal: 1
+  tohum: 0
   testGostergesi: 1
   ampulAraligi: 0.35
   karanlikSuresi: 1.4

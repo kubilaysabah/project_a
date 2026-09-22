@@ -21,11 +21,18 @@ public class KatYoneticisi : MonoBehaviour
     [Tooltip("Oyuncunun kendisi. Boş bırakılırsa 'Oyuncu' adlı nesne aranır.")]
     [SerializeField] private Transform oyuncu;
 
-    [Header("Anomali — GEÇİCİ")]
-    [Tooltip("GEÇİCİ: gerçek anomali sistemi #5'te gelecek. Şimdilik her kat " +
-             "bu olasılıkla anomalili sayılıyor ve ampul yeşile dönüyor.")]
+    [Header("Anomali")]
+    [Tooltip("Bir katın anomalili olma olasılığı.")]
     [Range(0f, 1f)]
-    [SerializeField] private float anomaliOlasiligi = 0.4f;
+    [SerializeField] private float anomaliOlasiligi = 0.5f;
+
+    [Tooltip("1. kat her zaman normal olsun mu? Oyuncunun önce NORMALİN neye " +
+             "benzediğini görmesi gerekir; kapatmanız önerilmez.")]
+    [SerializeField] private bool ilkKatHepNormal = true;
+
+    [Tooltip("Rastgelelik tohumu. 0 = her oyunda farklı tur. Sıfırdan farklı bir " +
+             "sayı verirseniz aynı tur birebir tekrar oynanır — hata ayıklarken işe yarar.")]
+    [SerializeField] private int tohum = 0;
 
     [Header("Test")]
     [Tooltip("Ekranın köşesinde kat numarasını ve anomali durumunu gösterir. " +
@@ -58,6 +65,18 @@ public class KatYoneticisi : MonoBehaviour
     // B = merdivenin tepesindeki sahanlık (yani BİR ÜST kat).
     private TextMesh aSolNumara, aSagNumara, bSolNumara, bSagNumara;
 
+    // ---------- ANOMALİ SİSTEMİ ----------
+    private AnomaliSecici secici;
+
+    // İki sahanlık ayrı ayrı bozuluyor, o yüzden HER BİRİNİN kendi uygulayıcısı
+    // ve kendi geri alma defteri var. Tek uygulayıcı olsaydı A'yı geri alırken
+    // B'nin kaydı silinir ve B'deki anomali kalıcı olurdu.
+    private AnomaliUygulayici uygulayiciA;
+    private AnomaliUygulayici uygulayiciB;
+
+    private Transform sahanlikA, sahanlikB;
+    private AnomaliKarti[] kartlar;
+
     // ---------- KURULUM ----------
 
     private void Awake()
@@ -83,6 +102,28 @@ public class KatYoneticisi : MonoBehaviour
         ozgunRenkler = new Color[ampuller.Length];
         for (int i = 0; i < ampuller.Length; i++) ozgunRenkler[i] = ampuller[i].color;
 
+        // ---- ANOMALİ SİSTEMİ ----
+        GameObject a = GameObject.Find("Sahanlik_A");
+        GameObject b = GameObject.Find("Sahanlik_B");
+        sahanlikA = a != null ? a.transform : null;
+        sahanlikB = b != null ? b.transform : null;
+
+        uygulayiciA = new AnomaliUygulayici();
+        uygulayiciB = new AnomaliUygulayici();
+
+        // Resources.LoadAll: "Resources" adlı klasörlerin içindeki her şeyi yükler.
+        // Kartları oraya koymamızın sebebi şu: yeni bir kart eklemek için hiçbir
+        // yere sürüklemek, hiçbir listeye kaydetmek gerekmiyor. Dosyayı klasöre
+        // koyuyorsunuz, oyun onu kendiliğinden buluyor. "Kırk yedinci anomali
+        // sıfır kod gerektirmeli" kuralı ancak böyle tam olarak sağlanıyor.
+        kartlar = Resources.LoadAll<AnomaliKarti>("Anomaliler");
+
+        if (kartlar.Length == 0)
+        {
+            Debug.LogWarning("[ANOMALİ] Assets/Resources/Anomaliler klasöründe hiç kart yok. " +
+                             "Bütün katlar normal geçecek.");
+        }
+
         // Kapı numarası yazılarını bul.
         aSolNumara = NumaraBul("Sahanlik_A/Kapi_Sol/Mentese/Numara");
         aSagNumara = NumaraBul("Sahanlik_A/Kapi_Sag/Mentese/Numara");
@@ -99,6 +140,12 @@ public class KatYoneticisi : MonoBehaviour
     private void Start()
     {
         ilerleme = new KatIlerlemeTakipcisi(MekanOlculeri.DikeyOfset, SanalKot());
+
+        // Tohum 0 ise her oyun farklı olsun diye saatin o anki değerini kullanıyoruz.
+        int gercekTohum = tohum != 0 ? tohum : System.Environment.TickCount;
+
+        secici = new AnomaliSecici(kartlar, gercekTohum, anomaliOlasiligi, ilkKatHepNormal);
+
         YeniKatHazirla();
     }
 
@@ -210,7 +257,14 @@ public class KatYoneticisi : MonoBehaviour
             : $"Kat {sayac.MevcutKat} / {KatSayaci.CatiKati}   ·   " +
               (sayac.AnomaliVar ? "ANOMALİ VAR (geri dön)" : "normal (yukarı devam)");
 
-        string alt = $"hata: {sayac.ToplamHata}" +
+        // Hangi kartın uygulandığını da yazıyoruz: anomaliyi göremezsek
+        // kartın yanlış mı yazıldığını yoksa gerçekten ince mi olduğunu
+        // ancak böyle ayırt edebiliriz.
+        string kartAdi = (uygulayiciA != null && uygulayiciA.UygulananKart != null)
+            ? "   ·   kart: " + uygulayiciA.UygulananKart.Kimlik
+            : "";
+
+        string alt = $"hata: {sayac.ToplamHata}" + kartAdi +
                      (cezaBekliyor ? "   ·   ceza yolda…" : "") +
                      (cezaCalisiyor ? "   ·   CEZA" : "");
 
@@ -248,17 +302,39 @@ public class KatYoneticisi : MonoBehaviour
 
     private void YeniKatHazirla()
     {
-        // GEÇİCİ: gerçek anomali kartları #5'te gelecek.
-        bool anomali = Random.value < anomaliOlasiligi;
-        sayac.KatiHazirla(anomali);
+        int kat = sayac.MevcutKat;
 
-        // GEÇİCİ GÖRSEL İPUCU: anomalili katta ampul yeşile döner.
-        // Elle test edebilmek için şart; #5'te veri güdümlü sistem bunun yerini alacak.
-        AmpulleriBoya(anomali ? new Color(0.45f, 1f, 0.5f) : Color.clear);
+        // SIRA ÖNEMLİ, üç adım kesinlikle bu düzende olmalı:
+        //
+        // 1) Önce eski anomaliler geri alınır. Sahanlık tertemiz olur.
+        // 2) Sonra kapı numaraları yazılır. Artık sahanlık o katın DOĞRU hâlinde.
+        // 3) En son kart uygulanır.
+        //
+        // Neden? Uygulayıcı "eski hâl" olarak gördüğü şeyi kaydeder. Numaraları
+        // karttan SONRA yazsaydık, kartın değiştirdiği numarayı ezerdik.
+        // Geri almayı numaralardan SONRA yapsaydık, uygulayıcı eski katın
+        // numarasını geri yazardı ve numara bir kat geride kalırdı.
+
+        uygulayiciA.GeriAl();
+        uygulayiciB.GeriAl();
 
         KapiNumaralariniYaz();
 
-        Debug.Log($"[KAT] {sayac.MevcutKat}. kat hazır — anomali: {(anomali ? "VAR" : "yok")}");
+        // Alt sahanlık bu katı, üst sahanlık BİR ÜST katı gösterir.
+        // Seçici aynı kata her zaman aynı cevabı verdiği için, oyuncu
+        // yukarı çıkıp ışınlandığında sahanlık değişmez.
+        IAnomaliKart aKart = secici.KatIcinSec(kat);
+        IAnomaliKart bKart = secici.KatIcinSec(kat + 1);
+
+        // Seçici arayüz üzerinden çalışıyor; sahnedeki gerçek tip AnomaliKarti.
+        if (sahanlikA != null) uygulayiciA.Uygula(aKart as AnomaliKarti, sahanlikA);
+        if (sahanlikB != null) uygulayiciB.Uygula(bKart as AnomaliKarti, sahanlikB);
+
+        // Karar kuralı yalnızca oyuncunun BULUNDUĞU sahanlığa bakar.
+        sayac.KatiHazirla(aKart != null);
+
+        string durum = aKart != null ? $"VAR ({aKart.Kimlik})" : "yok";
+        Debug.Log($"[KAT] {kat}. kat hazır — anomali: {durum}");
     }
 
     // ---------- KAPI NUMARALARI ----------
@@ -328,6 +404,10 @@ public class KatYoneticisi : MonoBehaviour
 
         merdiven.DonguyuAyarla(true);
         cezaCalisiyor = false;
+
+        // Kat kararları silinir: aynı tur bir daha aynı sırayla gelmesin,
+        // oyuncu ezberleyerek ilerleyemesin.
+        secici.Sifirla();
 
         Debug.Log("[KAT] 1. kata dönüldü.");
         YeniKatHazirla();
