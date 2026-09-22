@@ -1,0 +1,16 @@
+{
+    "name": "Huzur.Anomali",
+    "rootNamespace": "",
+    "references": [
+        "Huzur.Cekirdek"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

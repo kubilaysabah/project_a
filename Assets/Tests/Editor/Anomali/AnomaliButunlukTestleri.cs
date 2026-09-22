@@ -1,0 +1,238 @@
+// AnomaliButunlukTestleri.cs
+// Projedeki HER anomali kartını gerçek sahanlığa uygulayıp geri alır ve
+// sahanlığın birebir eski hâline döndüğünü doğrular.
+//
+// ---------- BU TEST NEDEN VAR ----------
+// Sahnede tek bir sahanlık var ve her katta tekrar kullanılıyor. Bir kart
+// yaptığı değişikliği geri alamazsa o anomali KALICI olur: sonraki katta da
+// görünür, oyuncu doğru kararı verdiği hâlde ceza yer ve oyun sessizce bozulur.
+//
+// Bu tür bir hata elle test ederken aylarca fark edilmeyebilir, çünkü ancak
+// belirli bir kart geldiğinde ve ondan sonraki katta ortaya çıkar. 60 kart
+// yazılacak; her birini elle sınamak imkânsız. Bu test hepsini saniyeler içinde
+// sınıyor ve yeni eklenen her kart otomatik olarak kapsama giriyor.
+//
+// Ayrıca kartlardaki YOL HATALARINI da yakalıyor. Bir kartta hedef yolu yanlış
+// yazılırsa anomali hiç görünmez; oyunda bunu fark etmek çok zordur.
+
+using System.Collections.Generic;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
+
+[TestFixture]
+public class AnomaliButunlukTestleri
+{
+    const string SahneYolu = "Assets/Scenes/Landing.unity";
+    const string SahanlikAdi = "Sahanlik_A";
+
+    private Scene sahne;
+    private Transform sahanlik;
+
+    // [SetUp] her testten önce çalışır.
+    // Sahneyi EK OLARAK açıyoruz (Additive): geliştiricinin o an açık olan
+    // sahnesi kapanmasın, kaydedilmemiş işi kaybolmasın.
+    [SetUp]
+    public void Hazirla()
+    {
+        sahne = EditorSceneManager.OpenScene(SahneYolu, OpenSceneMode.Additive);
+
+        sahanlik = null;
+        foreach (GameObject kok in sahne.GetRootGameObjects())
+        {
+            if (kok.name == SahanlikAdi) { sahanlik = kok.transform; break; }
+        }
+
+        Assert.IsNotNull(sahanlik,
+            $"'{SahneYolu}' içinde '{SahanlikAdi}' bulunamadı. " +
+            "Sahne Huzur → Graybox Sahanlığı Yeniden Kur ile kurulmuş olmalı.");
+    }
+
+    // [TearDown] her testten sonra çalışır. Açtığımız sahneyi kapatıyoruz,
+    // yoksa testler editörde çöp bırakır.
+    [TearDown]
+    public void Topla()
+    {
+        if (sahne.IsValid())
+        {
+            EditorSceneManager.CloseScene(sahne, removeScene: true);
+        }
+    }
+
+    // ---------- FOTOĞRAF ----------
+    // Sahanlığın o anki hâlini tek bir metne çevirir. İki fotoğrafı
+    // karşılaştırmak, yüzlerce değeri tek tek karşılaştırmakla aynı şeydir
+    // ama çok daha kısa yazılır ve hiçbir alanı atlamaz.
+    private string Fotograf()
+    {
+        var sb = new System.Text.StringBuilder();
+
+        // true: kapatılmış (gizlenmiş) nesneler de dahil olsun.
+        // Bu şart: "Gorunurluk" etkisi nesneyi gizliyor, gizlenen nesne
+        // listeye girmezse gizlemenin geri alınıp alınmadığını göremeyiz.
+        foreach (Transform t in sahanlik.GetComponentsInChildren<Transform>(true))
+        {
+            sb.Append(t.name).Append('|')
+              .Append(t.gameObject.activeSelf).Append('|')
+              .Append(t.localPosition.ToString("F4")).Append('|')
+              .Append(t.localRotation.ToString("F4")).Append('|')
+              .Append(t.localScale.ToString("F4")).Append(';');
+
+            Light isik = t.GetComponent<Light>();
+            if (isik != null)
+            {
+                sb.Append("ISIK:").Append(isik.color.ToString("F4"))
+                  .Append(isik.intensity.ToString("F4"))
+                  .Append(isik.enabled).Append(';');
+            }
+
+            TextMesh yazi = t.GetComponent<TextMesh>();
+            if (yazi != null) sb.Append("YAZI:").Append(yazi.text).Append(';');
+
+            // Renk etkisi malzemeyi değil, çiziciye takılan geçici bir blok
+            // kullanıyor. Geri alınıp alınmadığını görmek için onu da yazıyoruz.
+            Renderer cizici = t.GetComponent<Renderer>();
+            if (cizici != null)
+            {
+                var blok = new MaterialPropertyBlock();
+                cizici.GetPropertyBlock(blok);
+                sb.Append("BLOK:").Append(blok.isEmpty ? "bos" : "dolu").Append(';');
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    private static AnomaliKarti[] TumKartlar()
+    {
+        return Resources.LoadAll<AnomaliKarti>("Anomaliler");
+    }
+
+    // ---------- ASIL TEST ----------
+
+    [Test]
+    public void Her_kart_uygulanip_geri_alininca_sahanlik_ilk_haline_doner()
+    {
+        AnomaliKarti[] kartlar = TumKartlar();
+        Assert.Greater(kartlar.Length, 0, "Resources/Anomaliler klasöründe hiç kart yok.");
+
+        string ilkHal = Fotograf();
+        var uygulayici = new AnomaliUygulayici();
+
+        foreach (AnomaliKarti kart in kartlar)
+        {
+            uygulayici.Uygula(kart, sahanlik);
+            uygulayici.GeriAl();
+
+            string sonHal = Fotograf();
+
+            Assert.AreEqual(ilkHal, sonHal,
+                $"'{kart.Kimlik}' kartı geri alındıktan sonra sahanlık eski hâline dönmedi. " +
+                "Bu kart uygulandığı katın ardından KALICI bir anomali bırakır.");
+        }
+    }
+
+    [Test]
+    public void Her_kart_sahanlikta_gercekten_bir_sey_degistirir()
+    {
+        AnomaliKarti[] kartlar = TumKartlar();
+        var uygulayici = new AnomaliUygulayici();
+
+        foreach (AnomaliKarti kart in kartlar)
+        {
+            string once = Fotograf();
+
+            uygulayici.Uygula(kart, sahanlik);
+            string uygulanmis = Fotograf();
+
+            uygulayici.GeriAl();
+
+            // Hiçbir şey değişmediyse kart ya boştur ya da hedef yolu yanlıştır.
+            // İkisi de sessiz hatadır: oyuncu anomali arar, ortada anomali yoktur.
+            Assert.AreNotEqual(once, uygulanmis,
+                $"'{kart.Kimlik}' kartı sahanlıkta hiçbir şey değiştirmedi. " +
+                "Hedef yolu yanlış yazılmış olabilir.");
+        }
+    }
+
+    [Test]
+    public void Her_kartin_hedef_yollari_sahanlikta_bulunuyor()
+    {
+        AnomaliKarti[] kartlar = TumKartlar();
+        var hatalar = new List<string>();
+
+        foreach (AnomaliKarti kart in kartlar)
+        {
+            foreach (AnomaliEtkisi etki in kart.Etkiler)
+            {
+                if (sahanlik.Find(etki.hedefYol) == null)
+                {
+                    hatalar.Add($"'{kart.Kimlik}' → '{etki.hedefYol}'");
+                }
+            }
+        }
+
+        Assert.IsEmpty(hatalar,
+            "Şu kartların hedef yolları sahanlıkta yok: " + string.Join(", ", hatalar));
+    }
+
+    [Test]
+    public void Hicbir_kart_bos_degildir()
+    {
+        foreach (AnomaliKarti kart in TumKartlar())
+        {
+            Assert.IsTrue(kart.Gecerli, $"'{kart.Kimlik}' kartının hiç etkisi yok.");
+        }
+    }
+
+    [Test]
+    public void Kart_kimlikleri_benzersizdir()
+    {
+        var gorulen = new HashSet<string>();
+
+        foreach (AnomaliKarti kart in TumKartlar())
+        {
+            // Add, daha önce eklenmişse false döner.
+            Assert.IsTrue(gorulen.Add(kart.Kimlik),
+                $"'{kart.Kimlik}' kimliği birden fazla kartta kullanılmış. " +
+                "Kimlikler kayıt ve hata ayıklamada karışır.");
+        }
+    }
+
+    [Test]
+    public void Kart_zorluklari_bir_ile_bes_arasindadir()
+    {
+        foreach (AnomaliKarti kart in TumKartlar())
+        {
+            Assert.GreaterOrEqual(kart.Zorluk, 1, $"'{kart.Kimlik}' zorluğu 1'in altında.");
+            Assert.LessOrEqual(kart.Zorluk, 5, $"'{kart.Kimlik}' zorluğu 5'in üstünde.");
+        }
+    }
+
+    // Bütün kartlar arka arkaya uygulanırsa bile sahanlık temiz kalmalı.
+    // Oyunda kat kat ilerlerken tam olarak bu oluyor.
+    [Test]
+    public void Kartlar_arka_arkaya_uygulaninca_birikme_olmaz()
+    {
+        AnomaliKarti[] kartlar = TumKartlar();
+        string ilkHal = Fotograf();
+
+        var uygulayici = new AnomaliUygulayici();
+
+        // Üç tur boyunca bütün kartları sırayla uygula; aralarda geri alma YOK.
+        // Uygulayıcı her Uygula çağrısında kendisi temizlemeli.
+        for (int tur = 0; tur < 3; tur++)
+        {
+            foreach (AnomaliKarti kart in kartlar)
+            {
+                uygulayici.Uygula(kart, sahanlik);
+            }
+        }
+
+        uygulayici.GeriAl();
+
+        Assert.AreEqual(ilkHal, Fotograf(),
+            "Kartlar arka arkaya uygulanınca sahanlıkta artık kaldı.");
+    }
+}
