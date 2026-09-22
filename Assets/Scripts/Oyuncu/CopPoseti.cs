@@ -1,17 +1,13 @@
 // CopPoseti.cs
-// Bir nesnenin "alınabilir çöp poşeti" olduğunu söyleyen İŞARET bileşeni.
+// Kapıcının toplayacağı çöp poşeti.
 //
-// İçinde neredeyse hiç kod yok, olması da gerekmiyor. Tek işi, oyuncunun
-// attığı ışın bir nesneye çarptığında "bu bir poşet mi?" sorusuna cevap vermek.
-//
-// NEDEN İSİMLE DEĞİL BİLEŞENLE
-// Nesnenin adına bakıp `if (carpan.name == "Cop_Poseti")` de yazabilirdik.
-// Ama isim bir gün değişirse kod sessizce çalışmaz olurdu ve derleyici
-// bunu fark etmezdi. Bileşen varsa ya vardır ya yoktur; yazım hatası olmaz.
+// IEtkilesimli sözleşmesini imzalıyor. Bu sayede oyuncunun etkileşim
+// sistemi onu tanıyor: yaklaşınca üstünde "TOPLA (E)" yazısı beliriyor,
+// tuşa basılınca alınıyor. Oyuncu tarafında poşete özel tek satır kod yok.
 
 using UnityEngine;
 
-public class CopPoseti : MonoBehaviour
+public class CopPoseti : MonoBehaviour, IEtkilesimli
 {
     [Tooltip("Poşet alındıktan sonra tekrar alınmasın diye işaretlenir. " +
              "Kat değişince sahanlıkla birlikte yenilenir.")]
@@ -19,6 +15,33 @@ public class CopPoseti : MonoBehaviour
 
     /// <summary>Bu poşet daha önce alındı mı?</summary>
     public bool Alindi { get { return alindi; } }
+
+    // ---------- SÖZLEŞME ----------
+
+    /// <summary>Ekranda görünecek eylem adı.</summary>
+    public string Ipucu { get { return "TOPLA"; } }
+
+    /// <summary>Alınmış poşet artık etkileşime açık değildir.</summary>
+    public bool EtkilesimeAcik { get { return !alindi && gameObject.activeSelf; } }
+
+    /// <summary>Oyuncu tuşa bastığında çağrılır.</summary>
+    public void Etkilesim(GameObject oyuncu)
+    {
+        // Sayaç oyuncuda duruyor: poşet kendini nasıl alacağını bilir,
+        // kaç tane taşındığını ise oyuncu bilir.
+        CopToplayici toplayici = oyuncu.GetComponent<CopToplayici>();
+
+        if (toplayici == null)
+        {
+            Debug.LogWarning("[ÇÖP] Oyuncuda CopToplayici yok, poşet sayılamadı.");
+            return;
+        }
+
+        Al();
+        toplayici.PosetSay();
+    }
+
+    // ---------- DURUM ----------
 
     /// <summary>Poşeti alır: işaretler ve gizler.</summary>
     public void Al()

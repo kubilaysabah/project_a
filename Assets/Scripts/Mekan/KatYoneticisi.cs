@@ -218,7 +218,12 @@ public class KatYoneticisi : MonoBehaviour
 
     private void KarariIsle(Karar karar)
     {
-        KararSonucu sonuc = sayac.KararVer(karar);
+        // Katta anomali varsa görev aranmaz: anomaliyi görüp işini bırakmak
+        // ve geri dönmek zaten doğru davranıştır. Kapıcıyı tehlikeli bir
+        // sahanlıkta çöp toplamaya zorlamak hem mantıksız hem de kötü tasarım olurdu.
+        bool gorevEksik = !sayac.AnomaliVar && ToplanmamisGorevVar();
+
+        KararSonucu sonuc = sayac.KararVer(karar, gorevEksik);
 
         switch (sonuc)
         {
@@ -230,8 +235,8 @@ public class KatYoneticisi : MonoBehaviour
             case KararSonucu.Sifirla:
                 // Ceza ANINDA gelmez. Oyuncu yürümeye devam eder, hiçbir şey
                 // olmamış gibi görünür; korku o beklemede birikir.
-                Debug.Log($"[KAT] YANLIŞ karar ({karar}). Ceza yolda... " +
-                          $"Toplam hata: {sayac.ToplamHata}");
+                string sebep = gorevEksik ? "çöp alınmadı" : $"yanlış karar ({karar})";
+                Debug.Log($"[KAT] CEZA: {sebep}. Toplam hata: {sayac.ToplamHata}");
                 cezaBekliyor = true;
                 break;
 
@@ -353,6 +358,29 @@ public class KatYoneticisi : MonoBehaviour
 
         string durum = aKart != null ? $"VAR ({aKart.Kimlik})" : "yok";
         Debug.Log($"[KAT] {kat}. kat hazır — anomali: {durum}");
+    }
+
+    // ---------- EKSİK GÖREV ----------
+    // Oyuncunun BULUNDUĞU sahanlıkta yapılmamış bir iş kaldı mı?
+    //
+    // Şu an tek iş çöp toplamak. İleride başka görevler eklenirse
+    // (ampulü değiştirmek, kapıyı kapatmak) kontrolleri buraya eklenir;
+    // karar mantığına dokunmak gerekmez.
+    //
+    // Gizlenmiş poşet SAYILMAZ: "eksik poşet" anomalisi poşeti ortadan
+    // kaldırıyor ve olmayan bir şeyi almamaktan ceza verilemez.
+    private bool ToplanmamisGorevVar()
+    {
+        if (sahanlikA == null) return false;
+
+        foreach (CopPoseti poset in sahanlikA.GetComponentsInChildren<CopPoseti>())
+        {
+            // GetComponentsInChildren varsayılan olarak yalnızca AÇIK nesneleri
+            // getirir; bu tam istediğimiz davranış.
+            if (!poset.Alindi) return true;
+        }
+
+        return false;
     }
 
     // ---------- ÇÖP POŞETLERİ ----------

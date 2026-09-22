@@ -86,14 +86,18 @@ public static class OyuncuKurucu
         seri.FindProperty("kamera").objectReferenceValue = kamera.transform;
         seri.ApplyModifiedProperties();   // değişikliği gerçekten yaz
 
-        // ---- ÇÖP TOPLAYICI ----
-        // Kapıcının görevi. Etkileşim tuşunu kendisi dinliyor, yürüyüş
-        // kontrolcüsünden bağımsız çalışıyor.
-        CopToplayici toplayici = oyuncu.AddComponent<CopToplayici>();
+        // ---- ETKİLEŞİM ----
+        // Oyuncunun baktığı şeyle etkileşim kuran tek merkez. Poşeti de,
+        // ileride gelecek zili veya notu da bu ele alacak.
+        Etkilesimci etkilesimci = oyuncu.AddComponent<Etkilesimci>();
 
-        SerializedObject seriToplayici = new SerializedObject(toplayici);
-        seriToplayici.FindProperty("kamera").objectReferenceValue = kamera.transform;
-        seriToplayici.ApplyModifiedProperties();
+        SerializedObject seriEtkilesim = new SerializedObject(etkilesimci);
+        seriEtkilesim.FindProperty("kamera").objectReferenceValue = kamera.transform;
+        seriEtkilesim.ApplyModifiedProperties();
+
+        // ---- ÇÖP SAYACI ----
+        // Kaç poşet taşındığını tutar. Nişan alma işi Etkilesimci'de.
+        oyuncu.AddComponent<CopToplayici>();
 
         // ---- SONSUZ MERDİVEN ----
         // Oyuncuyu üst sahanlıktan alt sahanlığa sessizce taşıyan döngü.

@@ -79,7 +79,15 @@ public class KatSayaci
     /// <summary>
     /// Oyuncunun kararını değerlendirir ve sayacı günceller.
     /// </summary>
-    public KararSonucu KararVer(Karar karar)
+    /// <param name="karar">Yukarı devam mı, geri dönüş mü.</param>
+    /// <param name="gorevEksik">
+    /// O katta yapılması gereken bir iş (çöp poşetini almak gibi) yapılmadıysa true.
+    /// Doğru karar bile olsa eksik görev cezalandırılır: kapıcı işini yapmadan
+    /// üst kata çıkamaz. Katta anomali varsa görev aranmaz — anomali gördüğünde
+    /// işini bırakıp geri dönmek zaten doğru davranıştır. Bu ayrımı çağıran taraf
+    /// yapar; burası sadece gelen bayrağa bakar.
+    /// </param>
+    public KararSonucu KararVer(Karar karar, bool gorevEksik = false)
     {
         // Tur bittiyse artık karar alınmaz; çağıran kod yanlış yapıyordur.
         if (TurBitti) return KararSonucu.CatiyaUlasildi;
@@ -93,6 +101,10 @@ public class KatSayaci
         bool dogruKarar = AnomaliVar
             ? (karar == Karar.Geri)      // "?" işaretinin solundaki koşul doğruysa bu değer,
             : (karar == Karar.Yukari);   // yanlışsa bu değer alınır. Kısa if-else yazımıdır.
+
+        // Görev eksikse doğru karar bile yetmez. Kapıcı çöpü almadan
+        // üst kata çıkmışsa işini yapmamıştır ve ceza alır.
+        if (gorevEksik) dogruKarar = false;
 
         if (!dogruKarar)
         {
