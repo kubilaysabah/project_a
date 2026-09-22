@@ -86,6 +86,15 @@ public static class OyuncuKurucu
         seri.FindProperty("kamera").objectReferenceValue = kamera.transform;
         seri.ApplyModifiedProperties();   // değişikliği gerçekten yaz
 
+        // ---- ÇÖP TOPLAYICI ----
+        // Kapıcının görevi. Etkileşim tuşunu kendisi dinliyor, yürüyüş
+        // kontrolcüsünden bağımsız çalışıyor.
+        CopToplayici toplayici = oyuncu.AddComponent<CopToplayici>();
+
+        SerializedObject seriToplayici = new SerializedObject(toplayici);
+        seriToplayici.FindProperty("kamera").objectReferenceValue = kamera.transform;
+        seriToplayici.ApplyModifiedProperties();
+
         // ---- SONSUZ MERDİVEN ----
         // Oyuncuyu üst sahanlıktan alt sahanlığa sessizce taşıyan döngü.
         oyuncu.AddComponent<SonsuzMerdiven>();

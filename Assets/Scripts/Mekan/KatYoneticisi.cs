@@ -77,6 +77,9 @@ public class KatYoneticisi : MonoBehaviour
     private Transform sahanlikA, sahanlikB;
     private AnomaliKarti[] kartlar;
 
+    // Kapıcının çöp görevi. Kat değişince poşetler yenilenir, ceza sonrası sayaç sıfırlanır.
+    private CopToplayici toplayici;
+
     // ---------- KURULUM ----------
 
     private void Awake()
@@ -110,6 +113,8 @@ public class KatYoneticisi : MonoBehaviour
 
         uygulayiciA = new AnomaliUygulayici();
         uygulayiciB = new AnomaliUygulayici();
+
+        toplayici = FindAnyObjectByType<CopToplayici>();
 
         // Resources.LoadAll: "Resources" adlı klasörlerin içindeki her şeyi yükler.
         // Kartları oraya koymamızın sebebi şu: yeni bir kart eklemek için hiçbir
@@ -270,7 +275,9 @@ public class KatYoneticisi : MonoBehaviour
             ? "   ·   kart: " + uygulayiciA.UygulananKart.Kimlik
             : "";
 
-        string alt = $"hata: {sayac.ToplamHata}" + kartAdi +
+        string poset = toplayici != null ? $"   ·   poşet: {toplayici.TasinanPoset}" : "";
+
+        string alt = $"hata: {sayac.ToplamHata}" + poset + kartAdi +
                      (cezaBekliyor ? "   ·   ceza yolda…" : "") +
                      (cezaCalisiyor ? "   ·   CEZA" : "");
 
@@ -324,6 +331,11 @@ public class KatYoneticisi : MonoBehaviour
         uygulayiciA.GeriAl();
         uygulayiciB.GeriAl();
 
+        // Poşetler burada yenilenir: anomali geri alındıktan SONRA, kart
+        // uygulanmadan ÖNCE. Böylece oyuncunun aldığı poşet yeni katta
+        // yerine gelir, ama "eksik poşet" kartı gelirse onu yine gizleyebilir.
+        PosetleriYenile();
+
         KapiNumaralariniYaz();
 
         // Alt sahanlık bu katı, üst sahanlık BİR ÜST katı gösterir.
@@ -341,6 +353,28 @@ public class KatYoneticisi : MonoBehaviour
 
         string durum = aKart != null ? $"VAR ({aKart.Kimlik})" : "yok";
         Debug.Log($"[KAT] {kat}. kat hazır — anomali: {durum}");
+    }
+
+    // ---------- ÇÖP POŞETLERİ ----------
+    // Her katta poşetler yerine gelir. Sahanlık tek olduğu için, oyuncunun
+    // önceki katta aldığı poşet aslında aynı nesnedir; gizlenmiş hâlden
+    // geri getiriyoruz.
+    private void PosetleriYenile()
+    {
+        PosetleriYenile(sahanlikA);
+        PosetleriYenile(sahanlikB);
+    }
+
+    private void PosetleriYenile(Transform sahanlik)
+    {
+        if (sahanlik == null) return;
+
+        // true parametresi: KAPALI nesneler de bulunsun. Alınmış poşet
+        // kapalı durumdadır; bu olmadan onu bir daha bulamazdık.
+        foreach (CopPoseti poset in sahanlik.GetComponentsInChildren<CopPoseti>(true))
+        {
+            poset.Yenile();
+        }
     }
 
     // ---------- KAPI NUMARALARI ----------
@@ -414,6 +448,9 @@ public class KatYoneticisi : MonoBehaviour
         // Kat kararları silinir: aynı tur bir daha aynı sırayla gelmesin,
         // oyuncu ezberleyerek ilerleyemesin.
         secici.Sifirla();
+
+        // Tur baştan başlıyor; toplanan poşetler de sıfırlanır.
+        if (toplayici != null) toplayici.Sifirla();
 
         Debug.Log("[KAT] 1. kata dönüldü.");
         YeniKatHazirla();

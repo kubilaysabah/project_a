@@ -440,11 +440,15 @@ public static class GrayboxKurucu
         // dairenin karanlık holüne bakmalı. Ayrıntılar aşağıdaki fonksiyonda.
         DaireIciKur(k, yon);
 
-        // Çöp poşeti: kapının yanında, yerde. Çöp toplama görevi (#7)
-        // bu nesneyi kullanacak; şimdilik sadece duruyor.
-        Kutu("Cop_Poseti", k,
+        // Çöp poşeti: kapının yanında, yerde. Kapıcının toplayacağı şey bu.
+        GameObject poset = Kutu("Cop_Poseti", k,
              new Vector3(duvarYuzu - yon * 0.26f, 0.16f, -(KapiGen / 2f) - 0.22f),
              new Vector3(0.30f, 0.32f, 0.30f));
+
+        // İşaret bileşeni: oyuncunun attığı ışın buna çarpınca "bu alınabilir
+        // bir poşet" olduğunu anlıyor. Nesnenin adına bakmak yerine bileşen
+        // kullanıyoruz; isim bir gün değişirse kod sessizce bozulmasın.
+        poset.AddComponent<CopPoseti>();
     }
 
     // ---------- DAİRE İÇİ ----------

@@ -39,10 +39,6 @@ public class BirinciSahisKontrolcu : MonoBehaviour
              "Fare hareketi piksel cinsinden çok daha büyük olduğu için fareyi etkilemez.")]
     [SerializeField] private float oluBolge = 0.15f;
 
-    [Header("Etkileşim")]
-    [Tooltip("E tuşuyla kaç metreye kadar uzanılabilir.")]
-    [SerializeField] private float etkilesimMenzili = 2.2f;
-
     [Header("Bağlantılar")]
     [Tooltip("Oyuncunun çocuğu olan kamera. Boş bırakılırsa çocuklardan otomatik bulunur.")]
     [SerializeField] private Transform kamera;
@@ -58,7 +54,6 @@ public class BirinciSahisKontrolcu : MonoBehaviour
     // "Move" eylemi hem WASD'ye hem de oyun kolunun çubuğuna bağlıdır.
     private InputAction hareketEylemi;
     private InputAction bakisEylemi;
-    private InputAction etkilesimEylemi;
 
     // ---------- AWAKE ----------
     // Awake, nesne sahnede belirdiği anda BİR KEZ çalışır. Start'tan da öncedir.
@@ -90,7 +85,6 @@ public class BirinciSahisKontrolcu : MonoBehaviour
         // FindAction: eylemi "harita/eylem" yoluyla bulur.
         hareketEylemi   = varlik.FindAction("Player/Move");
         bakisEylemi     = varlik.FindAction("Player/Look");
-        etkilesimEylemi = varlik.FindAction("Player/Interact");
     }
 
     // ---------- ONENABLE / ONDISABLE ----------
@@ -102,14 +96,12 @@ public class BirinciSahisKontrolcu : MonoBehaviour
         // "?." işareti: soldaki null ise hiçbir şey yapma, hata verme.
         hareketEylemi?.Enable();
         bakisEylemi?.Enable();
-        etkilesimEylemi?.Enable();
     }
 
     private void OnDisable()
     {
         hareketEylemi?.Disable();
         bakisEylemi?.Disable();
-        etkilesimEylemi?.Disable();
     }
 
     // ---------- START ----------
@@ -125,7 +117,6 @@ public class BirinciSahisKontrolcu : MonoBehaviour
     {
         Bak();
         Yuru();
-        EtkilesimiDinle();
 
         // Escape: fareyi serbest bırak. Editörde test ederken şart,
         // yoksa imleç pencereye kilitli kalır.
@@ -205,31 +196,6 @@ public class BirinciSahisKontrolcu : MonoBehaviour
         // Move: çarpışmaları hesaba katarak taşır. Duvardan geçmeyi engeller,
         // basamakları (stepOffset kadar) kendiliğinden tırmanır.
         kontrolcu.Move(hareket * Time.deltaTime);
-    }
-
-    // ---------- ETKİLEŞİM ----------
-    // Şimdilik sadece ne gördüğünü konsola yazar.
-    // Çöp poşeti görevi (#7) buraya bağlanacak.
-    private void EtkilesimiDinle()
-    {
-        if (etkilesimEylemi == null || kamera == null) return;
-
-        // wasPressedThisFrame: basılı tutmayı değil, BASMA ANINI yakalar.
-        if (!etkilesimEylemi.WasPressedThisFrame()) return;
-
-        // Raycast: kameradan ileri doğru görünmez bir ışın atar,
-        // neye çarptığını söyler. Nişan alma mantığı budur.
-        Ray isin = new Ray(kamera.position, kamera.forward);
-
-        // "out" : fonksiyon bize bu değişkenin içini doldurarak geri verir.
-        if (Physics.Raycast(isin, out RaycastHit carpma, etkilesimMenzili))
-        {
-            Debug.Log($"Etkileşim: {carpma.collider.name} ({carpma.distance:0.00} m)");
-        }
-        else
-        {
-            Debug.Log("Etkileşim: menzilde bir şey yok.");
-        }
     }
 
     // ---------- ÖLÜ BÖLGE ----------
