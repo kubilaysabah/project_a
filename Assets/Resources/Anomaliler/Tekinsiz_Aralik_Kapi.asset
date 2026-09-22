@@ -21,7 +21,7 @@ MonoBehaviour:
   - hedefYol: Kapi_Sag/Mentese
     tur: 2
     gorunur: 1
-    vektor: {x: 0, y: -22, z: 0}
+    vektor: {x: 0, y: 22, z: 0}
     renk: {r: 1, g: 1, b: 1, a: 1}
     sayi: 1
     metin: 

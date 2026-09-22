@@ -357,23 +357,33 @@ public static class GrayboxKurucu
         // Menteşe olmasaydı kanat kendi ORTASINDAN dönerdi ve yarısı duvarın
         // içine girerdi. Gerçek bir kapı kenarından döner. Menteşeyi döndürünce
         // kanat, kol, numaralık ve gözetleme deliği hep birlikte açılır.
+        //
+        // MENTEŞE TARAFI AYNALIDIR. Sağ duvardaki kapının menteşesi -z ucunda,
+        // sol duvardakinin +z ucunda. Bu keyfi bir tercih değil: iki kapı
+        // birbirinin aynası olunca, POZİTİF bir açı İKİSİNİ DE daireye doğru
+        // açar. Menteşeler aynı tarafta olsaydı kart yazan kişi her kapı için
+        // işaretin hangisi olduğunu hatırlamak zorunda kalırdı ve er geç
+        // koridora açılan bir kapı ortaya çıkardı.
+        float menteseZ = yon * -(KapiGen / 2f);   // menteşenin bulunduğu uç
+        float kanatZ   = yon * (KapiGen / 2f);    // kanadın menteşeye göre yönü
+
         GameObject mentese = new GameObject("Mentese");
         mentese.transform.SetParent(k, false);
-        mentese.transform.localPosition = new Vector3(kanatX, 0f, -(KapiGen / 2f));
+        mentese.transform.localPosition = new Vector3(kanatX, 0f, menteseZ);
         Transform m = mentese.transform;
 
         // Bundan sonraki konumlar MENTEŞEYE göredir, sahanlığa göre değil.
 
         // Kapı kanadı: menteşeden başlayıp kapı genişliği kadar uzanır.
-        Kutu("Kanat", m, new Vector3(0f, KapiYuk / 2f, KapiGen / 2f),
+        Kutu("Kanat", m, new Vector3(0f, KapiYuk / 2f, kanatZ),
              new Vector3(0.06f, KapiYuk, KapiGen));
 
         // Kol: menteşenin karşı ucunda, bel hizasında.
-        Kutu("Kol", m, new Vector3(-yon * 0.07f, 1.05f, KapiGen - 0.12f),
+        Kutu("Kol", m, new Vector3(-yon * 0.07f, 1.05f, yon * (KapiGen - 0.12f)),
              new Vector3(0.09f, 0.04f, 0.12f));
 
         // Numaralık: göz hizasının biraz üstünde, küçük bir plaka.
-        Kutu("Numaralik", m, new Vector3(-yon * 0.04f, 1.78f, KapiGen / 2f),
+        Kutu("Numaralik", m, new Vector3(-yon * 0.04f, 1.78f, kanatZ),
              new Vector3(0.02f, 0.16f, 0.26f));
 
         // NUMARA YAZISI. Plakanın üstünde duran 3B yazı.
@@ -382,7 +392,7 @@ public static class GrayboxKurucu
         // ekranda bir sayaçtan değil, BİNANIN KENDİSİNDEN okur.
         GameObject yaziNesne = new GameObject("Numara");
         yaziNesne.transform.SetParent(m, false);   // yazı da kapıyla birlikte açılır
-        yaziNesne.transform.localPosition = new Vector3(-yon * 0.06f, 1.78f, KapiGen / 2f);
+        yaziNesne.transform.localPosition = new Vector3(-yon * 0.06f, 1.78f, kanatZ);
 
         // Yazıyı kapının baktığı yöne çeviriyoruz: sol duvardaki kapı +x'e,
         // sağ duvardaki kapı -x'e bakar, dolayısıyla dönüşleri de terstir.
@@ -412,7 +422,7 @@ public static class GrayboxKurucu
 
         // Kapı gözü (gözetleme deliği): kanadın ortasında, göz hizasında.
         // Kanada ait olduğu için menteşenin çocuğu; kapı açılınca o da döner.
-        Kutu("Kapi_Gozu", m, new Vector3(-yon * 0.035f, 1.60f, KapiGen / 2f),
+        Kutu("Kapi_Gozu", m, new Vector3(-yon * 0.035f, 1.60f, kanatZ),
              new Vector3(0.03f, 0.05f, 0.05f));
 
         // Terlikler: paspasın üstünde bir çift. "Tek terlik" anomalisi
@@ -426,11 +436,96 @@ public static class GrayboxKurucu
              new Vector3(duvarYuzu - yon * 0.32f, 0.045f, 0.11f),
              new Vector3(0.26f, 0.06f, 0.10f));
 
+        // Kapının ARKASINDAKİ karanlık: kapı aralanınca oyuncu boşluğa değil
+        // dairenin karanlık holüne bakmalı. Ayrıntılar aşağıdaki fonksiyonda.
+        DaireIciKur(k, yon);
+
         // Çöp poşeti: kapının yanında, yerde. Çöp toplama görevi (#7)
         // bu nesneyi kullanacak; şimdilik sadece duruyor.
         Kutu("Cop_Poseti", k,
              new Vector3(duvarYuzu - yon * 0.26f, 0.16f, -(KapiGen / 2f) - 0.22f),
              new Vector3(0.30f, 0.32f, 0.30f));
+    }
+
+    // ---------- DAİRE İÇİ ----------
+    // Kapının ardındaki küçük, kapalı hol.
+    //
+    // NEDEN GEREKLİ
+    // Kapı daireye doğru açılıyor. Arkasında hiçbir şey olmasaydı oyuncu
+    // aralıktan sahnenin dışını, yani hiçliği görürdü ve yanılsama anında
+    // dağılırdı. Buraya beş kutudan kapalı bir hacim kuruyoruz: arka duvar,
+    // zemin, tavan ve iki yan. İçeride ışık yok; sahanlık ampulünden sızan
+    // az miktarda ışık dışında karanlık kalıyor.
+    //
+    // Bu, boşluğu kapatmanın yanı sıra korku açısından da doğru olan şey:
+    // aralık bir kapının ardındaki karanlık, kapının kendisinden daha rahatsız edici.
+    //
+    // Daire İÇİ modellenmiyor; bu sadece 1,2 metrelik bir hol. Oyuncu içeri
+    // hiç girmiyor, girmesi de planlanmıyor.
+    static void DaireIciKur(Transform ebeveyn, float yon)
+    {
+        const float Derinlik = 1.2f;
+        const float Kalinlik = 0.1f;
+
+        float genislik = KapiGen + 0.2f;                 // kapıdan biraz geniş
+        float yukseklik = KapiYuk;
+        float disYuzey = SahanlikGen / 2f + DuvarKalin;  // duvarın dış yüzü
+        float merkezX = yon * (disYuzey + Derinlik / 2f);
+
+        GameObject kok = new GameObject("Daire_Ici");
+        kok.transform.SetParent(ebeveyn, false);
+        Transform d = kok.transform;
+
+        // Arka duvar: holün dibi.
+        Kutu("Arka", d,
+             new Vector3(yon * (disYuzey + Derinlik), yukseklik / 2f, 0f),
+             new Vector3(Kalinlik, yukseklik + Kalinlik, genislik + Kalinlik));
+
+        // Zemin ve tavan.
+        Kutu("Zemin", d, new Vector3(merkezX, -Kalinlik / 2f, 0f),
+             new Vector3(Derinlik, Kalinlik, genislik));
+        Kutu("Tavan", d, new Vector3(merkezX, yukseklik + Kalinlik / 2f, 0f),
+             new Vector3(Derinlik, Kalinlik, genislik));
+
+        // İki yan duvar.
+        Kutu("Yan_A", d, new Vector3(merkezX, yukseklik / 2f, genislik / 2f),
+             new Vector3(Derinlik, yukseklik, Kalinlik));
+        Kutu("Yan_B", d, new Vector3(merkezX, yukseklik / 2f, -(genislik / 2f)),
+             new Vector3(Derinlik, yukseklik, Kalinlik));
+
+        // Holün yüzeyleri koyu bir malzeme alır. Sadece ışığı kısmak yetmiyor:
+        // gökyüzünden gelen ortam ışığı beyaz kutuları yine aydınlatıyor ve
+        // aralık kapı okunmuyordu. Koyu malzeme karanlığı garanti ediyor.
+        Material karanlik = KaranlikMalzeme();
+        foreach (MeshRenderer cizici in kok.GetComponentsInChildren<MeshRenderer>())
+        {
+            cizici.sharedMaterial = karanlik;
+        }
+    }
+
+    // Koyu malzemeyi bulur, yoksa bir kez üretip diske kaydeder.
+    // Her kurulumda yenisini üretmiyoruz; tek malzeme bütün daire içlerinde paylaşılıyor.
+    static Material KaranlikMalzeme()
+    {
+        const string Yol = "Assets/Materials/Daire_Karanlik.mat";
+
+        Material mevcut = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (mevcut != null) return mevcut;
+
+        if (!AssetDatabase.IsValidFolder("Assets/Materials"))
+        {
+            AssetDatabase.CreateFolder("Assets", "Materials");
+        }
+
+        // URP'nin standart malzemesi. Shader.Find adı geçen gölgelendiriciyi bulur.
+        Material yeni = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        yeni.SetColor("_BaseColor", new Color(0.04f, 0.04f, 0.045f));
+        yeni.SetFloat("_Smoothness", 0.05f);   // mat yüzey, parlama olmasın
+
+        AssetDatabase.CreateAsset(yeni, Yol);
+        AssetDatabase.SaveAssets();
+
+        return yeni;
     }
 
     // ---------- PASPAS ----------
