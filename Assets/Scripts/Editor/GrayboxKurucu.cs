@@ -349,16 +349,31 @@ public static class GrayboxKurucu
         float duvarYuzu = yon * (SahanlikGen / 2f);     // duvarın iç yüzü
         float kanatX    = duvarYuzu + yon * 0.09f;      // kanat duvarın içine, 9 cm geriye
 
-        // Kapı kanadı.
-        Kutu("Kanat", k, new Vector3(kanatX, KapiYuk / 2f, 0f),
+        // ---- MENTEŞE ----
+        // Kapıya ait her parça bu boş nesnenin ÇOCUĞU olur. Menteşe kapının
+        // dönme ekseninde durur, yani kanadın bir kenarında.
+        //
+        // Neden şart? "Aralık kapı" anomalisi kapıyı döndürerek kurulacak.
+        // Menteşe olmasaydı kanat kendi ORTASINDAN dönerdi ve yarısı duvarın
+        // içine girerdi. Gerçek bir kapı kenarından döner. Menteşeyi döndürünce
+        // kanat, kol, numaralık ve gözetleme deliği hep birlikte açılır.
+        GameObject mentese = new GameObject("Mentese");
+        mentese.transform.SetParent(k, false);
+        mentese.transform.localPosition = new Vector3(kanatX, 0f, -(KapiGen / 2f));
+        Transform m = mentese.transform;
+
+        // Bundan sonraki konumlar MENTEŞEYE göredir, sahanlığa göre değil.
+
+        // Kapı kanadı: menteşeden başlayıp kapı genişliği kadar uzanır.
+        Kutu("Kanat", m, new Vector3(0f, KapiYuk / 2f, KapiGen / 2f),
              new Vector3(0.06f, KapiYuk, KapiGen));
 
-        // Kol: kapının menteşesiz tarafında, bel hizasında.
-        Kutu("Kol", k, new Vector3(kanatX - yon * 0.07f, 1.05f, KapiGen / 2f - 0.12f),
+        // Kol: menteşenin karşı ucunda, bel hizasında.
+        Kutu("Kol", m, new Vector3(-yon * 0.07f, 1.05f, KapiGen - 0.12f),
              new Vector3(0.09f, 0.04f, 0.12f));
 
         // Numaralık: göz hizasının biraz üstünde, küçük bir plaka.
-        Kutu("Numaralik", k, new Vector3(kanatX - yon * 0.04f, 1.78f, 0f),
+        Kutu("Numaralik", m, new Vector3(-yon * 0.04f, 1.78f, KapiGen / 2f),
              new Vector3(0.02f, 0.16f, 0.26f));
 
         // NUMARA YAZISI. Plakanın üstünde duran 3B yazı.
@@ -366,8 +381,8 @@ public static class GrayboxKurucu
         // 2. katta 3 ve 4... Böylece oyuncu kaçıncı katta olduğunu
         // ekranda bir sayaçtan değil, BİNANIN KENDİSİNDEN okur.
         GameObject yaziNesne = new GameObject("Numara");
-        yaziNesne.transform.SetParent(k, false);
-        yaziNesne.transform.localPosition = new Vector3(kanatX - yon * 0.06f, 1.78f, 0f);
+        yaziNesne.transform.SetParent(m, false);   // yazı da kapıyla birlikte açılır
+        yaziNesne.transform.localPosition = new Vector3(-yon * 0.06f, 1.78f, KapiGen / 2f);
 
         // Yazıyı kapının baktığı yöne çeviriyoruz: sol duvardaki kapı +x'e,
         // sağ duvardaki kapı -x'e bakar, dolayısıyla dönüşleri de terstir.
@@ -396,7 +411,8 @@ public static class GrayboxKurucu
              new Vector3(0.05f, 0.08f, 0.06f));
 
         // Kapı gözü (gözetleme deliği): kanadın ortasında, göz hizasında.
-        Kutu("Kapi_Gozu", k, new Vector3(kanatX - yon * 0.035f, 1.60f, 0f),
+        // Kanada ait olduğu için menteşenin çocuğu; kapı açılınca o da döner.
+        Kutu("Kapi_Gozu", m, new Vector3(-yon * 0.035f, 1.60f, KapiGen / 2f),
              new Vector3(0.03f, 0.05f, 0.05f));
 
         // Terlikler: paspasın üstünde bir çift. "Tek terlik" anomalisi

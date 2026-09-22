@@ -84,10 +84,10 @@ public class KatYoneticisi : MonoBehaviour
         for (int i = 0; i < ampuller.Length; i++) ozgunRenkler[i] = ampuller[i].color;
 
         // Kapı numarası yazılarını bul.
-        aSolNumara = NumaraBul("Sahanlik_A/Kapi_Sol/Numara");
-        aSagNumara = NumaraBul("Sahanlik_A/Kapi_Sag/Numara");
-        bSolNumara = NumaraBul("Sahanlik_B/Kapi_Sol/Numara");
-        bSagNumara = NumaraBul("Sahanlik_B/Kapi_Sag/Numara");
+        aSolNumara = NumaraBul("Sahanlik_A/Kapi_Sol/Mentese/Numara");
+        aSagNumara = NumaraBul("Sahanlik_A/Kapi_Sag/Mentese/Numara");
+        bSolNumara = NumaraBul("Sahanlik_B/Kapi_Sol/Mentese/Numara");
+        bSagNumara = NumaraBul("Sahanlik_B/Kapi_Sag/Mentese/Numara");
     }
 
     private TextMesh NumaraBul(string yol)
