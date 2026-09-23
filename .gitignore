@@ -108,3 +108,8 @@ InitTestScene*.unity*
 
 # Claude Code: kişisel/makineye özel talimatlar (her geliştirici kendi dosyasını tutar, paylaşılmaz)
 CLAUDE.local.md
+
+# Blender betikleri (Art/Blender/scripts) — Python önbelleği ve Blender yedekleri
+__pycache__/
+*.pyc
+*.blend1
