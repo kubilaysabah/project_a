@@ -14,7 +14,7 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
   - **K** = sadece kart. Bugün, sıfır kodla yapılabilir.
   - **E** = önce sahneye yeni bir eşya eklenmeli (sonrası yine sadece kart).
   - **Y** = yeni kod gerekir (ses sistemi, animasyon, çekirdeğe dokunan kart, senaryolu olay).
-- **Durum:** ✅ oyunda · 🎨 graybox beyazken okunmaz, art pass (#10) sonrası · ⭐ sıradaki 10'luk (#13) için önerilen.
+- **Durum:** ✅ oyunda · 🎨 graybox beyazken okunmaz, art pass (#10) sonrası · ⭐ sıradaki 10'luk (#13), onaylı.
 
 ## Kurallar (bu listeyi yazarken uyulanlar)
 
@@ -124,7 +124,7 @@ ilan üstüne yazı, gizli beşinci kapı, asansör göstergesi ışığı, insa
 3. **Zamanlı/animasyonlu etkiler**: sallanan ve titreyen ampul, kapı gözü ışığı (F32, T19, T21).
 4. **Senaryolu KÂBUS olayları**: tetikleyiciyle oynayan kısa sahneler (K03, K07, K10).
 
-## Sıradaki 10'luk üretim sırası (#13) — öneri, Şahan onayı bekliyor
+## Sıradaki 10'luk üretim sırası (#13) — Şahan onayladı, 2026-09-23
 
 Hepsi **sadece kart** (sıfır kod), katman ve zorluk dağılımı dengeli, yeni sahanlığın asansörünü ve dört kapısını kullanıyor:
 
