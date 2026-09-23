@@ -3,7 +3,7 @@
 Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 `Assets/Resources/Anomaliler/` altına kart olarak dökülür (#13).
 
-**Oturum:** 2026-09-23 · **Toplam:** 67 fikir (35 FISILTI · 22 TEKİNSİZ · 10 KÂBUS) · 20'si oyunda (#6'da 10, #13 birinci grupta 10).
+**Oturum:** 2026-09-23 · **Toplam:** 67 fikir (35 FISILTI · 22 TEKİNSİZ · 10 KÂBUS) · 30'u oyunda (#6'da 10, #13'te 20).
 
 ## Sütunlar
 
@@ -50,17 +50,17 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | F18 | Büyümüş paspas | `Kapi_1/Paspas` ölçek ×1,6 | 👁 | 3 | K | |
 | F19 | Yukarıdaki kapı kolu | `Kapi_2/Mentese/Kol` 50 cm yukarıda | 👁 | 4 | K | ✅ |
 | F20 | Eksik kapı kolu | `Kapi_4/Mentese/Kol` gizli | 👁 | 3 | K | |
-| F21 | Eksik kapı gözü | `Kapi_3/Mentese/Kapi_Gozu` gizli | 👁 | 5 | K | |
-| F22 | Yamuk ilan | `Ilan` Z 12° | 👁 | 5 | K | |
+| F21 | Eksik kapı gözü | `Kapi_3/Mentese/Kapi_Gozu` gizli | 👁 | 5 | K | ✅ |
+| F22 | Yamuk ilan | `Ilan` Z 12° | 👁 | 5 | K | ✅ |
 | F23 | Yere düşmüş ilan | `Ilan` yerde, yatık | 👁 | 3 | K | |
 | F24 | Yer değiştirmiş ayakkabılık | `Ayakkabilik` sol duvara geçmiş | 👁 | 3 | K | |
 | F25 | Kaymış ampul | `Ampul` köşeye kaymış; gölgeler ve aydınlık kayar | 👁 | 4 | K | |
 | F26 | Kısa kapı kanadı | `Kapi_1/Mentese/Kanat` boyu %95, altta aralık | 👁 | 5 | K | |
-| F27 | Ters terlikler | `Kapi_2/Terlikler` 180° (burunlar kapıya) | 👁 | 4 | K | 🎨 |
+| F27 | Ters terlikler | `Kapi_2/Terlikler` 180° (burunlar kapıya) | 👁 | 4 | K | ✅ |
 | F28 | Sağa dönük tek terlik | `Kapi_4/Terlikler/Terlik_Sol` 90° | 👁 | 4 | K | |
-| F29 | Kapının önünde tüp | Normalde olmayan bir tüp `Kapi_2` önünde | 👁 | 3 | E (tüp) | |
-| F30 | Eksik saksı | `Kapi_1` yanındaki saksı yok | 👁 | 3 | E (saksı) | |
-| F31 | Kapı önünde gazete | `Kapi_3` paspasında 1994 tarihli gazete | 👁 | 4 | E (gazete) | |
+| F29 | Kapının önünde tüp | Normalde olmayan bir tüp `Kapi_2` önünde | 👁 | 3 | E (tüp) | ✅ |
+| F30 | Eksik saksı | `Kapi_1` yanındaki saksı yok | 👁 | 3 | E (saksı) | ✅ |
+| F31 | Kapı önünde gazete | `Kapi_3` paspasında 1994 tarihli gazete | 👁 | 4 | E (gazete) | ✅ |
 | F32 | Sallanan ampul | `Ampul` hafifçe sallanıyor | 👁 | 4 | Y (animasyon) | |
 | F33 | Pencerede kayıt yok | `Pencere/Kayit` gizli | 👁 | 4 | Y (çekirdek hedefi) | |
 | F34 | Uzak TV susmuş | Normal ambiyanstaki uzak TV sesi yok | 👂 | 3 | Y (ses sistemi) | |
@@ -78,15 +78,15 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | T06 | Bütün kapılar aralık | 4 kapının menteşesi +15° | 👁 | 1 | K | |
 | T07 | Ardına kadar açık kapı | `Kapi_1/Mentese` +80°; karanlık hol görünür | 👁 | 1 | K | ✅ |
 | T08 | İçeri yürüyen terlikler | `Kapi_4/Terlikler` kapının eşiğinde, yarısı içeride | 👁 | 3 | K | |
-| T09 | Kırmızı ampul | `Ampul` ışığı koyu kırmızı | 👁 | 2 | K | |
+| T09 | Kırmızı ampul | `Ampul` ışığı koyu kırmızı | 👁 | 2 | K | ✅ |
 | T10 | Duvara dikilmiş paspas | `Kapi_3/Paspas` dik, duvara yaslı | 👁 | 2 | K | ✅ |
 | T11 | Devrilmiş ayakkabılık | `Ayakkabilik` yan yatmış | 👁 | 2 | K | ✅ |
 | T12 | 13 numara | Bir kapının numarası "13" (sabit metin) | 👁 | 3 | K | |
 | T13 | Tavana yapışık terlik | `Kapi_2/Terlikler/Terlik_Sol` tavanda | 👁 | 2 | K | |
 | T14 | İlan "ÇIKMAYIN" | İlanda normalde duyuru; bu katta tek kelime | 👁 | 2 | E (ilana yazı) | |
-| T15 | Kapı önünde tek ayakkabı | Hiç kimsenin olmayan tek bir erkek ayakkabısı | 👁 | 3 | E (ayakkabı) | |
+| T15 | Kapı önünde tek ayakkabı | Hiç kimsenin olmayan tek bir erkek ayakkabısı | 👁 | 3 | E (ayakkabı) | ✅ |
 | T16 | Ayak izleri | Islak ayak izleri asansörden bir kapıya | 👁 | 2 | E (decal) | 🎨 |
-| T17 | Sayaç kapağı açık | Elektrik sayacının kapağı açık, içi karanlık | 👁 | 3 | E (kapak) | |
+| T17 | Sayaç kapağı açık | Elektrik sayacının kapağı açık, içi karanlık | 👁 | 3 | E (kapak) | ✅ |
 | T18 | Mırıltı susmuş | Kapıların ardındaki uğultu bu katta yok | 👂 | 3 | Y (ses sistemi) | |
 | T19 | Kapı gözünde ışık | Bir kapının gözünden ışık sızıyor, sonra kararıyor | 👁 | 3 | Y (ışık + zamanlama) | |
 | T20 | Merdiven ampulü sönük | `Ampul_Merdiven` sönük | 👁 | 3 | Y (çekirdek hedefi) | |
@@ -105,7 +105,7 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | K06 | Ters ağlayan bebek | Normal ambiyanstaki bebek ağlaması tersten | 👂 | 3 | Y (ses) | |
 | K07 | Açılan asansör | Asansör kapısı açılır, içi ışıklı ve boş | 👁👂 | 1 | Y (animasyon + ses) | |
 | K08 | Gözden bakan yüz | Merdiven gözünden aşağıda yukarı bakan bir yüz | 👁 | 2 | Y + E (figür) | |
-| K09 | Karanlık kat | Sahanlık tamamen karanlık, yalnız asansör göstergesi yanıyor | 👁 | 1 | E (gösterge ışığı) | |
+| K09 | Karanlık kat | Sahanlık tamamen karanlık, yalnız asansör göstergesi yanıyor | 👁 | 1 | E (gösterge ışığı) | ✅ |
 | K10 | Göz kırpan ışık, açık kapı | Işık bir an söner; yandığında bir kapı ardına kadar açık | 👁 | 1 | Y (zamanlama) | |
 
 ---
