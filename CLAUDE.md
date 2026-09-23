@@ -109,6 +109,19 @@ Two living documents mirror this file for humans; keep BOTH in sync with this fi
 
 This repo's CLAUDE.md stays the canonical, binding session memory (it is what sessions auto-load); the docs are the readable/shareable layer on top.
 
+## Pending actions for Kubilay (read this first, Kubilay)
+
+Things only Kubilay can do. Claude on Kubilay's machine: walk him through these, then remove the item here in a `docs:` commit and report on the issue.
+
+1. **#21 — verify Git LFS on your machine.** Şahan's side is done (`978f770`: `URP.png` is now an LFS pointer; `Layout.wlt` is a text file and correctly stays out of LFS). Steps:
+   - `git pull`
+   - `git lfs install` (safe to run again; it only sets the LFS filters in your git config)
+   - `git lfs env` → must contain `git config filter.lfs.process = "git-lfs filter-process"`
+   - `git lfs ls-files` → must list `Assets/TutorialInfo/Icons/URP.png`
+   - `git status` → must be empty (an IDE-regenerated `project_a.slnx` is the only acceptable noise)
+   - Post the results as a comment on #21. Once confirmed, #21 can be closed (needs Şahan's verification too, per the closing rule).
+2. **#1 — decide the final game name with Şahan.** Urgent: the Steam page must go live in week 4 (milestone H3-4, due 2026-10-18) and it needs the name and capsule art. Candidates and the Steam collision scan are on #1 and in "Name decision" above.
+
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
 - 2026-09-23 (Lesson 16): **#21 worked, left OPEN.** `URP.png` moved into LFS in `978f770`; verified by a fresh clone (empty `git status`, `git lfs ls-files` lists it, byte-identical 24,069-byte JPEG) and a Unity reimport (0 errors). Open for two reasons, both written on the issue: the "`git lfs ls-files` lists both files" criterion is wrong for `Layout.wlt` (text file, correctly not LFS) and needs Şahan's OK to be amended, and the scope requires `git lfs install` to be verified on **Kubilay's** machine too. Şahan paused local AI "for now" — do #8's brainstorm with Claude. Agreed order for the rest of H1-2: #21 → #8, with #1 (name) started with Kubilay in parallel because the week-4 Steam page needs it.
