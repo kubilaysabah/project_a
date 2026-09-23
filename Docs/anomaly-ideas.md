@@ -3,7 +3,7 @@
 Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 `Assets/Resources/Anomaliler/` altına kart olarak dökülür (#13).
 
-**Oturum:** 2026-09-23 · **Toplam:** 67 fikir (35 FISILTI · 22 TEKİNSİZ · 10 KÂBUS) · 10'u oyunda.
+**Oturum:** 2026-09-23 · **Toplam:** 67 fikir (35 FISILTI · 22 TEKİNSİZ · 10 KÂBUS) · 20'si oyunda (#6'da 10, #13 birinci grupta 10).
 
 ## Sütunlar
 
@@ -14,7 +14,7 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
   - **K** = sadece kart. Bugün, sıfır kodla yapılabilir.
   - **E** = önce sahneye yeni bir eşya eklenmeli (sonrası yine sadece kart).
   - **Y** = yeni kod gerekir (ses sistemi, animasyon, çekirdeğe dokunan kart, senaryolu olay).
-- **Durum:** ✅ oyunda · 🎨 graybox beyazken okunmaz, art pass (#10) sonrası · ⭐ sıradaki 10'luk (#13), onaylı.
+- **Durum:** ✅ oyunda · 🎨 graybox beyazken okunmaz, art pass (#10) sonrası · ⭐ sıradaki 10'luk için önerilen.
 
 ## Kurallar (bu listeyi yazarken uyulanlar)
 
@@ -39,16 +39,16 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | F07 | Eksik ARIZALI notu | `Asansor/Not` + `Not_Yazi` gizli | 👁 | 2 | K | ✅ |
 | F08 | Yer değiştirmiş numaralar | `Kapi_1` ile `Kapi_2` numaraları takas | 👁 | 4 | Y (kata göre metin) | |
 | F09 | Tekrarlanan numara | `Kapi_3` numarası `Kapi_4` ile aynı | 👁 | 3 | Y (kata göre metin) | |
-| F10 | Eksik numara plakası | `Kapi_2/Mentese/Numaralik` + `Numara` gizli | 👁 | 2 | K | ⭐ |
+| F10 | Eksik numara plakası | `Kapi_2/Mentese/Numaralik` + `Numara` gizli | 👁 | 2 | K | ✅ |
 | F11 | Boş plaka | `Kapi_1/Mentese/Numara` metni boş | 👁 | 3 | K | |
-| F12 | Asansör göstergesi çalışıyor | `Asansor/Yazi` "-" yerine sabit bir sayı ("5") | 👁 | 3 | K | ⭐ |
+| F12 | Asansör göstergesi çalışıyor | `Asansor/Yazi` "-" yerine sabit bir sayı ("5") | 👁 | 3 | K | ✅ |
 | F13 | Çağrı düğmesi yok | `Asansor/Cagri_Dugmesi` gizli | 👁 | 3 | K | |
-| F14 | Eksik sayaç | `Elektrik_Sayaci` gizli | 👁 | 3 | K | ⭐ |
+| F14 | Eksik sayaç | `Elektrik_Sayaci` gizli | 👁 | 3 | K | ✅ |
 | F15 | Yan yatmış sayaç | `Elektrik_Sayaci` Z 90° | 👁 | 3 | K | |
 | F16 | Zil öbür yanda | `Kapi_4/Zil` kapının menteşe tarafında | 👁 | 4 | K | |
 | F17 | Eksik paspas | `Kapi_3/Paspas` gizli | 👁 | 2 | K | |
 | F18 | Büyümüş paspas | `Kapi_1/Paspas` ölçek ×1,6 | 👁 | 3 | K | |
-| F19 | Yukarıdaki kapı kolu | `Kapi_2/Mentese/Kol` 50 cm yukarıda | 👁 | 4 | K | ⭐ |
+| F19 | Yukarıdaki kapı kolu | `Kapi_2/Mentese/Kol` 50 cm yukarıda | 👁 | 4 | K | ✅ |
 | F20 | Eksik kapı kolu | `Kapi_4/Mentese/Kol` gizli | 👁 | 3 | K | |
 | F21 | Eksik kapı gözü | `Kapi_3/Mentese/Kapi_Gozu` gizli | 👁 | 5 | K | |
 | F22 | Yamuk ilan | `Ilan` Z 12° | 👁 | 5 | K | |
@@ -73,14 +73,14 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | T01 | Yeşil ampul | `Ampul` ışığı hastane yeşili | 👁 | 1 | K | ✅ |
 | T02 | Aralık kapı | `Kapi_3/Mentese` +22° (içeri) | 👁 | 2 | K | ✅ |
 | T03 | Sönük ampul | `Ampul` şiddet düşük | 👁 | 2 | K | ✅ |
-| T04 | Göstergede 9 | `Asansor/Yazi` = "9"; bina 8 katlı (finaldeki 9. kat ipucu) | 👁 | 2 | K | ⭐ |
-| T05 | Aralık asansör | `Asansor/Kapi_Sol` + `Kapi_Sag` 15'er cm açık; içi karanlık kuyu | 👁 | 2 | K | ⭐ |
+| T04 | Göstergede 9 | `Asansor/Yazi` = "9"; bina 8 katlı (finaldeki 9. kat ipucu) | 👁 | 2 | K | ✅ |
+| T05 | Aralık asansör | `Asansor/Kapi_Sol` + `Kapi_Sag` 15'er cm açık; içi karanlık kuyu | 👁 | 2 | K | ✅ |
 | T06 | Bütün kapılar aralık | 4 kapının menteşesi +15° | 👁 | 1 | K | |
-| T07 | Ardına kadar açık kapı | `Kapi_1/Mentese` +80°; karanlık hol görünür | 👁 | 1 | K | ⭐ |
+| T07 | Ardına kadar açık kapı | `Kapi_1/Mentese` +80°; karanlık hol görünür | 👁 | 1 | K | ✅ |
 | T08 | İçeri yürüyen terlikler | `Kapi_4/Terlikler` kapının eşiğinde, yarısı içeride | 👁 | 3 | K | |
 | T09 | Kırmızı ampul | `Ampul` ışığı koyu kırmızı | 👁 | 2 | K | |
-| T10 | Duvara dikilmiş paspas | `Kapi_3/Paspas` dik, duvara yaslı | 👁 | 2 | K | ⭐ |
-| T11 | Devrilmiş ayakkabılık | `Ayakkabilik` yan yatmış | 👁 | 2 | K | ⭐ |
+| T10 | Duvara dikilmiş paspas | `Kapi_3/Paspas` dik, duvara yaslı | 👁 | 2 | K | ✅ |
+| T11 | Devrilmiş ayakkabılık | `Ayakkabilik` yan yatmış | 👁 | 2 | K | ✅ |
 | T12 | 13 numara | Bir kapının numarası "13" (sabit metin) | 👁 | 3 | K | |
 | T13 | Tavana yapışık terlik | `Kapi_2/Terlikler/Terlik_Sol` tavanda | 👁 | 2 | K | |
 | T14 | İlan "ÇIKMAYIN" | İlanda normalde duyuru; bu katta tek kelime | 👁 | 2 | E (ilana yazı) | |
@@ -97,7 +97,7 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 
 | # | Ad | Hedef / değişiklik | Algı | Zorluk | Yapım | Durum |
 |---|---|---|---|---|---|---|
-| K01 | Bütün kapılar aynı numara | 4 kapının numarası aynı | 👁 | 1 | K | ⭐ |
+| K01 | Bütün kapılar aynı numara | 4 kapının numarası aynı | 👁 | 1 | K | ✅ |
 | K02 | Beşinci kapı | Duvarda olmaması gereken 5. bir kapı | 👁 | 1 | E (gizli `Kapi_5`) | |
 | K03 | Sırtı dönük adam | Asansörün önünde sırtı dönük biri duruyor | 👁 | 1 | Y + E (figür) | |
 | K04 | Zil kendiliğinden çalıyor | Oyuncu sahanlığa varınca bir zil çalar | 👂 | 1 | Y (ses) | |
