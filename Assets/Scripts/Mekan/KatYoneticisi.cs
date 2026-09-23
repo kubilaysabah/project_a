@@ -83,8 +83,12 @@ public class KatYoneticisi : MonoBehaviour
     // noktasına göre kaç kat yukarıda/aşağıda durduğunu bununla hesaplıyoruz.
     private int referansDongu;
 
-    private Light[] ampuller;             // sahnedeki bütün nokta ışıklar
+    private Light[] ampuller;             // sahnedeki bütün lamba ışıkları (spot + dolgu)
     private Color[] ozgunRenkler;
+
+    // Lambaların ANA ışıkları (aşağı bakan spotlar). Her lambanın dolgu ışığı
+    // ve parlayan camı bu ışığın çocuğu; ceza sırasında lamba bütünüyle söner.
+    private Light[] lambalar;
 
     // ---- SAHNE PARÇALARI ----
     private Transform sahanlikA, sahanlikB;
@@ -128,13 +132,17 @@ public class KatYoneticisi : MonoBehaviour
             govde = oyuncu.GetComponent<CharacterController>();
         }
 
-        // Sahnedeki nokta ışıkları bir kez topla; her karede aramak pahalı olurdu.
+        // Sahnedeki lamba ışıklarını bir kez topla; her karede aramak pahalı olurdu.
+        // Spot ve nokta ışıklar lambalara ait; yönlü ışık (ay) dahil değil.
         var liste = new System.Collections.Generic.List<Light>();
+        var anaIsiklar = new System.Collections.Generic.List<Light>();
         foreach (var l in FindObjectsByType<Light>())
         {
-            if (l.type == LightType.Point) liste.Add(l);   // güneş ışığını dahil etme
+            if (l.type == LightType.Point || l.type == LightType.Spot) liste.Add(l);
+            if (l.type == LightType.Spot) anaIsiklar.Add(l);
         }
         ampuller = liste.ToArray();
+        lambalar = anaIsiklar.ToArray();
 
         ozgunRenkler = new Color[ampuller.Length];
         for (int i = 0; i < ampuller.Length; i++) ozgunRenkler[i] = ampuller[i].color;
@@ -561,9 +569,9 @@ public class KatYoneticisi : MonoBehaviour
         // Döngüyü durdur: karanlıkta ışınlanma olmasın.
         merdiven.DonguyuAyarla(false);
 
-        // Yalnızca şu an AÇIK olan ampuller söner; kapalı katlardakiler zaten görünmüyor.
+        // Yalnızca şu an AÇIK olan lambalar söner; kapalı katlardakiler zaten görünmüyor.
         var sirali = new System.Collections.Generic.List<Light>();
-        foreach (var l in ampuller) if (l.isActiveAndEnabled) sirali.Add(l);
+        foreach (var l in lambalar) if (l.isActiveAndEnabled) sirali.Add(l);
 
         // Oyuncudan UZAKTAKİNDEN başlayarak söndür. Karanlığın uzaktan
         // yaklaşması, yakından başlamasından daha ürkütücüdür.
@@ -574,9 +582,13 @@ public class KatYoneticisi : MonoBehaviour
         // İki sönme arasındaki bekleme, toplam süre sabit kalacak şekilde hesaplanıyor.
         float aralik = sirali.Count > 0 ? sonmeSuresi / sirali.Count : 0f;
 
-        foreach (var ampul in sirali)
+        for (int i = 0; i < sirali.Count; i++)
         {
-            ampul.enabled = false;
+            // En son sönen lamba oyuncuya en yakın olanı. O hemen sönmez: önce
+            // birkaç kez titrer. Oyuncu artık neyin geldiğini anlar ama durduramaz.
+            if (i == sirali.Count - 1) yield return StartCoroutine(Titret(sirali[i]));
+
+            LambayiAyarla(sirali[i], false);
             yield return new WaitForSeconds(aralik);
         }
 
@@ -585,7 +597,7 @@ public class KatYoneticisi : MonoBehaviour
 
         OyuncuyuBasaAl();
 
-        foreach (var ampul in ampuller) ampul.enabled = true;
+        foreach (var lamba in lambalar) LambayiAyarla(lamba, true);
         for (int i = 0; i < ampuller.Length; i++) ampuller[i].color = ozgunRenkler[i];
 
         merdiven.DonguyuAyarla(true);
@@ -604,6 +616,31 @@ public class KatYoneticisi : MonoBehaviour
         cezaCalisiyor = false;
         Debug.Log("[KAT] 1. kata dönüldü.");
         SahanliklariGuncelle(zorla: true);
+    }
+
+    // Bir lambayı bütün parçalarıyla açar ya da kapatır: ana spot ışık, dolgu
+    // ışığı ve parlayan cam. Yalnızca ışığı kapatsaydık cam karanlıkta parlamaya
+    // devam eder, "söndü" hissi hiç oluşmazdı.
+    private void LambayiAyarla(Light lamba, bool acik)
+    {
+        foreach (Light l in lamba.GetComponentsInChildren<Light>(true)) l.enabled = acik;
+        foreach (Renderer r in lamba.GetComponentsInChildren<Renderer>(true))
+        {
+            if (r.name == "Cam") r.enabled = acik;   // kablo zaten koyu, dokunmuyoruz
+        }
+    }
+
+    // Arızalı bir ampul gibi titreme: kısa sönme, kısa yanma, düzensiz aralıklarla.
+    // Aralıklar rastgele; düzenli bir yanıp sönme makine gibi durur, düzensizi arıza gibi.
+    private IEnumerator Titret(Light lamba)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            LambayiAyarla(lamba, false);
+            yield return new WaitForSeconds(Random.Range(0.04f, 0.10f));
+            LambayiAyarla(lamba, true);
+            yield return new WaitForSeconds(Random.Range(0.06f, 0.22f));
+        }
     }
 
     private void OyuncuyuBasaAl()

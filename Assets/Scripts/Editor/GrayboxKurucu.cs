@@ -156,6 +156,10 @@ public static class GrayboxKurucu
         RenderSettings.fogStartDistance = 8f;
         RenderSettings.fogEndDistance = 17f;
 
+        // Gece atmosferi (#11): ortam ışığı, ay ışığı, post-processing, kamera.
+        // Ayrı bir araçta duruyor ama graybox her kurulduğunda o da kurulur.
+        AtmosferKurucu.Kur();
+
         // Kamerayı göz hizasına al — AMA sadece başıboşsa. Oyuncunun
         // çocuğuysa dokunmayız, yoksa oyuncunun kafasını yerinden oynatırız.
         if (Camera.main != null && Camera.main.transform.parent == null)
@@ -266,7 +270,7 @@ public static class GrayboxKurucu
 
         // Sahanlık ampulü. Sahte katlarda da var: merdiven gözünden bakınca
         // alt katların karanlık bir delik gibi değil, ışıklı katlar gibi görünmesi için.
-        AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.25f, onZ / 2f), 7f, 2.0f);
+        AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.30f, onZ / 2f), 8f, LambaSiddeti);
 
         return kok;
     }
@@ -384,7 +388,7 @@ public static class GrayboxKurucu
 
         // Göstergedeki yazı: modelde koyu kırmızı ekranın önünde kırmızı rakam.
         YaziKur("Yazi", a, new Vector3(0f, AsansorYuk + 0.22f, yuz + 0.04f), "-", 0.012f,
-                model ? new Color(0.9f, 0.15f, 0.1f) : new Color(0.10f, 0.10f, 0.12f));
+                model ? new Color(0.9f, 0.15f, 0.1f) : new Color(0.03f, 0.03f, 0.035f));
 
         // Kanadın ön yüzü: modelde yüzeyden 1 cm, kutu sürümünde 2,5 cm içeride.
         float kanatOnu = model ? yuz - 0.01f : yuz - 0.05f + 0.025f;
@@ -403,7 +407,7 @@ public static class GrayboxKurucu
     // Asansör yazıları için 3B yazı. Sahanlığa (+z) bakar.
     static void YaziKur(string ad, Transform ebeveyn, Vector3 konum, string metin, float boy)
     {
-        YaziKur(ad, ebeveyn, konum, metin, boy, new Color(0.10f, 0.10f, 0.12f));
+        YaziKur(ad, ebeveyn, konum, metin, boy, new Color(0.03f, 0.03f, 0.035f));
     }
 
     // Aynı isimde ama renk de alan ikinci sürüm. C#'ta aynı isimli fonksiyon farklı
@@ -428,7 +432,7 @@ public static class GrayboxKurucu
         yazi.characterSize = boy;
         yazi.color = renk;
         yazi.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        g.GetComponent<MeshRenderer>().sharedMaterial = yazi.font.material;
+        g.GetComponent<MeshRenderer>().sharedMaterial = YaziMalzeme(yazi.font);
     }
 
     // =====================================================================
@@ -488,9 +492,12 @@ public static class GrayboxKurucu
         yazi.alignment = TextAlignment.Center;
         yazi.fontSize = 96;
         yazi.characterSize = 0.014f;
-        yazi.color = new Color(0.12f, 0.12f, 0.12f);
+        // Neredeyse siyah: yazı ışıktan etkilenmediği için rengi karanlıkta da aynı
+        // kalır. Koyu gri (0,12) karanlıkta hafif parlıyordu; siyaha yakın rakam
+        // aydınlık plakada okunur, karanlıkta görünmez (#11).
+        yazi.color = new Color(0.03f, 0.03f, 0.03f);
         yazi.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        yaziNesne.GetComponent<MeshRenderer>().sharedMaterial = yazi.font.material;
+        yaziNesne.GetComponent<MeshRenderer>().sharedMaterial = YaziMalzeme(yazi.font);
 
         // Kapı gözü: kanadın ortasında, göz hizasında. Kanatla birlikte döner.
         Kutu("Kapi_Gozu", m, new Vector3(-yon * 0.035f, 1.60f, kanatZ),
@@ -689,7 +696,7 @@ public static class GrayboxKurucu
 
         // Merdiven ampulü: ara sahanlığın üstünde.
         AmpulKur("Ampul_Merdiven", t,
-                 new Vector3(0f, AraKot + 2.35f, KolUzunluk + AraSahanlikDerin / 2f), 6f, 1.6f);
+                 new Vector3(0f, AraKot + 2.35f, KolUzunluk + AraSahanlikDerin / 2f), 7f, LambaSiddeti * 0.8f);
 
         return kok;
     }
@@ -1029,26 +1036,129 @@ public static class GrayboxKurucu
         g.transform.localScale = new Vector3(kalinlik, kalinlik, fark.magnitude);
     }
 
-    // Nokta ışık üretir. 1994 akkor ampulünün sıcak sarısı.
+    // ---------- LAMBA (#11) ----------
+    // Tavandan sarkan çıplak bir akkor ampul. Üç parçadan oluşur:
     //
-    // HİÇBİR AMPUL GÖLGE ATMIYOR. Önceki düzende sahanlık ampulleri atıyordu.
-    // Artık sahnede on dört ampul var ve gölge atan bir nokta ışık sahneyi altı kez
-    // daha çizdirir. Daha önemlisi, döngü hilesi her katın BİREBİR aynı
-    // aydınlanmasını istiyor: bazı ampuller gölge atıp bazıları atmasaydı
-    // ışık döşemelerden farklı sızar ve ışınlanma anında aydınlık değişirdi.
-    // Gerçek ışık düzeni art pass'te (#10) kurulacak.
+    //   Ampul        aşağı bakan SPOT ışık, gölge atar. Kartların hedefi bu nesne.
+    //   Ampul/Dolgu gölgesiz, zayıf NOKTA ışık: tavanı ve duvarların üstünü aydınlatır.
+    //   Ampul/Cam    parlayan cam; bloom efekti etrafında hale oluşturur.
+    //
+    // NEDEN SPOT + DOLGU, NEDEN TEK NOKTA IŞIK DEĞİL
+    // Gölge, ışığın "gözünden" sahnenin bir kez daha çizilmesidir (gölge haritası).
+    // Nokta ışık her yöne baktığı için bunu ALTI kez yapar; spot ışık tek yöne
+    // baktığı için BİR kez. Sahnede on dört lamba var: nokta ışıkla gölge
+    // performansı öldürürdü (#6'da beş gölgeli nokta ışık GPU'yu tavana vurmuştu).
+    // Aşağı bakan geniş bir spot, zemini ve eşyaları gölgeli aydınlatır; spotun
+    // göremediği tavanı da gölgesiz dolgu ışığı kurtarır.
+    //
+    // HER KATTA AYNI: bütün lambalar (sahte katlardakiler dahil) birebir aynı
+    // kurulur. Döngü hilesi her katın aynı aydınlanmasını istiyor; bazı lambalar
+    // farklı olsaydı ışınlanma anında aydınlık değişirdi.
+    //
+    // DİKKAT: ışık kartlarındaki şiddet MUTLAK değerdir (kart "yarıya indir" değil
+    // "0,5 yap" der). Buradaki şiddetler değişirse ampul kartları da güncellenmeli.
+    // İlk denemede 2,6 idi ve sahanlık zifiri karanlıktı: ortam ışığı kalkınca
+    // her şeyi lamba taşımak zorunda. Işık uzaklığın KARESİYLE zayıflar; tavandaki
+    // ampulden 4 m ötedeki köşeye şiddetin ancak onda biri ulaşır. Kapı numaraları
+    // ve terlikler okunmalı (anomaliler onlarda), o yüzden şiddet bunu sağlayacak kadar.
+    public const float LambaSiddeti = 10f;        // spotun şiddeti
+    public const float DolguOrani   = 0.30f;      // dolgu ışığı = spotun bu kadarı
+
+    static readonly Color AkkorRengi = new Color(1f, 0.82f, 0.58f);   // 2700 K civarı sıcak sarı
+
     static void AmpulKur(string ad, Transform ebeveyn, Vector3 konum, float menzil, float siddet)
     {
         GameObject g = new GameObject(ad);
         g.transform.SetParent(ebeveyn, false);
         g.transform.localPosition = konum;
 
-        Light isik = g.AddComponent<Light>();
-        isik.type = LightType.Point;                    // her yöne yayılan ampul
-        isik.range = menzil;
-        isik.intensity = siddet;
-        isik.color = new Color(1f, 0.92f, 0.76f);       // sıcak sarı
-        isik.shadows = LightShadows.None;
+        // Spot ışık yerel +z yönüne bakar. x ekseninde 90° döndürünce aşağı bakar.
+        g.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+
+        Light spot = g.AddComponent<Light>();
+        spot.type = LightType.Spot;
+        // Dış açı: neredeyse yarım küre. 150° ile kapı numara plakaları (ampule göre
+        // ~79° açıda) koninin DIŞINDA kalıyor ve okunmuyordu; "ters numara" anomalisi
+        // tam o plakada olduğu için plakalar aydınlık olmak zorunda.
+        spot.spotAngle = 170f;
+        // İç açı: bu koninin içinde tam şiddet, dışına doğru azalır. İlk denemede 70°
+        // idi; kapılar ampule göre ~67° açıda kaldığı için azalma bölgesine düşüp
+        // karanlıkta kalıyordu. 120° ile ışık sahanlığa daha eşit yayılıyor.
+        spot.innerSpotAngle = 130f;
+        spot.range = menzil;
+        spot.intensity = siddet;
+        spot.color = AkkorRengi;
+        spot.shadows = LightShadows.Soft;
+        spot.shadowStrength = 0.92f;
+        spot.shadowNearPlane = 0.08f;       // camın kendisi gölge atmasın diye çok yakını yok say
+
+        // DOLGU: spotun göremediği tavanı aydınlatır. Gölge atmaz.
+        GameObject dolgu = new GameObject("Dolgu");
+        dolgu.transform.SetParent(g.transform, false);
+        Light nokta = dolgu.AddComponent<Light>();
+        nokta.type = LightType.Point;
+        nokta.range = menzil * 0.7f;
+        nokta.intensity = siddet * DolguOrani;
+        nokta.color = AkkorRengi;
+        nokta.shadows = LightShadows.None;
+
+        // CAM: parlak, ışık hesabından etkilenmeyen (Unlit) küçük bir küre.
+        // Rengi 1'in çok üstünde (HDR): bloom yalnızca eşiği aşan pikselleri parlatır.
+        GameObject cam = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        cam.name = "Cam";
+        cam.transform.SetParent(g.transform, false);
+        cam.transform.localScale = Vector3.one * 0.07f;
+        Object.DestroyImmediate(cam.GetComponent<Collider>());   // oyuncu ampule takılmasın
+        MeshRenderer camCizici = cam.GetComponent<MeshRenderer>();
+        camCizici.sharedMaterial = CamMalzeme();
+        camCizici.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;   // ışığın önünü kesmesin
+
+        // KABLO: ampulden tavana ince bir kordon. Dönmüş nesnenin çocuğu olduğu
+        // için dünya konumu ve dönüşü ayrıca veriliyor (kordon hep dik dursun).
+        GameObject kablo = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        kablo.name = "Kablo";
+        kablo.transform.SetParent(g.transform, false);
+        kablo.transform.position = g.transform.position + Vector3.up * 0.14f;
+        kablo.transform.rotation = Quaternion.identity;
+        kablo.transform.localScale = new Vector3(0.012f, 0.11f, 0.012f);   // silindir 2 birim boyunda: 0,22 m
+        Object.DestroyImmediate(kablo.GetComponent<Collider>());
+        MeshRenderer kabloCizici = kablo.GetComponent<MeshRenderer>();
+        kabloCizici.sharedMaterial = KaranlikMalzeme();
+        kabloCizici.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+    }
+
+    // Dünyadaki 3B yazıların malzemesi (#11). Yazı tipinin kendi malzemesi ekran
+    // arayüzü için yapılmış ve derinliğe bakmıyor: yazı duvarların içinden görünüyordu
+    // (bir üst kattaki asansör notu tavandan, kapı numaraları ceza karanlığında).
+    // Assets/Shaders/Yazi3B.shader aynı işi derinliğe saygı göstererek yapıyor.
+    static Material YaziMalzeme(Font yaziTipi)
+    {
+        const string Yol = "Assets/Materials/Yazi_3B.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Huzur/Yazi3B"));
+            AssetDatabase.CreateAsset(m, Yol);
+        }
+        // Harf dokusu yazı tipinin kendi dokusu. Her kurulumda yeniden bağlanıyor:
+        // yazı tipi dinamik, dokusu yeni harf istendikçe yeniden üretilebiliyor.
+        m.mainTexture = yaziTipi.material.mainTexture;
+        EditorUtility.SetDirty(m);
+        return m;
+    }
+
+    // Ampul camının malzemesi: URP'nin ışıktan etkilenmeyen (Unlit) gölgelendiricisi.
+    static Material CamMalzeme()
+    {
+        const string Yol = "Assets/Materials/Ampul_Cam.mat";
+        Material mevcut = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (mevcut != null) return mevcut;
+
+        Material yeni = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        yeni.SetColor("_BaseColor", AkkorRengi * 6f);   // HDR: 6 kat parlak
+        AssetDatabase.CreateAsset(yeni, Yol);
+        AssetDatabase.SaveAssets();
+        return yeni;
     }
 
     // Daire holü, asansör kuyusu ve kuyu dibi için koyu malzeme.

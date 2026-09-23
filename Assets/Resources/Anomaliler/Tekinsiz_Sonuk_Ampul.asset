@@ -21,7 +21,23 @@ MonoBehaviour:
     tur: 5
     gorunur: 1
     vektor: {x: 0, y: 0, z: 0}
-    renk: {r: 1, g: 0.92, b: 0.76, a: 1}
-    sayi: 0.5
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 2.3
+    metin: 
+    ses: {fileID: 0}
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0.7
+    metin: 
+    ses: {fileID: 0}
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1.2, g: 0.98, b: 0.7, a: 1}
+    sayi: 1
     metin: 
     ses: {fileID: 0}
