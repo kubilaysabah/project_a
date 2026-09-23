@@ -34,9 +34,15 @@ public static class OyuncuKurucu
         // ---- GÖVDE ----
         GameObject oyuncu = new GameObject("Oyuncu");
 
-        // Oyuncu, her ışınlanmadan sonra vardığı noktanın TAM AYNISINDA başlar.
-        // Başka bir yerde başlatırsak 1. kat diğer yedi kattan farklı görünür.
-        oyuncu.transform.position = new Vector3(0f, 0.2f, MekanOlculeri.OyuncuBaslangicZ);
+        // Oyuncu, 2. kolun tepesinden sahanlığa yeni adım atmış gibi başlar:
+        // her kata tam buradan varılıyor, 1. kat da diğer yedi kat gibi görünsün.
+        // 20 cm yukarıda konuyor ki döşemenin içine gömülmesin; ilk karede yere düşer.
+        oyuncu.transform.position = new Vector3(MekanOlculeri.OyuncuBaslangicX, 0.2f,
+                                                MekanOlculeri.OyuncuBaslangicZ);
+
+        // Yüzü sahanlığa dönük (-z yönü). Sahanlık merdivenin -z tarafında;
+        // Euler(0, 180, 0) oyuncuyu dikey eksen etrafında yarım tur çevirir.
+        oyuncu.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
 
         // CharacterController: Unity'nin hazır yürüyüş bileşeni.
         // Fizik motorunun tam simülasyonunu kullanmaz; bunun yerine
@@ -106,11 +112,14 @@ public static class OyuncuKurucu
         // ---- KAT YÖNETİCİSİ ----
         // Kat sayacı ile sahne arasındaki köprü. Ayrı bir nesnede durur,
         // çünkü oyuncuya değil oyunun kendisine aittir.
-        GameObject eskiYonetici = GameObject.Find("KatYoneticisi");
-        if (eskiYonetici != null) Object.DestroyImmediate(eskiYonetici);
-
-        GameObject yonetici = new GameObject("KatYoneticisi");
-        yonetici.AddComponent<KatYoneticisi>();
+        //
+        // Varsa DOKUNMUYORUZ. Eskiden silip yeniden kuruyorduk ve sahnede elle
+        // ayarlanmış değerler (anomali olasılığı gibi) sessizce varsayılana dönüyordu.
+        if (GameObject.Find("KatYoneticisi") == null)
+        {
+            GameObject yonetici = new GameObject("KatYoneticisi");
+            yonetici.AddComponent<KatYoneticisi>();
+        }
 
         Selection.activeGameObject = oyuncu;   // Hierarchy'de seçili gelsin
 

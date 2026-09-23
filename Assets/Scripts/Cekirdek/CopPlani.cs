@@ -88,15 +88,47 @@ public class CopPlani
         return toplam;
     }
 
+    // ---------- TOPLANANLAR ----------
+    // Sahnede tek bir sahanlık var ve o sahanlık farklı katları sırayla gösteriyor.
+    // Oyuncu bir katta iki poşet toplayıp merdivenden biraz inip geri dönerse,
+    // sahanlık o katı YENİDEN kurar. Toplanan poşetleri bir yerde hatırlamasaydık
+    // poşetler geri gelirdi. Bu kayıt işte o hafıza.
+    //
+    // HashSet: içinde her değerin EN FAZLA BİR KEZ bulunduğu bir küme.
+    // "Bu var mı?" sorusunu listeden çok daha hızlı cevaplar; sırası yoktur.
+    private readonly HashSet<int> toplananlar = new HashSet<int>();
+
+    // Üç sayıyı (kat, daire, sıra) tek bir tam sayıya çeviriyoruz ki kümede
+    // tek anahtar olarak tutulabilsin. Kat 4, daire 2, sıra 3 -> 423.
+    // Daire ve sıra 10'dan küçük olduğu sürece iki farklı üçlü asla aynı sayıya denk gelmez.
+    private static int Anahtar(int kat, int daire, int sira)
+    {
+        return kat * 100 + daire * 10 + sira;
+    }
+
+    /// <summary>Bir poşetin toplandığını kaydeder. daire ve sira 0'dan başlar.</summary>
+    public void ToplandiOlarakIsaretle(int kat, int daire, int sira)
+    {
+        toplananlar.Add(Anahtar(kat, daire, sira));
+    }
+
+    /// <summary>Bu poşet bu turda daha önce toplandı mı?</summary>
+    public bool ToplandiMi(int kat, int daire, int sira)
+    {
+        return toplananlar.Contains(Anahtar(kat, daire, sira));
+    }
+
     // ---------- SIFIRLAMA ----------
 
     /// <summary>
     /// Cezadan sonra çağrılır: bütün katların sayıları unutulur, bir sonraki
     /// soruda yeniden çekilir. Üretici BAŞA SARILMAZ, kaldığı yerden devam eder;
     /// başa sarılsaydı aynı sayılar tekrar gelirdi ve "yeniden rastgele" olmazdı.
+    /// Toplanan poşet kayıtları da silinir: yeni turda her şey yerinde.
     /// </summary>
     public void Sifirla()
     {
         katlar.Clear();
+        toplananlar.Clear();
     }
 }

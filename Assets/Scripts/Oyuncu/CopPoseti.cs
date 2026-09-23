@@ -51,6 +51,20 @@ public class CopPoseti : MonoBehaviour, IEtkilesimli
     }
 
     /// <summary>Yeni katta poşeti geri getirir.</summary>
+    /// <summary>
+    /// Poşeti o katın durumuna göre hazırlar.
+    /// mevcut = false: bu katta bu poşet YOK (çöp planı daha az poşet çekti).
+    /// alinmis = true: poşet vardı ama oyuncu bu turda zaten topladı.
+    /// İki durumda da poşet görünmez; ama yalnızca "alinmis" durumu toplanmış
+    /// sayılır. Olmayan poşet eksik görev sayılmaz, çünkü kapalı nesneleri
+    /// görev kontrolü hiç görmüyor.
+    /// </summary>
+    public void Ayarla(bool mevcut, bool alinmis)
+    {
+        alindi = alinmis;
+        gameObject.SetActive(mevcut && !alinmis);
+    }
+
     public void Yenile()
     {
         alindi = false;

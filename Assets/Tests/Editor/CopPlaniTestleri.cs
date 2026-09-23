@@ -119,6 +119,31 @@ public class CopPlaniTestleri
         Assert.IsTrue(farkVar, "Sıfırlamadan sonra 8 katın hepsi aynı çıktı.");
     }
 
+    // Sahanlık aynı katı yeniden kurduğunda toplanan poşet geri gelmemeli.
+    [Test]
+    public void Toplanan_poset_hatirlanir_ve_yalnizca_kendisi_isaretlenir()
+    {
+        var plan = new CopPlani(DaireSayisi, tohum: 4);
+
+        plan.ToplandiOlarakIsaretle(kat: 3, daire: 1, sira: 2);
+
+        Assert.IsTrue(plan.ToplandiMi(3, 1, 2));
+        Assert.IsFalse(plan.ToplandiMi(3, 1, 1), "Aynı kapının başka poşeti işaretlenmemeli.");
+        Assert.IsFalse(plan.ToplandiMi(3, 2, 2), "Başka kapının poşeti işaretlenmemeli.");
+        Assert.IsFalse(plan.ToplandiMi(4, 1, 2), "Başka katın poşeti işaretlenmemeli.");
+    }
+
+    [Test]
+    public void Sifirlama_toplanan_kayitlarini_da_siler()
+    {
+        var plan = new CopPlani(DaireSayisi, tohum: 4);
+        plan.ToplandiOlarakIsaretle(2, 0, 0);
+
+        plan.Sifirla();
+
+        Assert.IsFalse(plan.ToplandiMi(2, 0, 0));
+    }
+
     [Test]
     public void Kattaki_toplam_dairelerin_toplamidir()
     {

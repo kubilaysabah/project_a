@@ -1,18 +1,23 @@
 // SonsuzMerdiven.cs
 // Oyunun en önemli hilesi: oyuncu sonsuza kadar merdiven çıkar,
-// ama sahnede tek bir sahanlık vardır.
+// ama sahnede gerçek olan tek bir kat vardır.
 //
 // NASIL ÇALIŞIR
-// Sahnede iki sahanlık var: A (altta) ve B (üstte). B, A'nın birebir aynısıdır.
-// Oyuncu merdiveni çıkıp B'ye adımını attığı anda, onu sessizce
-// 6,32 metre geri ve 3 metre aşağı taşırız. Bu, tam olarak A'daki
-// aynı noktaya denk gelir. İki sahanlık birebir aynı olduğu için
-// ekrandaki görüntü değişmez; oyuncu hiçbir şey olmadığını sanır.
+// Sahnede üst üste iki gerçek sahanlık var: A (y = 0) ve B (y = 3). B, A'nın
+// birebir aynısıdır ve TAM OLARAK onun üstündedir (yarım dönüşlü merdiven
+// sayesinde katlar üst üste biniyor). Oyuncu iki kolu çıkıp B'ye ayak bastığı
+// anda onu sessizce 3 metre aşağı alırız. Bu, A'daki aynı noktaya denk gelir.
+// İleri geri hiçbir kayma yok; sadece dikey bir taşıma.
 //
 // NEDEN GÖZ FARK ETMEZ
 // Işınlanmadan önceki ve sonraki kare piksel piksel aynıdır: aynı duvarlar,
-// aynı kapılar, aynı ışık, aynı bakış açısı. Beynin hareket olarak algılayacağı
-// hiçbir fark yoktur. Oyuncu yukarı çıktığını sanır, oysa yerinde saymaktadır.
+// aynı kapılar, aynı ışık, aynı bakış açısı. Merdiven gözünden aşağı ve yukarı
+// bakınca görünen katlar da aynı: sahnede A'nın altında ve B'nin üstünde
+// birebir aynı sahte katlar kurulu.
+//
+// ÖNEMLİ: bu script oyunun KURALLARINA karışmaz. Kat kararı, ışınlanmadan değil
+// oyuncunun gerçekten kat ettiği yoldan okunur (bkz. KatYoneticisi, SanalKot).
+// Işınlanma bir görüntü hilesidir; bir kural onu asla okumamalıdır.
 
 using UnityEngine;
 
@@ -23,15 +28,24 @@ using static MekanOlculeri;
 public class SonsuzMerdiven : MonoBehaviour
 {
     [Header("Durum")]
-    [Tooltip("Döngü açık mı? 8. kata gelindiğinde kapatılacak, yoksa oyuncu " +
-             "çatıya hiç varamaz ve sonsuza kadar döner durur.")]
+    [Tooltip("Döngü tamamen açık mı? Çatıya ulaşılınca ve ceza sırasında kapatılır.")]
     [SerializeField] private bool acik = true;
 
-    [Tooltip("Kaç kez yukarı döngü yapıldı. Kat sayacı (#4) bunu okuyacak.")]
+    [Tooltip("Yukarı ışınlanma açık mı? 8. katta kapatılır: oyuncu yukarı çıktığında " +
+             "bir sahanlığa değil çatı kapısına varmalı. Aşağı kaçış yolu açık kalır.")]
+    [SerializeField] private bool yukariAcik = true;
+
+    [Tooltip("Kaç kez yukarı döngü yapıldı.")]
     public int yukariDonguSayisi;
 
     [Tooltip("Kaç kez aşağı döngü yapıldı.")]
     public int asagiDonguSayisi;
+
+    /// <summary>
+    /// Net döngü sayısı: yukarı döngüler eksi aşağı döngüler. Oyuncunun kurgudaki
+    /// yüksekliğini hesaplamak için KatYoneticisi okur.
+    /// </summary>
+    public int NetDongu { get { return yukariDonguSayisi - asagiDonguSayisi; } }
 
     // CharacterController'a ışınlanma sırasında dokunmamız gerekiyor; sebebi aşağıda.
     private CharacterController kontrolcu;
@@ -41,54 +55,59 @@ public class SonsuzMerdiven : MonoBehaviour
         kontrolcu = GetComponent<CharacterController>();
     }
 
-    // Döngüyü dışarıdan açıp kapatmak için. Kat sayacı 8'e ulaşınca
-    // bu fonksiyon false ile çağrılacak ve oyuncu gerçekten üst sahanlığa çıkacak.
+    /// <summary>Döngüyü tamamen açar veya kapatır (çatı ve ceza için).</summary>
     public void DonguyuAyarla(bool yeniDurum)
     {
         acik = yeniDurum;
     }
 
+    /// <summary>Yalnızca yukarı ışınlanmayı açar veya kapatır (8. kat için).</summary>
+    public void YukariDonguyuAyarla(bool yeniDurum)
+    {
+        yukariAcik = yeniDurum;
+    }
+
     // ---------- LATEUPDATE ----------
-    // Update değil LateUpdate kullanıyoruz.
-    // Update: oyuncu kontrolcüsünün oyuncuyu hareket ettirdiği an.
-    // LateUpdate: o karedeki BÜTÜN hareketler bittikten sonra çalışır.
-    // Yani burada oyuncunun karenin sonundaki KESİN konumunu görürüz.
-    // Update'te baksaydık, hareketten önceki eski konumu okuma riskimiz olurdu.
+    // Update değil LateUpdate: o karedeki BÜTÜN hareketler bittikten sonra çalışır,
+    // yani burada oyuncunun karenin sonundaki KESİN konumunu görürüz.
+    //
+    // KatYoneticisi de kendi işini LateUpdate'te, ama BU scriptten SONRA yapıyor
+    // (DefaultExecutionOrder ile ayarlı). Sebebi: oyuncu B'ye vardığı karede
+    // önce burada A'ya taşınır, hemen ardından KatYoneticisi kararı verip
+    // sahanlığı yeni kata göre yeniler. İkisi aynı karede olduğu için ekrana
+    // çizilen ilk görüntü zaten yenilenmiş sahanlıktır; değişim hiç görünmez.
     private void LateUpdate()
     {
         if (!acik) return;
 
-        // Sadece z eksenine bakıyoruz, çünkü merdiven +z yönünde çıkıyor
-        // ve sahne orijinde kurulu. Bu varsayım MekanOlculeri'nde de yazılı.
-        float z = transform.position.z;
+        float y = transform.position.y;
 
-        if (z >= UstIsinlanmaEsigi)
+        if (yukariAcik && y >= UstIsinlanmaKotu)
         {
-            // Yukarı çıkıldı: oyuncuyu geri ve aşağı taşı.
-            Tasi(new Vector3(0f, -DikeyOfset, -IleriOfset));
+            // B'ye varıldı: oyuncuyu bir kat aşağı, A'ya taşı.
+            Tasi(new Vector3(0f, -DikeyOfset, 0f));
             yukariDonguSayisi++;
         }
-        else if (z <= AltIsinlanmaEsigi)
+        else if (y <= AltIsinlanmaKotu)
         {
-            // Aşağı inildi: oyuncuyu ileri ve yukarı taşı.
-            Tasi(new Vector3(0f, DikeyOfset, IleriOfset));
+            // A'nın altındaki merdivene inildi: oyuncuyu bir kat yukarı taşı.
+            // Kendini aynı noktada, A ile B arasındaki merdivende bulur.
+            Tasi(new Vector3(0f, DikeyOfset, 0f));
             asagiDonguSayisi++;
         }
 
         // NEDEN İKİ EŞİK BİRBİRİNE YAPIŞIK DEĞİL
-        // Üst eşik 5,50 m; oradan taşınınca oyuncu -0,82 m'ye düşer.
-        // Alt eşik -1,20 m. Yani ışınlanma sonrası oyuncu alt eşiğin
-        // 38 cm uzağında kalır. Eşikler bitişik olsaydı, taşınır taşınmaz
-        // diğer eşiği tetikler ve oyuncu iki nokta arasında titrerdi.
+        // Üst eşik 2,91 m; oradan taşınınca oyuncu ~0'a düşer, alt eşik -0,6'da.
+        // Alt eşikten taşınınca oyuncu 2,4'e çıkar, üst eşik 2,91'de.
+        // Eşikler bitişik olsaydı oyuncu taşınır taşınmaz öbür eşiği tetikler
+        // ve iki nokta arasında titrerdi.
     }
 
     // ---------- TAŞIMA ----------
     private void Tasi(Vector3 kayma)
     {
-        // CharacterController'ı KAPATMADAN transform.position'ı değiştiremeyiz.
-        // Sebebi şu: CharacterController oyuncunun konumunu kendi içinde ayrıca tutar
-        // ve her karede onu geri yazar. Açıkken konumu elle değiştirirsek,
-        // bileşen bir sonraki karede "hayır, sen şuradaydın" deyip geri alır.
+        // CharacterController oyuncunun konumunu kendi içinde ayrıca tutar ve
+        // açıkken elle yazılan konumu bir sonraki karede geri alır.
         // Kapatıp taşıyıp tekrar açmak, ona yeni konumu kabul ettirmenin yoludur.
         kontrolcu.enabled = false;
 
@@ -96,7 +115,6 @@ public class SonsuzMerdiven : MonoBehaviour
 
         kontrolcu.enabled = true;
 
-        // Fizik motorunun çarpışma verisi bir kare geriden gelir.
         // SyncTransforms, yeni konumu fizik dünyasına ANINDA bildirir;
         // yoksa ışınlanmadan hemen sonraki karede oyuncu zemine gömülebilir.
         Physics.SyncTransforms();
