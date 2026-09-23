@@ -1,0 +1,379 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 701f977fa1f14da47980ad5d47cad2ab, type: 3}
+  m_Name: Tekinsiz_Titreyen_Ampul
+  m_EditorClassIdentifier: Huzur.Anomali::AnomaliKarti
+  kimlik: titreyen_ampul
+  katman: 1
+  zorluk: 2
+  aciklama: Sahanlik ampulu birkac kez duzensiz titriyor.
+  etkiler:
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.2
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.2
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 0, g: 0, b: 0, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.2
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 10
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.27
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 3
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.27
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 6, g: 4.92, b: 3.48, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.27
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.38
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.38
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 0, g: 0, b: 0, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.38
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 10
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.45
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 3
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.45
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 6, g: 4.92, b: 3.48, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 1.45
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.0
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.0
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 0, g: 0, b: 0, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.0
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 10
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.12
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 3
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.12
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 6, g: 4.92, b: 3.48, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.12
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.25
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.25
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 0, g: 0, b: 0, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.25
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 10
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.3
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 3
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.3
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 6, g: 4.92, b: 3.48, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.3
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.42
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.42
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 0, g: 0, b: 0, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.42
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 10
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.6
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 3
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.6
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 6, g: 4.92, b: 3.48, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4.6
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 7.1
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 7.1
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 0, g: 0, b: 0, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 7.1
+  - hedefYol: Ampul
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 10
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 7.16
+  - hedefYol: Ampul/Dolgu
+    tur: 5
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 0.82, b: 0.58, a: 1}
+    sayi: 3
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 7.16
+  - hedefYol: Ampul/Cam
+    tur: 4
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 6, g: 4.92, b: 3.48, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 7.16

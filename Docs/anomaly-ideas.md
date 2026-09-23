@@ -3,7 +3,7 @@
 Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 `Assets/Resources/Anomaliler/` altına kart olarak dökülür (#13).
 
-**Oturum:** 2026-09-23 · **Toplam:** 67 fikir (35 FISILTI · 22 TEKİNSİZ · 10 KÂBUS) · 42'si oyunda (#6'da 10, #13'te 32).
+**Oturum:** 2026-09-23 · **Toplam:** 69 fikir (35 FISILTI · 24 TEKİNSİZ · 10 KÂBUS) · 52'si oyunda (#6'da 10, #13'te 42).
 
 ## Sütunlar
 
@@ -40,20 +40,20 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | F08 | Yer değiştirmiş numaralar | `Kapi_1` ile `Kapi_2` numaraları takas | 👁 | 4 | Y (kata göre metin) | |
 | F09 | Tekrarlanan numara | `Kapi_3` numarası `Kapi_4` ile aynı | 👁 | 3 | Y (kata göre metin) | |
 | F10 | Eksik numara plakası | `Kapi_2/Mentese/Numaralik` + `Numara` gizli | 👁 | 2 | K | ✅ |
-| F11 | Boş plaka | `Kapi_1/Mentese/Numara` metni boş | 👁 | 3 | K | |
+| F11 | Boş plaka | `Kapi_1/Mentese/Numara` metni boş | 👁 | 3 | K | ✅ |
 | F12 | Asansör göstergesi çalışıyor | `Asansor/Yazi` "-" yerine sabit bir sayı ("5") | 👁 | 3 | K | ✅ |
 | F13 | Çağrı düğmesi yok | `Asansor/Cagri_Dugmesi` gizli | 👁 | 3 | K | ✅ |
 | F14 | Eksik sayaç | `Elektrik_Sayaci` gizli | 👁 | 3 | K | ✅ |
-| F15 | Yan yatmış sayaç | `Elektrik_Sayaci` Z 90° | 👁 | 3 | K | |
+| F15 | Yan yatmış sayaç | `Elektrik_Sayaci` Z 90° | 👁 | 3 | K | ✅ |
 | F16 | Zil öbür yanda | `Kapi_4/Zil` kapının menteşe tarafında | 👁 | 4 | K | ✅ |
-| F17 | Eksik paspas | `Kapi_3/Paspas` gizli | 👁 | 2 | K | |
-| F18 | Büyümüş paspas | `Kapi_1/Paspas` ölçek ×1,6 | 👁 | 3 | K | |
+| F17 | Eksik paspas | `Kapi_3/Paspas` gizli | 👁 | 2 | K | ✅ |
+| F18 | Büyümüş paspas | `Kapi_1/Paspas` ölçek ×1,6 | 👁 | 3 | K | ✅ |
 | F19 | Yukarıdaki kapı kolu | `Kapi_2/Mentese/Kol` 50 cm yukarıda | 👁 | 4 | K | ✅ |
 | F20 | Eksik kapı kolu | `Kapi_4/Mentese/Kol` gizli | 👁 | 3 | K | ✅ |
 | F21 | Eksik kapı gözü | `Kapi_3/Mentese/Kapi_Gozu` gizli | 👁 | 5 | K | ✅ |
 | F22 | Yamuk ilan | `Ilan` Z 12° | 👁 | 5 | K | ✅ |
-| F23 | Yere düşmüş ilan | `Ilan` yerde, yatık | 👁 | 3 | K | |
-| F24 | Yer değiştirmiş ayakkabılık | `Ayakkabilik` sol duvara geçmiş | 👁 | 3 | K | |
+| F23 | Yere düşmüş ilan | `Ilan` yerde, yatık | 👁 | 3 | K | ✅ |
+| F24 | Yer değiştirmiş ayakkabılık | `Ayakkabilik` sol duvara geçmiş | 👁 | 3 | K | ✅ |
 | F25 | Kaymış ampul | `Ampul` köşeye kaymış; gölgeler ve aydınlık kayar | 👁 | 4 | K | ✅ |
 | F26 | Kısa kapı kanadı | `Kapi_1/Mentese/Kanat` boyu %95, altta aralık | 👁 | 5 | K | ✅ |
 | F27 | Ters terlikler | `Kapi_2/Terlikler` 180° (burunlar kapıya) | 👁 | 4 | K | ✅ |
@@ -81,7 +81,7 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | T09 | Kırmızı ampul | `Ampul` ışığı koyu kırmızı | 👁 | 2 | K | ✅ |
 | T10 | Duvara dikilmiş paspas | `Kapi_3/Paspas` dik, duvara yaslı | 👁 | 2 | K | ✅ |
 | T11 | Devrilmiş ayakkabılık | `Ayakkabilik` yan yatmış | 👁 | 2 | K | ✅ |
-| T12 | 13 numara | Bir kapının numarası "13" (sabit metin) | 👁 | 3 | K | |
+| T12 | 13 numara | Bir kapının numarası "13" (sabit metin) | 👁 | 3 | K | ✅ |
 | T13 | Tavana yapışık terlik | `Kapi_2/Terlikler/Terlik_Sol` tavanda | 👁 | 2 | K | ✅ |
 | T14 | İlan "ÇIKMAYIN" | İlanda normalde duyuru; bu katta tek kelime | 👁 | 2 | E (ilana yazı) | |
 | T15 | Kapı önünde tek ayakkabı | Hiç kimsenin olmayan tek bir erkek ayakkabısı | 👁 | 3 | E (ayakkabı) | ✅ |
@@ -90,8 +90,10 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | T18 | Mırıltı susmuş | Kapıların ardındaki uğultu bu katta yok | 👂 | 3 | Y (ses sistemi) | |
 | T19 | Kapı gözünde ışık | Bir kapının gözünden ışık sızıyor, sonra kararıyor | 👁 | 3 | Y (ışık + zamanlama) | |
 | T20 | Merdiven ampulü sönük | `Ampul_Merdiven` sönük | 👁 | 3 | Y (çekirdek hedefi) | |
-| T21 | Yanıp sönen ampul | `Ampul` titriyor | 👁 | 2 | Y (animasyon) | |
+| T21 | Yanıp sönen ampul | `Ampul` titriyor (zamanlı etkilerle) | 👁 | 2 | K (zamanlı) | ✅ |
 | T22 | Pencerede silüet | Ara sahanlık penceresinde dışarıda biri | 👁 | 2 | Y + E (figür) | |
+| T23 | Kapı tıklatılıyor | `Kapi_1/Daire_Ici` içinden üç tıklatma, 3. ve 8. sn (kodla üretilmiş ses) | 👂 | 2 | K (zamanlı ses) | ✅ |
+| T24 | Asansörde geri sayım | `Asansor/Yazi` 3, 2, 1, 0 diye sayar ve 0'da kalır | 👁 | 2 | K (zamanlı) | ✅ |
 
 ## KÂBUS — nadir, senaryolu (10)
 

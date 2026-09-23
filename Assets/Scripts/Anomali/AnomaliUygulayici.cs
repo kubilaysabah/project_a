@@ -123,7 +123,10 @@ public class AnomaliUygulayici
 
             // Senaryolu anlar kısa sürüyor (ışık 0,35 sn söner); gözle kaçırmak kolay.
             // Console'a yazmak hangi etkinin tam ne zaman oynadığını gösterir.
-            Debug.Log($"[ANOMALİ] '{UygulananKart.Kimlik}' {gecenSure:0.00} sn: {etki}");
+            // Yalnızca oyun çalışırken: testler saati ileri sararak her kartı defalarca
+            // uyguluyor ve bu satır Console'u binlerce kayıtla doldurup testleri yavaşlatıyordu.
+            if (Application.isPlaying)
+                Debug.Log($"[ANOMALİ] '{UygulananKart.Kimlik}' {gecenSure:0.00} sn: {etki}");
         }
     }
 
