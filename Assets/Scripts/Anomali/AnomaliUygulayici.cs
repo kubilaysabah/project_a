@@ -120,6 +120,10 @@ public class AnomaliUygulayici
             AnomaliEtkisi etki = bekleyenler[0];
             bekleyenler.RemoveAt(0);
             EtkiUygula(UygulananKart, etki, uygulananSahanlik);
+
+            // Senaryolu anlar kısa sürüyor (ışık 0,35 sn söner); gözle kaçırmak kolay.
+            // Console'a yazmak hangi etkinin tam ne zaman oynadığını gösterir.
+            Debug.Log($"[ANOMALİ] '{UygulananKart.Kimlik}' {gecenSure:0.00} sn: {etki}");
         }
     }
 

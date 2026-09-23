@@ -3,7 +3,7 @@
 Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 `Assets/Resources/Anomaliler/` altına kart olarak dökülür (#13).
 
-**Oturum:** 2026-09-23 · **Toplam:** 67 fikir (35 FISILTI · 22 TEKİNSİZ · 10 KÂBUS) · 40'ı oyunda (#6'da 10, #13'te 30).
+**Oturum:** 2026-09-23 · **Toplam:** 67 fikir (35 FISILTI · 22 TEKİNSİZ · 10 KÂBUS) · 42'si oyunda (#6'da 10, #13'te 32).
 
 ## Sütunlar
 
@@ -100,13 +100,13 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | K01 | Bütün kapılar aynı numara | 4 kapının numarası aynı | 👁 | 1 | K | ✅ |
 | K02 | Beşinci kapı | Duvarda olmaması gereken 5. bir kapı | 👁 | 1 | E (gizli `Kapi_5`) | ✅ |
 | K03 | Sırtı dönük adam | Asansörün önünde sırtı dönük biri duruyor | 👁 | 1 | Y + E (figür) | |
-| K04 | Zil kendiliğinden çalıyor | Oyuncu sahanlığa varınca bir zil çalar | 👂 | 1 | Y (ses) | |
+| K04 | Zil kendiliğinden çalıyor | Oyuncu sahanlığa varınca bir zil çalar | 👂 | 1 | Y (ses) | ✅ |
 | K05 | "Geldim" | Bir kapının ardından "geldim" diye bir ses | 👂 | 1 | Y (ses) | |
 | K06 | Ters ağlayan bebek | Normal ambiyanstaki bebek ağlaması tersten | 👂 | 3 | Y (ses) | |
 | K07 | Açılan asansör | Asansör kapısı açılır, içi ışıklı ve boş | 👁👂 | 1 | Y (animasyon + ses) | |
 | K08 | Gözden bakan yüz | Merdiven gözünden aşağıda yukarı bakan bir yüz | 👁 | 2 | Y + E (figür) | |
 | K09 | Karanlık kat | Sahanlık tamamen karanlık, yalnız asansör göstergesi yanıyor | 👁 | 1 | E (gösterge ışığı) | ✅ |
-| K10 | Göz kırpan ışık, açık kapı | Işık bir an söner; yandığında bir kapı ardına kadar açık | 👁 | 1 | Y (zamanlama) | |
+| K10 | Göz kırpan ışık, açık kapı | Işık bir an söner; yandığında bir kapı ardına kadar açık | 👁 | 1 | Y (zamanlama) | ✅ |
 
 ---
 
