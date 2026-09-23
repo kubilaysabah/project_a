@@ -93,6 +93,15 @@ public class AnomaliSecici
         // varsayılan olarak her zaman temizdir.
         if (ilkKatHepNormal && kat <= KatSayaci.BaslangicKati) return null;
 
+        // SON KAT (8.) HER ZAMAN NORMALDİR. Şahan'ın kararı, 2026-09-23 (#23).
+        // 8. katın üstünde sahanlık yok, çatı kapısı var. 8. kat anomalili olsaydı,
+        // doğru hamle olan geri dönüş de "çatıya ulaşıldı" sayılırdı: oyuncu aşağıdaki
+        // sahanlıkta var olmayan bir "9. kat" görür, sonra çatıya çıkmak için bir kat
+        // geri tırmanmak zorunda kalırdı. Son kat temiz olunca çatıya giden tek yol
+        // yukarısı olur. Bu kural ilk kat kuralı gibi kapatılamaz; çatının
+        // yapısından doğuyor, bir tercih değil. Çatının üstünde de kat yok.
+        if (kat >= KatSayaci.CatiKati) return null;
+
         if (kartlar.Length == 0) return null;
 
         // NextDouble 0 ile 1 arasında bir sayı verir.

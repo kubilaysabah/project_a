@@ -55,13 +55,14 @@ public class AnomaliSeciciTestleri
     }
 
     [Test]
-    public void Olasilik_birse_ilk_kat_disinda_hepsi_anomalili_olur()
+    public void Olasilik_birse_ilk_ve_son_kat_disinda_hepsi_anomalili_olur()
     {
         var secici = new AnomaliSecici(OnKart(), tohum: 1, anomaliOlasiligi: 1f);
 
         Assert.IsNull(secici.KatIcinSec(1), "1. kat her zaman normal olmalı");
+        Assert.IsNull(secici.KatIcinSec(KatSayaci.CatiKati), "son kat her zaman normal olmalı");
 
-        for (int kat = 2; kat <= KatSayaci.CatiKati; kat++)
+        for (int kat = 2; kat < KatSayaci.CatiKati; kat++)
         {
             Assert.IsNotNull(secici.KatIcinSec(kat), $"{kat}. kat anomalili olmalıydı");
         }
@@ -85,6 +86,23 @@ public class AnomaliSeciciTestleri
                                        anomaliOlasiligi: 1f, ilkKatHepNormal: false);
 
         Assert.IsNotNull(secici.KatIcinSec(1));
+    }
+
+    // Son katın üstü çatı. Anomalili olsaydı doğru hamle (geri dönmek) de
+    // "çatıya ulaşıldı" sayılırdı ve oyuncu var olmayan bir 9. katı görürdü.
+    // Kural kapatılamaz: ilk kat kuralı kapalıyken bile son kat temiz kalmalı.
+    [Test]
+    public void Son_kat_her_zaman_normaldir_ve_kapatilamaz()
+    {
+        for (int tohum = 0; tohum < 30; tohum++)
+        {
+            var secici = new AnomaliSecici(OnKart(), tohum,
+                                           anomaliOlasiligi: 1f, ilkKatHepNormal: false);
+            Assert.IsNull(secici.KatIcinSec(KatSayaci.CatiKati),
+                          $"tohum {tohum}: son kat normal olmalıydı");
+            Assert.IsNull(secici.KatIcinSec(KatSayaci.CatiKati + 1),
+                          $"tohum {tohum}: çatının üstünde anomali olmamalı");
+        }
     }
 
     // ---------- KAT HAFIZASI ----------
@@ -128,10 +146,10 @@ public class AnomaliSeciciTestleri
 
         string oncekiKimlik = null;
 
-        // Birçok tur oyna: her turda 2-8 arası katlar anomalili gelir.
+        // Birçok tur oyna: her turda 2-7 arası katlar anomalili gelir (8. kat hep normal).
         for (int tur = 0; tur < 40; tur++)
         {
-            for (int kat = 2; kat <= KatSayaci.CatiKati; kat++)
+            for (int kat = 2; kat < KatSayaci.CatiKati; kat++)
             {
                 IAnomaliKart kart = secici.KatIcinSec(kat);
                 Assert.IsNotNull(kart);
@@ -169,7 +187,7 @@ public class AnomaliSeciciTestleri
 
         for (int tur = 0; tur < 30; tur++)
         {
-            for (int kat = 2; kat <= KatSayaci.CatiKati; kat++)
+            for (int kat = 2; kat < KatSayaci.CatiKati; kat++)   // 8. kat hep normal
             {
                 IAnomaliKart kart = secici.KatIcinSec(kat);
                 int tavan = AnomaliSecici.ZorlukTavani(kat);
@@ -226,7 +244,7 @@ public class AnomaliSeciciTestleri
         var tek = new IAnomaliKart[] { new SahteKart("tek", 1) };
         var secici = new AnomaliSecici(tek, tohum: 4, anomaliOlasiligi: 1f);
 
-        for (int kat = 2; kat <= KatSayaci.CatiKati; kat++)
+        for (int kat = 2; kat < KatSayaci.CatiKati; kat++)   // 8. kat hep normal
         {
             Assert.AreEqual("tek", secici.KatIcinSec(kat).Kimlik);
         }
