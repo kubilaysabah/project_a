@@ -46,6 +46,12 @@ public class KatYoneticisi : MonoBehaviour
     [SerializeField] private int tohum = 0;
 
     [Header("Test")]
+    [Tooltip("Belirli bir kartı denemek için: buraya bir kart sürüklenirse 2. kattan " +
+             "itibaren HER kat bu kartla gelir (42 kart arasından rastgele denk gelmesini " +
+             "beklemeye gerek kalmaz). Boş bırakıldığında oyun normal çalışır. " +
+             "Test bitince boşaltmayı unutmayın.")]
+    [SerializeField] private AnomaliKarti testKarti;
+
     [Tooltip("Ekranın köşesinde kat numarasını ve anomali durumunu gösterir. " +
              "Sadece test içindir; gerçek oyunda kapalı olacak.")]
     [SerializeField] private bool testGostergesi = true;
@@ -219,7 +225,18 @@ public class KatYoneticisi : MonoBehaviour
         // Tohum 0 ise her oyun farklı olsun diye saatin o anki değerini kullanıyoruz.
         int gercekTohum = tohum != 0 ? tohum : System.Environment.TickCount;
 
-        secici = new AnomaliSecici(kartlar, gercekTohum, anomaliOlasiligi, ilkKatHepNormal);
+        // Test kartı verildiyse seçici yalnızca onu tanır ve her katta onu seçer
+        // (olasılık 1). 1. ve 8. kat kuralları yine geçerli.
+        if (testKarti != null)
+        {
+            Debug.LogWarning($"[ANOMALİ] TEST KARTI AÇIK: her kat '{testKarti.Kimlik}' ile gelecek. " +
+                             "Normal oyun için KatYoneticisi → Test Kartı alanını boşaltın.");
+            secici = new AnomaliSecici(new IAnomaliKart[] { testKarti }, gercekTohum, 1f, ilkKatHepNormal);
+        }
+        else
+        {
+            secici = new AnomaliSecici(kartlar, gercekTohum, anomaliOlasiligi, ilkKatHepNormal);
+        }
 
         // Çöp planı AYRI bir tohumla kuruluyor. Aynı tohumu verseydik iki üretici
         // aynı sayı dizisini üretir ve poşet sayıları anomalilerle gizlice
@@ -551,6 +568,7 @@ public class KatYoneticisi : MonoBehaviour
 
         string alt = $"hata: {sayac.ToplamHata}" + poset + kartAdi +
                      (catiModu ? "   ·   üstte çatı" : "") +
+                     (testKarti != null ? "   ·   TEST KARTI AÇIK" : "") +
                      (cezaBekliyor ? "   ·   ceza yolda…" : "") +
                      (cezaCalisiyor ? "   ·   CEZA" : "");
 
