@@ -51,6 +51,8 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+# Unity 6 kod editörü için yeni biçim çözüm dosyası; Unity her derlemede yeniden üretir.
+*.slnx
 *.suo
 *.tmp
 *.user
