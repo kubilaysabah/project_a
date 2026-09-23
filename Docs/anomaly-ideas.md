@@ -3,7 +3,7 @@
 Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 `Assets/Resources/Anomaliler/` altına kart olarak dökülür (#13).
 
-**Oturum:** 2026-09-23 · **Toplam:** 77 fikir (38 FISILTI · 28 TEKİNSİZ · 11 KÂBUS) · **60'ı oyunda** (#6'da 10, #13'te 50).
+**Oturum:** 2026-09-23 · **Toplam:** 81 fikir (40 FISILTI · 30 TEKİNSİZ · 11 KÂBUS) · **66'sı oyunda** (#6'da 10, #13'te 50, #14'te 6 sesli kart).
 
 ## Sütunlar
 
@@ -63,11 +63,12 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | F31 | Kapı önünde gazete | `Kapi_3` paspasında 1994 tarihli gazete | 👁 | 4 | E (gazete) | ✅ |
 | F32 | Sallanan ampul | `Ampul` hafifçe sallanıyor | 👁 | 4 | Y (animasyon) | |
 | F33 | Pencerede kayıt yok | `Pencere/Kayit` gizli | 👁 | 4 | Y (çekirdek hedefi) | |
-| F34 | Uzak TV susmuş | Normal ambiyanstaki uzak TV sesi yok | 👂 | 3 | Y (ses sistemi) | |
+| F34 | Uzak TV susmuş | `Kapi_2/Ses_TV` gizli (#14) | 👂 | 4 | K (ses) | ✅ |
 | F35 | Boru tıkırtısı ritimli | Rastgele boru tıkırtısı düzenli bir ritimde | 👂 | 5 | Y (ses sistemi) | |
 | F36 | Ters ARIZALI notu | `Asansor/Not_Yazi` baş aşağı | 👁 | 4 | K | ✅ |
 | F37 | Devrik saksı | `Kapi_1/Saksi` yan yatmış | 👁 | 3 | K | ✅ |
 | F38 | Değişen numara | `Kapi_4/Mentese/Numara` 4. sn'de "0" olur | 👁 | 3 | K (zamanlı) | ✅ |
+| F39 | TV yanlış daireden | `Kapi_2/Ses_TV` karşı daireye taşınır (#14) | 👂 | 5 | K (ses) | ✅ |
 
 ## TEKİNSİZ — fark edilince ürperten (22)
 
@@ -90,7 +91,7 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | T15 | Kapı önünde tek ayakkabı | Hiç kimsenin olmayan tek bir erkek ayakkabısı | 👁 | 3 | E (ayakkabı) | ✅ |
 | T16 | Ayak izleri | Islak ayak izleri asansörden bir kapıya | 👁 | 2 | E (decal) | 🎨 |
 | T17 | Sayaç kapağı açık | Elektrik sayacının kapağı açık, içi karanlık | 👁 | 3 | E (kapak) | ✅ |
-| T18 | Mırıltı susmuş | Kapıların ardındaki uğultu bu katta yok | 👂 | 3 | Y (ses sistemi) | |
+| T18 | Mırıltı susmuş | bütün ortam sesleri susar: `Tekinsiz_Sessizlik` (#14) | 👂 | 3 | K (ses) | ✅ |
 | T19 | Kapı gözünde ışık | Bir kapının gözünden ışık sızıyor, sonra kararıyor | 👁 | 3 | Y (ışık + zamanlama) | |
 | T20 | Merdiven ampulü sönük | `Ampul_Merdiven` sönük | 👁 | 3 | Y (çekirdek hedefi) | |
 | T21 | Yanıp sönen ampul | `Ampul` titriyor (zamanlı etkilerle) | 👁 | 2 | K (zamanlı) | ✅ |
@@ -101,6 +102,9 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | T26 | Yürüyen terlik | `Kapi_3/Terlikler/Terlik_Sol` 4. ve 7. sn'de sahanlığa doğru kayar | 👁 | 3 | K (zamanlı) | ✅ |
 | T27 | Kendiliğinden açılan sayaç | `Elektrik_Sayaci/Kapak` 2-8. sn arası adım adım açılır | 👁 | 2 | K (zamanlı) | ✅ |
 | T28 | İçeri çekilen gazete | `Kapi_3/Gazete` 5. sn'de kapının altından içeri çekilir | 👁 | 2 | K (zamanlı) | ✅ |
+| T29 | Tersten ağlama | `Kapi_4/Ses_Bebek` gizli, yerine tersten çalan ağlama (#14) | 👂 | 2 | K (ses) | ✅ |
+| T30 | Makine gibi boru | `Ses_Boru` gizli, yerine düzenli ritim (#14) | 👂 | 3 | K (ses) | ✅ |
+| T31 | Asansörde ağlama | bebek ağlaması asansör kuyusundan, yakından (#14) | 👂 | 2 | K (ses) | ✅ |
 
 ## KÂBUS — nadir, senaryolu (10)
 
