@@ -266,6 +266,9 @@ public static class GrayboxKurucu
 
             // Kapı önü ek eşyaları (saksı, tüp, gazete, tek ayakkabı).
             KapiEkEsyalari(t);
+
+            // Olmaması gereken beşinci daire kapısı (KÂBUS anomalisi K02). Gizli başlar.
+            BesinciKapiKur(t);
         }
 
         // Sahanlık ampulü. Sahte katlarda da var: merdiven gözünden bakınca
@@ -1004,6 +1007,38 @@ public static class GrayboxKurucu
         GameObject ayakkabi = Model("Ayakkabi", sahanlik.Find("Kapi_4"), "Ayakkabi", null,
                                     new Vector3(sag - 0.45f, 0f, -0.2f), -90f, false);
         if (ayakkabi != null) ayakkabi.SetActive(false);
+    }
+
+    // ---------- BEŞİNCİ KAPI (#13, K02) ----------
+    // Her katta dört daire var. Bu kapı ön duvarda, oyuncuya göre asansörün SAĞINDA
+    // (dünyanın -x tarafı; oyuncu -z yönüne bakıyor) belirir ve
+    // normal bir katta HİÇ görünmez; bir KÂBUS kartı onu görünür yaparak oyuncuya
+    // "bu binada olmaması gereken bir daire" gösterir. Numara plakası bilerek BOŞ.
+    //
+    // Duvarda boşluk açılmıyor: kapı kasasıyla birlikte duvarın yüzüne oturuyor.
+    // Gizliyken duvar kesintisiz görünmeli; boşluk açsaydık normal katlarda da
+    // duvarda bir delik olurdu.
+    static void BesinciKapiKur(Transform sahanlik)
+    {
+        const float Gen = 0.9f, Yuk = 2.05f;
+
+        GameObject kok = new GameObject("Kapi_5");
+        kok.transform.SetParent(sahanlik, false);
+        kok.transform.localPosition = new Vector3(-2.3f, 0f, -SahanlikDerin);   // ön duvarın iç yüzü
+        Transform k = kok.transform;
+
+        // Kasa: iki dikme ve üst başlık, duvardan 5 cm taşar.
+        Kutu("Kasa_Sol", k, new Vector3(-(Gen / 2f + 0.03f), (Yuk + 0.06f) / 2f, 0.025f), new Vector3(0.06f, Yuk + 0.06f, 0.05f));
+        Kutu("Kasa_Sag", k, new Vector3(Gen / 2f + 0.03f, (Yuk + 0.06f) / 2f, 0.025f), new Vector3(0.06f, Yuk + 0.06f, 0.05f));
+        Kutu("Kasa_Ust", k, new Vector3(0f, Yuk + 0.03f, 0.025f), new Vector3(Gen + 0.12f, 0.06f, 0.05f));
+
+        // Kanat, kol (oyuncuya göre sağda, yani -x), boş numara plakası ve kapı gözü.
+        Kutu("Kanat", k, new Vector3(0f, Yuk / 2f, 0.02f), new Vector3(Gen, Yuk, 0.04f));
+        Kutu("Kol", k, new Vector3(-0.33f, 1.05f, 0.07f), new Vector3(0.12f, 0.04f, 0.06f));
+        Kutu("Numaralik", k, new Vector3(0f, 1.78f, 0.05f), new Vector3(0.26f, 0.16f, 0.02f));
+        Kutu("Kapi_Gozu", k, new Vector3(0f, 1.60f, 0.055f), new Vector3(0.05f, 0.05f, 0.03f));
+
+        kok.SetActive(false);
     }
 
     // Adı, ebeveyni, yerel konumu ve ölçeği verilen bir küp üretir.
