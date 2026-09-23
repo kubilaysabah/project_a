@@ -490,7 +490,11 @@ public static class GrayboxKurucu
         yaziNesne.transform.localRotation = Quaternion.Euler(0f, sagDuvar ? 90f : -90f, 0f);
 
         TextMesh yazi = yaziNesne.AddComponent<TextMesh>();
-        yazi.text = "0";
+        // Yer tutucu: oyunda KatYoneticisi gerçek numarayı her katta yeniden yazar.
+        // "0" değil "?", çünkü "değişen numara" kartı numarayı "0" yapıyor; yer tutucu
+        // da "0" olsaydı bütünlük testi editördeki sahnede o kartın hiçbir şey
+        // değiştirmediğini sanıp hata verirdi. Kartlar "?" kullanmamalı.
+        yazi.text = "?";
         yazi.anchor = TextAnchor.MiddleCenter;
         yazi.alignment = TextAlignment.Center;
         yazi.fontSize = 96;

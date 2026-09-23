@@ -3,7 +3,7 @@
 Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 `Assets/Resources/Anomaliler/` altına kart olarak dökülür (#13).
 
-**Oturum:** 2026-09-23 · **Toplam:** 69 fikir (35 FISILTI · 24 TEKİNSİZ · 10 KÂBUS) · 52'si oyunda (#6'da 10, #13'te 42).
+**Oturum:** 2026-09-23 · **Toplam:** 77 fikir (38 FISILTI · 28 TEKİNSİZ · 11 KÂBUS) · **60'ı oyunda** (#6'da 10, #13'te 50).
 
 ## Sütunlar
 
@@ -65,6 +65,9 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | F33 | Pencerede kayıt yok | `Pencere/Kayit` gizli | 👁 | 4 | Y (çekirdek hedefi) | |
 | F34 | Uzak TV susmuş | Normal ambiyanstaki uzak TV sesi yok | 👂 | 3 | Y (ses sistemi) | |
 | F35 | Boru tıkırtısı ritimli | Rastgele boru tıkırtısı düzenli bir ritimde | 👂 | 5 | Y (ses sistemi) | |
+| F36 | Ters ARIZALI notu | `Asansor/Not_Yazi` baş aşağı | 👁 | 4 | K | ✅ |
+| F37 | Devrik saksı | `Kapi_1/Saksi` yan yatmış | 👁 | 3 | K | ✅ |
+| F38 | Değişen numara | `Kapi_4/Mentese/Numara` 4. sn'de "0" olur | 👁 | 3 | K (zamanlı) | ✅ |
 
 ## TEKİNSİZ — fark edilince ürperten (22)
 
@@ -94,6 +97,10 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | T22 | Pencerede silüet | Ara sahanlık penceresinde dışarıda biri | 👁 | 2 | Y + E (figür) | |
 | T23 | Kapı tıklatılıyor | `Kapi_1/Daire_Ici` içinden üç tıklatma, 3. ve 8. sn (kodla üretilmiş ses) | 👂 | 2 | K (zamanlı ses) | ✅ |
 | T24 | Asansörde geri sayım | `Asansor/Yazi` 3, 2, 1, 0 diye sayar ve 0'da kalır | 👁 | 2 | K (zamanlı) | ✅ |
+| T25 | Çarpan kapı | `Kapi_2/Mentese` aralık başlar, 4. sn'de çarpma sesiyle kapanır | 👁👂 | 2 | K (zamanlı ses) | ✅ |
+| T26 | Yürüyen terlik | `Kapi_3/Terlikler/Terlik_Sol` 4. ve 7. sn'de sahanlığa doğru kayar | 👁 | 3 | K (zamanlı) | ✅ |
+| T27 | Kendiliğinden açılan sayaç | `Elektrik_Sayaci/Kapak` 2-8. sn arası adım adım açılır | 👁 | 2 | K (zamanlı) | ✅ |
+| T28 | İçeri çekilen gazete | `Kapi_3/Gazete` 5. sn'de kapının altından içeri çekilir | 👁 | 2 | K (zamanlı) | ✅ |
 
 ## KÂBUS — nadir, senaryolu (10)
 
@@ -109,6 +116,7 @@ Oyunun içerik hammaddesi. Her satır bir anomali fikri; buradan seçilenler
 | K08 | Gözden bakan yüz | Merdiven gözünden aşağıda yukarı bakan bir yüz | 👁 | 2 | Y + E (figür) | |
 | K09 | Karanlık kat | Sahanlık tamamen karanlık, yalnız asansör göstergesi yanıyor | 👁 | 1 | E (gösterge ışığı) | ✅ |
 | K10 | Göz kırpan ışık, açık kapı | Işık bir an söner; yandığında bir kapı ardına kadar açık | 👁 | 1 | Y (zamanlama) | ✅ |
+| K11 | Açılan asansör | "ding" (3. sn), kapılar aralanır, karanlık kuyu; 8. sn'de kapanır | 👁👂 | 1 | K (zamanlı ses) | ✅ |
 
 ---
 

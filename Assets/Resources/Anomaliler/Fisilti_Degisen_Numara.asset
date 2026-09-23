@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 701f977fa1f14da47980ad5d47cad2ab, type: 3}
+  m_Name: Fisilti_Degisen_Numara
+  m_EditorClassIdentifier: Huzur.Anomali::AnomaliKarti
+  kimlik: degisen_numara
+  katman: 0
+  zorluk: 3
+  aciklama: Birkac saniye sonra merdivene yakin sag (4.) kapinin numarasi 0 oluyor.
+  etkiler:
+  - hedefYol: Kapi_4/Mentese/Numara
+    tur: 6
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 1, b: 1, a: 1}
+    sayi: 1
+    metin: 0
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 4
