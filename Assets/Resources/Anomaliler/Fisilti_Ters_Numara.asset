@@ -15,9 +15,9 @@ MonoBehaviour:
   kimlik: ters_numara
   katman: 0
   zorluk: 4
-  aciklama: Sag dairenin kapi numarasi bas asagi duruyor.
+  aciklama: Merdivene yakin sag (4.) dairenin kapi numarasi bas asagi duruyor.
   etkiler:
-  - hedefYol: Kapi_Sag/Mentese/Numara
+  - hedefYol: Kapi_4/Mentese/Numara
     tur: 2
     gorunur: 1
     vektor: {x: 0, y: 0, z: 180}

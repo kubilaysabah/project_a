@@ -15,10 +15,10 @@ MonoBehaviour:
   kimlik: tek_terlik
   katman: 0
   zorluk: 3
-  aciklama: Sol dairenin kapisi onunde bir cift terlik durur. Bu katta sadece biri
+  aciklama: 1 numarali dairenin kapisi onunde bir cift terlik durur. Bu katta sadece biri
     var.
   etkiler:
-  - hedefYol: Kapi_Sol/Terlikler/Terlik_Sag
+  - hedefYol: Kapi_1/Terlikler/Terlik_Sag
     tur: 0
     gorunur: 0
     vektor: {x: 0, y: 0, z: 0}

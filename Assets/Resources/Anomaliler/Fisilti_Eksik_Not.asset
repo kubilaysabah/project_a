@@ -10,14 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 701f977fa1f14da47980ad5d47cad2ab, type: 3}
-  m_Name: Fisilti_Eksik_Poset
+  m_Name: Fisilti_Eksik_Not
   m_EditorClassIdentifier: Huzur.Anomali::AnomaliKarti
-  kimlik: eksik_poset
+  kimlik: eksik_not
   katman: 0
   zorluk: 2
-  aciklama: Sol dairenin kapisi onunde cop poseti yok. Diger kapida duruyor.
+  aciklama: Asansorun kapisindaki ARIZALI notu yok. Her katta bantli durur.
   etkiler:
-  - hedefYol: Kapi_Sol/Cop_Poseti
+  - hedefYol: Asansor/Not
+    tur: 0
+    gorunur: 0
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 1, b: 1, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+  - hedefYol: Asansor/Not_Yazi
     tur: 0
     gorunur: 0
     vektor: {x: 0, y: 0, z: 0}

@@ -15,10 +15,10 @@ MonoBehaviour:
   kimlik: kaymis_paspas
   katman: 0
   zorluk: 3
-  aciklama: Sol kapinin paspasi duvardan ayrilmis ve yana kaymis. Normalde kapiya
+  aciklama: Sol uzaktaki (2.) kapinin paspasi duvardan ayrilmis ve yana kaymis. Normalde kapiya
     dayali durur.
   etkiler:
-  - hedefYol: Paspas_Sol
+  - hedefYol: Kapi_2/Paspas
     tur: 1
     gorunur: 1
     vektor: {x: 0.22, y: 0, z: 0.16}
@@ -26,7 +26,7 @@ MonoBehaviour:
     sayi: 1
     metin: 
     ses: {fileID: 0}
-  - hedefYol: Paspas_Sol
+  - hedefYol: Kapi_2/Paspas
     tur: 2
     gorunur: 1
     vektor: {x: 0, y: 17, z: 0}

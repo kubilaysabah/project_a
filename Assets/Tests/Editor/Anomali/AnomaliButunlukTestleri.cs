@@ -177,6 +177,28 @@ public class AnomaliButunlukTestleri
             "Şu kartların hedef yolları sahanlıkta yok: " + string.Join(", ", hatalar));
     }
 
+    // Poşet sayısı her katta rastgele (0-3). Bir kart poşeti gizlese oyuncu bunu
+    // anomali olarak okuyamaz, çünkü kaç poşet olması gerektiğini bilmiyor; o poşet
+    // zaten plan gereği yoksa kart hiçbir şey değiştirmemiş olur ve anomalili kat
+    // "normal" görünür. Oyuncu doğru kararı veremez. Bu yüzden poşetler yasak hedef.
+    [Test]
+    public void Hicbir_kart_rastgele_poset_sayisina_dokunmaz()
+    {
+        var hatalar = new List<string>();
+
+        foreach (AnomaliKarti kart in TumKartlar())
+        {
+            foreach (AnomaliEtkisi etki in kart.Etkiler)
+            {
+                if (etki.hedefYol.Contains("Copler")) hatalar.Add($"'{kart.Kimlik}' → '{etki.hedefYol}'");
+            }
+        }
+
+        Assert.IsEmpty(hatalar,
+            "Şu kartlar çöp poşetlerini hedef alıyor (poşet sayısı rastgele olduğu için yasak): " +
+            string.Join(", ", hatalar));
+    }
+
     [Test]
     public void Hicbir_kart_bos_degildir()
     {

@@ -15,9 +15,9 @@ MonoBehaviour:
   kimlik: kaymis_zil
   katman: 0
   zorluk: 4
-  aciklama: Sag dairenin zili normal yerinde degil, cok asagida duruyor.
+  aciklama: Sag uzaktaki (3.) dairenin zili normal yerinde degil, cok asagida duruyor.
   etkiler:
-  - hedefYol: Kapi_Sag/Zil
+  - hedefYol: Kapi_3/Zil
     tur: 1
     gorunur: 1
     vektor: {x: 0, y: -0.45, z: 0}

@@ -15,10 +15,10 @@ MonoBehaviour:
   kimlik: aralik_kapi
   katman: 1
   zorluk: 2
-  aciklama: Sagdaki dairenin kapisi kapali degil, birkac santim aralik duruyor. Normal
+  aciklama: Sag uzaktaki (3.) dairenin kapisi kapali degil, birkac santim aralik duruyor. Normal
     katta iki kapi da tam kapalidir.
   etkiler:
-  - hedefYol: Kapi_Sag/Mentese
+  - hedefYol: Kapi_3/Mentese
     tur: 2
     gorunur: 1
     vektor: {x: 0, y: 22, z: 0}
