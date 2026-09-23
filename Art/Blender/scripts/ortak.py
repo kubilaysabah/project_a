@@ -152,6 +152,9 @@ def kaydet_ve_disari_aktar(ad, nesneler):
         apply_scale_options="FBX_SCALE_ALL",
         # EKSEN DÖNÜŞÜMÜ: Blender'da yukarı Z, Unity'de yukarı Y.
         # Bu iki satır olmadan eşya Unity'de yan yatmış gelir.
+        # SONUÇ (Unity'de ölçülerek doğrulandı): Blender (x, y, z) -> Unity (-x, z, -y).
+        # Yani model dikey eksende 180° döner: Blender'da -y'ye bakan ön yüz,
+        # Unity'de +Z'ye bakar. Bütün eşyalar bu kurala göre yerleştirilir.
         axis_forward="-Z",
         axis_up="Y",
         bake_space_transform=True,       # dönüşümü meshe işle; Unity'de dönüş 0,0,0 kalsın
@@ -203,3 +206,83 @@ def onizleme_al(yol, hedef_yukseklik, uzaklik=1.6):
     sahne.render.resolution_y = 640
     sahne.render.filepath = yol
     bpy.ops.render.render(write_still=True)
+
+
+# ---------- KISA YOLLAR ----------
+# Eşya betiklerinde en çok kullanılan iki şekil. Her biri tek satırda
+# "şu ölçüde, şurada, şu malzemeyle bir parça" demeyi sağlıyor.
+
+def kutu(ad, olcu, konum, mat, pah_genislik=0.0):
+    """olcu: (en x, derinlik y, yükseklik z) metre. konum: kutunun MERKEZİ."""
+    bpy.ops.mesh.primitive_cube_add(size=1, location=konum)
+    n = bpy.context.active_object
+    n.name = ad
+    n.scale = olcu                                  # 1 m'lik küpü istenen ölçüye getir
+    bpy.ops.object.transform_apply(scale=True)      # ölçeği meshe işle; pah doğru hesaplansın
+    ata(n, mat)
+    if pah_genislik > 0:
+        pah(n, pah_genislik)
+    return n
+
+
+def silindir(ad, yaricap, boy, konum, mat, kose=32, pah_genislik=0.0):
+    """Dik (z ekseninde) bir silindir. konum: MERKEZİ. kose: çevredeki köşe sayısı."""
+    bpy.ops.mesh.primitive_cylinder_add(vertices=kose, radius=yaricap, depth=boy, location=konum)
+    n = bpy.context.active_object
+    n.name = ad
+    ata(n, mat)
+    if pah_genislik > 0:
+        pah(n, pah_genislik)
+    return n
+
+
+def oy(hedef, kesici):
+    """
+    BOOLEAN: kesicinin kapladığı hacmi hedeften siler (oyma), sonra kesiciyi atar.
+    Delik, oyuk, çentik açmanın en kısa yolu.
+    """
+    mod = hedef.modifiers.new("Oy", "BOOLEAN")
+    mod.operation = "DIFFERENCE"
+    mod.object = kesici
+    bpy.context.view_layer.objects.active = hedef
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    bpy.data.objects.remove(kesici, do_unlink=True)
+
+
+def tek_parca(parcalar, ad, aci=35):
+    """Parçaları birleştir, yumuşat, pivotu tabana al. Çoğu eşyanın son adımı."""
+    n = birlestir(parcalar, ad)
+    yumusat(n, aci)
+    pivotu_dunya_merkezine_al(n)
+    return n
+
+
+def pivotu_tasi(nesne, nokta):
+    """
+    Pivotu verilen noktaya taşır. Menteşeli parçalar için gerekli: sayaç
+    kapağının pivotu menteşe çizgisinde olmalı ki Unity'de döndürünce
+    kenarından açılsın (daire kapılarındaki "Mentese" mantığının aynısı).
+    """
+    bpy.ops.object.select_all(action="DESELECT")
+    nesne.select_set(True)
+    bpy.context.view_layer.objects.active = nesne
+    bpy.context.scene.cursor.location = nokta
+    bpy.ops.object.origin_set(type="ORIGIN_CURSOR")
+    bpy.context.scene.cursor.location = (0, 0, 0)
+
+
+def calistir_ve_bitir(ad, nesneler, onizleme_yuksekligi, onizleme_uzakligi, onizlemede_kaldir=0.0):
+    """
+    Kaydet, FBX'e aktar, istenirse önizleme al ve ölçüyü yazdır. Her betiğin son satırı.
+    onizlemede_kaldir: duvar eşyalarının pivotu ortada olduğu için önizlemede yarısı
+    zeminin altında kalır; eşyayı yalnızca önizleme için bu kadar yukarı kaldırır.
+    Dışa aktarım ÖNCE yapıldığı için Unity'ye giden dosya bundan etkilenmez.
+    """
+    import sys
+    kaydet_ve_disari_aktar(ad, nesneler)
+    for n in nesneler:
+        print("OLCU", n.name, round(n.dimensions.x, 3), round(n.dimensions.y, 3), round(n.dimensions.z, 3))
+    if "--onizleme" in sys.argv:
+        for n in nesneler:
+            n.location.z += onizlemede_kaldir
+        onizleme_al(sys.argv[sys.argv.index("--onizleme") + 1], onizleme_yuksekligi, onizleme_uzakligi)

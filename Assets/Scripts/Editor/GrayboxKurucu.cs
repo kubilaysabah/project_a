@@ -229,20 +229,39 @@ public static class GrayboxKurucu
             // Anomali sistemi ancak sahanlıkta BOZULACAK ŞEY kadar zengin olabilir.
             // İsimler sabittir; anomali kartları bu isimlerle hedef gösterir.
 
-            // Ayakkabılık: 4 numaranın yanında, sağ duvara dayalı, merdiven tarafında.
-            Kutu("Ayakkabilik", t,
-                 new Vector3(SahanlikGen / 2f - 0.18f, 0.3f, -0.55f),
-                 new Vector3(0.35f, 0.6f, 0.8f));
+            // Her eşya için önce Blender modeli denenir (#24); bulunamazsa beyaz kutu konur.
+            // Modellerin ön yüzü +Z'ye bakar (FBX aktarımının sonucu, bkz. ortak.py);
+            // y ekseni etrafındaki dönüş ön yüzü doğru yöne çevirir.
 
-            // Elektrik sayacı: arka duvarın sol parçasında.
-            Kutu("Elektrik_Sayaci", t,
-                 new Vector3(-(cekirdekDis + parcaGen / 2f), 1.55f, -0.05f),
-                 new Vector3(0.22f, 0.28f, 0.10f));
+            // Ayakkabılık: 4 numaranın yanında, sağ duvara dayalı, merdiven tarafında.
+            // -90° dönüş ön yüzü -x'e, yani sahanlığın ortasına çevirir.
+            if (Model("Ayakkabilik", t, "Ayakkabilik", null,
+                      new Vector3(SahanlikGen / 2f - 0.2f, 0f, -0.55f), -90f, carpisma: true) == null)
+                Kutu("Ayakkabilik", t,
+                     new Vector3(SahanlikGen / 2f - 0.18f, 0.3f, -0.55f),
+                     new Vector3(0.35f, 0.6f, 0.8f));
+
+            // Elektrik sayacı: arka duvarın sol parçasında. Pivotu arka yüzünde; 180°
+            // dönüşle ön yüzü sahanlığa (-z) bakar. Menteşeli kapağı "Kapak" adlı çocuğu;
+            // ileride "sayaç kapağı açık" anomalisi onu döndürecek.
+            GameObject sayac = Model("Elektrik_Sayaci", t, "Elektrik_Sayaci", "Elektrik_Sayaci",
+                                     new Vector3(-(cekirdekDis + parcaGen / 2f), 1.40f, 0f), 180f, carpisma: true);
+            if (sayac != null)
+                Model("Kapak", sayac.transform, "Elektrik_Sayaci", "Kapak", Vector3.zero, 0f, carpisma: false);
+            else
+                Kutu("Elektrik_Sayaci", t,
+                     new Vector3(-(cekirdekDis + parcaGen / 2f), 1.55f, -0.05f),
+                     new Vector3(0.22f, 0.28f, 0.10f));
 
             // Yönetici ilanı: ön duvarda, oyuncuya göre asansörün solunda (+x), göz hizasında.
-            Kutu("Ilan", t,
-                 new Vector3(1.4f, 1.50f, onZ + 0.01f),
-                 new Vector3(0.21f, 0.30f, 0.02f));
+            // Model ahşap çerçeveli bir pano; adı yine "Ilan" çünkü kartlar bu adı hedefliyor.
+            if (Model("Ilan", t, "IlanPanosu", null, new Vector3(1.4f, 1.50f, onZ), 0f, carpisma: false) == null)
+                Kutu("Ilan", t,
+                     new Vector3(1.4f, 1.50f, onZ + 0.01f),
+                     new Vector3(0.21f, 0.30f, 0.02f));
+
+            // Kapı önü ek eşyaları (saksı, tüp, gazete, tek ayakkabı).
+            KapiEkEsyalari(t);
         }
 
         // Sahanlık ampulü. Sahte katlarda da var: merdiven gözünden bakınca
@@ -317,44 +336,62 @@ public static class GrayboxKurucu
 
         float yuz = -SahanlikDerin;   // ön duvarın iç yüzü; +z sahanlığa bakar
 
-        // Kasa: kapı boşluğunun etrafında duvardan biraz taşan çerçeve.
-        Kutu("Kasa_Sol", a, new Vector3(-(AsansorGen / 2f + 0.03f), AsansorYuk / 2f, yuz + 0.02f),
-             new Vector3(0.06f, AsansorYuk, 0.04f));
-        Kutu("Kasa_Sag", a, new Vector3(AsansorGen / 2f + 0.03f, AsansorYuk / 2f, yuz + 0.02f),
-             new Vector3(0.06f, AsansorYuk, 0.04f));
-        Kutu("Kasa_Ust", a, new Vector3(0f, AsansorYuk + 0.03f, yuz + 0.02f),
-             new Vector3(AsansorGen + 0.12f, 0.06f, 0.04f));
-
-        // İki kapı kanadı, boşluğun 5 cm içinde.
-        float kanatGen = AsansorGen / 2f - 0.01f;
-        Kutu("Kapi_Sol", a, new Vector3(-kanatGen / 2f - 0.005f, AsansorYuk / 2f, yuz - 0.05f),
-             new Vector3(kanatGen, AsansorYuk - 0.02f, 0.05f));
-        Kutu("Kapi_Sag", a, new Vector3(kanatGen / 2f + 0.005f, AsansorYuk / 2f, yuz - 0.05f),
-             new Vector3(kanatGen, AsansorYuk - 0.02f, 0.05f));
-
-        // Kapıların arkasında karanlık bir kuyu. Kapı bir gün aralanırsa
+        // Kapıların arkasında (model olsa da olmasa da) karanlık bir kuyu. Kapı bir gün aralanırsa
         // (anomali) oyuncu hiçliği değil, simsiyah bir asansör boşluğunu görür.
         GameObject kuyu = Kutu("Kuyu", a, new Vector3(0f, AsansorYuk / 2f, yuz - DuvarKalin - 0.6f),
              new Vector3(AsansorGen + 0.2f, AsansorYuk + 0.2f, 0.1f));
         kuyu.GetComponent<MeshRenderer>().sharedMaterial = KaranlikMalzeme();
 
-        // Çağrı düğmesi: oyuncunun SAĞINDA, bel hizasında bir plaka ve üstünde düğme.
-        // Oyuncu asansöre bakarken -z yönüne bakıyor; onun sağı dünyanın -x tarafı.
-        GameObject dugme = Kutu("Cagri_Dugmesi", a, new Vector3(-(AsansorGen / 2f + 0.3f), 1.1f, yuz + 0.015f),
-             new Vector3(0.10f, 0.18f, 0.03f));
-        Kutu("Dugme", dugme.transform, new Vector3(0f, 0f, 0.6f), new Vector3(0.4f, 0.25f, 0.8f));
+        // Blender modeli varsa (#24) kasa, kanatlar, gösterge ve düğme modelden gelir.
+        // Model parçalarının pivotu boşluğun alt ortası; hepsi aynı noktaya konur.
+        bool model = Model("Kasa", a, "Asansor", "Kasa", new Vector3(0f, 0f, yuz), 0f, carpisma: true) != null;
+        if (model)
+        {
+            Model("Kapi_Sol", a, "Asansor", "Kapi_Sol", new Vector3(0f, 0f, yuz), 0f, carpisma: true);
+            Model("Kapi_Sag", a, "Asansor", "Kapi_Sag", new Vector3(0f, 0f, yuz), 0f, carpisma: true);
+            Model("Gosterge", a, "Asansor", "Gosterge", new Vector3(0f, 0f, yuz), 0f, carpisma: false);
+            Model("Cagri_Dugmesi", a, "Asansor", "Cagri_Dugmesi", new Vector3(0f, 0f, yuz), 0f, carpisma: false);
+        }
+        else
+        {
+            // Kasa: kapı boşluğunun etrafında duvardan biraz taşan çerçeve.
+            Kutu("Kasa_Sol", a, new Vector3(-(AsansorGen / 2f + 0.03f), AsansorYuk / 2f, yuz + 0.02f),
+                 new Vector3(0.06f, AsansorYuk, 0.04f));
+            Kutu("Kasa_Sag", a, new Vector3(AsansorGen / 2f + 0.03f, AsansorYuk / 2f, yuz + 0.02f),
+                 new Vector3(0.06f, AsansorYuk, 0.04f));
+            Kutu("Kasa_Ust", a, new Vector3(0f, AsansorYuk + 0.03f, yuz + 0.02f),
+                 new Vector3(AsansorGen + 0.12f, 0.06f, 0.04f));
 
-        // Kat göstergesi: kapının üstünde küçük bir ekran. Asansör arızalı,
-        // o yüzden sadece bir çizgi yazıyor. İleride bir anomali buraya
-        // olmaması gereken bir kat numarası yazabilir.
-        Kutu("Gosterge", a, new Vector3(0f, AsansorYuk + 0.22f, yuz + 0.015f),
-             new Vector3(0.30f, 0.12f, 0.03f));
-        YaziKur("Yazi", a, new Vector3(0f, AsansorYuk + 0.22f, yuz + 0.035f), "-", 0.012f);
+            // İki kapı kanadı, boşluğun 5 cm içinde.
+            float kanatGen = AsansorGen / 2f - 0.01f;
+            Kutu("Kapi_Sol", a, new Vector3(-kanatGen / 2f - 0.005f, AsansorYuk / 2f, yuz - 0.05f),
+                 new Vector3(kanatGen, AsansorYuk - 0.02f, 0.05f));
+            Kutu("Kapi_Sag", a, new Vector3(kanatGen / 2f + 0.005f, AsansorYuk / 2f, yuz - 0.05f),
+                 new Vector3(kanatGen, AsansorYuk - 0.02f, 0.05f));
+
+            // Çağrı düğmesi: oyuncunun SAĞINDA, bel hizasında bir plaka ve üstünde düğme.
+            // Oyuncu asansöre bakarken -z yönüne bakıyor; onun sağı dünyanın -x tarafı.
+            GameObject dugme = Kutu("Cagri_Dugmesi", a, new Vector3(-(AsansorGen / 2f + 0.3f), 1.1f, yuz + 0.015f),
+                 new Vector3(0.10f, 0.18f, 0.03f));
+            Kutu("Dugme", dugme.transform, new Vector3(0f, 0f, 0.6f), new Vector3(0.4f, 0.25f, 0.8f));
+
+            // Kat göstergesi: kapının üstünde küçük bir ekran. Asansör arızalı,
+            // o yüzden sadece bir çizgi yazıyor. İleride bir anomali buraya
+            // olmaması gereken bir kat numarası yazabilir.
+            Kutu("Gosterge", a, new Vector3(0f, AsansorYuk + 0.22f, yuz + 0.015f),
+                 new Vector3(0.30f, 0.12f, 0.03f));
+        }
+
+        // Göstergedeki yazı: modelde koyu kırmızı ekranın önünde kırmızı rakam.
+        YaziKur("Yazi", a, new Vector3(0f, AsansorYuk + 0.22f, yuz + 0.04f), "-", 0.012f,
+                model ? new Color(0.9f, 0.15f, 0.1f) : new Color(0.10f, 0.10f, 0.12f));
+
+        // Kanadın ön yüzü: modelde yüzeyden 1 cm, kutu sürümünde 2,5 cm içeride.
+        float kanatOnu = model ? yuz - 0.01f : yuz - 0.05f + 0.025f;
 
         if (tam)
         {
             // "ARIZALI" notu: oyuncunun sağındaki kanada (-x) bantlanmış bir kâğıt.
-            float kanatOnu = yuz - 0.05f + 0.025f;   // kanadın ön yüzü
             Kutu("Not", a, new Vector3(-0.22f, 1.45f, kanatOnu + 0.004f),
                  new Vector3(0.26f, 0.20f, 0.008f));
             YaziKur("Not_Yazi", a, new Vector3(-0.22f, 1.46f, kanatOnu + 0.01f),
@@ -365,6 +402,14 @@ public static class GrayboxKurucu
 
     // Asansör yazıları için 3B yazı. Sahanlığa (+z) bakar.
     static void YaziKur(string ad, Transform ebeveyn, Vector3 konum, string metin, float boy)
+    {
+        YaziKur(ad, ebeveyn, konum, metin, boy, new Color(0.10f, 0.10f, 0.12f));
+    }
+
+    // Aynı isimde ama renk de alan ikinci sürüm. C#'ta aynı isimli fonksiyon farklı
+    // parametrelerle birden fazla kez yazılabilir ("aşırı yükleme"); derleyici
+    // çağrıdaki parametrelere bakıp doğrusunu seçer.
+    static void YaziKur(string ad, Transform ebeveyn, Vector3 konum, string metin, float boy, Color renk)
     {
         GameObject g = new GameObject(ad);
         g.transform.SetParent(ebeveyn, false);
@@ -381,7 +426,7 @@ public static class GrayboxKurucu
         yazi.alignment = TextAlignment.Center;
         yazi.fontSize = 96;
         yazi.characterSize = boy;
-        yazi.color = new Color(0.10f, 0.10f, 0.12f);
+        yazi.color = renk;
         yazi.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         g.GetComponent<MeshRenderer>().sharedMaterial = yazi.font.material;
     }
@@ -459,18 +504,37 @@ public static class GrayboxKurucu
         // Paspas: kapının tam önünde, duvara dayalı. Artık kapının çocuğu;
         // böylece dört kapının paspası dört ayrı isim yerine "Kapi_N/Paspas" oluyor.
         const float PaspasEn = 0.62f, PaspasBoy = 0.50f;
-        Kutu("Paspas", k, new Vector3(duvarYuzu - yon * PaspasEn / 2f, 0.015f, 0f),
-             new Vector3(PaspasEn, 0.03f, PaspasBoy));
+        if (Model("Paspas", k, "Paspas", null, new Vector3(duvarYuzu - yon * PaspasEn / 2f, 0f, 0f), 0f, false) == null)
+            Kutu("Paspas", k, new Vector3(duvarYuzu - yon * PaspasEn / 2f, 0.015f, 0f),
+                 new Vector3(PaspasEn, 0.03f, PaspasBoy));
 
         // Terlikler: paspasın üstünde bir çift, ayrı ayrı ("tek terlik" anomalisi).
         GameObject terlikler = new GameObject("Terlikler");
         terlikler.transform.SetParent(k, false);
-        Kutu("Terlik_Sol", terlikler.transform,
-             new Vector3(duvarYuzu - yon * 0.32f, 0.045f, -0.11f),
-             new Vector3(0.26f, 0.06f, 0.10f));
-        Kutu("Terlik_Sag", terlikler.transform,
-             new Vector3(duvarYuzu - yon * 0.32f, 0.045f, 0.11f),
-             new Vector3(0.26f, 0.06f, 0.10f));
+        // Model varsa: burunlar kapıya dönük (daireye girerken çıkarılmış gibi).
+        // Terlik modelinin burnu -Z'ye bakar; -90 x yon derece dönüş burnu duvara çevirir.
+        // Sağ terlik, sol terliğin AYNASI: x ölçeği -1. Ayrı nesneler olmaları şart,
+        // çünkü "tek terlik" anomalisi yalnızca birini gizliyor.
+        GameObject terlikSol = Model("Terlik_Sol", terlikler.transform, "Terlik", null,
+                                     new Vector3(duvarYuzu - yon * 0.30f, 0f, -0.07f), -90f * yon, false);
+        if (terlikSol != null)
+        {
+            GameObject terlikSag = Model("Terlik_Sag", terlikler.transform, "Terlik", null,
+                                         new Vector3(duvarYuzu - yon * 0.30f, 0f, 0.07f), -90f * yon, false);
+            terlikSag.transform.localScale = new Vector3(-1f, 1f, 1f);
+        }
+        else
+        {
+            Kutu("Terlik_Sol", terlikler.transform,
+                 new Vector3(duvarYuzu - yon * 0.32f, 0.045f, -0.11f),
+                 new Vector3(0.26f, 0.06f, 0.10f));
+            Kutu("Terlik_Sag", terlikler.transform,
+                 new Vector3(duvarYuzu - yon * 0.32f, 0.045f, 0.11f),
+                 new Vector3(0.26f, 0.06f, 0.10f));
+        }
+
+        // İsimlik: zilin üstünde, duvarda. Pivotu arka yüzünde; -90 x yon ön yüzü sahanlığa çevirir.
+        Model("Isimlik", k, "Isimlik", null, new Vector3(duvarYuzu, 1.55f, KapiGen / 2f + 0.12f), -90f * yon, false);
 
         // Kapının arkasındaki karanlık hol.
         DaireIciKur(k, yon);
@@ -845,6 +909,95 @@ public static class GrayboxKurucu
     // =====================================================================
     // KÜÇÜK YARDIMCILAR
     // =====================================================================
+
+    // ---------- BLENDER MODELLERİ (#24) ----------
+    // Eşyaların modelleri Art/Blender/scripts altındaki betiklerle üretilip
+    // Assets/Models/Props'a FBX olarak konuyor.
+    const string ModelKlasoru = "Assets/Models/Props/";
+
+    // Bir FBX'teki tek bir parçayı sahneye, verilen isimle koyar.
+    //   ad:       sahnedeki isim (anomali kartlarının hedef aldığı isim)
+    //   dosya:    FBX dosyasının adı (uzantısız)
+    //   parca:    FBX içindeki parçanın adı; tek parçalı dosyada null
+    //   konum:    ebeveyne göre yerel konum
+    //   yDonus:   dikey eksen etrafında dönüş (ön yüzü çevirmek için)
+    //   carpisma: oyuncu içinden geçemesin diye kutu şeklinde çarpışma eklensin mi
+    // FBX bulunamazsa null döner; çağıran taraf o zaman eski beyaz kutuyu koyar.
+    //
+    // NEDEN FBX'İ OLDUĞU GİBİ SAHNEYE KOYMUYORUZ
+    // Asansörün parçaları "Asansor/Kapi_Sol" yolunda durmalı (kartlar bu yolu hedefliyor).
+    // FBX olduğu gibi konsaydı araya dosyanın kendi kök nesnesi girer ve yol
+    // "Asansor/Asansor/Kapi_Sol" olurdu. Parçanın meshini ve malzemelerini kendi
+    // isimlendirdiğimiz nesneye kopyalamak yolu bizim kontrolümüzde tutuyor.
+    static GameObject Model(string ad, Transform ebeveyn, string dosya, string parca,
+                            Vector3 konum, float yDonus, bool carpisma)
+    {
+        GameObject fbx = AssetDatabase.LoadAssetAtPath<GameObject>(ModelKlasoru + dosya + ".fbx");
+        if (fbx == null) return null;
+
+        // Parçayı bul: adı verildiyse ÖNCE FBX'in içinde ara. Önce içeride aramak şart:
+        // sayaç dosyasında hem dosyanın kök nesnesi hem içindeki parça "Elektrik_Sayaci"
+        // adını taşıyor; kökü seçseydik (kökte mesh yok) model sessizce kutuya dönerdi.
+        // Ad verilmediyse, tek parçalı dosyada mesh kökün kendisindedir.
+        Transform kaynak = parca == null ? fbx.transform : fbx.transform.Find(parca);
+        if (kaynak == null && parca == fbx.name) kaynak = fbx.transform;
+        if (kaynak == null) return null;
+
+        MeshFilter kaynakMesh = kaynak.GetComponent<MeshFilter>();
+        if (kaynakMesh == null) return null;
+
+        GameObject g = new GameObject(ad);
+        g.transform.SetParent(ebeveyn, false);
+
+        // Parçanın FBX içindeki kendi konumu da eklenir: sayaç kapağının pivotu
+        // menteşede olduğu için FBX'te kutunun yanında, kaydırılmış duruyor.
+        bool kokParca = kaynak == fbx.transform;
+        g.transform.localPosition = konum + (kokParca ? Vector3.zero : kaynak.localPosition);
+        g.transform.localRotation = Quaternion.Euler(0f, yDonus, 0f) *
+                                    (kokParca ? Quaternion.identity : kaynak.localRotation);
+
+        // sharedMesh / sharedMaterials: kopya üretmeden aynı meshi ve malzemeleri
+        // paylaş. Her sahanlıkta ayrı kopya üretseydik bellek boşa harcanırdı.
+        g.AddComponent<MeshFilter>().sharedMesh = kaynakMesh.sharedMesh;
+        g.AddComponent<MeshRenderer>().sharedMaterials = kaynak.GetComponent<MeshRenderer>().sharedMaterials;
+
+        // BoxCollider eklendiği anda kendini meshin sınırlarına göre boyutlandırır.
+        if (carpisma) g.AddComponent<BoxCollider>();
+
+        return g;
+    }
+
+    // Kapıların önündeki ek eşyalar. Hepsi bir kapının çocuğu, böylece yolları
+    // "Kapi_N/..." biçiminde ve kapının kendi yerel eksenlerinde.
+    //
+    // GÖRÜNMEZ BAŞLAYANLAR: tüp, gazete ve tek ayakkabı normal bir katta yoktur.
+    // #8'deki "olmaması gereken bir şey" anomalileri (F29, F31, T15) bunları
+    // görünür yaparak kurulacak. Nesne sahnede hazır beklediği için o kartlar
+    // tek satır veriyle yazılabilecek.
+    static void KapiEkEsyalari(Transform sahanlik)
+    {
+        // Sol duvar kapıları -x duvarında, sağ duvardakiler +x'te.
+        float sol = -(SahanlikGen / 2f), sag = SahanlikGen / 2f;
+
+        // Saksı: 1 numaranın merdiven tarafında, duvara yakın. Normalde VAR (F30 onu gizler).
+        Model("Saksi", sahanlik.Find("Kapi_1"), "Saksi", null,
+              new Vector3(sol + 0.18f, 0f, KapiGen / 2f + 0.35f), 0f, true);
+
+        // Tüp: 2 numaranın önünde, kapıdan 75 cm uzakta. Normalde YOK (F29).
+        GameObject tup = Model("Tup", sahanlik.Find("Kapi_2"), "Tup", null,
+                               new Vector3(sol + 0.75f, 0f, 0f), 0f, true);
+        if (tup != null) tup.SetActive(false);
+
+        // Gazete: 3 numaranın paspasının üstünde. Normalde YOK (F31).
+        GameObject gazete = Model("Gazete", sahanlik.Find("Kapi_3"), "Gazete", null,
+                                  new Vector3(sag - 0.30f, 0.016f, 0.04f), 12f, false);
+        if (gazete != null) gazete.SetActive(false);
+
+        // Tek erkek ayakkabısı: 4 numaranın önünde, burnu kapıya dönük. Normalde YOK (T15).
+        GameObject ayakkabi = Model("Ayakkabi", sahanlik.Find("Kapi_4"), "Ayakkabi", null,
+                                    new Vector3(sag - 0.45f, 0f, -0.2f), -90f, false);
+        if (ayakkabi != null) ayakkabi.SetActive(false);
+    }
 
     // Adı, ebeveyni, yerel konumu ve ölçeği verilen bir küp üretir.
     static GameObject Kutu(string ad, Transform ebeveyn, Vector3 konum, Vector3 olcek)

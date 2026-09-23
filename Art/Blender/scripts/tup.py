@@ -86,26 +86,18 @@ bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=HALKA_YARICAP,
 halka = bpy.context.active_object
 ortak.ata(halka, mavi)
 
-# BOOLEAN: bir şekli başka bir şekille "oymak". İçi boşaltmak için daha ince
-# bir silindiri, delikler için bir kutuyu halkadan çıkarıyoruz.
-def oy(hedef, kesici):
-    mod = hedef.modifiers.new("Oy", "BOOLEAN")
-    mod.operation = "DIFFERENCE"   # kesicinin kapladığı yeri hedeften sil
-    mod.object = kesici
-    bpy.context.view_layer.objects.active = hedef
-    bpy.ops.object.modifier_apply(modifier=mod.name)
-    bpy.data.objects.remove(kesici, do_unlink=True)   # kesici artık gereksiz
-
+# İçi boşaltmak için daha ince bir silindiri, delikler için bir kutuyu halkadan oyuyoruz
+# (ortak.oy: "boolean" ile bir şekli başka bir şekilden çıkarmak).
 bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=HALKA_YARICAP - HALKA_KALIN,
                                     depth=HALKA_YUKSEK * 2, location=(0, 0, halka_z))
-oy(halka, bpy.context.active_object)
+ortak.oy(halka, bpy.context.active_object)
 
 # Tutamak delikleri: x ekseni boyunca uzanan bir kutu, halkanın iki yanını birden deler.
 bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, halka_z + 0.02))
 delik = bpy.context.active_object
 delik.scale = (HALKA_YARICAP * 3, 0.085, 0.035)
 bpy.ops.object.transform_apply(scale=True)
-oy(halka, delik)
+ortak.oy(halka, delik)
 
 ortak.pah(halka, 0.002)
 parcalar.append(halka)
