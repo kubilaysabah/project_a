@@ -25,3 +25,13 @@ MonoBehaviour:
     sayi: 1
     metin: 
     ses: {fileID: 0}
+  - hedefYol: Kapi_5
+    tur: 7
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 1, b: 1, a: 1}
+    sayi: 0.45
+    metin: 
+    ses: {fileID: 8300000, guid: 7463b9623c4089b47a60bed8db58d7dd, type: 3}
+    dongu: 1
+    gecikme: 0

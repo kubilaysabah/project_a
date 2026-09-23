@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 701f977fa1f14da47980ad5d47cad2ab, type: 3}
+  m_Name: Tekinsiz_Ters_Aglama
+  m_EditorClassIdentifier: Huzur.Anomali::AnomaliKarti
+  kimlik: ters_aglama
+  katman: 1
+  zorluk: 2
+  aciklama: Merdivene yakin sag (4.) dairedeki bebek tersten agliyor.
+  etkiler:
+  - hedefYol: Kapi_4/Ses_Bebek
+    tur: 0
+    gorunur: 0
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 1, b: 1, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 0
+  - hedefYol: Kapi_4/Daire_Ici/Arka
+    tur: 7
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 1, b: 1, a: 1}
+    sayi: 0.55
+    metin: 
+    ses: {fileID: 8300000, guid: af9816777413f174ea533e4d2e4eddb5, type: 3}
+    dongu: 1
+    gecikme: 0

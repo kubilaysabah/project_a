@@ -347,3 +347,13 @@ MonoBehaviour:
     ses: {fileID: 0}
     dongu: 0
     gecikme: 8.6
+  - hedefYol: Asansor/Kuyu
+    tur: 7
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 1, b: 1, a: 1}
+    sayi: 0.7
+    metin: 
+    ses: {fileID: 8300000, guid: 1def28a99264f9e4c8896a1f15f41a68, type: 3}
+    dongu: 1
+    gecikme: 3.6

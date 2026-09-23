@@ -37,3 +37,13 @@ MonoBehaviour:
     ses: {fileID: 8300000, guid: d2db20a2738e5e1458ef44b452ce6c8c, type: 3}
     dongu: 0
     gecikme: 8
+  - hedefYol: Kapi_2/Ses_TV
+    tur: 0
+    gorunur: 0
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 1, g: 1, b: 1, a: 1}
+    sayi: 1
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 2.5

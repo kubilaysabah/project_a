@@ -17,7 +17,7 @@ MonoBehaviour:
   zorluk: 2
   aciklama: Merdivene yakin sol (1.) dairenin kapisi ICERIDEN uc kez tiklatiliyor; biraz sonra yine.
   etkiler:
-  - hedefYol: Kapi_1/Daire_Ici
+  - hedefYol: Kapi_1/Daire_Ici/Arka
     tur: 7
     gorunur: 1
     vektor: {x: 0, y: 0, z: 0}
@@ -27,7 +27,7 @@ MonoBehaviour:
     ses: {fileID: 8300000, guid: 482b44ee12097e34d8f3ffff5677158a, type: 3}
     dongu: 0
     gecikme: 3
-  - hedefYol: Kapi_1/Daire_Ici
+  - hedefYol: Kapi_1/Daire_Ici/Arka
     tur: 7
     gorunur: 1
     vektor: {x: 0, y: 0, z: 0}

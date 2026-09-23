@@ -37,7 +37,7 @@ MonoBehaviour:
     ses: {fileID: 0}
     dongu: 0
     gecikme: 4
-  - hedefYol: Kapi_2
+  - hedefYol: Kapi_2/Mentese
     tur: 7
     gorunur: 1
     vektor: {x: 0, y: 0, z: 0}
