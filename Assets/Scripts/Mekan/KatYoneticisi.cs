@@ -616,12 +616,20 @@ public class KatYoneticisi : MonoBehaviour
             yield return new WaitForSeconds(aralik);
         }
 
-        // Tam karanlık. Hiçbir şey olmaz; oyunun en korkunç anı burasıdır.
+        // Tam karanlık ve TAM SESSİZLİK (#14). Binanın uğultusu, TV'ler, borular...
+        // hepsi aynı anda susar. AudioListener.pause oyundaki bütün sesleri
+        // duraklatır; oyuncu sesin yokluğunu, ışığın yokluğundan bile önce duyar.
+        // Hiçbir şey olmaz; oyunun en korkunç anı burasıdır.
+        AudioListener.pause = true;
         yield return new WaitForSeconds(karanlikSuresi);
 
         OyuncuyuBasaAl();
 
         foreach (var lamba in lambalar) LambayiAyarla(lamba, true);
+
+        // Işıkla birlikte ses de geri gelir. Duraklatılan sesler kaldıkları yerden
+        // devam eder; hepsi birlikte durduğu için saat kilitleri bozulmaz.
+        AudioListener.pause = false;
         for (int i = 0; i < ampuller.Length; i++) ampuller[i].color = ozgunRenkler[i];
 
         merdiven.DonguyuAyarla(true);
@@ -665,6 +673,12 @@ public class KatYoneticisi : MonoBehaviour
             LambayiAyarla(lamba, true);
             yield return new WaitForSeconds(Random.Range(0.06f, 0.22f));
         }
+    }
+
+    // Oyun ceza sırasında durdurulursa ses duraklatılmış kalmasın.
+    private void OnDisable()
+    {
+        AudioListener.pause = false;
     }
 
     private void OyuncuyuBasaAl()

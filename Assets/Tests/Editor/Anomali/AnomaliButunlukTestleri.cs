@@ -201,6 +201,28 @@ public class AnomaliButunlukTestleri
             string.Join(", ", hatalar));
     }
 
+    // Normal katın ses dokusu (#14). Ses bozulması kartları bu yolları hedefliyor;
+    // biri sahanlığı yeniden düzenlerken bir katmanı silerse ya da döngüsünü bozarsa
+    // anomali kartları sessizce etkisiz kalırdı.
+    [Test]
+    public void Ortam_ses_katmanlari_sahanlikta_ve_dongude()
+    {
+        foreach (string yol in new[] { "Ses_Ugultu", "Kapi_2/Ses_TV", "Kapi_4/Ses_Bebek", "Ses_Boru" })
+        {
+            Transform t = sahanlik.Find(yol);
+            Assert.IsNotNull(t, $"'{yol}' ses katmanı sahanlıkta yok.");
+
+            AudioSource kaynak = t.GetComponent<AudioSource>();
+            Assert.IsNotNull(kaynak, $"'{yol}' üzerinde AudioSource yok.");
+            Assert.IsNotNull(kaynak.clip, $"'{yol}' için ses dosyası bağlanmamış.");
+            Assert.IsTrue(kaynak.loop, $"'{yol}' döngüde çalmıyor; bir süre sonra susar.");
+            // OrtamSesi oyunun varsayılan derlemesinde (Assembly-CSharp); test derlemeleri
+            // oraya başvuramaz. Bileşeni tipiyle değil ADIYLA arıyoruz.
+            Assert.IsNotNull(t.GetComponent("OrtamSesi"),
+                $"'{yol}' saate kilitli değil (OrtamSesi yok); ışınlanmada ses atlar.");
+        }
+    }
+
     [Test]
     public void Hicbir_kart_bos_degildir()
     {

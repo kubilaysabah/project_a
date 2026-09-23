@@ -275,6 +275,10 @@ public static class GrayboxKurucu
         // alt katların karanlık bir delik gibi değil, ışıklı katlar gibi görünmesi için.
         AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.30f, onZ / 2f), 8f, LambaSiddeti);
 
+        // Normal katın ses dokusu (#14). Sahte katlarda da var: komşu katların sesi
+        // hafifçe duyulur ve ışınlanmada ses ortamı değişmez.
+        OrtamSesleriKur(t);
+
         return kok;
     }
 
@@ -701,6 +705,10 @@ public static class GrayboxKurucu
         // (60 cm) arasından geçemez.
         KorkuluklariKur(t);
 
+        // Rüzgâr (#14): pencerenin dışından hafif bir uğultu.
+        OrtamKaynagi("Ses_Ruzgar", t, new Vector3(0f, AraKot + 1.45f, CekirdekDerin + 0.3f),
+                     "Ortam_Ruzgar", 0.30f, 1f, 6f);
+
         // Merdiven ampulü: ara sahanlığın üstünde.
         AmpulKur("Ampul_Merdiven", t,
                  new Vector3(0f, AraKot + 2.35f, KolUzunluk + AraSahanlikDerin / 2f), 7f, LambaSiddeti * 0.8f);
@@ -923,6 +931,63 @@ public static class GrayboxKurucu
     // =====================================================================
     // KÜÇÜK YARDIMCILAR
     // =====================================================================
+
+    // ---------- ORTAM SESLERİ (#14) ----------
+    // Bir sahanlığın ses katmanları. Hepsi sahanlığın (ya da bir kapının) çocuğu,
+    // yani anomali kartları onları da yolla hedefleyebilir: "Kapi_2/Ses_TV" gibi.
+    // Bir sesi susturmak = o nesneyi gizlemek; sesi başka yere taşımak = konumunu
+    // değiştirmek. Ses bozulmaları da kod değil, kart verisi.
+    //
+    // Ses dosyaları Art/Ses/scripts/ortam_uret.py ile kodla üretiliyor.
+    static void OrtamSesleriKur(Transform sahanlik)
+    {
+        float sol = -(SahanlikGen / 2f + DuvarKalin), sag = SahanlikGen / 2f + DuvarKalin;
+
+        // Uğultu: tavanın ortasından; bütün sahanlığı dolduracak kadar geniş menzil.
+        OrtamKaynagi("Ses_Ugultu", sahanlik, new Vector3(0f, 2.4f, -SahanlikDerin / 2f),
+                     "Ortam_Ugultu", 0.25f, 4f, 9f);
+
+        // Uzak TV: 2 numaranın İÇİNDEN, holün 80 cm gerisinden.
+        OrtamKaynagi("Ses_TV", sahanlik.Find("Kapi_2"), new Vector3(sol - 0.8f, 1.2f, 0f),
+                     "Ortam_TV", 0.5f, 1.5f, 9f);
+
+        // Bebek: 4 numaranın içinden.
+        OrtamKaynagi("Ses_Bebek", sahanlik.Find("Kapi_4"), new Vector3(sag + 0.8f, 1.0f, 0f),
+                     "Ortam_Bebek", 0.55f, 1.5f, 10f);
+
+        // Boru: arka duvarın sol parçasının içinden (elektrik sayacının arkası).
+        OrtamKaynagi("Ses_Boru", sahanlik, new Vector3(-(CekirdekGen / 2f + DuvarKalin + 0.85f), 1.0f, DuvarKalin / 2f),
+                     "Ortam_Boru", 0.5f, 1f, 8f);
+    }
+
+    // Tek bir ortam sesi kaynağı: döngüde çalan, üç boyutlu bir AudioSource ve
+    // onu diğer kopyalarla aynı saate kilitleyen OrtamSesi bileşeni.
+    //   ses:      ses şiddeti (0-1)
+    //   yakin:    bu mesafeye kadar tam şiddet (metre)
+    //   uzak:     bu mesafede tamamen sessiz; aradaki mesafede düzgün azalır
+    static void OrtamKaynagi(string ad, Transform ebeveyn, Vector3 konum, string klip,
+                             float ses, float yakin, float uzak)
+    {
+        if (ebeveyn == null) return;
+        AudioClip kayit = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Ortam/" + klip + ".wav");
+        if (kayit == null) return;
+
+        GameObject g = new GameObject(ad);
+        g.transform.SetParent(ebeveyn, false);
+        g.transform.localPosition = konum;
+
+        AudioSource kaynak = g.AddComponent<AudioSource>();
+        kaynak.clip = kayit;
+        kaynak.loop = true;
+        kaynak.playOnAwake = false;        // çalmayı OrtamSesi başlatır, saate kilitleyerek
+        kaynak.volume = ses;
+        kaynak.spatialBlend = 1f;          // tamamen üç boyutlu: yönü ve uzaklığı duyulur
+        kaynak.rolloffMode = AudioRolloffMode.Linear;
+        kaynak.minDistance = yakin;
+        kaynak.maxDistance = uzak;
+
+        g.AddComponent<OrtamSesi>();
+    }
 
     // ---------- BLENDER MODELLERİ (#24) ----------
     // Eşyaların modelleri Art/Blender/scripts altındaki betiklerle üretilip
