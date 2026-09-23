@@ -36,11 +36,24 @@ public class AnomaliUygulayici
         public Color eskiRenk;
         public float eskiSiddet;
         public string eskiMetin;
+
+        public GameObject sesNesnesi;    // ses etkisinin ürettiği ses kaynağı; geri alırken silinir
     }
 
     // List<T>: boyutu değişebilen dizi. Kaç değişiklik yapılacağını önceden
     // bilmediğimiz için normal dizi yerine bunu kullanıyoruz.
     private readonly List<Kayit> defter = new List<Kayit>();
+
+    // ---------- ZAMANLI ETKİLER (#13) ----------
+    // Gecikmesi olan etkiler kart uygulandığında HEMEN yapılmaz; bu listede sırasını
+    // bekler. KatYoneticisi her karede Ilerlet() çağırır, süresi dolan etki uygulanır.
+    // Bir kum saati gibi: kart uygulandığında ters çevrilir, kum aktıkça sıradaki olur.
+    private readonly List<AnomaliEtkisi> bekleyenler = new List<AnomaliEtkisi>();
+    private Transform uygulananSahanlik;
+    private float gecenSure;
+
+    /// <summary>Henüz zamanı gelmemiş etki sayısı.</summary>
+    public int BekleyenEtkiSayisi { get { return bekleyenler.Count; } }
 
     /// <summary>Şu an uygulanmış olan kart. Hiçbiri yoksa null.</summary>
     public AnomaliKarti UygulananKart { get; private set; }
@@ -72,12 +85,42 @@ public class AnomaliUygulayici
             return;
         }
 
+        UygulananKart = kart;
+        uygulananSahanlik = sahanlik;
+        gecenSure = 0f;
+
         foreach (AnomaliEtkisi etki in kart.Etkiler)
         {
-            EtkiUygula(kart, etki, sahanlik);
+            // Gecikmesi olan etki bekler; olmayan hemen uygulanır.
+            if (etki.gecikme > 0f) bekleyenler.Add(etki);
+            else EtkiUygula(kart, etki, sahanlik);
         }
 
-        UygulananKart = kart;
+        // Bekleyenleri zamanına göre sırala: erken olan önce. Sort'a verilen küçük
+        // fonksiyon iki etkiyi karşılaştırır (lambda: "a ile b'yi gecikmelerine göre kıyasla").
+        bekleyenler.Sort((a, b) => a.gecikme.CompareTo(b.gecikme));
+    }
+
+    // ---------- İLERLET ----------
+
+    /// <summary>
+    /// Kartın saatini ilerletir ve zamanı gelen bekleyen etkileri uygular.
+    /// KatYoneticisi yalnızca oyuncunun BULUNDUĞU sahanlık için çağırır; merdivenden
+    /// görünen üst sahanlıkta hiçbir şey kendiliğinden olmaz.
+    /// </summary>
+    public void Ilerlet(float gecenZaman)
+    {
+        if (bekleyenler.Count == 0 || UygulananKart == null) return;
+
+        gecenSure += gecenZaman;
+
+        // Liste sıralı: zamanı gelmeyen ilk etkide dururuz, arkasındakiler de gelmemiştir.
+        while (bekleyenler.Count > 0 && bekleyenler[0].gecikme <= gecenSure)
+        {
+            AnomaliEtkisi etki = bekleyenler[0];
+            bekleyenler.RemoveAt(0);
+            EtkiUygula(UygulananKart, etki, uygulananSahanlik);
+        }
     }
 
     private void EtkiUygula(AnomaliKarti kart, AnomaliEtkisi etki, Transform sahanlik)
@@ -164,16 +207,44 @@ public class AnomaliUygulayici
                 break;
 
             case EtkiTuru.Ses:
-                // Ses anlık çalar ve kendiliğinden biter; geri alınacak bir şey yok.
-                // Sürekli çalan ambiyans anomalileri ses tasarımıyla (#14) gelecek.
-                if (etki.ses != null)
+                if (etki.ses == null)
                 {
-                    AudioSource.PlayClipAtPoint(etki.ses, hedef.position);
+                    Debug.LogWarning($"[ANOMALİ] '{kart.Kimlik}': ses etkisinde ses dosyası yok.");
+                    return;
                 }
-                return;   // deftere yazmaya gerek yok
+                kayit.sesNesnesi = SesCal(hedef, etki);
+                break;
         }
 
         defter.Add(kayit);
+    }
+
+    // ---------- SES ----------
+    // Hedefin çocuğu olarak bir ses kaynağı üretir ve çalar. Ses kaynağı hedefin
+    // yerinde durduğu için ses oradan gelir: oyuncu zilin sesini zilin olduğu
+    // yönden duyar. Geri alırken bu nesne silinir, ses de onunla susar.
+    //
+    // Eskiden AudioSource.PlayClipAtPoint kullanılıyordu: Unity sahneye kendi
+    // geçici nesnesini koyar ve sesi durdurmanın bir yolu olmaz. Kat değişse ya da
+    // ceza gelse bile ses çalmaya devam ederdi.
+    private static GameObject SesCal(Transform hedef, AnomaliEtkisi etki)
+    {
+        GameObject g = new GameObject("Anomali_Sesi");
+        g.transform.SetParent(hedef, false);
+
+        AudioSource kaynak = g.AddComponent<AudioSource>();
+        kaynak.clip = etki.ses;
+        kaynak.loop = etki.dongu;
+        kaynak.volume = Mathf.Clamp01(etki.sayi);
+        kaynak.spatialBlend = 1f;                        // 1 = tamamen üç boyutlu: yönü ve uzaklığı duyulur
+        kaynak.rolloffMode = AudioRolloffMode.Linear;    // uzaklaştıkça düzgün azalsın
+        kaynak.minDistance = 1f;
+        kaynak.maxDistance = 14f;                        // bir kat boyunca duyulur, uzak katlarda susar
+        kaynak.playOnAwake = false;
+
+        // Editörde (oyun çalışmıyorken) ses çalmıyoruz; testler ve önizleme sessiz kalsın.
+        if (Application.isPlaying) kaynak.Play();
+        return g;
     }
 
     // ---------- RENK ----------
@@ -267,10 +338,25 @@ public class AnomaliUygulayici
                     TextMesh yazi = k.nesne.GetComponent<TextMesh>();
                     if (yazi != null) yazi.text = k.eskiMetin;
                     break;
+
+                case EtkiTuru.Ses:
+                    // Ses kaynağını sil. Oyun çalışırken Destroy (kare sonunda siler),
+                    // editörde DestroyImmediate (hemen siler; testler hemen karşılaştırıyor).
+                    if (k.sesNesnesi != null)
+                    {
+                        if (Application.isPlaying) Object.Destroy(k.sesNesnesi);
+                        else Object.DestroyImmediate(k.sesNesnesi);
+                    }
+                    break;
             }
         }
 
         defter.Clear();
+
+        // Zamanı gelmemiş etkiler de iptal: kat değişti, o kartın senaryosu artık oynamaz.
+        bekleyenler.Clear();
+        gecenSure = 0f;
+        uygulananSahanlik = null;
         UygulananKart = null;
     }
 }

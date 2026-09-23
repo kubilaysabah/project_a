@@ -53,6 +53,10 @@ public static class AnomaliOnizleyici
 
         uygulayici = new AnomaliUygulayici();
         uygulayici.Uygula(kart, sahanlik.transform);
+
+        // Zamanlı etkiler (#13) önizlemede beklemeden uygulanır: kartın senaryosunun
+        // SON hâli görünür. (Editörde zaman akmıyor; beklesek de hiç gelmezlerdi.)
+        uygulayici.Ilerlet(float.MaxValue);
         uygulananKartAdi = kart.Kimlik;
 
         Debug.Log($"[ÖNİZLEME] '{kart.Kimlik}' uygulandı ({kart.Katman}, zorluk {kart.Zorluk}). " +

@@ -123,6 +123,7 @@ public class AnomaliButunlukTestleri
         foreach (AnomaliKarti kart in kartlar)
         {
             uygulayici.Uygula(kart, sahanlik);
+            uygulayici.Ilerlet(float.MaxValue);   // zamanlı etkiler de denensin (#13)
             uygulayici.GeriAl();
 
             string sonHal = Fotograf();
@@ -144,6 +145,7 @@ public class AnomaliButunlukTestleri
             string once = Fotograf();
 
             uygulayici.Uygula(kart, sahanlik);
+            uygulayici.Ilerlet(float.MaxValue);   // zamanlı etkiler de denensin (#13)
             string uygulanmis = Fotograf();
 
             uygulayici.GeriAl();
@@ -249,6 +251,7 @@ public class AnomaliButunlukTestleri
             foreach (AnomaliKarti kart in kartlar)
             {
                 uygulayici.Uygula(kart, sahanlik);
+                uygulayici.Ilerlet(float.MaxValue);   // zamanlı etkiler de denensin (#13)
             }
         }
 

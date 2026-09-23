@@ -294,6 +294,12 @@ public class KatYoneticisi : MonoBehaviour
 
         // Ceza bekliyorsa sahanlıklara dokunmuyoruz: ışıklar zaten sönmek üzere.
         if (!cezaBekliyor && !sayac.TurBitti) SahanliklariGuncelle(zorla: false);
+
+        // Senaryolu anomali anları (#13): kartın zamanlı etkileri yalnızca oyuncunun
+        // BULUNDUĞU sahanlıkta işler. A mevcut katı gösteriyorsa oyuncu oradadır;
+        // aşağı inerken A bir sonraki katı gösterir ve saat durur. Üst sahanlığın (B)
+        // saati hiç işlemez: merdivenden bakarken bir şey kendiliğinden olmamalı.
+        if (gosterilenA == sayac.MevcutKat) uygulayiciA.Ilerlet(Time.deltaTime);
     }
 
     // ---------- KARARIN SONUCU ----------

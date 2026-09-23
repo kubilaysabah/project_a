@@ -77,12 +77,28 @@ public class AnomaliEtkisi
     [Tooltip("Metin türünde yazılacak yazı.")]
     public string metin;
 
-    [Tooltip("Ses türünde çalınacak ses dosyası.")]
+    [Tooltip("Ses türünde çalınacak ses dosyası. Ses, hedef nesnenin bulunduğu yerden " +
+             "üç boyutlu çalar; ses şiddeti 'sayi' alanından okunur (1 = tam).")]
     public AudioClip ses;
+
+    [Tooltip("Ses türünde: ses sürekli tekrar etsin mi? (uğultu, mırıltı gibi)")]
+    public bool dongu;
+
+    // ---------- ZAMANLAMA (#13, KÂBUS anları) ----------
+    // Bugüne kadarki bütün kartlarda etkiler kart uygulandığı anda gerçekleşiyordu.
+    // Senaryolu bir an (zil kendi kendine çalar, ışık bir an söner ve bir kapı
+    // açık bulunur) ZAMAN ister. Bu alan bunu veriyle ifade etmeyi sağlar:
+    // yeni bir anomali türü için yine kod yazmak gerekmez.
+    [Header("Zamanlama")]
+    [Tooltip("Etkinin, oyuncu bu kata vardıktan kaç saniye sonra uygulanacağı. " +
+             "0 = hemen (varsayılan). Zamanlayıcı yalnızca oyuncunun BULUNDUĞU " +
+             "sahanlıkta işler; merdivenden görünen üst sahanlıkta hiçbir şey kendiliğinden olmaz.")]
+    [Min(0f)]
+    public float gecikme;
 
     /// <summary>Kartı Inspector'da okunur kılmak için kısa özet.</summary>
     public override string ToString()
     {
-        return $"{tur} → {hedefYol}";
+        return gecikme > 0f ? $"{tur} → {hedefYol} ({gecikme:0.##} sn sonra)" : $"{tur} → {hedefYol}";
     }
 }
