@@ -9,6 +9,7 @@
 #   Assets/Resources/Sesler/Lamba_Cizirti son lamba titrerken elektrik cızırtısı
 #   Assets/Resources/Sesler/Poset_Hisirti poşet toplanırken naylon hışırtısı
 #   Assets/Audio/Ortam/Ortam_Sabah      çatı kapısı açılınca: uzak şehir, kuşlar, rüzgâr
+#   Assets/Resources/Sesler/Guvercin_Kanat çatı kapısı açılınca havalanan güvercinler (#16)
 #
 # "Resources" klasöründeki dosyaları oyun kodu adıyla yükleyebiliyor (Resources.Load);
 # sahnede hiçbir yere sürüklemek gerekmiyor. Anomali kartları da aynı yolla bulunuyor.
@@ -156,9 +157,32 @@ def sabah():
     kaydet(ORTAM, "Ortam_Sabah", sonuc, 0.7)
 
 
+# ---------- GÜVERCİNLER ----------
+# Çatı kapısı açılınca ürken bir sürü: çok sayıda kanat çırpışı. Tek bir çırpış,
+# kanadın havayı dövdüğü kısa, boğuk bir "fırr"dır (alçak geçiren süzgeçten geçmiş
+# gürültü patlaması). Her kuş saniyede 6-9 kez çırpar; kuşlar önce bir arada
+# havalanır, sonra uzaklaştıkça sesleri azalır.
+def guvercinler():
+    random.seed(11)
+    L = 3.5
+    s = [0.0] * int(L * HIZ)
+    for kus in range(9):
+        bas = random.uniform(0.0, 0.5)
+        hiz = random.uniform(6.0, 9.0)                          # saniyedeki çırpış
+        t = bas
+        while t < L - 0.1:
+            uzaklik = 1.0 / (1.0 + (t - bas) * 0.9)             # kuş uzaklaştıkça ses azalır
+            for i in range(int(t * HIZ), min(len(s), int((t + 0.06) * HIZ))):
+                g = i / HIZ - t
+                s[i] += uzaklik * math.sin(math.pi * g / 0.06) * random.uniform(-1, 1)
+            t += 1.0 / hiz * random.uniform(0.85, 1.15)
+    kaydet(SESLER, "Guvercin_Kanat", suz(suz(s, 0.25), 0.4), 0.8)
+
+
 if __name__ == "__main__":
     adimlar()
     lamba_sonme()
     lamba_cizirti()
     poset()
     sabah()
+    guvercinler()

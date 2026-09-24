@@ -52,7 +52,7 @@ public static class GrayboxKurucu
         string[] adlar =
         {
             // Bugünkü isimler
-            "Sahanlik_A", "Sahanlik_B", "Cekirdek_A", "Sahte_Katlar", "CatiBolumu", "Zemin_Kat",
+            "Sahanlik_A", "Sahanlik_B", "Cekirdek_A", "Sahte_Katlar", "CatiBolumu", "Zemin_Kat", "Final",
 
             // Düz merdivenli eski yerleşimin isimleri (#23 öncesi)
             "Merdiven_Yukari", "Merdiven_Yukari2", "Merdiven_Asagi", "Kapak_Alt", "Kapak_Ust"
@@ -153,6 +153,9 @@ public static class GrayboxKurucu
         GameObject cati = CatiBolumuKur();
         cati.transform.position = new Vector3(0f, DikeyOfset, 0f);
         cati.SetActive(false);
+
+        // ---- DIŞ CEPHE ve FİNAL (#16) ----
+        DisCepheKur();
 
         // ---- SİS ----
         // Sis, uzaktaki şeyleri yavaş yavaş bir renge boğar. Burada neredeyse siyah.
@@ -1047,6 +1050,175 @@ public static class GrayboxKurucu
         // ---- BODRUM KAPISI: aşağı inen merdivenin başını kapatır ----
         // Zemin kat binanın dibi; oyuncu açılışta aşağıdaki sahte katlara inmesin.
         Kutu("Bodrum_Kapisi", z, new Vector3(VarisKoluX, 1.1f, 0.14f), new Vector3(KolGen, 2.2f, 0.06f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+    }
+
+    // ---------- DIŞ CEPHE ve FİNAL (#16) ----------
+    // Final sahnesinin dış görüntüsü: merdiven boşluğundan çok uzakta (x = 400),
+    // oyuncunun kamerasının hiçbir zaman görmediği bir yerde basit bir apartman,
+    // iki alçak komşu, bir sokak ve final kamerası. Bina ZEMİN + 9 KAT: oyuncu
+    // sekiz kat çıktı ama dışarıdan bakınca bir kat fazla görüyor. 9. katta tek bir
+    // pencere yanıyor.
+    //
+    // Bina cephesi z = 0'da ve -z yönüne (kameraya) bakıyor.
+    const int CepheKatSayisi = 9;
+    const float CepheZemin = 3.6f;     // zemin katın yüksekliği (normal katlardan yüksek)
+    const float CepheGen = 16f, CepheDerin = 12f;
+
+    static void DisCepheKur()
+    {
+        GameObject kok = new GameObject("Final");
+        kok.transform.position = new Vector3(400f, 0f, 0f);
+        Transform f = kok.transform;
+
+        Material beton = MalzemeBul("Assets/Materials/Cephe_Beton.mat", new Color(0.62f, 0.58f, 0.52f));
+        Material bant = MalzemeBul("Assets/Materials/Cephe_Bant.mat", new Color(0.48f, 0.45f, 0.41f));
+        Material cam = MalzemeBul("Assets/Materials/Cephe_Cam.mat", new Color(0.05f, 0.06f, 0.08f));
+        Material komsu = MalzemeBul("Assets/Materials/Cephe_Komsu.mat", new Color(0.40f, 0.38f, 0.36f));
+        // Asfalt gerçekte daha koyudur, ama sahnenin gece ton eğrisi 0,2'nin altını
+        // simsiyah gösteriyor (0,09 ve 0,17 denendi: yol kadrajda bir delik gibiydi).
+        Material asfalt = MalzemeBul("Assets/Materials/Asfalt.mat", new Color(0.28f, 0.28f, 0.29f));
+        // MalzemeBul var olan dosyayı olduğu gibi döndürür; eski, daha koyu bir
+        // asfalt dosyası kalmışsa rengini burada düzeltiyoruz.
+        asfalt.SetColor("_BaseColor", new Color(0.28f, 0.28f, 0.29f));
+        Material kaldirim = MalzemeBul("Assets/Materials/Kaldirim.mat", new Color(0.36f, 0.35f, 0.34f));
+        Material metal = MalzemeBul("Assets/Materials/Metal_Gri.mat", new Color(0.42f, 0.44f, 0.45f));
+
+        float ustKot = CepheZemin + CepheKatSayisi * KatYuksekligi;   // 30,6 m
+
+        // ---- GÖVDE ----
+        Boya(Kutu("Govde", f, new Vector3(0f, ustKot / 2f, CepheDerin / 2f), new Vector3(CepheGen, ustKot, CepheDerin)), beton);
+
+        // ---- ZEMİN KAT: giriş, sundurma, tabela ----
+        Boya(Kutu("Giris_Kapisi", f, new Vector3(0f, 1.2f, -0.03f), new Vector3(1.6f, 2.4f, 0.06f)), cam);
+        Boya(Kutu("Sundurma", f, new Vector3(0f, 2.75f, -0.6f), new Vector3(2.6f, 0.12f, 1.2f)), bant);
+        for (int i = 0; i < 4; i++)
+        {
+            float x = (i < 2 ? -1 : 1) * (3.2f + (i % 2) * 2.8f);
+            Boya(Kutu($"Zemin_Pencere_{i + 1}", f, new Vector3(x, 1.7f, -0.03f), new Vector3(1.6f, 1.2f, 0.06f)), cam);
+        }
+        GameObject tabela = new GameObject("Tabela");
+        tabela.transform.SetParent(f, false);
+        tabela.transform.localPosition = new Vector3(0f, 3.15f, -0.05f);
+        TextMesh ty = tabela.AddComponent<TextMesh>();
+        ty.text = "HUZUR APARTMANI";
+        ty.anchor = TextAnchor.MiddleCenter;
+        ty.fontSize = 96;
+        ty.characterSize = 0.035f;
+        ty.color = new Color(0.12f, 0.10f, 0.08f);
+        ty.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        tabela.GetComponent<MeshRenderer>().sharedMaterial = YaziMalzeme(ty.font);
+
+        // ---- 9 NORMAL KAT ----
+        // Her kat çizgisinde öne taşan bir bant: katları SAYMAYI kolaylaştırıyor,
+        // sürprizin okunması buna bağlı.
+        float[] pencereX = { -6f, -3f, 0f, 3f, 6f };
+        Material isikliCam = IsikliPencereMalzeme();
+        for (int kat = 1; kat <= CepheKatSayisi; kat++)
+        {
+            float y0 = CepheZemin + (kat - 1) * KatYuksekligi;
+            Boya(Kutu($"Bant_{kat}", f, new Vector3(0f, y0, -0.08f), new Vector3(CepheGen + 0.3f, 0.22f, 0.16f)), bant);
+
+            for (int p = 0; p < pencereX.Length; p++)
+            {
+                // 9. katın en sağdaki penceresi YANIYOR: finalin sorusu o pencere.
+                bool yanan = kat == CepheKatSayisi && p == 4;
+                Boya(Kutu($"Pencere_{kat}_{p + 1}", f, new Vector3(pencereX[p], y0 + 1.65f, -0.03f), new Vector3(1.3f, 1.5f, 0.06f)),
+                     yanan ? isikliCam : cam);
+                Boya(Kutu($"Denizlik_{kat}_{p + 1}", f, new Vector3(pencereX[p], y0 + 0.87f, -0.08f), new Vector3(1.5f, 0.06f, 0.16f)), bant);
+            }
+
+            // İki balkon: -3 ve +3'teki pencerelerin önünde döşeme ve korkuluk.
+            foreach (float bx in new[] { -3f, 3f })
+            {
+                Boya(Kutu($"Balkon_{kat}_{bx}", f, new Vector3(bx, y0 + 0.06f, -0.55f), new Vector3(2.2f, 0.12f, 1.1f)), bant);
+                Boya(Kutu($"Korkuluk_{kat}_{bx}", f, new Vector3(bx, y0 + 0.55f, -1.07f), new Vector3(2.2f, 0.9f, 0.05f)), metal);
+            }
+        }
+
+        // ---- ÇATI: korkuluk, merdiven evi, su deposu, anten ----
+        Boya(Kutu("Cati_Korkuluk", f, new Vector3(0f, ustKot + 0.5f, 0.1f), new Vector3(CepheGen, 1f, 0.2f)), bant);
+        Boya(Kutu("Merdiven_Evi", f, new Vector3(-4f, ustKot + 1.4f, 6f), new Vector3(4f, 2.8f, 4f)), beton);
+        GameObject depo = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        depo.name = "Su_Deposu";
+        depo.transform.SetParent(f, false);
+        depo.transform.localPosition = new Vector3(3.5f, ustKot + 1.0f, 5f);
+        depo.transform.localScale = new Vector3(1.6f, 1.0f, 1.6f);
+        Boya(depo, metal);
+        Boya(Kutu("Anten", f, new Vector3(-4f, ustKot + 4.3f, 6f), new Vector3(0.05f, 3f, 0.05f)), metal);
+        Boya(Kutu("Anten_Kol", f, new Vector3(-4f, ustKot + 5.2f, 6f), new Vector3(1.2f, 0.04f, 0.04f)), metal);
+
+        // ---- KOMŞULAR: alçak, koyu; bizim bina yanlarında yükseliyor ----
+        Boya(Kutu("Komsu_Sol", f, new Vector3(-CepheGen / 2f - 5f, 6.3f, CepheDerin / 2f + 0.5f), new Vector3(10f, 12.6f, CepheDerin)), komsu);
+        Boya(Kutu("Komsu_Sag", f, new Vector3(CepheGen / 2f + 5f, 7.8f, CepheDerin / 2f + 0.5f), new Vector3(10f, 15.6f, CepheDerin)), komsu);
+
+        // ---- SOKAK ----
+        Boya(Kutu("Kaldirim", f, new Vector3(0f, 0.07f, -2f), new Vector3(80f, 0.14f, 4f)), kaldirim);
+        // Yol 10 m: iki şerit. İlk denemede 52 m derinliğinde bir asfalt vardı; alçak
+        // şafak güneşi yatay yüzeyi çok az aydınlattığı için kadrajın altı simsiyah
+        // bir boşluk gibi görünüyordu.
+        Boya(Kutu("Yol", f, new Vector3(0f, -0.05f, -9f), new Vector3(120f, 0.1f, 10f)), asfalt);
+        for (int serit = -9; serit <= 9; serit++)   // kesik orta şerit: 2 m çizgi, 2 m boşluk
+            Boya(Kutu("Serit_" + (serit + 10), f, new Vector3(serit * 4f, 0.005f, -9f), new Vector3(2f, 0.01f, 0.14f)), kaldirim);
+        Boya(Kutu("Kaldirim_Karsi", f, new Vector3(0f, 0.07f, -15.5f), new Vector3(80f, 0.14f, 3f)), kaldirim);
+
+        // Karşı kaldırımın ardında boş bir arsa: sıkışmış açık renkli toprak. Kamera
+        // son duruşunda buradan (z = -52) binaya bakıyor; açık renk, alçak güneşte
+        // bile kadrajın altını karanlık bir delik olmaktan çıkarıyor.
+        Boya(Kutu("Bos_Arsa", f, new Vector3(0f, -0.02f, -48f), new Vector3(120f, 0.1f, 62f)),
+             MalzemeBul("Assets/Materials/Toprak.mat", new Color(0.46f, 0.40f, 0.32f)));
+        Boya(Kutu("Lamba_Diregi", f, new Vector3(-6f, 2.6f, -3.6f), new Vector3(0.12f, 5.2f, 0.12f)), metal);
+        GameObject sokakIsigi = new GameObject("Sokak_Lambasi");
+        sokakIsigi.transform.SetParent(f, false);
+        sokakIsigi.transform.localPosition = new Vector3(-6f, 5.1f, -3.2f);
+        Light si = sokakIsigi.AddComponent<Light>();
+        si.type = LightType.Point;
+        si.range = 12f;
+        si.intensity = 2.5f;
+        si.color = new Color(1f, 0.72f, 0.42f);
+        si.shadows = LightShadows.None;
+
+        // ---- FİNAL KAMERASI: başta kapalı; final başlayınca açılır ----
+        GameObject kam = new GameObject("Final_Kamera");
+        kam.transform.SetParent(f, false);
+        Camera c = kam.AddComponent<Camera>();
+        c.fieldOfView = 60f;
+        c.farClipPlane = 600f;
+        UnityEngine.Rendering.Universal.UniversalAdditionalCameraData veri =
+            kam.AddComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+        veri.renderPostProcessing = true;
+        veri.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+        kam.AddComponent<AudioListener>();
+
+        // Kameranın kulağında sabah sesi: iki boyutlu, sokağın sesi.
+        AudioSource sokak = kam.AddComponent<AudioSource>();
+        sokak.clip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Ortam/Ortam_Sabah.wav");
+        sokak.loop = true;
+        sokak.playOnAwake = true;          // kamera açılınca çalmaya başlar
+        sokak.spatialBlend = 0f;
+        sokak.volume = 0.7f;
+        kam.SetActive(false);
+
+        kok.AddComponent<FinalSahnesi>();
+    }
+
+    static void Boya(GameObject g, Material m)
+    {
+        g.GetComponent<MeshRenderer>().sharedMaterial = m;
+    }
+
+    // 9. kattaki yanan pencere: ışıktan etkilenmeyen (Unlit), 1'in üstünde parlak
+    // sıcak bir renk. Bloom efekti etrafında hafif bir hale oluşturur.
+    static Material IsikliPencereMalzeme()
+    {
+        const string Yol = "Assets/Materials/Pencere_Isik.mat";
+        Material mevcut = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (mevcut != null) return mevcut;
+
+        Material yeni = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        yeni.SetColor("_BaseColor", new Color(1f, 0.72f, 0.40f) * 2.2f);
+        AssetDatabase.CreateAsset(yeni, Yol);
+        AssetDatabase.SaveAssets();
+        return yeni;
     }
 
     // ---------- ORTAM SESLERİ (#14) ----------

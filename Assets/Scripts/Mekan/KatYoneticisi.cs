@@ -535,6 +535,10 @@ public class KatYoneticisi : MonoBehaviour
         // Ses kaynağı çatı bölümünde kapalı bekliyor; açmak çalmak demek.
         Transform sabah = catiBolumu.transform.Find("Ses_Sabah");
         if (sabah != null) sabah.gameObject.SetActive(true);
+
+        // Final (#16): şafak ışığı, güvercinler ve oyuncu çatıya çıkınca dış görüntü.
+        FinalSahnesi final = FindAnyObjectByType<FinalSahnesi>();
+        if (final != null) final.CatiAcildi(oyuncu);
     }
 
     // ---------- KAPI NUMARALARI ----------
