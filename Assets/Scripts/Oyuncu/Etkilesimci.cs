@@ -29,6 +29,13 @@ public class Etkilesimci : MonoBehaviour
     [Tooltip("Harf boyu. Yazı dünya içinde durduğu için metre cinsindendir.")]
     [SerializeField] private float ipucuBoyu = 0.012f;
 
+    // Panelin koyu malzemesi (#26). OyuncuKurucu bağlar: Assets/Materials/Ipucu_Panel.mat.
+    // Neden dosya: build, yalnızca sahnede bir yere BAĞLANMIŞ dosyaları pakete koyar.
+    // Shader'ı oyun sırasında adıyla aramak (Shader.Find) ancak o shader başka bir
+    // yüzden pakete girmişse çalışır; girmemişse panel pembe ya da görünmez çıkar.
+    [Tooltip("İpucu panelinin malzemesi. Boşsa shader adıyla aranır (build'de riskli).")]
+    [SerializeField] private Material panelMalzemesi;
+
     // Şu anda nişan alınan nesne. Başka scriptler (test göstergesi) okuyabilir.
     public IEtkilesimli Hedef { get; private set; }
 
@@ -84,8 +91,14 @@ public class Etkilesimci : MonoBehaviour
         // nişan ışını kendi ipucuna çarpar ve hedefi kaybeder.
         Destroy(ipucuPaneli.GetComponent<Collider>());
 
-        Material panelMalzeme = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-        panelMalzeme.SetColor("_BaseColor", new Color(0.04f, 0.04f, 0.05f));
+        Material panelMalzeme = panelMalzemesi;
+        if (panelMalzeme == null)
+        {
+            // Yedek yol: bağlanmamışsa eskisi gibi adıyla ara ve uyar.
+            Debug.LogWarning("[İPUCU] Panel malzemesi bağlanmamış; Huzur → Oyuncuyu Yeniden Kur.");
+            panelMalzeme = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            panelMalzeme.SetColor("_BaseColor", new Color(0.04f, 0.04f, 0.05f));
+        }
         ipucuPaneli.GetComponent<MeshRenderer>().sharedMaterial = panelMalzeme;
 
         // ---- YAZI ----

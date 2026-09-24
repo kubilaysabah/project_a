@@ -319,6 +319,11 @@ public class KatYoneticisi : MonoBehaviour
 
     private void LateUpdate()
     {
+        // FPS ölçümü (test göstergesi için, #26). Tek karenin süresi çok oynak olduğu
+        // için yumuşatılmış bir ortalama tutuyoruz: her karede farkın %5'i kadar yaklaş.
+        // unscaledDeltaTime: Esc menüsü oyun saatini durdursa da gerçek kare süresi.
+        ortalamaKareSuresi += (Time.unscaledDeltaTime - ortalamaKareSuresi) * 0.05f;
+
         if (merdiven == null || oyuncu == null) return;
 
         // Ceza gösterisi oynarken ve tur bittikten sonra karar dinlemeyiz.
@@ -619,9 +624,16 @@ public class KatYoneticisi : MonoBehaviour
     // ---------- TEST GÖSTERGESİ ----------
     // Ekranın köşesine kat numarasını ve anomali durumunu yazar. Oyunun arayüzü
     // DEĞİLDİR; sadece elle test yapabilmek içindir.
+    //
+    // Yalnızca Editor'de ve geliştirme build'inde çizilir (#26). Debug.isDebugBuild
+    // Editor'de ve "Development Build" işaretli build'de true, oyuncuya giden yayın
+    // build'inde false. Böylece sahnedeki testGostergesi kutusu açık unutulsa bile
+    // oyuncu bu yazıyı hiçbir zaman görmez.
+    private float ortalamaKareSuresi = 1f / 60f;
+
     private void OnGUI()
     {
-        if (!testGostergesi || copPlani == null) return;
+        if (!testGostergesi || !Debug.isDebugBuild || copPlani == null) return;
 
         var stil = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold };
         stil.normal.textColor = Color.white;
@@ -641,7 +653,12 @@ public class KatYoneticisi : MonoBehaviour
             ? $"   ·   poşet: {toplayici.TasinanPoset} (bu katta {copPlani.KattakiToplam(sayac.MevcutKat)})"
             : "";
 
-        string alt = $"hata: {sayac.ToplamHata}" + poset + kartAdi +
+        // FPS: saniyedeki kare sayısı = 1 / bir karenin süresi. ms: bir kare kaç milisaniye.
+        // Editor'de bu sayı güvenilmez (Editor kendi pencerelerini de çiziyor); gerçek
+        // değer geliştirme build'inde okunur.
+        string fps = $"   ·   FPS {1f / ortalamaKareSuresi:0} ({ortalamaKareSuresi * 1000f:0.0} ms)";
+
+        string alt = $"hata: {sayac.ToplamHata}" + poset + kartAdi + fps +
                      (catiModu ? "   ·   üstte çatı" : "") +
                      (acilisModu ? "   ·   AÇILIŞ (zemin kat)" : "") +
                      (testKarti != null ? "   ·   TEST KARTI AÇIK" : "") +
@@ -649,14 +666,14 @@ public class KatYoneticisi : MonoBehaviour
                      (cezaCalisiyor ? "   ·   CEZA" : "");
 
         GUI.color = new Color(0f, 0f, 0f, 0.55f);
-        GUI.DrawTexture(new Rect(14, 12, 560, 62), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(14, 12, 720, 62), Texture2D.whiteTexture);
         GUI.color = Color.white;
 
-        GUI.Label(new Rect(24, 16, 550, 28), durum, stil);
+        GUI.Label(new Rect(24, 16, 710, 28), durum, stil);
 
         stil.fontSize = 14;
         stil.fontStyle = FontStyle.Normal;
-        GUI.Label(new Rect(24, 44, 550, 24), alt, stil);
+        GUI.Label(new Rect(24, 44, 710, 24), alt, stil);
     }
 
     // ---------- GECİKMELİ CEZA ----------

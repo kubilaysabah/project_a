@@ -99,6 +99,7 @@ public static class OyuncuKurucu
 
         SerializedObject seriEtkilesim = new SerializedObject(etkilesimci);
         seriEtkilesim.FindProperty("kamera").objectReferenceValue = kamera.transform;
+        seriEtkilesim.FindProperty("panelMalzemesi").objectReferenceValue = IpucuPaneliMalzemesi();
         seriEtkilesim.ApplyModifiedProperties();
 
         // ---- ÇÖP SAYACI ----
@@ -141,5 +142,20 @@ public static class OyuncuKurucu
 
         // Kurulan hâl bellekte kalıp sessizce kaybolmasın (nedeni GrayboxKurucu'da).
         GrayboxKurucu.SahneyiKaydet("Oyuncu");
+    }
+
+    // İpucu panelinin koyu, ışıktan etkilenmeyen malzemesi (#26). Dosya olarak
+    // üretiliyor ki Etkilesimci'ye bağlansın ve build'e kesin girsin; varsa aynen kullanılır.
+    // Unlit: ışık hesaplanmaz, renk her koşulda aynı görünür (karanlık sahanlıkta da okunur).
+    private static Material IpucuPaneliMalzemesi()
+    {
+        const string Yol = "Assets/Materials/Ipucu_Panel.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (m != null) return m;
+
+        m = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        m.SetColor("_BaseColor", new Color(0.04f, 0.04f, 0.05f));
+        AssetDatabase.CreateAsset(m, Yol);
+        return m;
     }
 }

@@ -227,6 +227,31 @@ public class AnomaliButunlukTestleri
         Assert.IsEmpty(hatalar, "Şu kartlar çevrilemeyen bir kelime yazıyor: " + string.Join(", ", hatalar));
     }
 
+    // KatYoneticisi.testKarti doluysa 2. kattan itibaren HER kat aynı kartla gelir.
+    // Kart denerken kullanılıyor; boşaltılmadan kaydedilirse build'deki oyuncu her
+    // katta aynı anomaliyi görür ve oyun anlamını yitirir. Build'den önce bu test
+    // yakalasın (#26).
+    [Test]
+    public void Sahnede_test_karti_bos_birakilmis()
+    {
+        Component yonetici = null;
+        foreach (GameObject kok in sahne.GetRootGameObjects())
+        {
+            // KatYoneticisi oyunun varsayılan derlemesinde; test derlemesi ona tipiyle
+            // başvuramaz, bileşeni ADIYLA arıyoruz (OrtamSesi testindeki gibi).
+            if (kok.name == "KatYoneticisi") yonetici = kok.GetComponent("KatYoneticisi");
+        }
+        Assert.IsNotNull(yonetici, "Sahnede KatYoneticisi bulunamadı.");
+
+        // SerializedObject: bir bileşenin kaydedilmiş alanlarını, özel (private)
+        // olsalar bile, Inspector'ın gördüğü gibi okur.
+        var alanlar = new UnityEditor.SerializedObject(yonetici);
+        Object kart = alanlar.FindProperty("testKarti").objectReferenceValue;
+
+        Assert.IsNull(kart, $"Sahnede test kartı dolu kalmış ('{(kart != null ? kart.name : "")}'). " +
+                            "KatYoneticisi → Test Karti alanını boşaltıp sahneyi kaydedin.");
+    }
+
     // Normal katın ses dokusu (#14). Ses bozulması kartları bu yolları hedefliyor;
     // biri sahanlığı yeniden düzenlerken bir katmanı silerse ya da döngüsünü bozarsa
     // anomali kartları sessizce etkisiz kalırdı.

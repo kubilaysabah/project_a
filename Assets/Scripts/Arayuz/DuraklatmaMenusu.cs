@@ -109,6 +109,26 @@ public class DuraklatmaMenusu : MonoBehaviour
         kapattiklarim.Add(b);
     }
 
+    // ---------- PENCERE ODAĞI (#26) ----------
+    // Oyuncu alt-tab ile başka pencereye geçerse oyun kendiliğinden durup menüyü açar.
+    // Korku oyununda ekran başında yokken cezanın ya da bir anomalinin işlemesi can
+    // sıkıcı olur; dönünce oyuncu kaldığı anı menünün arkasında bekler bulur.
+    //
+    // Editor'de varsayılan olarak KAPALI: Editor'de odak, Console'a veya Inspector'a
+    // her tıklandığında kaybolur; oyun geliştirirken sürekli kendi kendine dururdu.
+    // Editor'de denemek için bu kutuyu işaretleyin.
+    [Tooltip("Editor'de de pencere odağı kaybolunca menü açılsın mı? Build'de her zaman açılır.")]
+    [SerializeField] private bool editordeOdakKaybindaDuraklat = false;
+
+    // OnApplicationFocus: Unity, oyun penceresi odağı kaybettiğinde (false) ve geri
+    // kazandığında (true) bu fonksiyonu kendiliğinden çağırır.
+    private void OnApplicationFocus(bool odakta)
+    {
+        if (odakta) return;                                              // geri dönüşte bir şey yapma; menü açık bekler
+        if (Application.isEditor && !editordeOdakKaybindaDuraklat) return;
+        if (!acik && oncekiKareOynanabilir) Ac();                        // not/final sırasında açılmaz (Esc ile aynı kural)
+    }
+
     // Menü açıkken sahne kapanırsa (final sonrası yeniden yükleme, Play'den çıkış)
     // saat durmuş kalmasın: Time.timeScale sahneden sahneye taşınan bir ayar.
     private void OnDisable()
