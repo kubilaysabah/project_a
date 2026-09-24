@@ -16,6 +16,10 @@ public class CopPoseti : MonoBehaviour, IEtkilesimli
     /// <summary>Bu poşet daha önce alındı mı?</summary>
     public bool Alindi { get { return alindi; } }
 
+    // Toplama sesi. "static": bütün poşetler tek bir kopyayı paylaşır; ilk toplamada
+    // bir kez yüklenir, sonrakilerde yeniden aranmaz.
+    private static AudioClip hisirti;
+
     // ---------- SÖZLEŞME ----------
 
     /// <summary>Ekranda görünecek eylem adı.</summary>
@@ -39,6 +43,12 @@ public class CopPoseti : MonoBehaviour, IEtkilesimli
 
         Al();
         toplayici.PosetSay();
+
+        // Naylon hışırtısı, poşetin durduğu yerden (#25). PlayClipAtPoint o noktada
+        // geçici bir ses kaynağı kurar ve ses bitince kendisi siler; tek seferlik
+        // bir ses için en kısa yol.
+        if (hisirti == null) hisirti = Resources.Load<AudioClip>("Sesler/Poset_Hisirti");
+        if (hisirti != null) AudioSource.PlayClipAtPoint(hisirti, transform.position, 0.8f);
     }
 
     // ---------- DURUM ----------

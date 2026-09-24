@@ -105,6 +105,10 @@ public static class OyuncuKurucu
         // Kaç poşet taşındığını tutar. Nişan alma işi Etkilesimci'de.
         oyuncu.AddComponent<CopToplayici>();
 
+        // ---- AYAK SESİ (#25) ----
+        // Oyuncunun kendi adımları. Ses kaynağını bileşen kendisi ekler.
+        oyuncu.AddComponent<AyakSesi>();
+
         // ---- SONSUZ MERDİVEN ----
         // Oyuncuyu üst sahanlıktan alt sahanlığa sessizce taşıyan döngü.
         oyuncu.AddComponent<SonsuzMerdiven>();

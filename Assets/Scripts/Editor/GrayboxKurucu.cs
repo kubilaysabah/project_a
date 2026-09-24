@@ -919,6 +919,12 @@ public static class GrayboxKurucu
         Kutu("Parapet_On", t, new Vector3(0f, Parapet / 2f, -SahanlikDerin - DuvarKalin / 2f),
              new Vector3(2f * disX, Parapet, DuvarKalin));
 
+        // SABAH SESİ (#25): çatının ortasında, KAPALI bekler. Çatı kapısı açılınca
+        // KatYoneticisi onu açar ve ses kapıdan içeri dolar.
+        OrtamKaynagi("Ses_Sabah", t, new Vector3(0f, 1.5f, -3.2f), "Ortam_Sabah", 0.6f, 3f, 20f);
+        Transform sabah = t.Find("Ses_Sabah");
+        if (sabah != null) sabah.gameObject.SetActive(false);
+
         float arkaGen = disX - cekirdekDis;
         Kutu("Parapet_Arka_Sol", t, new Vector3(-(cekirdekDis + arkaGen / 2f), Parapet / 2f, DuvarKalin / 2f),
              new Vector3(arkaGen, Parapet, DuvarKalin));

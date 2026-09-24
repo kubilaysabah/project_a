@@ -92,6 +92,9 @@ public class KatYoneticisi : MonoBehaviour
     private Light[] ampuller;             // sahnedeki bütün lamba ışıkları (spot + dolgu)
     private Color[] ozgunRenkler;
 
+    // Ceza sesleri (#25): lamba sönerken "tık", son lamba titrerken cızırtı.
+    private AudioClip lambaSonme, lambaCizirti;
+
     // Lambaların ANA ışıkları (aşağı bakan spotlar). Her lambanın dolgu ışığı
     // ve parlayan camı bu ışığın çocuğu; ceza sırasında lamba bütünüyle söner.
     private Light[] lambalar;
@@ -172,6 +175,9 @@ public class KatYoneticisi : MonoBehaviour
         // Resources.LoadAll: "Resources" klasörlerindeki bütün kartları yükler.
         // Yeni kart eklemek için hiçbir listeye kaydetmek gerekmiyor.
         kartlar = Resources.LoadAll<AnomaliKarti>("Anomaliler");
+
+        lambaSonme = Resources.Load<AudioClip>("Sesler/Lamba_Sonme");
+        lambaCizirti = Resources.Load<AudioClip>("Sesler/Lamba_Cizirti");
 
         if (kartlar.Length == 0)
         {
@@ -466,6 +472,11 @@ public class KatYoneticisi : MonoBehaviour
         }
 
         kapi.gameObject.SetActive(false);
+
+        // Kapı açılınca sabahın sesi içeri dolar (#25): uzak şehir, kuşlar, rüzgâr.
+        // Ses kaynağı çatı bölümünde kapalı bekliyor; açmak çalmak demek.
+        Transform sabah = catiBolumu.transform.Find("Ses_Sabah");
+        if (sabah != null) sabah.gameObject.SetActive(true);
     }
 
     // ---------- KAPI NUMARALARI ----------
@@ -613,6 +624,11 @@ public class KatYoneticisi : MonoBehaviour
             if (i == sirali.Count - 1) yield return StartCoroutine(Titret(sirali[i]));
 
             LambayiAyarla(sirali[i], false);
+
+            // Lamba kendi yerinden "tık" diye söner: karanlık uzaktan yaklaşırken
+            // ses de uzaktan yaklaşır, son tık oyuncunun tepesinde.
+            if (lambaSonme != null) AudioSource.PlayClipAtPoint(lambaSonme, sirali[i].transform.position, 0.9f);
+
             yield return new WaitForSeconds(aralik);
         }
 
@@ -666,6 +682,9 @@ public class KatYoneticisi : MonoBehaviour
     // Aralıklar rastgele; düzenli bir yanıp sönme makine gibi durur, düzensizi arıza gibi.
     private IEnumerator Titret(Light lamba)
     {
+        // Titreme boyunca ampulden elektrik cızırtısı.
+        if (lambaCizirti != null) AudioSource.PlayClipAtPoint(lambaCizirti, lamba.transform.position, 0.8f);
+
         for (int i = 0; i < 3; i++)
         {
             LambayiAyarla(lamba, false);
