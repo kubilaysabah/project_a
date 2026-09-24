@@ -24,9 +24,9 @@ menu.cik	Oyundan Çık	Quit Game
 dil.ad	Türkçe	English
 
 # ---- Binanın üstündeki yazılar ----
-# İKİ DİLDE DE TÜRKÇE (Şahan'ın kararı, 2026-09-24): oyun 1994'te bir Türk
-# apartmanında geçiyor; İngilizce oynayan da kapıdaki notu Türkçe görmeli.
-# Fikir değişirse sadece İngilizce sütun değişir, kod değişmez.
+# TABELA iki dilde de Türkçe: "Huzur Apartmanı" binanın adı, özel isim çevrilmez.
+# Asansör notu ve takvim İngilizce oyunda çevrilir (Şahan'ın kararı, 2026-09-24):
+# not bir MESAJ ("asansör bozuk"); okunamazsa oyuncu onu anomali ipucu sanabilir.
 bina.tabela	HUZUR APARTMANI	HUZUR APARTMANI
-bina.takvim	EKİM\n1994	EKİM\n1994
-bina.asansor_notu	ARIZALI\n<size=48>Yönetim</size>	ARIZALI\n<size=48>Yönetim</size>
+bina.takvim	EKİM\n1994	<size=66>OCTOBER</size>\n1994
+bina.asansor_notu	ARIZALI\n<size=48>Yönetim</size>	<size=78>OUT OF\nORDER</size>\n<size=44>Management</size>

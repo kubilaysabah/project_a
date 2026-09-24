@@ -4,8 +4,9 @@
 //
 // Yazının kendisi sahnede Türkçe olarak kuruludur (Editor'de de okunabilsin);
 // oyun başlayınca bu bileşen metni seçili dile göre yeniden yazar, dil değişince
-// de hemen günceller. Bina yazıları şimdilik iki dilde de Türkçe (tablodaki karar),
-// ama o karar değişirse sadece tablo değişir, bu dosya ve sahne değişmez.
+// de hemen günceller. Hangi yazının çevrileceği tablonun kararıdır (tabela Türkçe
+// kalır, asansör notu ve takvim çevrilir); karar değişirse sadece tablo değişir,
+// bu dosya ve sahne değişmez.
 //
 // DİKKAT: Bir anomali kartı bu bileşeni taşıyan bir yazının METNİNİ değiştirirse,
 // oyuncu o sırada dil değiştirdiğinde kartın yazısı tablodakiyle ezilir. Bugün
