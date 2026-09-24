@@ -45,6 +45,11 @@ public class KatYoneticisi : MonoBehaviour
              "sayı verirseniz aynı tur birebir tekrar oynanır — hata ayıklarken işe yarar.")]
     [SerializeField] private int tohum = 0;
 
+    [Header("Açılış (#16)")]
+    [Tooltip("Oyun zemin kattaki kapıcı dairesinde, yönetici notuyla başlasın mı? " +
+             "Kapatırsanız doğrudan 1. katta başlar; anomali test ederken işe yarar.")]
+    [SerializeField] private bool acilisIleBasla = true;
+
     [Header("Test")]
     [Tooltip("Belirli bir kartı denemek için: buraya bir kart sürüklenirse 2. kattan " +
              "itibaren HER kat bu kartla gelir (42 kart arasından rastgele denk gelmesini " +
@@ -127,6 +132,11 @@ public class KatYoneticisi : MonoBehaviour
     private int gosterilenA = -1, gosterilenB = -1;
     private bool catiModu;
 
+    // ---- AÇILIŞ ----
+    private GameObject zeminKat;       // kapıcı dairesi olan zemin kat (başta kapalı)
+    private GameObject sahteAlt1;      // 1. katın altındaki sahte kat; açılışta zemin kata yer bırakır
+    private bool acilisModu;
+
     // ---------- KURULUM ----------
 
     private void Awake()
@@ -164,6 +174,10 @@ public class KatYoneticisi : MonoBehaviour
         GameObject sahte = KokBul("Sahte_Katlar");
         Transform ust = sahte != null ? sahte.transform.Find("Ust") : null;
         ustKatlar = ust != null ? ust.gameObject : null;
+
+        zeminKat = KokBul("Zemin_Kat");
+        Transform alt1 = sahte != null ? sahte.transform.Find("Alt/Sahanlik_Alt1") : null;
+        sahteAlt1 = alt1 != null ? alt1.gameObject : null;
 
         aNumaralar = NumaralariBul(sahanlikA);
         bNumaralar = NumaralariBul(sahanlikB);
@@ -251,6 +265,42 @@ public class KatYoneticisi : MonoBehaviour
 
         referansDongu = merdiven != null ? merdiven.NetDongu : 0;
         SahanliklariGuncelle(zorla: true);
+
+        if (acilisIleBasla && zeminKat != null) AcilisiBaslat();
+    }
+
+    // ---------- AÇILIŞ (#16) ----------
+    // 8. kattaki çatı modunun aynası: çatı B'nin yerini alıyordu, zemin kat da
+    // 1. katın altındaki sahte katın yerini alıyor. Oyuncu kapıcı odasında uyanır,
+    // merdivenden 1. kata çıkar; 1. kata yerleştiği anda zemin kat eski sahte kata
+    // döner ve döngü normal çalışır. O anda oyuncu 1. katın sahanlığında, zemin kat
+    // ise altında ve görüş alanı dışında: değişim görünmez.
+    private void AcilisiBaslat()
+    {
+        acilisModu = true;
+        zeminKat.SetActive(true);
+        if (sahteAlt1 != null) sahteAlt1.SetActive(false);
+
+        // Zemin kattan aşağı ışınlanma olmasın: zemin kat binanın dibi.
+        merdiven.AsagiDonguyuAyarla(false);
+
+        // Oyuncuyu kapıcı odasına al, yüzü kapıya dönük (+x). Cezada dönülecek yer
+        // (baslangicKonumu) Awake'te kaydedildi ve 1. kat olarak kalıyor.
+        if (govde != null) govde.enabled = false;
+        oyuncu.position = new Vector3(MekanOlculeri.OdaBaslangicX, MekanOlculeri.ZeminKot + 0.2f,
+                                      MekanOlculeri.OdaBaslangicZ);
+        oyuncu.rotation = Quaternion.Euler(0f, 90f, 0f);
+        if (govde != null) govde.enabled = true;
+        Physics.SyncTransforms();
+    }
+
+    private void AcilisiBitir()
+    {
+        acilisModu = false;
+        zeminKat.SetActive(false);
+        if (sahteAlt1 != null) sahteAlt1.SetActive(true);
+        merdiven.AsagiDonguyuAyarla(true);
+        Debug.Log("[KAT] Açılış bitti: 1. kata varıldı, döngü başladı.");
     }
 
     // ---------- SANAL KOT ----------
@@ -290,6 +340,14 @@ public class KatYoneticisi : MonoBehaviour
             oncekiY = y;
 
             if (!oturdu) return;
+
+            // Açılışta oyuncu zemin kattayken karar sayılmaz: ölçüm 1. katta başlar.
+            // Zemin kattan 1. kata çıkmak bir "kat kararı" değil, işe başlamaktır.
+            if (acilisModu)
+            {
+                if (y < -0.5f) return;
+                AcilisiBitir();
+            }
 
             ilerleme = new KatIlerlemeTakipcisi(MekanOlculeri.DikeyOfset, SanalKot());
             referansDongu = merdiven.NetDongu;
@@ -579,6 +637,7 @@ public class KatYoneticisi : MonoBehaviour
 
         string alt = $"hata: {sayac.ToplamHata}" + poset + kartAdi +
                      (catiModu ? "   ·   üstte çatı" : "") +
+                     (acilisModu ? "   ·   AÇILIŞ (zemin kat)" : "") +
                      (testKarti != null ? "   ·   TEST KARTI AÇIK" : "") +
                      (cezaBekliyor ? "   ·   ceza yolda…" : "") +
                      (cezaCalisiyor ? "   ·   CEZA" : "");

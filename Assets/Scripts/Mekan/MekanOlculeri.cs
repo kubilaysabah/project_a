@@ -123,4 +123,24 @@ public static class MekanOlculeri
     /// </summary>
     public const float OyuncuBaslangicX = VarisKoluX;   // -1.1 m
     public const float OyuncuBaslangicZ = -0.6f;
+
+    // ---------- AÇILIŞ: KAPICI DAİRESİ (#16) ----------
+    // Oyun zemin kattaki kapıcı dairesinde başlar. Zemin kat, 1. katın (A) tam
+    // bir kat altındadır. Oda, zemin katın sol yakın kapısının (1 numaranın
+    // yerinin) arkasında, duvarın dış tarafında.
+
+    /// <summary>Zemin katın döşeme kotu: 1. katın bir kat altı.</summary>
+    public const float ZeminKot = -KatYuksekligi;                  // -3 m
+
+    /// <summary>Kapıcı odasının derinliği (x) ve genişliği (z).</summary>
+    public const float OdaDerin = 3.2f;
+    public const float OdaGen   = 2.6f;
+
+    /// <summary>
+    /// Oyuncunun uyandığı nokta: odanın içinde, yüzü kapıya dönük (+x). Yatağın ve
+    /// sandalyenin arasındaki boşlukta; ilk denemede yatağa 15 cm yakın kalmıştı ve
+    /// CharacterController oyuncuyu yatağın içinden dışarı itiyordu.
+    /// </summary>
+    public const float OdaBaslangicX = -(SahanlikGen / 2f + DuvarKalin) - 1.5f;   // -5.2 m
+    public const float OdaBaslangicZ = YakinKapiZ + 0.05f;                         // -1.45 m
 }

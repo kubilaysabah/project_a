@@ -52,7 +52,7 @@ public static class GrayboxKurucu
         string[] adlar =
         {
             // Bugünkü isimler
-            "Sahanlik_A", "Sahanlik_B", "Cekirdek_A", "Sahte_Katlar", "CatiBolumu",
+            "Sahanlik_A", "Sahanlik_B", "Cekirdek_A", "Sahte_Katlar", "CatiBolumu", "Zemin_Kat",
 
             // Düz merdivenli eski yerleşimin isimleri (#23 öncesi)
             "Merdiven_Yukari", "Merdiven_Yukari2", "Merdiven_Asagi", "Kapak_Alt", "Kapak_Ust"
@@ -103,6 +103,15 @@ public static class GrayboxKurucu
             c.transform.SetParent(alt.transform, false);
             c.transform.localPosition = new Vector3(0f, -i * DikeyOfset, 0f);
         }
+
+        // ZEMİN KAT (#16, açılış): oyun burada, kapıcı dairesinde başlar. Normal bir
+        // sahanlık olarak kurulup zemin kata çevriliyor ve 1. altındaki sahte katın
+        // TAM YERİNDE duruyor. Başta KAPALI; KatYoneticisi oyun başlarken sahte katı
+        // gizleyip bunu açıyor, oyuncu 1. kata çıkınca eski düzene dönüyor.
+        GameObject zemin = SahanlikKur("Zemin_Kat", tam: false);
+        zemin.transform.position = new Vector3(0f, ZeminKot, 0f);
+        ZeminKatiDonat(zemin.transform);
+        zemin.SetActive(false);
 
         // Kuyunun dibi: merdiven gözünden aşağı bakınca sonsuz bir karanlık.
         // Siyah malzeme ve sis birlikte dibi görünmez kılıyor.
@@ -937,6 +946,108 @@ public static class GrayboxKurucu
     // =====================================================================
     // KÜÇÜK YARDIMCILAR
     // =====================================================================
+
+    // ---------- ZEMİN KAT (#16) ----------
+    // Normal bir sahanlığı zemin kata çevirir: 1 numaranın yerinde kapıcı dairesi
+    // (kapısı açık, arkasında oda ve yönetici notu), ön duvarda bina girişi,
+    // arka duvarda posta kutuları, aşağı inen merdivenin başında bodrum kapısı.
+    static void ZeminKatiDonat(Transform z)
+    {
+        Material ahsap = MalzemeBul("Assets/Materials/Ahsap_Koyu.mat", new Color(0.24f, 0.14f, 0.07f));
+        Material kumas = MalzemeBul("Assets/Materials/Kumas_Battaniye.mat", new Color(0.33f, 0.10f, 0.09f));
+        Material kagit = MalzemeBul("Assets/Materials/Kagit.mat", new Color(0.86f, 0.82f, 0.70f));
+        Material metal = MalzemeBul("Assets/Materials/Metal_Gri.mat", new Color(0.42f, 0.44f, 0.45f));
+
+        float disX = SahanlikGen / 2f + DuvarKalin;   // yan duvarın dış yüzü (3.7)
+
+        // ---- KAPICI DAİRESİNİN KAPISI: ardına kadar açık (pozitif açı içeri açar) ----
+        Transform mentese = z.Find("Kapi_1/Mentese");
+        if (mentese != null) mentese.localRotation = Quaternion.Euler(0f, 90f, 0f);
+
+        // ---- KAPICI ODASI: sol duvarın dışında, kapının arkasında ----
+        GameObject oda = new GameObject("Kapici_Odasi");
+        oda.transform.SetParent(z, false);
+        Transform o = oda.transform;
+
+        float icX = -disX, disOda = -disX - OdaDerin;          // oda x = -3.7 ile -6.9 arası
+        float ortaX = (icX + disOda) / 2f;
+        float zOn = YakinKapiZ + OdaGen / 2f, zArka = YakinKapiZ - OdaGen / 2f;   // -0.2 ile -2.8
+
+        Kutu("Zemin", o, new Vector3(ortaX, -DuvarKalin / 2f, YakinKapiZ), new Vector3(OdaDerin + DuvarKalin, DuvarKalin, OdaGen + 2f * DuvarKalin));
+        Kutu("Tavan", o, new Vector3(ortaX, DuvarYuksek + DuvarKalin / 2f, YakinKapiZ), new Vector3(OdaDerin + DuvarKalin, DuvarKalin, OdaGen + 2f * DuvarKalin));
+        Kutu("Duvar_Arka", o, new Vector3(disOda - DuvarKalin / 2f, DuvarYuksek / 2f, YakinKapiZ), new Vector3(DuvarKalin, DuvarYuksek, OdaGen + 2f * DuvarKalin));
+        Kutu("Duvar_On", o, new Vector3(ortaX, DuvarYuksek / 2f, zOn + DuvarKalin / 2f), new Vector3(OdaDerin, DuvarYuksek, DuvarKalin));
+        Kutu("Duvar_Yan", o, new Vector3(ortaX, DuvarYuksek / 2f, zArka - DuvarKalin / 2f), new Vector3(OdaDerin, DuvarYuksek, DuvarKalin));
+
+        // Eşyalar: dar bir kapıcı odası. Yatak arka köşede, masa karşı duvarda.
+        Kutu("Yatak", o, new Vector3(disOda + 1.05f, 0.22f, zArka + 0.5f), new Vector3(1.95f, 0.44f, 0.9f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
+        Kutu("Battaniye", o, new Vector3(disOda + 1.2f, 0.47f, zArka + 0.5f), new Vector3(1.5f, 0.07f, 0.92f)).GetComponent<MeshRenderer>().sharedMaterial = kumas;
+        Kutu("Yastik", o, new Vector3(disOda + 0.3f, 0.5f, zArka + 0.5f), new Vector3(0.4f, 0.12f, 0.6f));
+        Kutu("Masa", o, new Vector3(disOda + 1.1f, 0.37f, zOn - 0.35f), new Vector3(1.0f, 0.74f, 0.6f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
+        Kutu("Sandalye", o, new Vector3(disOda + 1.1f, 0.23f, zOn - 0.85f), new Vector3(0.42f, 0.46f, 0.42f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
+        Kutu("Radyo", o, new Vector3(disOda + 0.8f, 0.83f, zOn - 0.3f), new Vector3(0.3f, 0.18f, 0.15f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+        Kutu("Dolap", o, new Vector3(disOda + 0.3f, 0.95f, YakinKapiZ + 0.15f), new Vector3(0.55f, 1.9f, 0.8f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
+
+        // Duvar takvimi: tarihi söyleyen tek ayrıntı. Oyuncu odanın içinden (-z tarafından)
+        // bakıyor; TextMesh'in okunan yüzü de o yöne dönük, döndürmeye gerek yok.
+        Kutu("Takvim", o, new Vector3(icX - 0.9f, 1.5f, zOn - 0.01f), new Vector3(0.3f, 0.42f, 0.01f)).GetComponent<MeshRenderer>().sharedMaterial = kagit;
+        GameObject takvimYazi = new GameObject("Takvim_Yazi");
+        takvimYazi.transform.SetParent(o, false);
+        takvimYazi.transform.localPosition = new Vector3(icX - 0.9f, 1.62f, zOn - 0.02f);
+        TextMesh ty = takvimYazi.AddComponent<TextMesh>();
+        ty.text = "EKİM\n1994";
+        ty.anchor = TextAnchor.MiddleCenter;
+        ty.alignment = TextAlignment.Center;
+        ty.fontSize = 96;
+        ty.characterSize = 0.008f;
+        ty.color = new Color(0.45f, 0.05f, 0.05f);
+        ty.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        takvimYazi.GetComponent<MeshRenderer>().sharedMaterial = YaziMalzeme(ty.font);
+
+        // Oda lambası: loş, sıcak, gölgesiz tek bir ampul.
+        GameObject lamba = new GameObject("Oda_Lambasi");
+        lamba.transform.SetParent(o, false);
+        lamba.transform.localPosition = new Vector3(ortaX, DuvarYuksek - 0.4f, YakinKapiZ);
+        Light isik = lamba.AddComponent<Light>();
+        isik.type = LightType.Point;
+        isik.range = 4.5f;
+        isik.intensity = 2.2f;
+        isik.color = new Color(1f, 0.78f, 0.5f);
+        isik.shadows = LightShadows.None;
+
+        // YÖNETİCİ NOTU: kapının dibinde, içeri itilmiş gibi yerde.
+        GameObject not = Kutu("Yonetici_Notu", o, new Vector3(icX - 0.45f, 0.004f, YakinKapiZ + 0.15f), new Vector3(0.21f, 0.006f, 0.28f));
+        not.transform.localRotation = Quaternion.Euler(0f, 17f, 0f);
+        not.GetComponent<MeshRenderer>().sharedMaterial = kagit;
+        not.AddComponent<YoneticiNotu>();
+
+        // ---- BİNA GİRİŞİ: ön duvarda, oyuncuya göre asansörün solunda (+x) ----
+        GameObject giris = new GameObject("Bina_Girisi");
+        giris.transform.SetParent(z, false);
+        giris.transform.localPosition = new Vector3(2.3f, 0f, -SahanlikDerin);
+        Transform g = giris.transform;
+        Kutu("Kasa_Sol", g, new Vector3(-0.64f, 1.13f, 0.03f), new Vector3(0.08f, 2.26f, 0.06f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+        Kutu("Kasa_Sag", g, new Vector3(0.64f, 1.13f, 0.03f), new Vector3(0.08f, 2.26f, 0.06f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+        Kutu("Kasa_Ust", g, new Vector3(0f, 2.3f, 0.03f), new Vector3(1.36f, 0.08f, 0.06f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+        Kutu("Cam_Sol", g, new Vector3(-0.3f, 1.1f, 0.02f), new Vector3(0.58f, 2.2f, 0.02f)).GetComponent<MeshRenderer>().sharedMaterial = GeceMalzeme();
+        Kutu("Cam_Sag", g, new Vector3(0.3f, 1.1f, 0.02f), new Vector3(0.58f, 2.2f, 0.02f)).GetComponent<MeshRenderer>().sharedMaterial = GeceMalzeme();
+        Kutu("Kayit", g, new Vector3(0f, 1.1f, 0.035f), new Vector3(0.04f, 2.2f, 0.03f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+
+        // ---- POSTA KUTULARI: arka duvarın sağ parçasında ----
+        float cekirdekDis = CekirdekGen / 2f + DuvarKalin;
+        GameObject posta = new GameObject("Posta_Kutulari");
+        posta.transform.SetParent(z, false);
+        posta.transform.localPosition = new Vector3(cekirdekDis + (disX - cekirdekDis) / 2f, 1.3f, -0.12f);
+        for (int satir = 0; satir < 2; satir++)
+            for (int sutun = 0; sutun < 4; sutun++)
+                Kutu($"Kutu_{satir * 4 + sutun + 1}", posta.transform,
+                     new Vector3(-0.45f + sutun * 0.3f, -0.18f + satir * 0.36f, 0f),
+                     new Vector3(0.28f, 0.34f, 0.24f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+
+        // ---- BODRUM KAPISI: aşağı inen merdivenin başını kapatır ----
+        // Zemin kat binanın dibi; oyuncu açılışta aşağıdaki sahte katlara inmesin.
+        Kutu("Bodrum_Kapisi", z, new Vector3(VarisKoluX, 1.1f, 0.14f), new Vector3(KolGen, 2.2f, 0.06f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+    }
 
     // ---------- ORTAM SESLERİ (#14) ----------
     // Bir sahanlığın ses katmanları. Hepsi sahanlığın (ya da bir kapının) çocuğu,

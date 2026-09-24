@@ -35,6 +35,10 @@ public class SonsuzMerdiven : MonoBehaviour
              "bir sahanlığa değil çatı kapısına varmalı. Aşağı kaçış yolu açık kalır.")]
     [SerializeField] private bool yukariAcik = true;
 
+    [Tooltip("Aşağı ışınlanma açık mı? Açılışta (#16) oyuncu zemin kattayken kapatılır: " +
+             "zemin kat binanın dibi, altında döngüye bağlanan bir kat yok.")]
+    [SerializeField] private bool asagiAcik = true;
+
     [Tooltip("Kaç kez yukarı döngü yapıldı.")]
     public int yukariDonguSayisi;
 
@@ -67,6 +71,12 @@ public class SonsuzMerdiven : MonoBehaviour
         yukariAcik = yeniDurum;
     }
 
+    /// <summary>Yalnızca aşağı ışınlanmayı açar veya kapatır (açılış için).</summary>
+    public void AsagiDonguyuAyarla(bool yeniDurum)
+    {
+        asagiAcik = yeniDurum;
+    }
+
     // ---------- LATEUPDATE ----------
     // Update değil LateUpdate: o karedeki BÜTÜN hareketler bittikten sonra çalışır,
     // yani burada oyuncunun karenin sonundaki KESİN konumunu görürüz.
@@ -88,7 +98,7 @@ public class SonsuzMerdiven : MonoBehaviour
             Tasi(new Vector3(0f, -DikeyOfset, 0f));
             yukariDonguSayisi++;
         }
-        else if (y <= AltIsinlanmaKotu)
+        else if (asagiAcik && y <= AltIsinlanmaKotu)
         {
             // A'nın altındaki merdivene inildi: oyuncuyu bir kat yukarı taşı.
             // Kendini aynı noktada, A ile B arasındaki merdivende bulur.
