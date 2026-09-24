@@ -118,14 +118,11 @@ public class BirinciSahisKontrolcu : MonoBehaviour
         Bak();
         Yuru();
 
-        // Escape: fareyi serbest bırak. Editörde test ederken şart,
-        // yoksa imleç pencereye kilitli kalır.
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            FareyiKilitle(false);
-        }
+        // Escape artık burada değil, duraklatma menüsünde (#15): menü fareyi serbest
+        // bırakır ve kapanınca geri kilitler. İki yer aynı tuşa tepki verirse biri
+        // diğerinin yaptığını bozar.
 
-        // Sol tık: fareyi tekrar kilitle ve oyuna dön.
+        // Sol tık: fareyi tekrar kilitle (ör. Windows'ta başka pencereye geçip dönünce).
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             FareyiKilitle(true);

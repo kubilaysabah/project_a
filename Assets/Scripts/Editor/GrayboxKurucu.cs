@@ -183,6 +183,28 @@ public static class GrayboxKurucu
         Debug.Log($"Graybox kuruldu. Sahanlık {SahanlikGen:0.0} x {SahanlikDerin:0.0} m, " +
                   $"{DaireSayisi} daire; merdiven {KolBasamakSayisi}+{KolBasamakSayisi} basamak x " +
                   $"{BasamakYuksek:0.0000} m, göz {KuyuGen:0.00} m; dikey ofset {DikeyOfset:0.00} m");
+
+        SahneyiKaydet("Graybox");
+    }
+
+    // ---------- SAHNEYİ KAYDET ----------
+    // Kodla nesne eklemek Unity'de sahneyi kendiliğinden "kaydedilmemiş değişiklik var"
+    // (dirty) durumuna GETİRMİYOR. Bu yüzden kurulumdan sonra sahne "temiz" görünüyor
+    // ama yeni hâl yalnızca bellekte duruyordu. Kayıtlı sahneyi açan bir şey (anomali
+    // bütünlük testleri bunu yapıyor) Unity'ye hiç sormadan bellekteki hâli atıyordu:
+    // #16'nın sokak düzenlemesi ve #15'in yazı bileşenleri böyle sessizce kayboldu.
+    // Kurucunun ürettiği şey her zaman saklanmak için üretiliyor; o yüzden kaydediyoruz.
+    // OyuncuKurucu da aynı fonksiyonu kullanır.
+    public static void SahneyiKaydet(string kim)
+    {
+        UnityEngine.SceneManagement.Scene sahne = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+
+        // MarkSceneDirty: "bu sahne değişti" diye işaretler. SaveScene: diske yazar.
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(sahne);
+        bool tamam = UnityEditor.SceneManagement.EditorSceneManager.SaveScene(sahne);
+
+        if (tamam) Debug.Log($"{kim}: sahne kaydedildi ({sahne.path}).");
+        else Debug.LogError($"{kim}: sahne KAYDEDİLEMEDİ ({sahne.path}); Ctrl+S ile elle kaydedin.");
     }
 
     // =====================================================================
@@ -418,9 +440,18 @@ public static class GrayboxKurucu
             Kutu("Not", a, new Vector3(-0.22f, 1.45f, kanatOnu + 0.004f),
                  new Vector3(0.26f, 0.20f, 0.008f));
             YaziKur("Not_Yazi", a, new Vector3(-0.22f, 1.46f, kanatOnu + 0.01f),
-                    "ARIZALI\n<size=48>Yönetim</size>", 0.0055f);
+                    Dil.Getir("bina.asansor_notu", DilKodu.TR), 0.0055f);
+            YerelYap(a.Find("Not_Yazi").gameObject, "bina.asansor_notu");
         }
 
+    }
+
+    // Dünyadaki bir yazıyı metin tablosuna bağlar (#15): YerelYazi bileşenini ekler
+    // ve anahtarını yazar. Sahne Türkçe kurulur (Editor'de okunabilsin); oyun
+    // başlayınca YerelYazi metni seçili dilde yeniden yazar.
+    static void YerelYap(GameObject nesne, string anahtar)
+    {
+        nesne.AddComponent<YerelYazi>().AnahtariKur(anahtar);
     }
 
     // Asansör yazıları için 3B yazı. Sahanlığa (+z) bakar.
@@ -998,7 +1029,8 @@ public static class GrayboxKurucu
         takvimYazi.transform.SetParent(o, false);
         takvimYazi.transform.localPosition = new Vector3(icX - 0.9f, 1.62f, zOn - 0.02f);
         TextMesh ty = takvimYazi.AddComponent<TextMesh>();
-        ty.text = "EKİM\n1994";
+        ty.text = Dil.Getir("bina.takvim", DilKodu.TR);
+        YerelYap(takvimYazi, "bina.takvim");
         ty.anchor = TextAnchor.MiddleCenter;
         ty.alignment = TextAlignment.Center;
         ty.fontSize = 96;
@@ -1100,7 +1132,8 @@ public static class GrayboxKurucu
         tabela.transform.SetParent(f, false);
         tabela.transform.localPosition = new Vector3(0f, 3.15f, -0.05f);
         TextMesh ty = tabela.AddComponent<TextMesh>();
-        ty.text = "HUZUR APARTMANI";
+        ty.text = Dil.Getir("bina.tabela", DilKodu.TR);
+        YerelYap(tabela, "bina.tabela");
         ty.anchor = TextAnchor.MiddleCenter;
         ty.fontSize = 96;
         ty.characterSize = 0.035f;

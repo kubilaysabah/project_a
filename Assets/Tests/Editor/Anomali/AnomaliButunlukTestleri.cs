@@ -201,6 +201,32 @@ public class AnomaliButunlukTestleri
             string.Join(", ", hatalar));
     }
 
+    // Kartın yazdığı metin iki dilli tablodan geçmez (kart sadece bir yazı taşır).
+    // Harf içeren bir metin ("GİRME" gibi) İngilizce oynayana Türkçe kalırdı. Bugün
+    // kartlar yalnızca kapı numarası yazıyor; kelime yazan bir kart gerekirse önce
+    // kartın metni bir tablo anahtarına bağlanacak şekilde sistem genişletilmeli (#15).
+    [Test]
+    public void Hicbir_kart_harf_iceren_metin_yazmaz()
+    {
+        var hatalar = new List<string>();
+
+        foreach (AnomaliKarti kart in TumKartlar())
+        {
+            foreach (AnomaliEtkisi etki in kart.Etkiler)
+            {
+                if (etki.tur != EtkiTuru.Metin || string.IsNullOrEmpty(etki.metin)) continue;
+
+                // char.IsLetter: harf mi (Türkçe harfler dahil); rakam ve işaretler geçer.
+                foreach (char c in etki.metin)
+                {
+                    if (char.IsLetter(c)) { hatalar.Add($"'{kart.Kimlik}' → \"{etki.metin}\""); break; }
+                }
+            }
+        }
+
+        Assert.IsEmpty(hatalar, "Şu kartlar çevrilemeyen bir kelime yazıyor: " + string.Join(", ", hatalar));
+    }
+
     // Normal katın ses dokusu (#14). Ses bozulması kartları bu yolları hedefliyor;
     // biri sahanlığı yeniden düzenlerken bir katmanı silerse ya da döngüsünü bozarsa
     // anomali kartları sessizce etkisiz kalırdı.

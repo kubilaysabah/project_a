@@ -210,7 +210,10 @@ public class Etkilesimci : MonoBehaviour
             return;
         }
 
-        ipucuYazisi.text = $"{Hedef.Ipucu} (E)";
+        // Biçim tablodan gelir (#15): "{0} (E)". string.Format, {0} yazan yere
+        // ikinci parametreyi koyar: "TOPLA (E)". Tuş işaretinin yeri de böylece
+        // dile göre değişebilir (bazı dillerde tuş önce yazılır).
+        ipucuYazisi.text = string.Format(Dil.Getir("ipucu.bicim"), Hedef.Ipucu);
 
         // Nesnenin ÜSTÜNE yerleştir. Görsel sınırlarını kullanıyoruz ki
         // büyük bir nesnede yazı içinde kalmasın, küçüğünde de çok yükseğe kaçmasın.

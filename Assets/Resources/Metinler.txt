@@ -1,0 +1,32 @@
+# Metinler.txt — oyundaki bütün yazıların iki dilli tablosu (#15).
+# Sütunlar TAB ile ayrılır:  anahtar <TAB> Türkçe <TAB> İngilizce
+# Satır atlamak için \n yazın. '#' ile başlayan satır açıklamadır.
+# Anahtarı değiştirmeyin: kod metni bu adla arıyor. Değiştirilecek olan sadece metin.
+
+# ---- Etkileşim ipuçları: hedefin üstünde yüzen "TOPLA (E)" paneli ----
+ipucu.bicim	{0} (E)	{0} (E)
+ipucu.topla	TOPLA	PICK UP
+ipucu.oku	OKU	READ
+
+# ---- Yönetici notu (açılış) ----
+not.yonetici	Kapıcı Efendi,\n\nGece çöpleri kat kat topla. Merdivenler hep aynıdır, alışırsın.\n\nBir şey yanlışsa — ne olduğunu sorma — KATA GİRME, geri dön.\n\nSabah çatının kapısını kilitlemeyi unutma.\n\n— Yönetim	Janitor,\n\nCollect the rubbish floor by floor tonight. The stairs are always the same — you'll get used to it.\n\nIf something is wrong — don't ask what — DON'T STEP ONTO THAT FLOOR. Turn back.\n\nDon't forget to lock the roof door in the morning.\n\n— The Management
+not.kapat	E / Esc: kapat	E / Esc: close
+
+# ---- Jenerik: ilk satır başlık, boş satırlar aralık ----
+jenerik	HUZUR APARTMANI\n\nTasarım ve Geliştirme\nŞahan Boz\n\nBirlikte\nKubilay\n\n\nOynadığın için teşekkürler.	HUZUR APARTMANI\n\nDesign & Development\nŞahan Boz\n\nWith\nKubilay\n\n\nThank you for playing.
+
+# ---- Duraklatma menüsü (Esc) ----
+menu.baslik	DURAKLATILDI	PAUSED
+menu.devam	Devam	Resume
+menu.dil	Dil: {0}	Language: {0}
+menu.cik	Oyundan Çık	Quit Game
+# Dilin kendi adı, her zaman o dilin kendisiyle yazılır.
+dil.ad	Türkçe	English
+
+# ---- Binanın üstündeki yazılar ----
+# İKİ DİLDE DE TÜRKÇE (Şahan'ın kararı, 2026-09-24): oyun 1994'te bir Türk
+# apartmanında geçiyor; İngilizce oynayan da kapıdaki notu Türkçe görmeli.
+# Fikir değişirse sadece İngilizce sütun değişir, kod değişmez.
+bina.tabela	HUZUR APARTMANI	HUZUR APARTMANI
+bina.takvim	EKİM\n1994	EKİM\n1994
+bina.asansor_notu	ARIZALI\n<size=48>Yönetim</size>	ARIZALI\n<size=48>Yönetim</size>

@@ -22,8 +22,8 @@ public class CopPoseti : MonoBehaviour, IEtkilesimli
 
     // ---------- SÖZLEŞME ----------
 
-    /// <summary>Ekranda görünecek eylem adı.</summary>
-    public string Ipucu { get { return "TOPLA"; } }
+    /// <summary>Ekranda görünecek eylem adı, seçili dilde (#15): "TOPLA" / "PICK UP".</summary>
+    public string Ipucu { get { return Dil.Getir("ipucu.topla"); } }
 
     /// <summary>Alınmış poşet artık etkileşime açık değildir.</summary>
     public bool EtkilesimeAcik { get { return !alindi && gameObject.activeSelf; } }

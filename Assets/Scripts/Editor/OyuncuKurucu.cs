@@ -125,9 +125,21 @@ public static class OyuncuKurucu
             yonetici.AddComponent<KatYoneticisi>();
         }
 
+        // ---- ARAYÜZ: DURAKLATMA MENÜSÜ (#15) ----
+        // Esc menüsü de oyuncuya değil oyuna ait; kat yöneticisi gibi kendi nesnesinde
+        // durur ve varsa dokunulmaz.
+        if (GameObject.Find("Arayuz") == null)
+        {
+            GameObject arayuz = new GameObject("Arayuz");
+            arayuz.AddComponent<DuraklatmaMenusu>();
+        }
+
         Selection.activeGameObject = oyuncu;   // Hierarchy'de seçili gelsin
 
         Debug.Log($"Oyuncu kuruldu. Boy: {BoyUzunlugu:0.00} m, göz hizası: {GozHizasi:0.00} m, " +
                   $"basamak eşiği: {BasamakEsigi:0.00} m");
+
+        // Kurulan hâl bellekte kalıp sessizce kaybolmasın (nedeni GrayboxKurucu'da).
+        GrayboxKurucu.SahneyiKaydet("Oyuncu");
     }
 }

@@ -55,19 +55,10 @@ public class FinalSahnesi : MonoBehaviour
 
     private Camera finalKamera;
 
-    private readonly string[] jenerik =
-    {
-        "HUZUR APARTMANI",
-        "",
-        "Tasarım ve Geliştirme",
-        "Şahan Boz",
-        "",
-        "Birlikte",
-        "Kubilay",
-        "",
-        "",
-        "Oynadığın için teşekkürler."
-    };
+    // Jenerik satırları. Metin tablosunda tek bir anahtarın altında, satırları
+    // "\n" ile ayrılmış olarak durur (#15); jenerik başlarken seçili dilde okunup
+    // satırlara bölünür. İlk satır başlık, boş satırlar aralık.
+    private string[] jenerik = new string[0];
 
     private void Awake()
     {
@@ -176,7 +167,8 @@ public class FinalSahnesi : MonoBehaviour
 
         yield return new WaitForSeconds(3f);
 
-        // Jenerik: ekranın altından yukarı akar.
+        // Jenerik: ekranın altından yukarı akar. Split('\n'): metni satır sonlarından böler.
+        jenerik = Dil.Getir("jenerik").Split('\n');
         for (jenerikKonum = 0f; jenerikKonum < 1f; jenerikKonum += Time.deltaTime / jenerikSuresi)
             yield return null;
 

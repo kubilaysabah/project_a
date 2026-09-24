@@ -627,6 +627,8 @@ public class KatYoneticisi : MonoBehaviour
         stil.normal.textColor = Color.white;
 
         string durum = sayac.TurBitti
+            // Test göstergesi metin tablosuna girmez (#15): yalnızca geliştirici görüyor,
+            // satılan oyunda gösterge yok. Bu yüzden yazıları burada Türkçe duruyor.
             ? "ÇATI — tur bitti"
             : $"Kat {sayac.MevcutKat} / {KatSayaci.CatiKati}   ·   " +
               (sayac.AnomaliVar ? "ANOMALİ VAR (geri dön)" : "normal (yukarı devam)");

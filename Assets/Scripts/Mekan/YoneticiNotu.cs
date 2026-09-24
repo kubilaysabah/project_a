@@ -14,16 +14,12 @@ using UnityEngine.InputSystem;
 
 public class YoneticiNotu : MonoBehaviour, IEtkilesimli
 {
-    [TextArea(4, 10)]
-    [SerializeField] private string metin =
-        "Kapıcı Efendi,\n\n" +
-        "Gece çöpleri kat kat topla. Merdivenler hep aynıdır, alışırsın.\n\n" +
-        "Bir şey yanlışsa — ne olduğunu sorma — KATA GİRME, geri dön.\n\n" +
-        "Sabah çatının kapısını kilitlemeyi unutma.\n\n" +
-        "— Yönetim";
+    // Notun metni kodda değil, metin tablosunda (Assets/Resources/Metinler.txt)
+    // bu anahtarın altında durur; Türkçesi de İngilizcesi de oradan gelir (#15).
+    private const string MetinAnahtari = "not.yonetici";
 
     // ---------- SÖZLEŞME ----------
-    public string Ipucu { get { return "OKU"; } }
+    public string Ipucu { get { return Dil.Getir("ipucu.oku"); } }
 
     // Not açıkken ikinci kez açılmasın.
     public bool EtkilesimeAcik { get { return !acik; } }
@@ -76,7 +72,7 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
     // ---------- KÂĞIT ----------
     // OnGUI ile ekranın ortasına sararmış bir kâğıt ve üstüne not çiziliyor.
     // Test göstergesindeki gibi basit çizim; ayrı bir arayüz sistemi kurmaya gerek yok.
-    // Türkçe/İngilizce metin (#15) geldiğinde metin buradan okunacak.
+    // Metin her karede tablodan istenir (#15); not açıkken dil değişirse hemen güncellenir.
     private GUIStyle yaziStili;
 
     private void OnGUI()
@@ -102,10 +98,10 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
             yaziStili.normal.textColor = new Color(0.12f, 0.10f, 0.08f);   // mürekkep
         }
 
-        GUI.Label(new Rect(kagit.x + 36, kagit.y + 30, kagit.width - 72, kagit.height - 80), metin, yaziStili);
+        GUI.Label(new Rect(kagit.x + 36, kagit.y + 30, kagit.width - 72, kagit.height - 80), Dil.Getir(MetinAnahtari), yaziStili);
 
         var ipucu = new GUIStyle(GUI.skin.label) { fontSize = 14, alignment = TextAnchor.LowerRight };
         ipucu.normal.textColor = new Color(0.3f, 0.27f, 0.22f);
-        GUI.Label(new Rect(kagit.x, kagit.y, kagit.width - 20, kagit.height - 12), "E / Esc: kapat", ipucu);
+        GUI.Label(new Rect(kagit.x, kagit.y, kagit.width - 20, kagit.height - 12), Dil.Getir("not.kapat"), ipucu);
     }
 }
