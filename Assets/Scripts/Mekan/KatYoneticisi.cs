@@ -634,6 +634,7 @@ public class KatYoneticisi : MonoBehaviour
     private void OnGUI()
     {
         if (!testGostergesi || !Debug.isDebugBuild || copPlani == null) return;
+        if (DuraklatmaMenusu.BaslikEkraninda) return;   // başlık ekranının üstüne çizilmesin (#32)
 
         var stil = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold };
         stil.normal.textColor = Color.white;

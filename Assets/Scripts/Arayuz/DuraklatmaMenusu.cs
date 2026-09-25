@@ -92,6 +92,33 @@ public class DuraklatmaMenusu : MonoBehaviour
     private AudioSource ornekSes;
     private float sonOrnekZamani = -1f;
 
+    // ---------- BAŞLIK EKRANI (#32) ----------
+    // Oyun açılınca menü "başlık modunda" başlar: ana sayfada "Devam" yerine "Başla",
+    // üstte oyunun adı, arkada merdiven boşluğundan yukarı bakan yavaşça dönen bir
+    // kamera. Ayarlar / Görüntü / Dil sayfaları Esc menüsündekilerin aynısı.
+    // Ayrı bir sahne değil: final sonrası sahne baştan yüklenince oyun kendiliğinden
+    // yine buraya döner.
+    [Tooltip("Oyun başlık ekranıyla mı açılsın? Kapatılırsa doğrudan kapıcı odasında başlar (test için).")]
+    [SerializeField] private bool baslikEkraniGoster = true;
+
+    /// <summary>Şu an başlık ekranında mıyız (test göstergesi bunu görünce çizilmez).</summary>
+    public static bool BaslikEkraninda { get; private set; }
+
+    private bool baslikta;          // başlık ekranı açık
+    private bool geciste;           // "Başla"ya basıldı, kararma sürüyor
+    private float karartma;         // 0 = açık, 1 = simsiyah (OnGUI çizer)
+    private Camera baslikKamerasi, oyuncuKamerasi;
+    private AudioListener oyuncuKulagi;
+    private float baslikDonusu;     // başlık kamerasının dik eksen etrafındaki açısı
+
+    // Merdiven gözünün ortası (x = 0, gözün z aralığı 0…2,16), 1. katın biraz üstü.
+    // Kamera neredeyse dik yukarı bakar; katlar kat kat dönerek karanlığa yükselir.
+    // Birkaç açı denenip seçildi. Dış cephe bilerek kullanılmadı: bina dışarıdan 9
+    // katlı görünür ve finaldeki sürprizi (#16) başlık ekranında bozardı.
+    private static readonly Vector3 BaslikKameraKonumu = new Vector3(0f, 0.3f, 1.08f);
+    private const float BaslikKameraEgimi = -85f;      // derece; eksi = yukarı
+    private const float BaslikKameraDonusHizi = 2.5f;  // derece/saniye; sarmal gibi yavaş döner
+
     private void Start()
     {
         kontrolcu = FindAnyObjectByType<BirinciSahisKontrolcu>();
@@ -110,10 +137,15 @@ public class DuraklatmaMenusu : MonoBehaviour
         // Enable: eylemi dinlemeye başlat (kontrolcünün kendi eylemleri için yaptığı gibi).
         gezinEylemi?.Enable();
         onayEylemi?.Enable();
+
+        if (baslikEkraniGoster) BaslikEkraniniAc();
     }
 
     private void Update()
     {
+        if (baslikta) BaslikKamerasiniDondur();
+        if (geciste) return;                            // kararma sırasında girdi okuma
+
         bool esc = Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
         bool baslat = Gamepad.current != null && Gamepad.current.startButton.wasPressedThisFrame;
         bool geri = Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame;
@@ -126,11 +158,13 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         if (devamIstendi) return;                       // kapanmak üzere; başka girdi okuma
 
-        if (baslat) { DevamIste(); return; }            // Start her sayfadan menüyü kapatır
+        // Start her sayfadan menüyü kapatır. Başlık ekranında kapatılacak bir menü yok
+        // (arkada devam edilecek bir oyun yok), o yüzden orada bir şey yapmaz.
+        if (baslat && !baslikta) { DevamIste(); return; }
         if (esc || geri)                                // Esc / B: bir geri git
         {
             if (sayfa != SayfaAna) SayfaAc(SayfaAna);
-            else DevamIste();
+            else if (!baslikta) DevamIste();            // başlık ekranının ana sayfasında geri yok
             return;
         }
 
@@ -170,6 +204,124 @@ public class DuraklatmaMenusu : MonoBehaviour
             Devam();
         }
         oncekiKareOynanabilir = !acik && kontrolcu != null && kontrolcu.enabled;
+
+        // Başlık ekranında fare hep serbest ve görünür kalsın. Oyuncu kontrolcüsü açılışta
+        // fareyi kilitliyor; Start'ların hangi sırayla çalışacağı belli olmadığı için
+        // kilidi her karenin sonunda geri açıyoruz.
+        if (baslikta)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+    }
+
+    // ---------- BAŞLIK EKRANI (#32) ----------
+    private void BaslikEkraniniAc()
+    {
+        baslikta = true;
+        BaslikEkraninda = true;
+        acik = true;
+        SayfaAc(SayfaAna);
+        gezgin.Sec(AnaDevam);   // "Başla" seçili
+
+        // Oyuncuyu dondur: yürümesin, bakmasın, etkileşmesin. Oyun saati durdurulmuyor;
+        // ortam sesleri çalsın, bina başlık ekranında da "yaşasın".
+        kapattiklarim.Clear();
+        if (kontrolcu != null)
+        {
+            KapatVeHatirla(kontrolcu);
+            KapatVeHatirla(kontrolcu.GetComponent<Etkilesimci>());
+            oyuncuKamerasi = kontrolcu.GetComponentInChildren<Camera>();
+        }
+
+        // Oyuncunun kamerasını ve kulağını kapat; ikisini başlık kamerası üstlenir.
+        // Sahnede aynı anda iki AudioListener olursa Unity uyarı verir ve ses karışır.
+        if (oyuncuKamerasi != null)
+        {
+            oyuncuKamerasi.enabled = false;
+            oyuncuKulagi = oyuncuKamerasi.GetComponent<AudioListener>();
+            if (oyuncuKulagi != null) oyuncuKulagi.enabled = false;
+        }
+
+        // Başlık kamerası: oyun sırasında kodla kuruluyor, sahneye kaydedilmiyor (yalnızca
+        // başlık ekranı boyunca yaşıyor). Gece efektleri görünsün diye URP'nin kamera
+        // verisi eklenip post-processing açılıyor (AtmosferKurucu'nun oyuncu kamerasına
+        // yaptığının aynısı).
+        GameObject nesne = new GameObject("Baslik_Kamerasi");
+        baslikKamerasi = nesne.AddComponent<Camera>();
+        baslikKamerasi.fieldOfView = 70f;
+        baslikKamerasi.nearClipPlane = 0.05f;
+        var veri = nesne.AddComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+        veri.renderPostProcessing = true;
+        veri.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+        nesne.AddComponent<AudioListener>();
+        BaslikKamerasiniDondur();
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
+    private void BaslikKamerasiniDondur()
+    {
+        if (baslikKamerasi == null) return;
+        baslikDonusu += BaslikKameraDonusHizi * Time.unscaledDeltaTime;
+        // Euler(eğim, dönüş, 0): önce dik eksen etrafında dön, sonra yukarı bak.
+        // Kamera yukarı bakarken dik eksen etrafında dönmek görüntüyü ortası etrafında
+        // çevirir: merdivenler sarmal gibi döner.
+        baslikKamerasi.transform.SetPositionAndRotation(BaslikKameraKonumu,
+            Quaternion.Euler(BaslikKameraEgimi, baslikDonusu, 0f));
+    }
+
+    private void Basla()
+    {
+        if (geciste) return;
+        StartCoroutine(BaslaGecisi());
+    }
+
+    // Ekran kararır → başlık kamerası kalkar, oyuncu kapıcı odasında uyanır → ekran açılır.
+    // Coroutine: "yield return" satırında durur, sonraki karede kaldığı yerden devam eder
+    // (FinalSahnesi'ndeki gibi). Süreler gerçek zamanla (unscaled) ölçülüyor.
+    private System.Collections.IEnumerator BaslaGecisi()
+    {
+        geciste = true;
+
+        for (float t = 0f; t < 1f; t += Time.unscaledDeltaTime / 0.8f)
+        {
+            karartma = t;
+            yield return null;
+        }
+        karartma = 1f;
+
+        // Ekran simsiyahken geçişi yap: oyuncu hiçbir ara kareyi görmez.
+        if (baslikKamerasi != null) Destroy(baslikKamerasi.gameObject);
+        if (oyuncuKamerasi != null) oyuncuKamerasi.enabled = true;
+        if (oyuncuKulagi != null) oyuncuKulagi.enabled = true;
+
+        baslikta = false;
+        BaslikEkraninda = false;
+        acik = false;
+        foreach (Behaviour b in kapattiklarim) if (b != null) b.enabled = true;
+        kapattiklarim.Clear();
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        yield return null;   // bir kare simsiyah kalsın: oyuncunun kamerası yerine otursun
+
+        for (float t = 1f; t > 0f; t -= Time.unscaledDeltaTime / 0.8f)
+        {
+            karartma = t;
+            yield return null;
+        }
+        karartma = 0f;
+        geciste = false;
+    }
+
+    // Static değer Play'ler arasında kalmasın (Dil.cs'teki gibi).
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void Sifirla()
+    {
+        BaslikEkraninda = false;
     }
 
     // Bir yön bu karede basıldı mı: oyun kolunun d-pad yönü ya da iki klavye tuşundan biri.
@@ -191,7 +343,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         {
             switch (gezgin.Secili)
             {
-                case AnaDevam: DevamIste(); break;
+                case AnaDevam: if (baslikta) Basla(); else DevamIste(); break;
                 case AnaAyarlar: SayfaAc(SayfaAyarlar); break;
                 case AnaGoruntu: SayfaAc(SayfaGoruntu); break;
                 case AnaDil: Dil.Sonraki(); break;
@@ -415,13 +567,25 @@ public class DuraklatmaMenusu : MonoBehaviour
     // ---------- ÇİZİM ----------
     // Not ve jenerik gibi OnGUI ile çiziliyor. GUI.Button bir düğme çizer ve o karede
     // tıklandıysa true döner; düğmenin ne yapacağı hemen altındaki if'te.
-    private GUIStyle baslikStili, dugmeStili, yaziStili;
+    private GUIStyle baslikStili, dugmeStili, yaziStili, oyunAdiStili, surumStili;
 
     private void OnGUI()
     {
-        if (!acik) return;
         GUI.depth = -200;   // not ve jeneriğin de üstünde
 
+        if (acik) MenuyuCiz();
+
+        // "Başla" geçişindeki kararma (#32): menüden bağımsız, her şeyin en üstüne çizilir.
+        if (karartma > 0f)
+        {
+            GUI.color = new Color(0f, 0f, 0f, karartma);
+            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
+            GUI.color = Color.white;
+        }
+    }
+
+    private void MenuyuCiz()
+    {
         if (baslikStili == null)
         {
             baslikStili = new GUIStyle(GUI.skin.label) { fontSize = 40, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
@@ -429,10 +593,13 @@ public class DuraklatmaMenusu : MonoBehaviour
             dugmeStili = new GUIStyle(GUI.skin.button) { fontSize = 24 };
             yaziStili = new GUIStyle(GUI.skin.label) { fontSize = 20 };
             yaziStili.normal.textColor = new Color(0.92f, 0.90f, 0.84f);
+            oyunAdiStili = new GUIStyle(baslikStili) { fontSize = 72 };
+            surumStili = new GUIStyle(GUI.skin.label) { fontSize = 14 };
+            surumStili.normal.textColor = new Color(0.6f, 0.58f, 0.54f);
         }
 
-        // Ekranı karart.
-        GUI.color = new Color(0f, 0f, 0f, 0.7f);
+        // Ekranı karart. Başlık ekranının ana sayfasında hafif: arkadaki merdiven görünsün.
+        GUI.color = new Color(0f, 0f, 0f, baslikta && sayfa == SayfaAna ? 0.3f : 0.7f);
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = Color.white;
 
@@ -441,14 +608,30 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         float en = 360f, boy = 56f, ara = 16f;
         float x = (Screen.width - en) / 2f;
-        float y = Screen.height / 2f - 225f;
+        float y;
 
-        GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.baslik"), baslikStili);
-        y += 60f + 2f * ara;
+        if (baslikta)
+        {
+            // Oyunun adı (#1'de isim belli olunca yalnızca tablodaki metin değişir) ve
+            // sol altta sürüm. Application.version: Project Settings → Player → Version (0.1.0).
+            GUI.Label(new Rect(0, Screen.height * 0.16f, Screen.width, 100f), Dil.Getir("menu.oyun_adi"), oyunAdiStili);
+            GUI.Label(new Rect(16, Screen.height - 36f, 400f, 28f), string.Format(Dil.Getir("menu.surum"), Application.version), surumStili);
+            y = Screen.height * 0.42f;
+        }
+        else
+        {
+            y = Screen.height / 2f - 225f;
+            GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.baslik"), baslikStili);
+            y += 60f + 2f * ara;
+        }
 
+        // İlk düğme: başlık ekranında "Başla", Esc menüsünde "Devam".
         Rect r = new Rect(x, y, en, boy);
         Vurgula(AnaDevam, r);
-        if (GUI.Button(r, Dil.Getir("menu.devam"), dugmeStili)) DevamIste();
+        if (GUI.Button(r, baslikta ? Dil.Getir("menu.basla") : Dil.Getir("menu.devam"), dugmeStili))
+        {
+            if (baslikta) Basla(); else DevamIste();
+        }
         y += boy + ara;
 
         r = new Rect(x, y, en, boy);
