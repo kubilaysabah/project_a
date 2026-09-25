@@ -9,7 +9,7 @@
 //
 // ANAHTAR NASIL TANINIYOR
 // Kodda bir metin anahtarı her zaman bu öneklerden biriyle başlar: ipucu., not.,
-// menu., dil., bina., ayar. ya da tek başına "jenerik". Kodun içindeki tırnaklı yazılardan
+// menu., dil., bina., ayar., tus. ya da tek başına "jenerik". Kodun içindeki tırnaklı yazılardan
 // bu kalıba uyan her şey anahtar sayılır. Yeni bir önek eklenirse (ör. "ayar.")
 // aşağıdaki Onekler listesine de eklenmeli.
 
@@ -23,7 +23,7 @@ using UnityEngine;
 [TestFixture]
 public class MetinButunlukTestleri
 {
-    private static readonly string[] Onekler = { "ipucu", "not", "menu", "dil", "bina", "ayar" };
+    private static readonly string[] Onekler = { "ipucu", "not", "menu", "dil", "bina", "ayar", "tus" };
 
     // Tablo dosyasını okuyup kurar. Testlerin hepsi buradan başlar.
     private static MetinTablosu TabloyuOku()

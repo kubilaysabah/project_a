@@ -35,6 +35,12 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
         etkilesimci = oyuncu.GetComponent<Etkilesimci>();
         if (kontrolcu != null) kontrolcu.enabled = false;
         if (etkilesimci != null) etkilesimci.enabled = false;
+
+        // Etkilesimci kapanırken "Player/Interact" eylemini de kapatıyor (OnDisable). Bu
+        // not da AYNI eylemi dinliyor (proje genelindeki tek eylem nesnesi); kapalı
+        // kalırsa E/A basışlarını hiç duyamaz. Bu yüzden eylemi burada yeniden açıyoruz.
+        // #29'da bulundu: not bugüne kadar E ile hiç kapanmıyordu, yalnızca Esc ile.
+        etkilesimEylemi?.Enable();
     }
 
     // ---------- DURUM ----------
@@ -56,15 +62,33 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
         // Notu AÇAN E basışı aynı karede onu kapatmasın: açıldığı karede kapatma yok.
         if (Time.frameCount <= acilisKaresi) return;
 
+        // Etkileşim eylemi klavyede E, oyun kolunda A (#29). Esc ve kolun B tuşu da kapatır.
         bool eBasildi = etkilesimEylemi != null && etkilesimEylemi.WasPressedThisFrame();
         bool escBasildi = Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
+        bool bBasildi = Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame;
 
-        if (eBasildi || escBasildi) Kapat();
+        if (eBasildi || escBasildi || bBasildi) Kapat();
     }
+
+    private bool geriVerilecek;   // oyuncunun kontrolü bu karenin sonunda geri verilecek
 
     private void Kapat()
     {
         acik = false;
+
+        // Oyuncuyu HEMEN değil, karenin sonunda (LateUpdate) serbest bırak (#29).
+        // Notu kapatan E/A basışı bu karede hâlâ "basıldı" görünüyor. Etkilesimci aynı
+        // karede açılırsa ve onun Update'i bizden sonra çalışırsa, aynı basışı görüp
+        // oyuncunun hâlâ baktığı notu hemen yeniden açardı. Bu, betiklerin çalışma
+        // sırasına bağlı sinsi bir hataydı; LateUpdate bütün Update'lerden sonra geldiği
+        // için sonraki karede basış artık "yeni" sayılmıyor.
+        geriVerilecek = true;
+    }
+
+    private void LateUpdate()
+    {
+        if (!geriVerilecek) return;
+        geriVerilecek = false;
         if (kontrolcu != null) kontrolcu.enabled = true;
         if (etkilesimci != null) etkilesimci.enabled = true;
     }
@@ -102,6 +126,8 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
 
         var ipucu = new GUIStyle(GUI.skin.label) { fontSize = 14, alignment = TextAnchor.LowerRight };
         ipucu.normal.textColor = new Color(0.3f, 0.27f, 0.22f);
-        GUI.Label(new Rect(kagit.x, kagit.y, kagit.width - 20, kagit.height - 12), Dil.Getir("not.kapat"), ipucu);
+        // "E / Esc: kapat" ya da oyun kolu kullanılıyorsa "A / B: kapat" (#29).
+        string tuslar = GirisCihazi.Kol ? Dil.Getir("tus.kapat_kol") : Dil.Getir("tus.kapat_klavye");
+        GUI.Label(new Rect(kagit.x, kagit.y, kagit.width - 20, kagit.height - 12), string.Format(Dil.Getir("not.kapat"), tuslar), ipucu);
     }
 }

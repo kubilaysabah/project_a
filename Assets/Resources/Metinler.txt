@@ -4,13 +4,13 @@
 # Anahtarı değiştirmeyin: kod metni bu adla arıyor. Değiştirilecek olan sadece metin.
 
 # ---- Etkileşim ipuçları: hedefin üstünde yüzen "TOPLA (E)" paneli ----
-ipucu.bicim	{0} (E)	{0} (E)
+ipucu.bicim	{0} ({1})	{0} ({1})
 ipucu.topla	TOPLA	PICK UP
 ipucu.oku	OKU	READ
 
 # ---- Yönetici notu (açılış) ----
 not.yonetici	Kapıcı Efendi,\n\nGece çöpleri kat kat topla. Merdivenler hep aynıdır, alışırsın.\n\nBir şey yanlışsa — ne olduğunu sorma — KATA GİRME, geri dön.\n\nSabah çatının kapısını kilitlemeyi unutma.\n\n— Yönetim	Janitor,\n\nCollect the rubbish floor by floor tonight. The stairs are always the same — you'll get used to it.\n\nIf something is wrong — don't ask what — DON'T STEP ONTO THAT FLOOR. Turn back.\n\nDon't forget to lock the roof door in the morning.\n\n— The Management
-not.kapat	E / Esc: kapat	E / Esc: close
+not.kapat	{0}: kapat	{0}: close
 
 # ---- Jenerik: ilk satır başlık, boş satırlar aralık ----
 jenerik	HUZUR APARTMANI\n\nTasarım ve Geliştirme\nŞahan Boz\n\nBirlikte\nKubilay\n\n\nOynadığın için teşekkürler.	HUZUR APARTMANI\n\nDesign & Development\nŞahan Boz\n\nWith\nKubilay\n\n\nThank you for playing.
@@ -41,3 +41,9 @@ ayar.varsayilan	Varsayılana dön	Reset to defaults
 bina.tabela	HUZUR APARTMANI	HUZUR APARTMANI
 bina.takvim	EKİM\n1994	<size=66>OCTOBER</size>\n1994
 bina.asansor_notu	ARIZALI\n<size=48>Yönetim</size>	<size=78>OUT OF\nORDER</size>\n<size=44>Management</size>
+
+# ---- Tuş adları (#29): ipuçları son kullanılan cihaza göre (klavye / oyun kolu) ----
+tus.etkilesim_klavye	E	E
+tus.etkilesim_kol	A	A
+tus.kapat_klavye	E / Esc	E / Esc
+tus.kapat_kol	A / B	A / B

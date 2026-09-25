@@ -223,10 +223,12 @@ public class Etkilesimci : MonoBehaviour
             return;
         }
 
-        // Biçim tablodan gelir (#15): "{0} (E)". string.Format, {0} yazan yere
-        // ikinci parametreyi koyar: "TOPLA (E)". Tuş işaretinin yeri de böylece
-        // dile göre değişebilir (bazı dillerde tuş önce yazılır).
-        ipucuYazisi.text = string.Format(Dil.Getir("ipucu.bicim"), Hedef.Ipucu);
+        // Biçim tablodan gelir (#15): "{0} ({1})". string.Format, {0} yazan yere
+        // eylemin adını, {1} yazan yere tuşun adını koyar: "TOPLA (E)". Tuş işaretinin
+        // yeri de böylece dile göre değişebilir (bazı dillerde tuş önce yazılır).
+        // Tuş, oyuncunun en son kullandığı cihaza göre (#29): klavyede E, oyun kolunda A.
+        string tus = GirisCihazi.Kol ? Dil.Getir("tus.etkilesim_kol") : Dil.Getir("tus.etkilesim_klavye");
+        ipucuYazisi.text = string.Format(Dil.Getir("ipucu.bicim"), Hedef.Ipucu, tus);
 
         // Nesnenin ÜSTÜNE yerleştir. Görsel sınırlarını kullanıyoruz ki
         // büyük bir nesnede yazı içinde kalmasın, küçüğünde de çok yükseğe kaçmasın.

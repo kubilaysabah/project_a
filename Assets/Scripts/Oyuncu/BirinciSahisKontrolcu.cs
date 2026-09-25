@@ -30,6 +30,9 @@ public class BirinciSahisKontrolcu : MonoBehaviour
     [Tooltip("Fare hassasiyeti. Büyüdükçe kamera daha hızlı döner.")]
     [SerializeField] private float fareHassasiyeti = 0.08f;
 
+    [Tooltip("Oyun kolu sağ çubuğu tam eğikken saniyede kaç derece dönülür (#29).")]
+    [SerializeField] private float cubukHizi = 150f;
+
     [Tooltip("Kameranın yukarı/aşağı bakabileceği en büyük açı (derece).")]
     [SerializeField] private float bakisSiniri = 85f;
 
@@ -161,11 +164,20 @@ public class BirinciSahisKontrolcu : MonoBehaviour
         // farenin BU KAREDE kaç piksel kaydığıdır (konumu değil, kayması).
         Vector2 fare = OluBolgeUygula(bakisEylemi.ReadValue<Vector2>());
 
-        // Fare kaymasını deltaTime ile ÇARPMAYIZ. Çünkü kayma zaten
-        // "bu karede ne kadar" bilgisidir; bir kez daha zamana bölersek
-        // kare hızı değiştikçe hassasiyet değişir ve his bozulur.
-        // Oyuncunun ayarı (#27): temel hassasiyetin çarpanı, Esc → Ayarlar'dan.
-        float hassasiyet = fareHassasiyeti * Ayarlar.Hassasiyet;
+        // Fare ile oyun kolu çubuğu FARKLI şeyler söyler (#29):
+        //   Fare  → "bu karede şu kadar piksel kaydım". Zaten kareye özgü bir miktar;
+        //           deltaTime ile ÇARPMAYIZ, yoksa kare hızı değiştikçe his bozulur.
+        //   Çubuk → "şu kadar eğiğim" (−1 ile 1 arası). Bu bir hız isteğidir; bir
+        //           karede ne kadar döneceğimizi bulmak için deltaTime ile ÇARPARIZ.
+        // Eskiden çubuğa da fare hesabı uygulanıyordu: bakış hızı kare hızına bağlıydı
+        // (165 FPS'te 60 FPS'in ~3 katı) ve çok yavaştı (~13°/sn).
+        // activeControl: eyleme bu karede değeri veren tuş/çubuk; .device onun cihazı.
+        InputControl kaynak = bakisEylemi.activeControl;
+        bool cubuk = kaynak != null && kaynak.device is Gamepad;
+        float temel = cubuk ? cubukHizi * Time.deltaTime : fareHassasiyeti;
+
+        // Oyuncunun ayarı (#27): temel hassasiyetin çarpanı, Esc → Ayarlar'dan. İkisine de uygulanır.
+        float hassasiyet = temel * Ayarlar.Hassasiyet;
         float yatay = fare.x * hassasiyet;
         float dikey = fare.y * hassasiyet;
 
