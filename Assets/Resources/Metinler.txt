@@ -20,8 +20,19 @@ menu.baslik	DURAKLATILDI	PAUSED
 menu.devam	Devam	Resume
 menu.dil	Dil: {0}	Language: {0}
 menu.cik	Oyundan Çık	Quit Game
+menu.ayarlar	Ayarlar	Settings
+menu.geri	Geri	Back
 # Dilin kendi adı, her zaman o dilin kendisiyle yazılır.
 dil.ad	Türkçe	English
+
+# ---- Ayarlar sayfası (#27). {0} yerine kod değeri koyar. ----
+ayar.hassasiyet	Fare hassasiyeti: {0}×	Mouse sensitivity: {0}×
+ayar.ses	Ses seviyesi: %{0}	Volume: {0}%
+ayar.gorus	Görüş açısı: {0}°	Field of view: {0}°
+ayar.ters	Fareyi ters çevir: {0}	Invert mouse: {0}
+ayar.acik	Açık	On
+ayar.kapali	Kapalı	Off
+ayar.varsayilan	Varsayılana dön	Reset to defaults
 
 # ---- Binanın üstündeki yazılar ----
 # TABELA iki dilde de Türkçe: "Huzur Apartmanı" binanın adı, özel isim çevrilmez.

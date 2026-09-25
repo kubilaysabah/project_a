@@ -109,6 +109,29 @@ public class BirinciSahisKontrolcu : MonoBehaviour
     private void Start()
     {
         FareyiKilitle(true);
+
+        // Görüş açısı ayarı (#27). Haberi OnEnable/OnDisable'da değil burada dinliyoruz:
+        // Esc menüsü açıkken bu bileşen KAPALI. OnDisable'da dinlemeyi bıraksaydık,
+        // oyuncu menüde görüş açısını değiştirdiğinde kamera menüden çıkana kadar
+        // değişmezdi. Start/OnDestroy nesnenin ömrü boyunca bir kez çalışır.
+        if (kamera != null) kameraBileseni = kamera.GetComponent<Camera>();
+        GorusAcisiniUygula();
+        Ayarlar.Degisti += GorusAcisiniUygula;
+    }
+
+    private void OnDestroy()
+    {
+        // Nesne yok olurken dinlemeyi bırak; yoksa Ayarlar yok olmuş bir kameraya yazmaya çalışır.
+        Ayarlar.Degisti -= GorusAcisiniUygula;
+    }
+
+    private Camera kameraBileseni;
+
+    private void GorusAcisiniUygula()
+    {
+        // fieldOfView: kameranın dikey görüş açısı (derece). Yalnızca oyuncunun kamerası;
+        // finaldeki dış kamera ayrı bir kamera ve kendi açısında kalır.
+        if (kameraBileseni != null) kameraBileseni.fieldOfView = Ayarlar.Gorus;
     }
 
     // ---------- UPDATE ----------
@@ -141,8 +164,13 @@ public class BirinciSahisKontrolcu : MonoBehaviour
         // Fare kaymasını deltaTime ile ÇARPMAYIZ. Çünkü kayma zaten
         // "bu karede ne kadar" bilgisidir; bir kez daha zamana bölersek
         // kare hızı değiştikçe hassasiyet değişir ve his bozulur.
-        float yatay = fare.x * fareHassasiyeti;
-        float dikey = fare.y * fareHassasiyeti;
+        // Oyuncunun ayarı (#27): temel hassasiyetin çarpanı, Esc → Ayarlar'dan.
+        float hassasiyet = fareHassasiyeti * Ayarlar.Hassasiyet;
+        float yatay = fare.x * hassasiyet;
+        float dikey = fare.y * hassasiyet;
+
+        // "Fareyi ters çevir" açıksa yukarı-aşağı bakış yön değiştirir.
+        if (Ayarlar.Ters) dikey = -dikey;
 
         // Sağa-sola bakış: GÖVDEYİ döndürürüz, çünkü yürüme yönü de dönmeli.
         transform.Rotate(Vector3.up * yatay);

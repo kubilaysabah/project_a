@@ -40,9 +40,26 @@ public class DuraklatmaMenusu : MonoBehaviour
     private CursorLockMode eskiFareKilidi;
     private bool eskiFareGorunur;
 
+    // Menünün iki sayfası var: ana sayfa (Devam / Ayarlar / Dil / Çık) ve ayarlar (#27).
+    private bool ayarSayfasi;
+
+    // Ses seviyesi değişince çalan örnek ses (#27). Menü açıkken bütün sesler
+    // duraklatılıyor (AudioListener.pause); oyuncu kaydırıcıyı oynatırken farkı
+    // duyamazdı. Bu kaynak ignoreListenerPause ile o duraklatmanın DIŞINDA kalıyor,
+    // ama ortak ses seviyesinden (AudioListener.volume) etkileniyor: tam olarak
+    // oyuncunun seçtiği seviyede çalıyor.
+    private AudioSource ornekSes;
+    private float sonOrnekZamani = -1f;
+
     private void Start()
     {
         kontrolcu = FindAnyObjectByType<BirinciSahisKontrolcu>();
+
+        ornekSes = gameObject.AddComponent<AudioSource>();
+        ornekSes.playOnAwake = false;
+        ornekSes.spatialBlend = 0f;              // 2B: yeri yok, "kulağın içinde"
+        ornekSes.ignoreListenerPause = true;     // menü duraklatması bunu susturmasın
+        ornekSes.clip = Resources.Load<AudioClip>("Sesler/Poset_Hisirti");
     }
 
     private void Update()
@@ -50,7 +67,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         bool esc = Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
         if (!esc) return;
 
-        if (acik) Devam();
+        if (acik && ayarSayfasi) ayarSayfasi = false;   // ayarlardan ana sayfaya dön
+        else if (acik) Devam();
         else if (oncekiKareOynanabilir) Ac();
     }
 
@@ -64,6 +82,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     private void Ac()
     {
         acik = true;
+        ayarSayfasi = false;   // menü her zaman ana sayfadan açılır
 
         // Time.timeScale: oyun saatinin hızı. 1 = normal, 0 = durmuş. Sıfırken
         // Time.deltaTime 0 olur: hareket, fizik, WaitForSeconds bekleyen ceza ve final
@@ -151,7 +170,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     // ---------- ÇİZİM ----------
     // Not ve jenerik gibi OnGUI ile çiziliyor. GUI.Button bir düğme çizer ve o karede
     // tıklandıysa true döner; düğmenin ne yapacağı hemen altındaki if'te.
-    private GUIStyle baslikStili, dugmeStili;
+    private GUIStyle baslikStili, dugmeStili, yaziStili;
 
     private void OnGUI()
     {
@@ -163,6 +182,8 @@ public class DuraklatmaMenusu : MonoBehaviour
             baslikStili = new GUIStyle(GUI.skin.label) { fontSize = 40, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
             baslikStili.normal.textColor = new Color(0.92f, 0.90f, 0.84f);
             dugmeStili = new GUIStyle(GUI.skin.button) { fontSize = 24 };
+            yaziStili = new GUIStyle(GUI.skin.label) { fontSize = 20 };
+            yaziStili.normal.textColor = new Color(0.92f, 0.90f, 0.84f);
         }
 
         // Ekranı karart.
@@ -170,14 +191,19 @@ public class DuraklatmaMenusu : MonoBehaviour
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = Color.white;
 
+        if (ayarSayfasi) { AyarlariCiz(); return; }
+
         float en = 360f, boy = 56f, ara = 16f;
         float x = (Screen.width - en) / 2f;
-        float y = Screen.height / 2f - 150f;
+        float y = Screen.height / 2f - 190f;
 
         GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.baslik"), baslikStili);
         y += 60f + 2f * ara;
 
         if (GUI.Button(new Rect(x, y, en, boy), Dil.Getir("menu.devam"), dugmeStili)) Devam();
+        y += boy + ara;
+
+        if (GUI.Button(new Rect(x, y, en, boy), Dil.Getir("menu.ayarlar"), dugmeStili)) ayarSayfasi = true;
         y += boy + ara;
 
         // "Dil: Türkçe" / "Language: English". Dilin adı her zaman kendi dilinde
@@ -187,5 +213,70 @@ public class DuraklatmaMenusu : MonoBehaviour
         y += boy + ara;
 
         if (GUI.Button(new Rect(x, y, en, boy), Dil.Getir("menu.cik"), dugmeStili)) OyundanCik();
+    }
+
+    // ---------- AYARLAR SAYFASI (#27) ----------
+    // GUI.HorizontalSlider: bir kaydırıcı çizer ve o karedeki değerini döndürür;
+    // oyuncu sürüklemediyse verdiğimiz değerin aynısı döner. Değer değiştiyse Ayarlar'a
+    // yazıyoruz; Ayarlar onu sınırlar, kaydeder ve uygular (anında, menüden çıkmadan).
+    private void AyarlariCiz()
+    {
+        float en = 480f, ara = 14f;
+        float x = (Screen.width - en) / 2f;
+        float y = Screen.height / 2f - 230f;
+
+        GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.ayarlar"), baslikStili);
+        y += 60f + 2f * ara;
+
+        // Sayılar dile göre yazılır: Türkçede "1,50", İngilizcede "1.50".
+        // CultureInfo: bir dilin sayı, tarih yazım kuralları.
+        System.Globalization.CultureInfo kultur = Dil.Etkin == DilKodu.TR
+            ? new System.Globalization.CultureInfo("tr-TR")
+            : System.Globalization.CultureInfo.InvariantCulture;
+
+        // Fare hassasiyeti: 0,05'lik adımlarla (1,00 / 1,05 / 1,10...).
+        float h = Ayarlar.Hassasiyet;
+        GUI.Label(new Rect(x, y, en, 30f), string.Format(Dil.Getir("ayar.hassasiyet"), h.ToString("0.00", kultur)), yaziStili);
+        y += 32f;
+        float yeniH = Mathf.Round(GUI.HorizontalSlider(new Rect(x, y, en, 20f), h, AyarKurallari.HassasiyetEnAz, AyarKurallari.HassasiyetEnCok) * 20f) / 20f;
+        if (!Mathf.Approximately(yeniH, h)) Ayarlar.Hassasiyet = yeniH;
+        y += 20f + ara;
+
+        // Ses seviyesi: %5'lik adımlar. Değişince örnek ses çalar (en fazla 0,2 sn'de bir;
+        // sürüklerken her karede çalsaydı ses üst üste binip cızırtıya dönerdi).
+        float s = Ayarlar.Ses;
+        GUI.Label(new Rect(x, y, en, 30f), string.Format(Dil.Getir("ayar.ses"), Mathf.RoundToInt(s * 100f)), yaziStili);
+        y += 32f;
+        float yeniS = Mathf.Round(GUI.HorizontalSlider(new Rect(x, y, en, 20f), s, AyarKurallari.SesEnAz, AyarKurallari.SesEnCok) * 20f) / 20f;
+        if (!Mathf.Approximately(yeniS, s))
+        {
+            Ayarlar.Ses = yeniS;
+            // unscaledTime: oyun saati durmuşken de ilerleyen gerçek zaman.
+            if (ornekSes != null && ornekSes.clip != null && Time.unscaledTime - sonOrnekZamani > 0.2f)
+            {
+                ornekSes.PlayOneShot(ornekSes.clip, 0.8f);
+                sonOrnekZamani = Time.unscaledTime;
+            }
+        }
+        y += 20f + ara;
+
+        // Görüş açısı: 1 derecelik adımlar.
+        float g = Ayarlar.Gorus;
+        GUI.Label(new Rect(x, y, en, 30f), string.Format(Dil.Getir("ayar.gorus"), Mathf.RoundToInt(g)), yaziStili);
+        y += 32f;
+        float yeniG = Mathf.Round(GUI.HorizontalSlider(new Rect(x, y, en, 20f), g, AyarKurallari.GorusEnAz, AyarKurallari.GorusEnCok));
+        if (!Mathf.Approximately(yeniG, g)) Ayarlar.Gorus = yeniG;
+        y += 20f + ara;
+
+        // Fareyi ters çevir: "Dil" düğmesi gibi, her tıklama durumu değiştirir. İlk
+        // denemede Unity'nin işaret kutusu (GUI.Toggle) kullanıldı; kutucuk çok küçük
+        // kaldı ve karanlık menüde neredeyse görünmüyordu.
+        string tersYazisi = string.Format(Dil.Getir("ayar.ters"), Ayarlar.Ters ? Dil.Getir("ayar.acik") : Dil.Getir("ayar.kapali"));
+        if (GUI.Button(new Rect(x, y, en, 44f), tersYazisi, dugmeStili)) Ayarlar.Ters = !Ayarlar.Ters;
+        y += 44f + 2f * ara;
+
+        float dugmeEn = (en - ara) / 2f, boy = 52f;
+        if (GUI.Button(new Rect(x, y, dugmeEn, boy), Dil.Getir("ayar.varsayilan"), dugmeStili)) Ayarlar.VarsayilanaDon();
+        if (GUI.Button(new Rect(x + dugmeEn + ara, y, dugmeEn, boy), Dil.Getir("menu.geri"), dugmeStili)) ayarSayfasi = false;
     }
 }
