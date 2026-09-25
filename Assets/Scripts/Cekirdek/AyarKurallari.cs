@@ -35,6 +35,61 @@ public static class AyarKurallari
     // Açıkken fareyi yukarı itmek aşağı baktırır (uçak kumandası gibi).
     public const bool TersVarsayilan = false;
 
+    // ---------- GÖRÜNTÜ (#30) ----------
+    // Grafik kalitesi: 0 = Düşük, 1 = Orta, 2 = Yüksek. Oyun Yüksek'te ayarlandı.
+    public const int KaliteDusuk = 0, KaliteOrta = 1, KaliteYuksek = 2;
+    public const int KaliteVarsayilan = KaliteYuksek;
+
+    // Parlaklık: gece post-processing'inin pozlamasına eklenen değer ("EV", pozlama
+    // adımı). +1 görüntüyü iki kat aydınlatır, -1 yarıya indirir. 0 = oyunun ayarlandığı hâl.
+    public const float ParlaklikEnAz = -1f;
+    public const float ParlaklikEnCok = 1f;
+    public const float ParlaklikVarsayilan = 0f;
+
+    public const bool TamEkranVarsayilan = true;
+    public const bool VSyncVarsayilan = true;
+
+    // V-Sync kapalıyken kare hızı sınırı. Sınırsız bırakılırsa ekran kartı, menüde bile,
+    // saniyede yüzlerce gereksiz kare çizip %100 çalışır (#6'da yaşandı).
+    public const int VSyncKapaliKareSiniri = 240;
+
+    public static int Kalite(int deger)
+    {
+        if (deger < KaliteDusuk) return KaliteDusuk;
+        if (deger > KaliteYuksek) return KaliteYuksek;
+        return deger;
+    }
+
+    public static float Parlaklik(float deger)
+    {
+        return Sinirla(deger, ParlaklikEnAz, ParlaklikEnCok, ParlaklikVarsayilan);
+    }
+
+    /// <summary>
+    /// Ekranın desteklediği çözünürlükler arasından kayıtlı olana en uygun olanın
+    /// sırasını verir. Birebir aynısı varsa o; yoksa piksel sayısı en yakın olan
+    /// (ör. başka bir monitöre geçilmişse). Liste boşsa -1.
+    /// genislikler[i] ve yukseklikler[i] birlikte bir çözünürlüğü anlatır.
+    /// </summary>
+    public static int CozunurlukSec(int[] genislikler, int[] yukseklikler, int genislik, int yukseklik)
+    {
+        if (genislikler == null || genislikler.Length == 0) return -1;
+
+        int enIyi = 0;
+        long enKucukFark = long.MaxValue;
+        long hedef = (long)genislik * yukseklik;   // long: büyük çarpımlar int'e sığmayabilir
+
+        for (int i = 0; i < genislikler.Length; i++)
+        {
+            if (genislikler[i] == genislik && yukseklikler[i] == yukseklik) return i;   // birebir
+
+            long fark = (long)genislikler[i] * yukseklikler[i] - hedef;
+            if (fark < 0) fark = -fark;
+            if (fark < enKucukFark) { enKucukFark = fark; enIyi = i; }
+        }
+        return enIyi;
+    }
+
     public static float Hassasiyet(float deger)
     {
         return Sinirla(deger, HassasiyetEnAz, HassasiyetEnCok, HassasiyetVarsayilan);

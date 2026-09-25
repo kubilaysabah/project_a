@@ -1,7 +1,8 @@
 // DuraklatmaMenusu.cs
-// Esc (ya da oyun kolunun Start tuşu) ile açılan duraklatma menüsü (#15, #27, #29).
-// Ana sayfa: Devam, Ayarlar, Dil, Oyundan Çık. Ayarlar sayfası: hassasiyet, ses,
-// görüş açısı, fareyi ters çevir, varsayılana dön, geri.
+// Esc (ya da oyun kolunun Start tuşu) ile açılan duraklatma menüsü (#15, #27, #29, #30).
+// Ana sayfa: Devam, Ayarlar, Görüntü, Dil, Oyundan Çık.
+// Ayarlar sayfası: hassasiyet, ses, görüş açısı, fareyi ters çevir, varsayılana dön, geri.
+// Görüntü sayfası: çözünürlük, ekran modu, V-Sync, grafik kalitesi, parlaklık, varsayılana dön, geri.
 //
 // Menü açılınca:
 //   - oyunun saati durur (Time.timeScale = 0),
@@ -49,14 +50,25 @@ public class DuraklatmaMenusu : MonoBehaviour
     private CursorLockMode eskiFareKilidi;
     private bool eskiFareGorunur;
 
-    // Menünün iki sayfası var: ana sayfa ve ayarlar (#27).
-    private bool ayarSayfasi;
+    // Menünün üç sayfası var: ana sayfa, ayarlar (#27) ve görüntü (#30).
+    private const int SayfaAna = 0, SayfaAyarlar = 1, SayfaGoruntu = 2;
+    private int sayfa = SayfaAna;
 
     // ---------- KLAVYE / KOL İLE GEZİNME (#29) ----------
     // Öğelerin sırası (yukarıdan aşağı). Numara, gezginin "Secili" değeriyle eşleşir.
-    private const int AnaDevam = 0, AnaAyarlar = 1, AnaDil = 2, AnaCik = 3, AnaOgeSayisi = 4;
+    private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaDil = 3, AnaCik = 4, AnaOgeSayisi = 5;
     private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3,
                       AyarVarsayilan = 4, AyarGeri = 5, AyarOgeSayisi = 6;
+    private const int GorCozunurluk = 0, GorEkran = 1, GorVSync = 2, GorKalite = 3,
+                      GorParlaklik = 4, GorVarsayilan = 5, GorGeri = 6, GorOgeSayisi = 7;
+
+    // Kalite seviyelerinin tablodaki adları: [0] Düşük, [1] Orta, [2] Yüksek.
+    private static readonly string[] KaliteAnahtarlari = { "ayar.dusuk", "ayar.orta", "ayar.yuksek" };
+
+    // Görüntü sayfası açılınca ekranın desteklediği çözünürlüklerden kurulan liste (#30).
+    // Aynı genişlik x yükseklik, farklı yenileme hızlarıyla birden çok kez gelir; tekler tutulur.
+    private int[] cozunurlukGenislik = new int[0], cozunurlukYukseklik = new int[0];
+    private int cozunurlukSirasi;
 
     private readonly MenuGezgini gezgin = new MenuGezgini(AnaOgeSayisi);
     private readonly TekrarZamanlayici dikeyTekrar = new TekrarZamanlayici();
@@ -117,7 +129,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (baslat) { DevamIste(); return; }            // Start her sayfadan menüyü kapatır
         if (esc || geri)                                // Esc / B: bir geri git
         {
-            if (ayarSayfasi) SayfaAc(ayarlar: false);
+            if (sayfa != SayfaAna) SayfaAc(SayfaAna);
             else DevamIste();
             return;
         }
@@ -175,24 +187,40 @@ public class DuraklatmaMenusu : MonoBehaviour
     // OnGUI'deki düğmelerden yapıyor; ikisi aynı fonksiyonları çağırıyor.
     private void SeciliyiCalistir()
     {
-        if (!ayarSayfasi)
+        if (sayfa == SayfaAna)
         {
             switch (gezgin.Secili)
             {
                 case AnaDevam: DevamIste(); break;
-                case AnaAyarlar: SayfaAc(ayarlar: true); break;
+                case AnaAyarlar: SayfaAc(SayfaAyarlar); break;
+                case AnaGoruntu: SayfaAc(SayfaGoruntu); break;
                 case AnaDil: Dil.Sonraki(); break;
                 case AnaCik: OyundanCik(); break;
             }
             return;
         }
 
+        if (sayfa == SayfaAyarlar)
+        {
+            switch (gezgin.Secili)
+            {
+                case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
+                case AyarVarsayilan: Ayarlar.VarsayilanaDon(); break;
+                case AyarGeri: SayfaAc(SayfaAna); break;
+                // Kaydırıcılarda onay tuşunun işi yok; sol/sağ ile değiştirilir.
+            }
+            return;
+        }
+
+        // Görüntü sayfası: düğmelerde onay, durumu bir ileri alır (fare tıklaması gibi).
         switch (gezgin.Secili)
         {
-            case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
-            case AyarVarsayilan: Ayarlar.VarsayilanaDon(); break;
-            case AyarGeri: SayfaAc(ayarlar: false); break;
-            // Kaydırıcılarda onay tuşunun işi yok; sol/sağ ile değiştirilir.
+            case GorCozunurluk: CozunurlukDegistir(+1); break;
+            case GorEkran: Ayarlar.TamEkran = !Ayarlar.TamEkran; break;
+            case GorVSync: Ayarlar.VSync = !Ayarlar.VSync; break;
+            case GorKalite: Ayarlar.Kalite = (Ayarlar.Kalite + 1) % KaliteAnahtarlari.Length; break;
+            case GorVarsayilan: Ayarlar.GoruntuVarsayilanaDon(); CozunurlukListesiniKur(); break;
+            case GorGeri: SayfaAc(SayfaAna); break;
         }
     }
 
@@ -200,9 +228,24 @@ public class DuraklatmaMenusu : MonoBehaviour
     // düğmelerinde de durumu değiştirir; sol/sağ oyuncuya orada da doğal gelir.
     private void Kaydir(int yon)
     {
-        if (!ayarSayfasi)
+        if (sayfa == SayfaAna)
         {
             if (gezgin.Secili == AnaDil) Dil.Sonraki();
+            return;
+        }
+
+        if (sayfa == SayfaGoruntu)
+        {
+            switch (gezgin.Secili)
+            {
+                case GorCozunurluk: CozunurlukDegistir(yon); break;
+                case GorEkran: Ayarlar.TamEkran = !Ayarlar.TamEkran; break;
+                case GorVSync: Ayarlar.VSync = !Ayarlar.VSync; break;
+                // Kalite sol/sağ ile bir aşağı / yukarı; uçlarda durur (dolaşmaz: "Düşük"ten
+                // bir sol daha "Yüksek"e atlasa oyuncu şaşırırdı). Sınırı Ayarlar koyuyor.
+                case GorKalite: Ayarlar.Kalite = Ayarlar.Kalite + yon; break;
+                case GorParlaklik: Ayarlar.Parlaklik = Mathf.Round((Ayarlar.Parlaklik + 0.1f * yon) * 10f) / 10f; break;
+            }
             return;
         }
 
@@ -215,13 +258,52 @@ public class DuraklatmaMenusu : MonoBehaviour
         }
     }
 
-    private void SayfaAc(bool ayarlar)
+    private void SayfaAc(int yeni)
     {
-        ayarSayfasi = ayarlar;
-        gezgin.OgeSayisiniAyarla(ayarlar ? AyarOgeSayisi : AnaOgeSayisi);
-        // Ayarlara girince ilk öğe; ana sayfaya dönünce "Ayarlar" düğmesi seçili kalsın
-        // (oyuncu nereden geldiğini görür, tekrar girmek isterse tek tuş yeter).
-        gezgin.Sec(ayarlar ? AyarHassasiyet : AnaAyarlar);
+        int onceki = sayfa;
+        sayfa = yeni;
+        gezgin.OgeSayisiniAyarla(yeni == SayfaAyarlar ? AyarOgeSayisi : yeni == SayfaGoruntu ? GorOgeSayisi : AnaOgeSayisi);
+
+        // Bir sayfaya girince ilk öğe seçili. Ana sayfaya dönünce geldiği sayfanın düğmesi
+        // seçili kalsın (oyuncu nereden geldiğini görür, tekrar girmek isterse tek tuş yeter).
+        if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : AnaAyarlar);
+        else gezgin.Sec(0);
+
+        if (yeni == SayfaGoruntu) CozunurlukListesiniKur();
+    }
+
+    // ---------- ÇÖZÜNÜRLÜK LİSTESİ (#30) ----------
+    // Screen.resolutions: ekranın (monitör + ekran kartı) desteklediği çözünürlükler.
+    // Aynı boyut her yenileme hızı için (60 Hz, 144 Hz...) ayrı gelir; tekleri alınır.
+    private void CozunurlukListesiniKur()
+    {
+        var genislik = new List<int>();
+        var yukseklik = new List<int>();
+        foreach (Resolution r in Screen.resolutions)
+        {
+            bool varMi = false;
+            for (int i = 0; i < genislik.Count; i++)
+                if (genislik[i] == r.width && yukseklik[i] == r.height) { varMi = true; break; }
+            if (!varMi) { genislik.Add(r.width); yukseklik.Add(r.height); }
+        }
+        // Liste boş gelirse (bazı sürücüler, Editor) en azından şu anki boyut seçilebilsin.
+        if (genislik.Count == 0) { genislik.Add(Screen.width); yukseklik.Add(Screen.height); }
+
+        cozunurlukGenislik = genislik.ToArray();
+        cozunurlukYukseklik = yukseklik.ToArray();
+
+        // Kayıtlı seçim yoksa (0) ekranın kendi çözünürlüğü kabul edilir.
+        int g = Ayarlar.CozunurlukGenislik > 0 ? Ayarlar.CozunurlukGenislik : Screen.currentResolution.width;
+        int y = Ayarlar.CozunurlukYukseklik > 0 ? Ayarlar.CozunurlukYukseklik : Screen.currentResolution.height;
+        cozunurlukSirasi = Mathf.Max(0, AyarKurallari.CozunurlukSec(cozunurlukGenislik, cozunurlukYukseklik, g, y));
+    }
+
+    private void CozunurlukDegistir(int yon)
+    {
+        int n = cozunurlukGenislik.Length;
+        if (n == 0) return;
+        cozunurlukSirasi = ((cozunurlukSirasi + yon) % n + n) % n;   // uçlarda dolaşır
+        Ayarlar.CozunurlukAyarla(cozunurlukGenislik[cozunurlukSirasi], cozunurlukYukseklik[cozunurlukSirasi]);
     }
 
     private void OrnekSesCal()
@@ -239,7 +321,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     private void Ac()
     {
         acik = true;
-        SayfaAc(ayarlar: false);
+        SayfaAc(SayfaAna);
         gezgin.Sec(AnaDevam);   // menü her zaman ana sayfada, "Devam" seçili açılır
 
         // Time.timeScale: oyun saatinin hızı. 1 = normal, 0 = durmuş. Sıfırken
@@ -354,11 +436,12 @@ public class DuraklatmaMenusu : MonoBehaviour
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = Color.white;
 
-        if (ayarSayfasi) { AyarlariCiz(); return; }
+        if (sayfa == SayfaAyarlar) { AyarlariCiz(); return; }
+        if (sayfa == SayfaGoruntu) { GoruntuCiz(); return; }
 
         float en = 360f, boy = 56f, ara = 16f;
         float x = (Screen.width - en) / 2f;
-        float y = Screen.height / 2f - 190f;
+        float y = Screen.height / 2f - 225f;
 
         GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.baslik"), baslikStili);
         y += 60f + 2f * ara;
@@ -370,7 +453,12 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         r = new Rect(x, y, en, boy);
         Vurgula(AnaAyarlar, r);
-        if (GUI.Button(r, Dil.Getir("menu.ayarlar"), dugmeStili)) SayfaAc(ayarlar: true);
+        if (GUI.Button(r, Dil.Getir("menu.ayarlar"), dugmeStili)) SayfaAc(SayfaAyarlar);
+        y += boy + ara;
+
+        r = new Rect(x, y, en, boy);
+        Vurgula(AnaGoruntu, r);
+        if (GUI.Button(r, Dil.Getir("menu.goruntu"), dugmeStili)) SayfaAc(SayfaGoruntu);
         y += boy + ara;
 
         // "Dil: Türkçe" / "Language: English". Dilin adı her zaman kendi dilinde
@@ -467,6 +555,69 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         r = new Rect(x + dugmeEn + ara, y, dugmeEn, boy);
         Vurgula(AyarGeri, r);
-        if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(ayarlar: false);
+        if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAna);
+    }
+
+    // ---------- GÖRÜNTÜ SAYFASI (#30) ----------
+    // Çözünürlük, ekran modu, V-Sync ve kalite düğmeleri tıklanınca bir sonraki seçeneğe
+    // geçer (klavye/kolda sol-sağ da değiştirir). Parlaklık bir kaydırıcı.
+    private void GoruntuCiz()
+    {
+        float en = 480f, ara = 14f, boy = 44f;
+        float x = (Screen.width - en) / 2f;
+        float y = Screen.height / 2f - 250f;
+
+        GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.goruntu"), baslikStili);
+        y += 60f + 2f * ara;
+
+        System.Globalization.CultureInfo kultur = Dil.Etkin == DilKodu.TR
+            ? new System.Globalization.CultureInfo("tr-TR")
+            : System.Globalization.CultureInfo.InvariantCulture;
+
+        // Çözünürlük: "1920 × 1080".
+        string cozunurluk = cozunurlukGenislik.Length > 0
+            ? cozunurlukGenislik[cozunurlukSirasi] + " × " + cozunurlukYukseklik[cozunurlukSirasi]
+            : Screen.width + " × " + Screen.height;
+        Rect r = new Rect(x, y, en, boy);
+        Vurgula(GorCozunurluk, r);
+        if (GUI.Button(r, string.Format(Dil.Getir("ayar.cozunurluk"), cozunurluk), dugmeStili)) CozunurlukDegistir(+1);
+        y += boy + ara;
+
+        r = new Rect(x, y, en, boy);
+        Vurgula(GorEkran, r);
+        string ekran = Ayarlar.TamEkran ? Dil.Getir("ayar.tamekran") : Dil.Getir("ayar.pencere");
+        if (GUI.Button(r, string.Format(Dil.Getir("ayar.ekran"), ekran), dugmeStili)) Ayarlar.TamEkran = !Ayarlar.TamEkran;
+        y += boy + ara;
+
+        r = new Rect(x, y, en, boy);
+        Vurgula(GorVSync, r);
+        string vsync = Ayarlar.VSync ? Dil.Getir("ayar.acik") : Dil.Getir("ayar.kapali");
+        if (GUI.Button(r, string.Format(Dil.Getir("ayar.vsync"), vsync), dugmeStili)) Ayarlar.VSync = !Ayarlar.VSync;
+        y += boy + ara;
+
+        r = new Rect(x, y, en, boy);
+        Vurgula(GorKalite, r);
+        string kalite = Dil.Getir(KaliteAnahtarlari[Ayarlar.Kalite]);
+        if (GUI.Button(r, string.Format(Dil.Getir("ayar.kalite"), kalite), dugmeStili))
+            Ayarlar.Kalite = (Ayarlar.Kalite + 1) % KaliteAnahtarlari.Length;
+        y += boy + ara;
+
+        // Parlaklık: 0,1'lik adımlar, işaretiyle yazılır ("+0,3", "-0,5", "0,0").
+        Vurgula(GorParlaklik, new Rect(x, y, en, 52f));
+        float p = Ayarlar.Parlaklik;
+        GUI.Label(new Rect(x, y, en, 30f), string.Format(Dil.Getir("ayar.parlaklik"), p.ToString("+0.0;-0.0;0.0", kultur)), yaziStili);
+        y += 32f;
+        float yeniP = Mathf.Round(GUI.HorizontalSlider(new Rect(x, y, en, 20f), p, AyarKurallari.ParlaklikEnAz, AyarKurallari.ParlaklikEnCok) * 10f) / 10f;
+        if (!Mathf.Approximately(yeniP, p)) Ayarlar.Parlaklik = yeniP;
+        y += 20f + 2f * ara;
+
+        float dugmeEn = (en - ara) / 2f;
+        r = new Rect(x, y, dugmeEn, 52f);
+        Vurgula(GorVarsayilan, r);
+        if (GUI.Button(r, Dil.Getir("ayar.varsayilan"), dugmeStili)) { Ayarlar.GoruntuVarsayilanaDon(); CozunurlukListesiniKur(); }
+
+        r = new Rect(x + dugmeEn + ara, y, dugmeEn, 52f);
+        Vurgula(GorGeri, r);
+        if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAna);
     }
 }

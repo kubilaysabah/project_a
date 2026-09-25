@@ -45,6 +45,53 @@ public class AyarKurallariTestleri
         Assert.AreEqual(75f, AyarKurallari.Gorus(75f));
     }
 
+    // ---------- GÖRÜNTÜ (#30) ----------
+
+    [Test]
+    public void Goruntu_varsayilanlari_oyunun_ayarlandigi_hal()
+    {
+        Assert.AreEqual(AyarKurallari.KaliteYuksek, AyarKurallari.KaliteVarsayilan);
+        Assert.AreEqual(0f, AyarKurallari.ParlaklikVarsayilan);
+        Assert.IsTrue(AyarKurallari.TamEkranVarsayilan);
+        Assert.IsTrue(AyarKurallari.VSyncVarsayilan);
+    }
+
+    [Test]
+    public void Kalite_ve_parlaklik_sinirlanir()
+    {
+        Assert.AreEqual(AyarKurallari.KaliteDusuk, AyarKurallari.Kalite(-3));
+        Assert.AreEqual(AyarKurallari.KaliteYuksek, AyarKurallari.Kalite(9));
+        Assert.AreEqual(AyarKurallari.KaliteOrta, AyarKurallari.Kalite(1));
+        Assert.AreEqual(1f, AyarKurallari.Parlaklik(5f));
+        Assert.AreEqual(-1f, AyarKurallari.Parlaklik(-5f));
+        Assert.AreEqual(0f, AyarKurallari.Parlaklik(float.NaN));
+    }
+
+    [Test]
+    public void Kayitli_cozunurluk_listede_varsa_o_secilir()
+    {
+        int[] g = { 1280, 1920, 2560 };
+        int[] y = { 720, 1080, 1440 };
+        Assert.AreEqual(1, AyarKurallari.CozunurlukSec(g, y, 1920, 1080));
+    }
+
+    [Test]
+    public void Kayitli_cozunurluk_listede_yoksa_en_yakini_secilir()
+    {
+        // Oyuncu 4K monitörden 1440p monitöre geçmiş: kayıtlı 3840x2160 artık yok.
+        int[] g = { 1280, 1920, 2560 };
+        int[] y = { 720, 1080, 1440 };
+        Assert.AreEqual(2, AyarKurallari.CozunurlukSec(g, y, 3840, 2160));
+        Assert.AreEqual(0, AyarKurallari.CozunurlukSec(g, y, 800, 600));
+    }
+
+    [Test]
+    public void Cozunurluk_listesi_bossa_eksi_bir()
+    {
+        Assert.AreEqual(-1, AyarKurallari.CozunurlukSec(new int[0], new int[0], 1920, 1080));
+        Assert.AreEqual(-1, AyarKurallari.CozunurlukSec(null, null, 1920, 1080));
+    }
+
     [Test]
     public void Sayi_olmayan_ya_da_sonsuz_deger_varsayilana_doner()
     {

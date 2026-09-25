@@ -75,6 +75,29 @@ public static class AtmosferKurucu
     }
 
     // ---------- POST-PROCESSING ----------
+    // Profile bir efekt ekler VE onu profil dosyasının içine alt nesne olarak kaydeder (#31).
+    //
+    // profil.Add<T>() efekti yalnızca BELLEKTE oluşturur. Bir ScriptableObject'in diske
+    // yazılması için ya kendi dosyası olmalı ya da başka bir dosyanın içine eklenmeli
+    // (AddObjectToAsset). #11'de bu adım yoktu: dosyaya efektlerin yerine boş kayıtlar
+    // (fileID: 0) yazıldı. Efektler yalnızca kurucu çalıştığı an bellekte vardı; Unity
+    // kodu yeniden yükleyince (her Play'de) kayboldular. Oyun modunda ve build'de hiç
+    // post-processing olmadı; Editor'deki kareler ise efektli göründüğü için fark edilmedi.
+    //
+    // <T> (generic, "tür parametresi"): fonksiyon her efekt türü için ayrı yazılmasın diye
+    // türü parametre olarak alır: Ekle<Bloom>(profil), Ekle<Vignette>(profil)...
+    // "where T : VolumeComponent": T yalnızca bir post-processing efekti olabilir.
+    static T Ekle<T>(VolumeProfile profil) where T : VolumeComponent
+    {
+        T efekt = profil.Add<T>(true);
+        efekt.name = typeof(T).Name;   // dosyada okunur bir ad
+        // Unity'nin kendi Volume editörü de böyle yapar: alt nesneler Project penceresinde
+        // ayrı birer dosya gibi görünüp kafa karıştırmasın.
+        efekt.hideFlags = HideFlags.HideInInspector | HideFlags.HideInHierarchy;
+        AssetDatabase.AddObjectToAsset(efekt, profil);
+        return efekt;
+    }
+
     static void PostProcessing()
     {
         // Profil dosyası: varsa aç ve içini temizle, yoksa üret. Silip yeniden
@@ -85,10 +108,13 @@ public static class AtmosferKurucu
             profil = ScriptableObject.CreateInstance<VolumeProfile>();
             AssetDatabase.CreateAsset(profil, ProfilYolu);
         }
-        foreach (VolumeComponent eski in profil.components.ToArray())
+        // Eski efektleri temizle. İki yerden: profilin listesi (içinde boş kayıtlar da
+        // olabilir; #31 öncesi dosyada altı boş kayıt vardı) ve dosyanın alt nesneleri
+        // (listede olmayan ama dosyada kalmış yetim efektler).
+        profil.components.Clear();
+        foreach (Object altNesne in AssetDatabase.LoadAllAssetsAtPath(ProfilYolu))
         {
-            profil.Remove(eski.GetType());
-            Object.DestroyImmediate(eski, true);
+            if (altNesne is VolumeComponent) Object.DestroyImmediate(altNesne, true);
         }
 
         // "Add<T>(true)": profile T türünde bir efekt ekler. true = bütün
@@ -99,12 +125,12 @@ public static class AtmosferKurucu
         // (ampulün kendisi duvardan yüzlerce kat parlak). Tonemapping bu aralığı
         // gerçekçi biçimde sıkıştırır; olmasa parlak yerler düz beyaz lekeye döner.
         // ACES, sinema kameralarının tepkisini taklit eden, kontrastı yüksek bir eğri.
-        Tonemapping ton = profil.Add<Tonemapping>(true);
+        Tonemapping ton = Ekle<Tonemapping>(profil);
         ton.mode.Override(TonemappingMode.ACES);
 
         // RENK AYARI: ACES görüntüyü biraz karartır; pozlamayla dengeliyoruz.
         // Doygunluğu kısmak 90'lar apartmanının solgun, yorgun rengini verir.
-        ColorAdjustments renk = profil.Add<ColorAdjustments>(true);
+        ColorAdjustments renk = Ekle<ColorAdjustments>(profil);
         renk.postExposure.Override(0.6f);
         renk.contrast.Override(12f);
         renk.saturation.Override(-18f);
@@ -112,27 +138,27 @@ public static class AtmosferKurucu
         // BÖLÜNMÜŞ TONLAMA (split toning): gölgelere bir renk, aydınlık yerlere
         // başka bir renk katar. Gölgeler soğuk mavi, ampulün aydınlattığı yerler
         // sıcak sarı: konseptteki "soğuk gece / sıcak ampul" zıtlığı tam olarak bu.
-        SplitToning tonlama = profil.Add<SplitToning>(true);
+        SplitToning tonlama = Ekle<SplitToning>(profil);
         tonlama.shadows.Override(new Color(0.30f, 0.40f, 0.60f));
         tonlama.highlights.Override(new Color(0.75f, 0.58f, 0.36f));
         tonlama.balance.Override(-15f);   // eksi: gölge rengi daha geniş bir alana yayılır
 
         // VIGNETTE: ekran kenarlarını karartır. Göz ortaya çekilir, çevre görüşü
         // daralır; oyuncu köşelerde bir şey olup olmadığından emin olamaz.
-        Vignette vinyet = profil.Add<Vignette>(true);
+        Vignette vinyet = Ekle<Vignette>(profil);
         vinyet.intensity.Override(0.38f);
         vinyet.smoothness.Override(0.45f);
 
         // FİLM GRENİ: karanlık alanlarda ince bir kumlanma. Düz, "temiz"
         // bilgisayar karanlığını kırar; eski bir kameranın gece çekimi gibi.
-        FilmGrain gren = profil.Add<FilmGrain>(true);
+        FilmGrain gren = Ekle<FilmGrain>(profil);
         gren.type.Override(FilmGrainLookup.Thin2);
         gren.intensity.Override(0.28f);
         gren.response.Override(0.85f);   // yüksek: gren daha çok karanlıkta görünür
 
         // BLOOM: çok parlak noktaların etrafına ışık taşması. Ampulün camı
         // eşiği aşacak kadar parlak; etrafında yumuşak bir hale oluşur.
-        Bloom bloom = profil.Add<Bloom>(true);
+        Bloom bloom = Ekle<Bloom>(profil);
         bloom.threshold.Override(1.1f);
         bloom.intensity.Override(0.7f);
         bloom.scatter.Override(0.65f);
@@ -147,6 +173,20 @@ public static class AtmosferKurucu
         if (hacim == null) hacim = nesne.AddComponent<Volume>();
         hacim.isGlobal = true;              // kamera nerede olursa olsun geçerli
         hacim.sharedProfile = profil;
+
+        // GÖRÜNTÜ AYARLARI (#30): oyuncunun seçtiği kaliteyi, parlaklığı, çözünürlüğü,
+        // ekran modunu ve V-Sync'i uygulayan bileşen. Kalite dosyalarını ona burada
+        // BAĞLIYORUZ (adıyla aratmıyoruz): build yalnızca bağlanmış dosyaları paketler.
+        KaliteKurucu.Kur();
+        GorunumUygulayici uygulayici = nesne.GetComponent<GorunumUygulayici>();
+        if (uygulayici == null) uygulayici = nesne.AddComponent<GorunumUygulayici>();
+        SerializedObject seri = new SerializedObject(uygulayici);
+        SerializedProperty dizi = seri.FindProperty("kaliteler");
+        string[] yollar = { KaliteKurucu.DusukYolu, KaliteKurucu.OrtaYolu, KaliteKurucu.YuksekYolu };   // sıra: 0 Düşük, 1 Orta, 2 Yüksek
+        dizi.arraySize = yollar.Length;
+        for (int i = 0; i < yollar.Length; i++)
+            dizi.GetArrayElementAtIndex(i).objectReferenceValue = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.RenderPipelineAsset>(yollar[i]);
+        seri.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // ---------- KAMERA ----------

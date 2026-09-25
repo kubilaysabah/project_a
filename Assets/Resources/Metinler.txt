@@ -22,6 +22,7 @@ menu.dil	Dil: {0}	Language: {0}
 menu.cik	Oyundan Çık	Quit Game
 menu.ayarlar	Ayarlar	Settings
 menu.geri	Geri	Back
+menu.goruntu	Görüntü	Display
 # Dilin kendi adı, her zaman o dilin kendisiyle yazılır.
 dil.ad	Türkçe	English
 
@@ -33,6 +34,18 @@ ayar.ters	Fareyi ters çevir: {0}	Invert mouse: {0}
 ayar.acik	Açık	On
 ayar.kapali	Kapalı	Off
 ayar.varsayilan	Varsayılana dön	Reset to defaults
+
+# ---- Görüntü sayfası (#30) ----
+ayar.cozunurluk	Çözünürlük: {0}	Resolution: {0}
+ayar.ekran	Ekran: {0}	Display mode: {0}
+ayar.tamekran	Tam ekran	Fullscreen
+ayar.pencere	Pencere	Windowed
+ayar.vsync	V-Sync: {0}	V-Sync: {0}
+ayar.kalite	Grafik kalitesi: {0}	Graphics quality: {0}
+ayar.dusuk	Düşük	Low
+ayar.orta	Orta	Medium
+ayar.yuksek	Yüksek	High
+ayar.parlaklik	Parlaklık: {0}	Brightness: {0}
 
 # ---- Binanın üstündeki yazılar ----
 # TABELA iki dilde de Türkçe: "Huzur Apartmanı" binanın adı, özel isim çevrilmez.

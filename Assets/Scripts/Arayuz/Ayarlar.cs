@@ -10,6 +10,7 @@
 //   Ses seviyesi       → burada: AudioListener.volume (bütün seslerin ortak düğmesi)
 //   Hassasiyet, ters   → BirinciSahisKontrolcu her karede buradan okur
 //   Görüş açısı        → BirinciSahisKontrolcu, Degisti haberini dinleyerek kameraya yazar
+//   Görüntü (#30)      → GorunumUygulayici: çözünürlük, ekran modu, V-Sync, kalite, parlaklık
 
 using System;
 using UnityEngine;
@@ -21,9 +22,16 @@ public static class Ayarlar
     private const string SesAdi = "ayar_ses";
     private const string TersAdi = "ayar_ters";
     private const string GorusAdi = "ayar_gorus";
+    private const string KaliteAdi = "ayar_kalite";
+    private const string ParlaklikAdi = "ayar_parlaklik";
+    private const string TamEkranAdi = "ayar_tamekran";
+    private const string VSyncAdi = "ayar_vsync";
+    private const string GenislikAdi = "ayar_cozunurluk_g";
+    private const string YukseklikAdi = "ayar_cozunurluk_y";
 
-    private static float hassasiyet, ses, gorus;
-    private static bool ters;
+    private static float hassasiyet, ses, gorus, parlaklik;
+    private static bool ters, tamEkran, vsync;
+    private static int kalite, genislik, yukseklik;
     private static bool hazir;
 
     /// <summary>Bir ayar değişti (görüş açısını uygulayan kontrolcü dinler).</summary>
@@ -60,7 +68,65 @@ public static class Ayarlar
         set { Hazirla(); gorus = AyarKurallari.Gorus(value); Kaydet(); }
     }
 
-    /// <summary>Bütün ayarları oyunun ayarlandığı hâle döndürür.</summary>
+    // ---------- GÖRÜNTÜ (#30) ----------
+
+    /// <summary>Grafik kalitesi: 0 Düşük, 1 Orta, 2 Yüksek.</summary>
+    public static int Kalite
+    {
+        get { Hazirla(); return kalite; }
+        set { Hazirla(); kalite = AyarKurallari.Kalite(value); Kaydet(); }
+    }
+
+    /// <summary>Parlaklık (pozlamaya eklenen değer, -1…+1).</summary>
+    public static float Parlaklik
+    {
+        get { Hazirla(); return parlaklik; }
+        set { Hazirla(); parlaklik = AyarKurallari.Parlaklik(value); Kaydet(); }
+    }
+
+    /// <summary>Tam ekran mı (değilse pencere).</summary>
+    public static bool TamEkran
+    {
+        get { Hazirla(); return tamEkran; }
+        set { Hazirla(); tamEkran = value; Kaydet(); }
+    }
+
+    /// <summary>V-Sync açık mı.</summary>
+    public static bool VSync
+    {
+        get { Hazirla(); return vsync; }
+        set { Hazirla(); vsync = value; Kaydet(); }
+    }
+
+    /// <summary>Seçilen çözünürlüğün genişliği; 0 = hiç seçilmedi (ekranın kendi çözünürlüğü).</summary>
+    public static int CozunurlukGenislik { get { Hazirla(); return genislik; } }
+
+    /// <summary>Seçilen çözünürlüğün yüksekliği; 0 = hiç seçilmedi.</summary>
+    public static int CozunurlukYukseklik { get { Hazirla(); return yukseklik; } }
+
+    /// <summary>Çözünürlüğü seçer (iki sayı birlikte değiştiği için özellik değil fonksiyon).</summary>
+    public static void CozunurlukAyarla(int yeniGenislik, int yeniYukseklik)
+    {
+        Hazirla();
+        genislik = yeniGenislik;
+        yukseklik = yeniYukseklik;
+        Kaydet();
+    }
+
+    /// <summary>Görüntü ayarlarını oyunun ayarlandığı hâle döndürür (oyun ayarlarına dokunmaz).</summary>
+    public static void GoruntuVarsayilanaDon()
+    {
+        Hazirla();
+        kalite = AyarKurallari.KaliteVarsayilan;
+        parlaklik = AyarKurallari.ParlaklikVarsayilan;
+        tamEkran = AyarKurallari.TamEkranVarsayilan;
+        vsync = AyarKurallari.VSyncVarsayilan;
+        genislik = 0;          // ekranın kendi çözünürlüğü
+        yukseklik = 0;
+        Kaydet();
+    }
+
+    /// <summary>Oyun ayarlarını (hassasiyet, ses, ters, görüş) oyunun ayarlandığı hâle döndürür.</summary>
     public static void VarsayilanaDon()
     {
         Hazirla();
@@ -79,6 +145,12 @@ public static class Ayarlar
         PlayerPrefs.SetFloat(SesAdi, ses);
         PlayerPrefs.SetInt(TersAdi, ters ? 1 : 0);   // bool doğrudan saklanamıyor; 1/0 olarak
         PlayerPrefs.SetFloat(GorusAdi, gorus);
+        PlayerPrefs.SetInt(KaliteAdi, kalite);
+        PlayerPrefs.SetFloat(ParlaklikAdi, parlaklik);
+        PlayerPrefs.SetInt(TamEkranAdi, tamEkran ? 1 : 0);
+        PlayerPrefs.SetInt(VSyncAdi, vsync ? 1 : 0);
+        PlayerPrefs.SetInt(GenislikAdi, genislik);
+        PlayerPrefs.SetInt(YukseklikAdi, yukseklik);
 
         // Kaydırıcı sürüklenirken her karede diske yazmak gereksiz ama zararsız: Save
         // birkaç küçük değer yazar. Hemen yazmak, oyun çökse de ayarın kalmasını sağlar.
@@ -98,6 +170,12 @@ public static class Ayarlar
         ses = AyarKurallari.Ses(PlayerPrefs.GetFloat(SesAdi, AyarKurallari.SesVarsayilan));
         ters = PlayerPrefs.GetInt(TersAdi, AyarKurallari.TersVarsayilan ? 1 : 0) == 1;
         gorus = AyarKurallari.Gorus(PlayerPrefs.GetFloat(GorusAdi, AyarKurallari.GorusVarsayilan));
+        kalite = AyarKurallari.Kalite(PlayerPrefs.GetInt(KaliteAdi, AyarKurallari.KaliteVarsayilan));
+        parlaklik = AyarKurallari.Parlaklik(PlayerPrefs.GetFloat(ParlaklikAdi, AyarKurallari.ParlaklikVarsayilan));
+        tamEkran = PlayerPrefs.GetInt(TamEkranAdi, AyarKurallari.TamEkranVarsayilan ? 1 : 0) == 1;
+        vsync = PlayerPrefs.GetInt(VSyncAdi, AyarKurallari.VSyncVarsayilan ? 1 : 0) == 1;
+        genislik = PlayerPrefs.GetInt(GenislikAdi, 0);
+        yukseklik = PlayerPrefs.GetInt(YukseklikAdi, 0);
     }
 
     // ---------- OYUN BAŞINDA ----------
