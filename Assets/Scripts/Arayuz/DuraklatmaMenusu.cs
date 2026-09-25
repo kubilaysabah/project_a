@@ -572,6 +572,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     private void OnGUI()
     {
         GUI.depth = -200;   // not ve jeneriğin de üstünde
+        ArayuzOlcegi.Uygula();   // her ekranda aynı oranda görünsün (#34); yerleşim sanal ekranda
 
         if (acik) MenuyuCiz();
 
@@ -579,7 +580,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (karartma > 0f)
         {
             GUI.color = new Color(0f, 0f, 0f, karartma);
-            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
             GUI.color = Color.white;
         }
     }
@@ -600,28 +601,28 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         // Ekranı karart. Başlık ekranının ana sayfasında hafif: arkadaki merdiven görünsün.
         GUI.color = new Color(0f, 0f, 0f, baslikta && sayfa == SayfaAna ? 0.3f : 0.7f);
-        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
         GUI.color = Color.white;
 
         if (sayfa == SayfaAyarlar) { AyarlariCiz(); return; }
         if (sayfa == SayfaGoruntu) { GoruntuCiz(); return; }
 
         float en = 360f, boy = 56f, ara = 16f;
-        float x = (Screen.width - en) / 2f;
+        float x = (ArayuzOlcegi.Genislik - en) / 2f;
         float y;
 
         if (baslikta)
         {
             // Oyunun adı (#1'de isim belli olunca yalnızca tablodaki metin değişir) ve
             // sol altta sürüm. Application.version: Project Settings → Player → Version (0.1.0).
-            GUI.Label(new Rect(0, Screen.height * 0.16f, Screen.width, 100f), Dil.Getir("menu.oyun_adi"), oyunAdiStili);
-            GUI.Label(new Rect(16, Screen.height - 36f, 400f, 28f), string.Format(Dil.Getir("menu.surum"), Application.version), surumStili);
-            y = Screen.height * 0.42f;
+            GUI.Label(new Rect(0, ArayuzOlcegi.Yukseklik * 0.16f, ArayuzOlcegi.Genislik, 100f), Dil.Getir("menu.oyun_adi"), oyunAdiStili);
+            GUI.Label(new Rect(16, ArayuzOlcegi.Yukseklik - 36f, 400f, 28f), string.Format(Dil.Getir("menu.surum"), Application.version), surumStili);
+            y = ArayuzOlcegi.Yukseklik * 0.42f;
         }
         else
         {
-            y = Screen.height / 2f - 225f;
-            GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.baslik"), baslikStili);
+            y = ArayuzOlcegi.Yukseklik / 2f - 225f;
+            GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.baslik"), baslikStili);
             y += 60f + 2f * ara;
         }
 
@@ -679,10 +680,10 @@ public class DuraklatmaMenusu : MonoBehaviour
     private void AyarlariCiz()
     {
         float en = 480f, ara = 14f;
-        float x = (Screen.width - en) / 2f;
-        float y = Screen.height / 2f - 230f;
+        float x = (ArayuzOlcegi.Genislik - en) / 2f;
+        float y = ArayuzOlcegi.Yukseklik / 2f - 230f;
 
-        GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.ayarlar"), baslikStili);
+        GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.ayarlar"), baslikStili);
         y += 60f + 2f * ara;
 
         // Sayılar dile göre yazılır: Türkçede "1,50", İngilizcede "1.50".
@@ -747,10 +748,10 @@ public class DuraklatmaMenusu : MonoBehaviour
     private void GoruntuCiz()
     {
         float en = 480f, ara = 14f, boy = 44f;
-        float x = (Screen.width - en) / 2f;
-        float y = Screen.height / 2f - 250f;
+        float x = (ArayuzOlcegi.Genislik - en) / 2f;
+        float y = ArayuzOlcegi.Yukseklik / 2f - 250f;
 
-        GUI.Label(new Rect(0, y, Screen.width, 60f), Dil.Getir("menu.goruntu"), baslikStili);
+        GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.goruntu"), baslikStili);
         y += 60f + 2f * ara;
 
         System.Globalization.CultureInfo kultur = Dil.Etkin == DilKodu.TR

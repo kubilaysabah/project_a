@@ -203,6 +203,7 @@ public class FinalSahnesi : MonoBehaviour
     private void OnGUI()
     {
         GUI.depth = -100;   // her şeyin üstünde
+        ArayuzOlcegi.Uygula();   // jenerik her ekranda aynı oranda (#34); yerleşim sanal ekranda
 
         if (jenerikKonum >= 0f)
         {
@@ -216,15 +217,15 @@ public class FinalSahnesi : MonoBehaviour
 
             // Metnin arkasına hafif bir karartma: gökyüzünde de okunsun.
             GUI.color = new Color(0f, 0f, 0f, 0.45f * Mathf.Clamp01(jenerikKonum * 6f));
-            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
             GUI.color = Color.white;
 
             float satirBoyu = 40f;
             float toplam = jenerik.Length * satirBoyu;
-            float y = Mathf.Lerp(Screen.height, -toplam, jenerikKonum);
+            float y = Mathf.Lerp(ArayuzOlcegi.Yukseklik, -toplam, jenerikKonum);
             for (int i = 0; i < jenerik.Length; i++)
             {
-                GUI.Label(new Rect(0, y + i * satirBoyu, Screen.width, satirBoyu * (i == 0 ? 1.6f : 1f)),
+                GUI.Label(new Rect(0, y + i * satirBoyu, ArayuzOlcegi.Genislik, satirBoyu * (i == 0 ? 1.6f : 1f)),
                           jenerik[i], i == 0 ? baslik : satir);
             }
         }
@@ -232,7 +233,7 @@ public class FinalSahnesi : MonoBehaviour
         if (karartma > 0f)
         {
             GUI.color = new Color(0f, 0f, 0f, karartma);
-            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
             GUI.color = Color.white;
         }
     }

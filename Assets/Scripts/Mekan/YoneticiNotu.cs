@@ -102,14 +102,15 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
     private void OnGUI()
     {
         if (!acik) return;
+        ArayuzOlcegi.Uygula();   // her ekranda aynı oranda görünsün (#34); yerleşim sanal ekranda
 
-        float en = Mathf.Min(560f, Screen.width * 0.8f);
-        float boy = Mathf.Min(420f, Screen.height * 0.75f);
-        Rect kagit = new Rect((Screen.width - en) / 2f, (Screen.height - boy) / 2f, en, boy);
+        float en = Mathf.Min(560f, ArayuzOlcegi.Genislik * 0.8f);
+        float boy = Mathf.Min(420f, ArayuzOlcegi.Yukseklik * 0.75f);
+        Rect kagit = new Rect((ArayuzOlcegi.Genislik - en) / 2f, (ArayuzOlcegi.Yukseklik - boy) / 2f, en, boy);
 
         // Ekranı hafifçe karart, kâğıdı öne çıkar.
         GUI.color = new Color(0f, 0f, 0f, 0.55f);
-        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
+        GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
 
         // Kâğıt: sararmış beyaz.
         GUI.color = new Color(0.86f, 0.82f, 0.70f, 1f);
