@@ -1,17 +1,13 @@
 # ortam_uret.py
 # Normal bir katın ses dokusunu ve anomali bozulmalarının seslerini kodla üretir (#14).
 #
-# ÇALIŞTIRMA:  python Art/Ses/scripts/ortam_uret.py
+# ÇALIŞTIRMA:  python Art/Ses/scripts/ortam_uret.py [ses adları]   (ör. ugultu boru)
 #
 # ÜRETİLEN DOSYALAR (Assets/Audio/Ortam ve Assets/Audio/Anomali):
 #   Ortam_Ugultu      binanın sürekli, alçak uğultusu (şebeke vızıltısı + hava)
-#   Ortam_TV          bir dairenin içinden, duvar arkasından boğuk TV mırıltısı
-#   Ortam_Bebek       başka bir dairede arada bir ağlayan bebek (çoğu zaman sessiz)
 #   Ortam_Boru        duvarın içinde düzensiz boru tıkırtıları
 #   Ortam_Ruzgar      merdiven penceresinden gelen rüzgâr
-#   Bebek_Ters        ağlamanın TERSTEN çalınmışı (anomali)
-#   Bebek_Yakin       aynı ağlama ama boğuk değil: duvar arkasından değil, çok yakından (anomali)
-#   Boru_Ritim        boru tıkırtısı makine gibi düzenli (anomali)
+#   Boru_Damla        sızdıran borudan makine gibi düzenli su damlası (anomali)
 #   Asansor_Ugultu    arızalı asansör kuyusundan yükselen derin uğultu (anomali)
 #
 # ---------- DÖNGÜ (LOOP) NASIL KUSURSUZ OLUR ----------
@@ -27,7 +23,8 @@
 # Duvarın arkasından gelen ses tam olarak böyle duyulur: duvar tizleri yutar.
 # Tek satırlık hali: yeni = önceki + k x (girdi - önceki). k küçüldükçe ses boğuklaşır.
 
-import math, os, random, struct, wave
+import math, os, random, struct, sys, wave
+import ses_ortak as ortak          # süzgeç, darbe, yankı aletleri (2026-09-26 revizyonu)
 
 HIZ = 22050          # saniyedeki örnek: ortam sesleri için yeterli, dosyalar yarı boyutta
 
@@ -82,139 +79,80 @@ def zarf(t, bas, sure, giris=0.05, cikis=0.1):
 
 
 # ---------- UĞULTU ----------
+# Revizyon (Şahan, 2026-09-26): "daha düşük sesli ve ufak ses yankıları olabilir; çok
+# gereksiz ve yüksek bir ses". Eski uğultu sürekli, yüksek bir 50 Hz vızıltısıydı.
+# Yeni hâli gece binasının "sessizliği":
+#   ZEMİN:  çok alçak, kısık bir hava gürültüsü; vızıltının yalnızca izi kaldı.
+#   UZAK OLAYLAR: birkaç saniyede bir binanın başka bir yerinden gelen küçük sesler
+#           (üst katta kapanan bir kapı, birkaç adım, dışarıdan geçen bir araba, bir
+#           kalorifer tıkırtısı). Uzaktan geldikleri için boğukturlar ve neredeyse
+#           yalnızca YANKILARI duyulur: sesin kendisi az, merdiven boşluğunun yankısı çok.
+# Kayıt 30 sn (eskisi 8 sn): olaylar her turda aynı yerde tekrar etmesin diye uzun.
+# Anomali kartı bu katmanı susturunca uzak sesler de kesilir; boşluk daha iyi hissedilir.
+def uzak_olay(tur, H):
+    """Binanın başka bir yerinden gelen tek bir küçük ses (yankısız; yankı sonra eklenir)."""
+    if tur == "kapi":        # uzakta kapanan bir kapı: alçak, boğuk bir güm
+        n = int(0.4 * H)
+        return ortak.tepeyi_esitle(ortak.alcak(ortak.alcak(ortak.darbe(n, H, 0.015), 160, H), 160, H))
+    if tur == "adim":        # üst katta dört yavaş adım
+        s = [0.0] * int(2.4 * H)
+        for k in range(4):
+            tek = ortak.tepeyi_esitle(ortak.alcak(ortak.darbe(int(0.2 * H), H, 0.005), 240, H))
+            ortak.ekle(s, tek, int(k * 0.58 * H), 0.35 + 0.08 * (k % 2))
+        return s
+    if tur == "araba":       # dışarıdan geçen bir araba: kabarıp sönen alçak bir hışırtı
+        n = int(4.0 * H)
+        g = ortak.tepeyi_esitle(ortak.alcak(ortak.alcak(ortak.gurultu(n), 260, H), 260, H))
+        return [0.3 * x * math.sin(math.pi * i / n) ** 2 for i, x in enumerate(g)]
+    # "tik": kaloriferin metalik tıkırtısı
+    tik = ortak.tepeyi_esitle(ortak.bant(ortak.darbe(int(0.3 * H), H, 0.001), 1400, H, 20))
+    return [0.25 * x for x in tik]
+
+
 def ugultu():
-    L = 8.0
+    L = 30.0
     n, gecis = int(L * HIZ), int(0.5 * HIZ)
     random.seed(1)
-    gurultu = suz([random.uniform(-1, 1) for _ in range(n + gecis)], 0.02)   # derin hava sesi
-    s = []
-    for i in range(n + gecis):
-        t = i / HIZ
-        # Şebeke vızıltısı: 50 Hz ve katları. 8 sn'de hepsi tam sayıda tur atar.
-        v = (0.5 * math.sin(2 * math.pi * 50 * t) + 0.35 * math.sin(2 * math.pi * 100 * t)
-             + 0.15 * math.sin(2 * math.pi * 150 * t) + 0.05 * math.sin(2 * math.pi * 300 * t))
-        v *= 1 + 0.08 * math.sin(2 * math.pi * 0.25 * t)                  # hafif dalgalanma (8 sn'de 2 tur)
-        s.append(0.6 * v + 3.0 * gurultu[i])
-    kaydet(ORTAM, "Ortam_Ugultu", dongule(s, n, gecis), 0.7)
+
+    # Zemin: çok alçak hava gürültüsü + vızıltının izi. Döngü için fazlası başa karışır.
+    hava = ortak.tepeyi_esitle(ortak.alcak(ortak.alcak(ortak.gurultu(n + gecis), 110, HIZ), 110, HIZ))
+    zemin = [0.10 * hava[i] + 0.012 * math.sin(2 * math.pi * 50 * i / HIZ) for i in range(n + gecis)]
+    zemin = dongule(zemin, n, gecis)
+
+    # Uzak olaylar, 30 sn'ye yayılmış. Olaylar kendi başına kısık; asıl duyulan yankıları.
+    olaylar = [0.0] * n
+    for bas, tur, guc in ((1.5, "kapi", 0.8), (6.2, "adim", 1.0), (10.8, "araba", 1.0),
+                          (16.0, "tik", 1.0), (19.4, "kapi", 0.55), (23.1, "adim", 0.8), (27.2, "tik", 0.8)):
+        ortak.ekle(olaylar, uzak_olay(tur, HIZ), int(bas * HIZ), guc)
+    olaylar = ortak.alcak(olaylar, 900, HIZ)                         # uzaktan: tizler yolda kaldı
+    olaylar = ortak.dairesel_yanki(olaylar, HIZ, 3.0, boyut=0.88, sonum=0.5, islak=1.0, kuru=0.25, oda=1.4)
+    olaylar = ortak.tepeyi_esitle(olaylar, 0.6)
+
+    kaydet(ORTAM, "Ortam_Ugultu", [a + b for a, b in zip(zemin, olaylar)], 0.6)
 
 
-# ---------- TV ----------
-# Konuşma taklidi: hecelerin ritmiyle (saniyede ~5) açılıp kapanan, perdesi (f0)
-# cümle boyunca inip çıkan bir "vızıltı". Her hecede ünlü değişir (farklı üst tonlar
-# öne çıkar). Duvarın arkasından geldiği için kelime seçilmez; zaten seçilmemeli.
-def tv():
-    L = 24.0
-    n, gecis = int(L * HIZ), int(0.4 * HIZ)
-    random.seed(2)
-    toplam = n + gecis
-
-    # Cümleleri ve heceleri önceden planla.
-    heceler = []                      # (başlangıç, süre, f0, ünlü)
-    t = 0.2
-    while t < L + 0.4:
-        konusmaci_f0 = random.choice([115, 125, 205, 220])      # erkek / kadın sesi
-        cumle = random.uniform(1.4, 3.6)
-        son = t + cumle
-        while t < son:
-            hs = random.uniform(0.11, 0.22)
-            heceler.append((t, hs, konusmaci_f0 * random.uniform(0.9, 1.15), random.randint(0, 3)))
-            t += hs + random.uniform(0.0, 0.05)
-        t += random.uniform(0.3, 1.1)                             # cümle arası boşluk
-
-    # Ünlüler: her biri iki "formant" (öne çıkan frekans bölgesi) ile tanımlı.
-    unluler = [(700, 1200), (400, 2000), (300, 900), (500, 1600)]
-
-    s = [0.0] * toplam
-    for bas, sure, f0, u in heceler:
-        f1, f2 = unluler[u]
-        i0, i1 = int(bas * HIZ), min(toplam, int((bas + sure) * HIZ))
-        for i in range(i0, i1):
-            tt = i / HIZ
-            g = tt - bas
-            e = math.sin(math.pi * g / sure) ** 2                   # hecenin şiddet eğrisi
-            v = 0.0
-            for h in range(1, 13):                                  # üst tonlar
-                f = f0 * h
-                w = math.exp(-((f - f1) / 250) ** 2) + 0.6 * math.exp(-((f - f2) / 400) ** 2)
-                v += w * math.sin(2 * math.pi * f * g)
-            s[i] += e * v
-
-    # Arka planda arada bir kısık bir müzik akoru (reklam, dizi jeneriği gibi).
-    for bas in (6.0, 17.5):
-        for i in range(int(bas * HIZ), int((bas + 3.2) * HIZ)):
-            tt = i / HIZ
-            e = zarf(tt, bas, 3.2, 0.4, 0.8)
-            s[i] += 0.5 * e * (math.sin(2 * math.pi * 220 * tt) + math.sin(2 * math.pi * 277 * tt) + math.sin(2 * math.pi * 330 * tt))
-
-    random.seed(22)
-    s = [x + 0.08 * random.uniform(-1, 1) for x in s]               # yayın cızırtısı
-    s = suz(suz(s, 0.10), 0.18)                                     # duvar arkası: çok boğuk
-    kaydet(ORTAM, "Ortam_TV", dongule(s, n, gecis), 0.8)
-
-
-# ---------- BEBEK ----------
-# Ağlama taklidi: yüksek perdeli (400-560 Hz), perdesi her nöbette yükselip alçalan,
-# titreyen (vibrato) bir "vaaa". Nöbetler arasında kısa, hırıltılı nefes alışlar.
-def aglama_nobeti(sure_toplam, seed):
-    """Tek bir ağlama nöbeti (birkaç 'vaaa' + nefesler). Süzgeçsiz, yakın ses."""
-    random.seed(seed)
-    s = [0.0] * int(sure_toplam * HIZ)
-    t = 0.2
-    while t < sure_toplam - 1.2:
-        vaa = random.uniform(0.9, 1.5)
-        f_bas, f_tepe, f_son = random.uniform(400, 450), random.uniform(520, 580), random.uniform(360, 400)
-        faz = 0.0
-        for i in range(int(t * HIZ), min(len(s), int((t + vaa) * HIZ))):
-            g = i / HIZ - t
-            p = g / vaa
-            f0 = f_bas + (f_tepe - f_bas) * min(1, p * 2.5) - (f_tepe - f_son) * max(0, p - 0.4) / 0.6
-            f0 += 14 * math.sin(2 * math.pi * 6 * g)                  # vibrato
-            faz += 2 * math.pi * f0 / HIZ
-            e = min(1.0, g / 0.08, (vaa - g) / 0.18)
-            v = 0.0
-            for h in range(1, 9):
-                f = f0 * h
-                w = math.exp(-((f - 1100) / 450) ** 2) + 0.7 * math.exp(-((f - 2600) / 600) ** 2) + 0.15
-                v += w * math.sin(faz * h)
-            s[i] += e * v
-        t += vaa
-        nefes = random.uniform(0.3, 0.5)                               # hırıltılı iç çekiş
-        for i in range(int(t * HIZ), min(len(s), int((t + nefes) * HIZ))):
-            g = i / HIZ - t
-            s[i] += 0.25 * math.sin(math.pi * g / nefes) * random.uniform(-1, 1)
-        t += nefes
-    return s
-
-
-def bebek():
-    L = 30.0
-    n = int(L * HIZ)
-    nobet = aglama_nobeti(8.0, 3)
-    s = [0.0] * n
-    bas = int(4.0 * HIZ)
-    for i, x in enumerate(nobet):
-        s[bas + i] += x
-    s = suz(suz(s, 0.12), 0.25)                                     # başka dairede: boğuk
-    kaydet(ORTAM, "Ortam_Bebek", s, 0.8)
-
-    # ANOMALİ 1: aynı nöbet TERSTEN (boğuk). Kaydın başına yakın, oyuncu kata varınca hemen duyulsun.
-    ters = [0.0] * int(1.0 * HIZ) + suz(suz(nobet[::-1], 0.12), 0.25) + [0.0] * int(5.0 * HIZ)
-    kaydet(ANOMALI, "Bebek_Ters", ters, 0.8)
-
-    # ANOMALİ 2: aynı nöbet boğuk DEĞİL: duvar arkasından değil, sahanlıkta, yakında.
-    yakin = [0.0] * int(1.0 * HIZ) + suz(nobet, 0.6) + [0.0] * int(5.0 * HIZ)
-    kaydet(ANOMALI, "Bebek_Yakin", yakin, 0.8)
+# ---------- TV VE BEBEK ----------
+# İlk turda burada formülle üretiliyorlardı (konuşma ve ağlama taklidi). Şahan'ın dinleme
+# testinde "TV ile alakası yok", "ağlayan uzaylı gibi" diye geri döndüler; 2026-09-26'dan
+# beri gerçek kayıtlardan üretiliyorlar: kayit_isle.py (bebek, tv). Buradan silindiler ki
+# bu betik çalıştırılınca gerçek kayıtlardan üretilen dosyaların üstüne yazmasın.
 
 
 # ---------- BORU ----------
-def tik(s, bas, guc):
-    """Duvar içinde bir boru tıkırtısı: kısa metalik çın + tok bir vuruş."""
-    for i in range(int(bas * HIZ), min(len(s), int((bas + 0.35) * HIZ))):
-        g = i / HIZ - bas
-        v = (math.sin(2 * math.pi * 900 * g) + 0.6 * math.sin(2 * math.pi * 1370 * g)
-             + 0.3 * math.sin(2 * math.pi * 2410 * g)) * math.exp(-g * 28)
-        v += 1.2 * math.sin(2 * math.pi * 120 * g) * math.exp(-g * 45)
-        s[i] += guc * v
+# Revizyon (Şahan, 2026-09-26): "daha yankılı olabilir, borulardan gelen sesler net gelmez".
+# Eski tıkırtı sinüs dalgalarıyla yapılmıştı ve fazla netti. Şimdi:
+#   - Vuruş bir gürültü darbesi; metal borunun dar modlarından geçiyor (q büyük: kısa
+#     ama metalik bir çınlama) ve altında boğuk bir güm var.
+#   - Ses duvarın içinden geliyor: 700 Hz üstü güçlü biçimde törpüleniyor (net değil).
+#   - Boru ve beton boşluğun uzun yankısı ekleniyor; kuru sesten çok yankı duyuluyor.
+BORU_MODLARI = [(610, 70, 1.0), (1020, 80, 0.7), (1580, 70, 0.5), (2350, 60, 0.3)]
+
+
+def boru_vurusu(guc):
+    n = int(0.5 * HIZ)
+    metal = ortak.tepeyi_esitle(ortak.modlar(ortak.darbe(n, HIZ, 0.002), HIZ, BORU_MODLARI))
+    gum = ortak.tepeyi_esitle(ortak.alcak(ortak.darbe(n, HIZ, 0.006), 150, HIZ))
+    return [guc * (0.6 * a + 1.0 * b) for a, b in zip(metal, gum)]
 
 
 def boru():
@@ -224,19 +162,51 @@ def boru():
     s = [0.0] * n
     t = 0.8
     while t < L - 1.0:
-        tik(s, t, random.uniform(0.5, 1.0))
+        ortak.ekle(s, boru_vurusu(random.uniform(0.5, 1.0)), int(t * HIZ))
         if random.random() < 0.4:                                   # bazen art arda ikinci tık
-            tik(s, t + random.uniform(0.12, 0.25), random.uniform(0.3, 0.6))
+            ortak.ekle(s, boru_vurusu(random.uniform(0.3, 0.6)), int((t + random.uniform(0.12, 0.25)) * HIZ))
         t += random.uniform(1.2, 3.4)
-    kaydet(ORTAM, "Ortam_Boru", suz(s, 0.35), 0.7)
+    s = ortak.alcak(s, 700, HIZ)                                    # duvarın içinden: boğuk
+    s = ortak.dairesel_yanki(s, HIZ, 3.0, boyut=0.88, sonum=0.3, islak=0.7, kuru=0.6, oda=1.2)
+    kaydet(ORTAM, "Ortam_Boru", s, 0.7)
 
-    # ANOMALİ: makine gibi düzenli, hep aynı güçte, tam 0,8 sn arayla.
-    r = [0.0] * n
+
+# ---------- DÜZENLİ DAMLA (anomali) ----------
+# Revizyon (Şahan, 2026-09-26): "su damlama sesi yaparsan daha güzel olabilir". Kart
+# (duzenli_boru) hâlâ aynı fikri taşıyor: normal katta boru tıkırtıları DÜZENSİZDİR;
+# anomali katında onların yerine sızdıran borudan makine gibi düzenli bir damla gelir:
+# hep aynı damla, tam 1,6 sn arayla.
+# 2. tur (Şahan): "düşüş sesi güzel, çok yankılı ve çok seri damlıyor" -> aralık 0,8'den
+# 1,6 sn'ye çıktı, yankı üçte birine indi.
+# Bir su damlasının "plip" sesi aslında suya çarpan damlanın hapsettiği küçük hava
+# kabarcığının titreşimidir; kabarcık küçüldükçe perdesi hızla YÜKSELİR. Bu yüzden
+# tek bir sinüs ama perdesi 20 ms içinde 850 Hz'den 2150 Hz'e kayıyor. (Burada sinüs
+# doğru seçim: kabarcık gerçekten tek perdede öter.)
+def damla():
+    n = int(0.12 * HIZ)
+    s, faz = [], 0.0
+    for i in range(n):
+        t = i / HIZ
+        f = 850 + 1300 * (1 - math.exp(-t / 0.012))                 # yükselen perde
+        faz += 2 * math.pi * f / HIZ
+        e = (1 - math.exp(-t / 0.0008)) * math.exp(-t / 0.022)     # çok hızlı başlar, çabuk söner
+        s.append(math.sin(faz) * e)
+    tik = ortak.tepeyi_esitle(ortak.bant(ortak.darbe(n, HIZ, 0.0005), 3000, HIZ, 2.0))   # suya değdiği an
+    return [a + 0.3 * b for a, b in zip(s, tik)]
+
+
+def duzenli_damla():
+    L = 16.0                                                        # 16 sn / 1,6 sn = tam 10 damla
+    n = int(L * HIZ)
+    s = [0.0] * n
+    tek = damla()
     t = 0.4
     while t < L:
-        tik(r, t, 0.9)
-        t += 0.8
-    kaydet(ANOMALI, "Boru_Ritim", suz(r, 0.35), 0.7)
+        ortak.ekle(s, tek, int(t * HIZ))
+        t += 1.6
+    s = ortak.alcak(s, 5000, HIZ)
+    s = ortak.dairesel_yanki(s, HIZ, 2.0, boyut=0.6, sonum=0.45, islak=0.15, oda=0.9)
+    kaydet(ANOMALI, "Boru_Damla", s, 0.7)
 
 
 # ---------- RÜZGÂR ----------
@@ -269,10 +239,11 @@ def asansor_ugultu():
     kaydet(ANOMALI, "Asansor_Ugultu", dongule(s, n, gecis), 0.8)
 
 
+URETICILER = {"ugultu": ugultu, "boru": boru,
+              "duzenli_damla": duzenli_damla, "ruzgar": ruzgar, "asansor_ugultu": asansor_ugultu}
+
 if __name__ == "__main__":
-    ugultu()
-    tv()
-    bebek()
-    boru()
-    ruzgar()
-    asansor_ugultu()
+    # Ad verilirse yalnızca o sesler üretilir; verilmezse hepsi. Onaylanmış bir sesi
+    # yanlışlıkla bozmamak için değişen sesleri tek tek üretmek iyi.
+    for ad in (sys.argv[1:] or list(URETICILER)):
+        URETICILER[ad]()

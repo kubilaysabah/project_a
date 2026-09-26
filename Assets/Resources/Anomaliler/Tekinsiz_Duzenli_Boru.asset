@@ -15,7 +15,7 @@ MonoBehaviour:
   kimlik: duzenli_boru
   katman: 1
   zorluk: 3
-  aciklama: Duvardaki boru tikirtilari makine gibi duzenli: hep ayni guc, tam ayni aralik.
+  aciklama: Boru tikirtilari susar; yerine sizdiran borudan makine gibi duzenli su damlasi gelir: hep ayni damla, tam 1,6 sn arayla.
   etkiler:
   - hedefYol: Ses_Boru
     tur: 0
