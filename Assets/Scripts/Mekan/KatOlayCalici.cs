@@ -64,11 +64,28 @@ public class KatOlayCalici
         saat = 0f;
     }
 
+    /// <summary>Kat olayının sesi şu an çalıyor mu? (Dış sesler araya girmesin diye, #37.)</summary>
+    public bool CaliyorMu
+    {
+        get
+        {
+            foreach (AudioSource k in kaynaklar) if (k != null && k.isPlaying) return true;
+            return false;
+        }
+    }
+
+    /// <summary>Sahanlık bu katı göstermeye başladığından beri geçen süre (saniye).</summary>
+    public float Saat { get { return saat; } }
+
     /// <summary>Oyuncu bu kattayken her kare çağrılır; saati gelen çalışı başlatır.</summary>
     public void Ilerlet(float gecen)
     {
         if (secili == null || zamanlar == null) return;
         saat += gecen;
+
+        // Dışarıdan bir ses (köpek, silah, rüzgâr) çalıyorsa bekle; o bitince hemen çalar.
+        // İki ses üst üste binmesin (#37).
+        if (DisSesleri.Caliyor) return;
 
         while (sonraki < zamanlar.Length && saat >= zamanlar[sonraki])
         {

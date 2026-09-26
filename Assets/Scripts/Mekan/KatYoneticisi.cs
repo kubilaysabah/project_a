@@ -523,6 +523,29 @@ public class KatYoneticisi : MonoBehaviour
         Debug.Log($"[KAT] A = {aKat}. kat (anomali: {durum}), B = {(cati ? "çatı" : bKat + ". kat")}");
     }
 
+    // ---------- BAŞKA BİR SES ÇALIYOR MU? (#37) ----------
+    // Dış sesler (DisSesleri) çalmadan önce bunu sorar: kat olayı, anomali sesi ya da
+    // ceza sürüyorsa araya girmez. Sesli bir kartın geldiği katta ilk 10 saniye de meşgul
+    // sayılır: kartın zamanlı sesleri (zil, kapı tıklatma...) 2,5-8 sn'de çalıyor; dış ses
+    // tam o sırada başlarsa üst üste binerdi.
+    public bool SesMesgul
+    {
+        get
+        {
+            if (cezaBekliyor || cezaCalisiyor) return true;
+            if (olayCaliciA != null && olayCaliciA.CaliyorMu) return true;
+            if (gosterilenA == sayac.MevcutKat && SesliKart(KartSec(sayac.MevcutKat)) &&
+                olayCaliciA != null && olayCaliciA.Saat < 10f) return true;
+            if (sahanlikA != null)
+                foreach (AudioSource k in sahanlikA.GetComponentsInChildren<AudioSource>())
+                    if (k.name == "Anomali_Sesi" && k.isPlaying) return true;
+            return false;
+        }
+    }
+
+    /// <summary>Tur bitti mi (çatıya ulaşıldı)? Dış sesler ve müzik buna bakar.</summary>
+    public bool TurBitti { get { return sayac != null && sayac.TurBitti; } }
+
     // Kartın etkilerinden biri ses çalıyor mu? (Yalnızca susturan ya da taşıyan kartlar,
     // örneğin susan_tv, "sesli" sayılmaz: onlar yeni bir ses çıkarmıyor.)
     private static bool SesliKart(IAnomaliKart kart)

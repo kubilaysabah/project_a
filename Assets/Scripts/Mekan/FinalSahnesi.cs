@@ -73,6 +73,10 @@ public class FinalSahnesi : MonoBehaviour
         StartCoroutine(Safak());
 
         // Ürken güvercinler: çatının ortasından havalanan bir sürü.
+        // Gece bitti: gerilim müziği 4 saniyede yavaşça susar (#36). "?." : müzik yoksa
+        // (ör. eski bir sahnede) hiçbir şey yapma, hata da verme.
+        ArkaMuzik.Ornek?.Sustur(4f);
+
         AudioClip kanat = Resources.Load<AudioClip>("Sesler/Guvercin_Kanat");
         if (kanat != null) AudioSource.PlayClipAtPoint(kanat, new Vector3(0f, 4.5f, -3.5f), 1f);
     }

@@ -33,7 +33,8 @@ public static class AtmosferKurucu
         AyIsigi();
         PostProcessing();
         Kamera();
-        Debug.Log("Atmosfer kuruldu: karanlık ortam, ay ışığı, gece post-processing profili.");
+        MuzikVeDisSesler();
+        Debug.Log("Atmosfer kuruldu: karanlık ortam, ay ışığı, gece post-processing profili, müzik ve dış sesler.");
     }
 
     // ---------- ORTAM IŞIĞI ----------
@@ -188,6 +189,59 @@ public static class AtmosferKurucu
         for (int i = 0; i < yollar.Length; i++)
             dizi.GetArrayElementAtIndex(i).objectReferenceValue = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.RenderPipelineAsset>(yollar[i]);
         seri.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // ---------- MÜZİK VE DIŞ SESLER (#36, #37) ----------
+    // İkisi de sahnenin kökünde birer nesne; ses dosyaları ADIYLA aranmıyor, burada
+    // bileşene BAĞLANIYOR (build yalnızca bağlanmış dosyaları paketler, #26 kuralı).
+    static void MuzikVeDisSesler()
+    {
+        // Arka müzik: 2B, döngüde, çok kısık. Seviye 0,15: TV (0,5) ve kat olaylarının
+        // (0,12-0,55) altında kalsın; anomali seslerini hiçbir zaman bastırmasın.
+        AudioSource muzik = KokKaynak("Arka_Muzik");
+        muzik.clip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Muzik/Muzik_Gerilim.wav");
+        muzik.loop = true;
+        muzik.volume = 0.15f;
+        if (muzik.GetComponent<ArkaMuzik>() == null) muzik.gameObject.AddComponent<ArkaMuzik>();
+
+        // Dış sesler: 2B, tek seferlik; ne zaman çalacağını DisSesleri seçer.
+        AudioSource dis = KokKaynak("Dis_Sesler");
+        dis.loop = false;
+        dis.volume = 0.5f;
+        DisSesleri bilesen = dis.GetComponent<DisSesleri>();
+        if (bilesen == null) bilesen = dis.gameObject.AddComponent<DisSesleri>();
+        SerializedObject seri = new SerializedObject(bilesen);
+        KlipleriBagla(seri.FindProperty("kopek"), "Dis_Kopek_");
+        KlipleriBagla(seri.FindProperty("silah"), "Dis_Silah_");
+        KlipleriBagla(seri.FindProperty("ruzgar"), "Dis_Ruzgar_");
+        seri.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // Sahnenin kökünde verilen adda, 2B bir AudioSource taşıyan nesne (yoksa oluşturur).
+    static AudioSource KokKaynak(string ad)
+    {
+        GameObject g = GameObject.Find(ad);
+        if (g == null) g = new GameObject(ad);
+        AudioSource k = g.GetComponent<AudioSource>();
+        if (k == null) k = g.AddComponent<AudioSource>();
+        k.playOnAwake = false;     // çalmayı bileşenler başlatır
+        k.spatialBlend = 0f;       // 2B: kafanın içinden, yeri yok
+        return k;
+    }
+
+    // Assets/Audio/Dis altında adı 'onek' ile başlayan bütün sesleri diziye bağlar
+    // (Dis_Silah_1, Dis_Silah_2...). Yeni bir çeşit eklemek = dosyayı koyup kurucuyu çalıştırmak.
+    static void KlipleriBagla(SerializedProperty dizi, string onek)
+    {
+        var liste = new System.Collections.Generic.List<AudioClip>();
+        foreach (string guid in AssetDatabase.FindAssets(onek + " t:AudioClip", new[] { "Assets/Audio/Dis" }))
+        {
+            string yol = AssetDatabase.GUIDToAssetPath(guid);
+            if (System.IO.Path.GetFileName(yol).StartsWith(onek)) liste.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(yol));
+        }
+        liste.Sort((x, y) => string.CompareOrdinal(x.name, y.name));
+        dizi.arraySize = liste.Count;
+        for (int i = 0; i < liste.Count; i++) dizi.GetArrayElementAtIndex(i).objectReferenceValue = liste[i];
     }
 
     // ---------- KAMERA ----------

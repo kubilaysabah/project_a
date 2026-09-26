@@ -299,6 +299,34 @@ public class AnomaliButunlukTestleri
         }
     }
 
+    // Arka müzik (#36) ve dış sesler (#37). Ses dosyaları bileşenlere BAĞLI olmalı: adıyla
+    // aranan bir dosya build'e girmez (#26 kuralı), bağlı değilse build'de sessizce çalmaz.
+    [Test]
+    public void Muzik_ve_dis_sesler_sahnede_ve_bagli()
+    {
+        GameObject muzik = null, dis = null;
+        foreach (GameObject kok in sahne.GetRootGameObjects())
+        {
+            if (kok.name == "Arka_Muzik") muzik = kok;
+            if (kok.name == "Dis_Sesler") dis = kok;
+        }
+        Assert.IsNotNull(muzik, "Sahnede Arka_Muzik yok.");
+        AudioSource m = muzik.GetComponent<AudioSource>();
+        Assert.IsNotNull(m.clip, "Arka müziğin ses dosyası bağlanmamış.");
+        Assert.IsTrue(m.loop, "Arka müzik döngüde değil.");
+        Assert.AreEqual(0f, m.spatialBlend, "Arka müzik 2B olmalı.");
+        Assert.LessOrEqual(m.volume, 0.3f, "Arka müzik anomali seslerini bastıracak kadar yüksek.");
+        Assert.IsNotNull(muzik.GetComponent("ArkaMuzik"));
+
+        Assert.IsNotNull(dis, "Sahnede Dis_Sesler yok.");
+        Component bilesen = dis.GetComponent("DisSesleri");
+        Assert.IsNotNull(bilesen);
+        var seri = new UnityEditor.SerializedObject(bilesen);
+        Assert.Greater(seri.FindProperty("silah").arraySize + seri.FindProperty("ruzgar").arraySize + seri.FindProperty("kopek").arraySize, 0,
+                       "Dış seslere hiç ses dosyası bağlanmamış.");
+        Assert.IsFalse(dis.GetComponent<AudioSource>().loop, "Dış ses kaynağı döngüde; sürekli çalar.");
+    }
+
     [Test]
     public void Hicbir_kart_bos_degildir()
     {

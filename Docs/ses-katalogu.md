@@ -100,6 +100,15 @@ onları da susturur. Test göstergesi o katın olayını yazar ("olay: Bebek").
 | **S22** | Kalorifer borusunun metalik tıkırtısı | Sol duvarın dibi (`Ses_Ugultu/Olay_Kalorifer`) | `Assets/Audio/Olay/Olay_Kalorifer.wav` · `kat_olaylari()` | 0,12 · 1–8 m · 3,3 sn | eskiden uğultunun içindeydi; "su damlası gibi" duyulan buydu |
 | **S23** | Dışarıdan geçen araba | Sokak (`Ses_Ugultu/Olay_Araba`) | `Assets/Audio/Olay/Olay_Araba.wav` · `kat_olaylari()` | 0,15 · 4–18 m · 7,0 sn | eskiden uğultunun içindeydi |
 
+## F. Müzik ve dış sesler (#36, #37)
+
+| No | Ses | Nasıl çalar | Dosya · betik | Seviye · uzunluk | Revizyon notu |
+|---|---|---|---|---|---|
+| **S24** | **Gerilim müziği.** Joth'un 5 karanlık ambiyans parçası (OpenGameArt, CC0) 3 sn'lik geçişlerle tek döngü; seviyesi yavaş bir dengeleyiciyle düzleştirildi | 2B, oyun boyunca döngüde (başlık ekranı dahil); ceza karanlığında durur, çatı kapısı açılınca 4 sn'de susar (`ArkaMuzik.cs`, sahnede `Arka_Muzik`) | `Assets/Audio/Muzik/Muzik_Gerilim.wav` · `kayit_isle.py` → `muzik()` | 0,15 · 268,5 sn, stereo | Şahan adaylar arasından seçti (Joth), "beşi sırayla" |
+| **S25** | **Uzak silah sesi.** Tek atış ve 1,1 sn arayla iki atış; boğuk, şehir yankılı | Dış katman (`DisSesleri.cs`, `Dis_Sesler`): 2B, 40-90 sn'de bir, türler art arda tekrar etmez; kat olayı, anomali sesi ya da ceza sürerken araya girmez, kat olayları da onu bekler | `Assets/Audio/Dis/Dis_Silah_1/2.wav` · `kayit_isle.py` → `dis_silah()` (BigSoundBank #2854) | 0,5 · 4,1 / 5,2 sn | Şahan seçti |
+| **S26** | **Pencereden içeri süzülen cılız rüzgâr.** Üç esinti | Dış katman, aynı kurallar | `Assets/Audio/Dis/Dis_Ruzgar_1..3.wav` · `dis_ruzgar()` (BigSoundBank #0147) | 0,5 · 13-14 sn | Şahan: "dışarıda esen değil, bina içine girecek cılız rüzgâr" |
+| **S27** | **Uzaktan köpek havlaması** | Dış katman, aynı kurallar | *Kayıt bekleniyor* (spirit.zip, Freesound; Şahan indirecek) | — | |
+
 ---
 
 *Liste, 2026-09-25'te sahnedeki ses kaynakları ve bütün anomali kartları taranarak
