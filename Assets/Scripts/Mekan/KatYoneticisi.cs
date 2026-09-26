@@ -143,6 +143,13 @@ public class KatYoneticisi : MonoBehaviour
     private KatAnahtari anahtarA, anahtarB;
     private readonly System.Collections.Generic.HashSet<int> acilanKatlar = new System.Collections.Generic.HashSet<int>();
 
+    // ---- DAİRELER (#53) ----
+    // A sahanlığındaki dört 3+1 daire (Daire_1..4, dizinin 0. yeri boş). Her katta yalnızca
+    // biri açık (DairePlani.AcikDaire): o dairenin sahanlıktaki kapısı ardına kadar açılır,
+    // kapının arkasındaki karanlık hol (Daire_Ici) kalkar, gerçek daire görünür.
+    private readonly GameObject[] daireler = new GameObject[MekanOlculeri.DaireSayisi + 1];
+    private const float GirisAcikAci = 80f;   // açık dairenin sahanlık kapısı: içeri doğru 80°
+
     // ---- KAT OLAYLARI (#35) ----
     // Her katta bir iki kez çalan tek bir olay sesi (bebek, uzak kapı, üst kat adımları,
     // kalorifer, araba). Plan hangisinin ve ne zaman çalacağını bilir; çalıcı yalnızca
@@ -214,6 +221,7 @@ public class KatYoneticisi : MonoBehaviour
         bPosetler = PosetleriBul(sahanlikB);
         olayCaliciA = new KatOlayCalici(sahanlikA);
         KapilariBul();
+        DaireleriBul();
         AyakkabilariBul(sahanlikA, out aRaflar, out aDaginik);
         AyakkabilariBul(sahanlikB, out bRaflar, out bDaginik);
         aKatSesleri = KatSesleriniBul(sahanlikA);
@@ -583,6 +591,11 @@ public class KatYoneticisi : MonoBehaviour
         NumaralariYaz(aNumaralar, aKat);
         NumaralariYaz(bNumaralar, bKat);
 
+        // Açık daire (#53): kart uygulanmadan ÖNCE. Kart bir kapıyı döndürüyorsa (aralık kapı
+        // gibi) önce bizim verdiğimiz açıyı kaydeder, geri alırken ona döner; sıra ters olsaydı
+        // kartın açtığı kapıyı biz ezerdik.
+        DaireleriAyarla(aKat, cati ? 0 : bKat);
+
         IAnomaliKart aKart = KartSec(aKat);
         IAnomaliKart bKart = cati ? null : KartSec(bKat);
 
@@ -679,6 +692,54 @@ public class KatYoneticisi : MonoBehaviour
         // Aynı katı gösteren öbür kapı da açılsın (B sahanlığı aynı katı gösteriyorsa).
         if (kapiA != null && kapiA.Kat == kat && !kapiA.Acik) kapiA.Ayarla(kat, true);
         if (kapiB != null && kapiB.Kat == kat && !kapiB.Acik) kapiB.Ayarla(kat, true);
+    }
+
+    // ---------- DAİRELER (#53) ----------
+    private void DaireleriBul()
+    {
+        for (int n = 1; n <= MekanOlculeri.DaireSayisi; n++)
+        {
+            Transform d = sahanlikA != null ? sahanlikA.Find($"Daire_{n}") : null;
+            daireler[n] = d != null ? d.gameObject : null;
+        }
+        if (daireler[1] == null) Debug.LogWarning("[DAIRE] Sahanlik_A/Daire_1 bulunamadı; graybox yeniden kurulmalı.");
+    }
+
+    // A'da o katın dairesi açılır, öbür üçü kapanır. B'de yalnızca sahanlık kapısı açılır:
+    // oyuncu B'ye hiç girmiyor, açık kapının ardında karanlık hol (Daire_Ici) durur. B'ye
+    // varınca oyuncu A'ya ışınlanır ve A aynı daireyi gerçek hâliyle gösterir.
+    private void DaireleriAyarla(int aKat, int bKat)
+    {
+        int aAcik = DairePlani.AcikDaire(aKat);
+        int bAcik = DairePlani.AcikDaire(bKat);
+        for (int n = 1; n <= MekanOlculeri.DaireSayisi; n++)
+        {
+            bool acik = n == aAcik;
+            if (daireler[n] != null)
+            {
+                daireler[n].SetActive(acik);
+                // Yeni katın dairesi baştan: bütün oda kapıları kapalı. (Hangi odanın kilitli
+                // olacağını #55'in kat içerikleri söyleyecek; balkon kapısı zaten hep kilitli.)
+                if (acik)
+                    foreach (IcKapi k in daireler[n].GetComponentsInChildren<IcKapi>(true))
+                        k.Ayarla(false);
+            }
+            SahanlikKapisiniAyarla(sahanlikA, n, acik, gercekDaire: true);
+            SahanlikKapisiniAyarla(sahanlikB, n, n == bAcik, gercekDaire: false);
+        }
+    }
+
+    private static void SahanlikKapisiniAyarla(Transform sahanlik, int n, bool acik, bool gercekDaire)
+    {
+        if (sahanlik == null) return;
+        Transform kapi = sahanlik.Find($"Kapi_{n}");
+        if (kapi == null) return;
+        // Pozitif açı kapıyı daireye doğru (içeri) açar; menteşeler bunun için aynalı kuruldu.
+        Transform mentese = kapi.Find("Mentese");
+        if (mentese != null) mentese.localRotation = Quaternion.Euler(0f, acik ? GirisAcikAci : 0f, 0f);
+        // Karanlık hol yalnızca gerçek dairenin önünden kalkar; kapalı kapılarda ve B'de durur.
+        Transform hol = kapi.Find("Daire_Ici");
+        if (hol != null) hol.gameObject.SetActive(!(acik && gercekDaire));
     }
 
     // Kartın etkilerinden biri ses çalıyor mu? (Yalnızca susturan ya da taşıyan kartlar,

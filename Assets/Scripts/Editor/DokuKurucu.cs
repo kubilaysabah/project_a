@@ -71,6 +71,13 @@ public static class DokuKurucu
     static readonly Tur Madeni  = new Tur("Doku_Madeni", null, 1f, 0.55f, new Color(0.45f, 0.43f, 0.40f));  // kapı kolu, kapı gözü
     static readonly Tur Naylon  = new Tur("Doku_Naylon", null, 1f, 0.6f, new Color(0.04f, 0.04f, 0.045f)); // çöp poşeti: siyah naylon
     static readonly Tur Kumas   = new Tur("Doku_Kumas", null, 1f, 0.05f, new Color(0.70f, 0.68f, 0.62f));   // yastık
+    // 3+1 daire (#53). ŞİMDİLİK ELDEKİ DOKULARLA: duvar kâğıdı, parke ve fayans Şahan'ın
+    // seçeceği CC0 dokularla değişecek; o zaman yalnızca bu satırlar değişir, adlar aynı kalır.
+    static readonly Tur DaireDuvar  = new Tur("Doku_DaireDuvar", "worn_plaster_wall", 1.5f, 0.10f, new Color(0.95f, 0.90f, 0.80f));
+    static readonly Tur Parke       = new Tur("Doku_Parke", "sapele_veneer", 1.0f, 0.30f, new Color(0.85f, 0.80f, 0.75f));
+    static readonly Tur Fayans      = new Tur("Doku_Fayans", "marble_mosaic_tiles", 1.5f, 0.45f, Color.white);
+    static readonly Tur FayansDuvar = new Tur("Doku_FayansDuvar", "marble_mosaic_tiles", 0.75f, 0.45f, new Color(0.92f, 0.95f, 0.95f));
+    static readonly Tur IcBoya      = new Tur("Doku_IcBoya", null, 1f, 0.35f, new Color(0.80f, 0.78f, 0.72f)); // oda kapıları: kirli beyaz yağlı boya
 
     // Bir kutuya ne olacağı: üst, alt ve yan yüzlerin türü ve UV'nin nereden hesaplanacağı.
     struct Kural
@@ -126,6 +133,14 @@ public static class DokuKurucu
         string ebeveyn = t.parent != null ? t.parent.name : "";
         bool cati = KokAdi(t) == "CatiBolumu";   // çatıdaki oda duvarları beton
 
+        // Daire (#53): önce bunlar, çünkü "Daire_Tavan" gibi adlar aşağıdaki genel kurallara uymaz.
+        if (ad == "Daire_Parke") return Yuzeyler(Parke, Tavan, Parke);
+        if (ad == "Daire_Fayans") return Yuzeyler(Fayans, Tavan, Fayans);
+        if (ad == "Daire_Duvar") return Tek(DaireDuvar);
+        if (ad == "Daire_Fayans_Duvar") return Tek(FayansDuvar);
+        if (ad == "Daire_Tavan") return Tek(Tavan);
+        if (ad == "Ic_Kanat") return Tek(IcBoya, yerel: true);
+        if (ad == "Ic_Kasa") return Tek(IcBoya);
         if (ad == "Zemin" || ad == "Ara_Sahanlik") return Yuzeyler(Zemin, Tavan, Tavan);
         if (ad == "Basamak") return Yuzeyler(Zemin, Tavan, Zemin);
         if (ad == "Tavan" || ad == "Oda_Tavan") return Tek(Tavan);

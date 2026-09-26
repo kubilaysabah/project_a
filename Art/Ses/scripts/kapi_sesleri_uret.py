@@ -1,5 +1,6 @@
 # kapi_sesleri_uret.py
 # Kat kapısının sesleri (#52): kilitli kapıyı sarsma, kilidin açılması, demir kapının gıcırtısı.
+# Dairedeki oda kapılarının sesleri (#53): açılma, kapanma, kilitli kolu zorlama.
 #
 # ÇALIŞTIRMA:  python Art/Ses/scripts/kapi_sesleri_uret.py
 #
@@ -84,7 +85,60 @@ def anahtar_al():
     kaydet(os.path.join(SESLER, "Anahtar_Al.wav"), s, HIZ, 0.6)
 
 
-URETICILER = {"sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al}
+# ---------- ODA KAPILARI (#53) ----------
+# Tahta kapı demirin tersine KALIN ve SÖNÜMLÜ çınlar: modları alçak ve kısa (q küçük).
+# Kol ve dil (kapının kasaya giren küçük demir parçası) küçük metal modlar: kısa, tiz tıklar.
+TAHTA = [(95, 3, 1.0), (180, 4, 0.7), (310, 5, 0.45), (520, 6, 0.25)]
+DIL = [(2300, 18, 1.0), (3400, 22, 0.6), (5200, 15, 0.3)]
+ODA = dict(boyut=0.35, sonum=0.55, islak=0.18, oda=0.6)   # küçük, eşyalı oda: kısa yankı
+
+
+def ic_acilma():
+    """Kol iner (tık), dil kasadan çıkar (tık), kanat hafifçe gıcırdayarak açılır."""
+    random.seed(31)
+    n = int(1.1 * HIZ)
+    s = [0.0] * n
+    for t, guc in ((0.0, 0.6), (0.07, 1.0)):
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.2 * HIZ), HIZ, 0.0008), HIZ, DIL)), int(t * HIZ), guc * 0.7)
+    # Kısa, alçak bir menteşe gıcırtısı: demir kapınınkinden kısa ve daha tok.
+    faz = 0.0
+    for i in range(int(0.15 * HIZ), int(0.85 * HIZ)):
+        t = i / HIZ - 0.15
+        f = 520 + 180 * math.sin(2 * math.pi * 0.9 * t)
+        faz += 2 * math.pi * f / HIZ
+        zarf = min(1.0, t / 0.1, (0.7 - t) / 0.25) * (0.6 + 0.4 * math.sin(2 * math.pi * 11 * t) ** 2)
+        s[i] += 0.25 * zarf * (math.sin(faz) + 0.4 * math.sin(2 * faz))
+    s = bant(s, 900, HIZ, 0.6)
+    s = yanki(s, HIZ, **ODA)
+    kaydet(os.path.join(SESLER, "IcKapi_Acilma.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.6)
+
+
+def ic_kapanma():
+    """Kanat kasaya oturur (tok tahta vuruşu), dil yerine girer (tık)."""
+    random.seed(32)
+    n = int(0.9 * HIZ)
+    s = [0.0] * n
+    ekle(s, tepeyi_esitle(modlar(darbe(int(0.5 * HIZ), HIZ, 0.004), HIZ, TAHTA)), 0, 1.0)
+    ekle(s, tepeyi_esitle(modlar(darbe(int(0.2 * HIZ), HIZ, 0.0008), HIZ, DIL)), int(0.02 * HIZ), 0.5)
+    s = yanki(s, HIZ, **ODA)
+    kaydet(os.path.join(SESLER, "IcKapi_Kapanma.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.7)
+
+
+def ic_kilitli():
+    """Kol iki kez aşağı bastırılır; dil kilide dayanır, kanat kasada hafifçe takırdar."""
+    random.seed(33)
+    n = int(1.0 * HIZ)
+    s = [0.0] * n
+    for t, guc in ((0.0, 1.0), (0.32, 0.8)):
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.2 * HIZ), HIZ, 0.0008), HIZ, DIL)), int(t * HIZ), guc * 0.6)
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.35 * HIZ), HIZ, 0.003), HIZ, TAHTA)), int((t + 0.03) * HIZ), guc * 0.8)
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.25 * HIZ), HIZ, 0.0008), HIZ, DIL)), int((t + 0.14) * HIZ), guc * 0.4)
+    s = yanki(s, HIZ, **ODA)
+    kaydet(os.path.join(SESLER, "IcKapi_Kilitli.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.7)
+
+
+URETICILER = {"sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
+              "ic_acilma": ic_acilma, "ic_kapanma": ic_kapanma, "ic_kilitli": ic_kilitli}
 
 if __name__ == "__main__":
     for ad in (sys.argv[1:] or list(URETICILER)):

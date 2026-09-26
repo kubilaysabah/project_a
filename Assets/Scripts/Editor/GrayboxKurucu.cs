@@ -24,7 +24,11 @@ using UnityEditor;        // MenuItem ve AssetDatabase gibi SADECE editörde ça
 using static MekanOlculeri;
 
 // "static" sınıf: içinden nesne üretilemez, sadece fonksiyonları çağrılır.
-public static class GrayboxKurucu
+// "partial": sınıfın birden fazla DOSYAYA bölünebileceğini söyler. Derleyici bütün parçaları
+// birleştirip tek sınıf yapar. Bu dosya çok büyüdüğü için dairenin kurucusu (#53) ayrı bir
+// dosyada, GrayboxKurucu_Daire.cs'de duruyor; ama aynı sınıfın parçası olduğu için buradaki
+// Kutu, Model ve malzeme yardımcılarını doğrudan kullanabiliyor.
+public static partial class GrayboxKurucu
 {
     // Merdiven gözünden kaç kat aşağısı ve yukarısı kurulsun.
     // Daha fazlası sisin içinde zaten görünmüyor; sadece sahneyi ağırlaştırır.
@@ -77,6 +81,10 @@ public static class GrayboxKurucu
         // Oyuncu yalnızca bu ikisinin ve aradaki merdivenin içinde dolaşır.
         GameObject sahanlikA = SahanlikKur("Sahanlik_A", tam: true);
         sahanlikA.transform.position = Vector3.zero;
+
+        // 3+1 daireler (#53): yalnızca A'da, çünkü oyuncu yalnızca A'da yürüyor. Dördü de
+        // kapalı kurulur; hangisinin açılacağına oyun sırasında KatYoneticisi karar verir.
+        DaireleriKur(sahanlikA.transform);
 
         GameObject cekirdekA = CekirdekKur("Cekirdek_A");
         cekirdekA.transform.position = Vector3.zero;
@@ -926,8 +934,11 @@ public static class GrayboxKurucu
         // gökyüzü sızıyordu. Yüksekliğin tam kat boyu olması da bilerek:
         // üst üste dizilen katlarda bu yüzeyler birbirine değip kesintisiz bir
         // karanlık duvar oluşturuyor, arada ne boşluk kalıyor ne üst üste binme.
+        // #53: genişlik sahanlığın dış genişliği (7,4 m). Eskiden 10 m'ydi; 1 ve 4 numaralı
+        // daireler merdiven çekirdeğinin arkasına kadar uzandığı için 10 m'lik yüzey salonun
+        // içinden geçip odada lacivert bir duvar dilimi gibi görünüyordu.
         GameObject gece = Kutu("Disari", p, new Vector3(0f, (Alt + Ust) / 2f, CekirdekDerin + DuvarKalin + 1.0f),
-             new Vector3(10f, Ust - Alt, 0.1f));
+             new Vector3(SahanlikGen + 2f * DuvarKalin, Ust - Alt, 0.1f));
         gece.GetComponent<MeshRenderer>().sharedMaterial = GeceMalzeme();
     }
 
