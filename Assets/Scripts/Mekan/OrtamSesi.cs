@@ -28,6 +28,28 @@ public class OrtamSesi : MonoBehaviour
         kaynak = GetComponent<AudioSource>();
     }
 
+    // ---------- KATA GÖRE KAYDIRMA (#39) ----------
+    // Aynı saate kilitli olmak ışınlanmayı kurtarıyordu ama bir yan etkisi vardı: bütün
+    // katların TV'si AYNI anı çalıyordu, yukarı çıkınca program kesintisiz devam ediyordu.
+    // Artık kaynağın bir "kaydırması" olabilir: sahanlık hangi katı gösteriyorsa KatYoneticisi
+    // o katın kaydırmasını buraya yazar (KatSesKaydirmasi). Çalınan an:
+    //   (ortak saat + kaydırma) mod kayıt uzunluğu.
+    // Kaydırma değişince kaynak hemen yeni yerine atlar; bu, sahanlığın başka bir katı
+    // göstermeye başladığı an olur (oyuncu o sırada merdivende, arkası dönük).
+    private double kaydirma;
+
+    /// <summary>Kayıttaki kaydırma (saniye). Değişince kaynak yeni yerine kilitlenir.</summary>
+    public double Kaydirma
+    {
+        get { return kaydirma; }
+        set
+        {
+            if (value == kaydirma) return;
+            kaydirma = value;
+            if (Application.isPlaying && kaynak != null && kaynak.isPlaying) Kilitle();
+        }
+    }
+
     // OnEnable: nesne her görünür (etkin) olduğunda çalışır; oyun başlarken de,
     // bir anomali kartı sesi gizleyip geri açtığında da.
     private void OnEnable()
@@ -35,12 +57,16 @@ public class OrtamSesi : MonoBehaviour
         if (!Application.isPlaying || kaynak == null || kaynak.clip == null) return;
 
         kaynak.Play();
+        Kilitle();
+    }
 
+    private void Kilitle()
+    {
         // Kaydın içindeki konum "örnek" (sample) cinsinden. Saati saniyede örnek
         // sayısıyla çarpıp kayıt uzunluğuna göre kalanını alıyoruz (%): böylece
         // döngü kaçıncı turunda olursa olsun doğru yer bulunur.
         AudioClip k = kaynak.clip;
-        long konum = (long)(AudioSettings.dspTime * k.frequency) % k.samples;
+        long konum = (long)((AudioSettings.dspTime + kaydirma) * k.frequency) % k.samples;
         kaynak.timeSamples = (int)konum;
     }
 }

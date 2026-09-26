@@ -135,6 +135,11 @@ public class KatYoneticisi : MonoBehaviour
     private KatOlayPlani olayPlani;
     private KatOlayCalici olayCaliciA;
 
+    // ---- KATA ÖZGÜ AN (#39) ----
+    // TV ve boru sesleri her katta kaydın farklı bir anını çalar. Her sahanlığın bu iki
+    // kaynağı; sahanlık yeni bir katı gösterince o katın kaydırmasını alırlar.
+    private OrtamSesi[] aKatSesleri, bKatSesleri;
+
     // Sahanlıkların şu an hangi katı gösterdiği. -1 = henüz hiçbiri.
     private int gosterilenA = -1, gosterilenB = -1;
     private bool catiModu;
@@ -191,6 +196,8 @@ public class KatYoneticisi : MonoBehaviour
         aPosetler = PosetleriBul(sahanlikA);
         bPosetler = PosetleriBul(sahanlikB);
         olayCaliciA = new KatOlayCalici(sahanlikA);
+        aKatSesleri = KatSesleriniBul(sahanlikA);
+        bKatSesleri = KatSesleriniBul(sahanlikB);
 
         toplayici = FindAnyObjectByType<CopToplayici>();
 
@@ -217,6 +224,30 @@ public class KatYoneticisi : MonoBehaviour
             if (g.name == ad) return g;
         }
         return null;
+    }
+
+    // Kata göre kaydırılan ortam sesleri: TV ve boru (#39). Uğultu ve rüzgâr dokudur,
+    // hangi anda oldukları duyulmaz; onlar bütün katlarda aynı kalır.
+    private OrtamSesi[] KatSesleriniBul(Transform sahanlik)
+    {
+        var liste = new System.Collections.Generic.List<OrtamSesi>();
+        if (sahanlik == null) return liste.ToArray();
+        foreach (string yol in new[] { "Kapi_2/Ses_TV", "Ses_Boru" })
+        {
+            Transform t = sahanlik.Find(yol);
+            OrtamSesi o = t != null ? t.GetComponent<OrtamSesi>() : null;
+            if (o != null) liste.Add(o);
+        }
+        return liste.ToArray();
+    }
+
+    private static void KatSesleriniKaydir(OrtamSesi[] sesler, int kat)
+    {
+        foreach (OrtamSesi o in sesler)
+        {
+            AudioSource k = o.GetComponent<AudioSource>();
+            if (k != null && k.clip != null) o.Kaydirma = KatSesKaydirmasi.Saniye(kat, k.clip.length);
+        }
     }
 
     private TextMesh[] NumaralariBul(Transform sahanlik)
@@ -396,7 +427,11 @@ public class KatYoneticisi : MonoBehaviour
         // BULUNDUĞU sahanlıkta işler. A mevcut katı gösteriyorsa oyuncu oradadır;
         // aşağı inerken A bir sonraki katı gösterir ve saat durur. Üst sahanlığın (B)
         // saati hiç işlemez: merdivenden bakarken bir şey kendiliğinden olmamalı.
-        if (gosterilenA == sayac.MevcutKat) uygulayiciA.Ilerlet(Time.deltaTime);
+        // Olaylı bir anomali anı gerçekleştiyse (kapı çarptı, zil çaldı, ışık göz kırptı)
+        // arka müzik kısa süre kabarır (#40). Sessiz anomalilerde zamanlı etki olmadığı için
+        // müzik değişmez; yani müzik cevabı vermez, yalnızca olmuş bir korkuyu vurgular.
+        if (gosterilenA == sayac.MevcutKat && uygulayiciA.Ilerlet(Time.deltaTime) > 0)
+            ArkaMuzik.Ornek?.Kabar();
 
         // Kat olayının saati de aynı kuralla işler (#35). Ceza yoldayken işlemez:
         // lambaların sönme sesine başka bir ses karışmasın.
@@ -512,6 +547,10 @@ public class KatYoneticisi : MonoBehaviour
         // o katın sesi zaten anomalinin sesi. Olay ile anomali sesi üst üste binmez.
         bool olayVar = aKat >= KatSayaci.BaslangicKati && aKat <= KatSayaci.CatiKati && !SesliKart(aKart);
         olayCaliciA.Hazirla(olayVar, olayPlani.KatIcin(aKat), olayPlani.ZamanlarKatIcin(aKat));
+
+        // TV ve boru o katın kendi anını çalsın (#39).
+        KatSesleriniKaydir(aKatSesleri, aKat);
+        KatSesleriniKaydir(bKatSesleri, bKat);
 
         gosterilenA = aKat;
         gosterilenB = bKat;

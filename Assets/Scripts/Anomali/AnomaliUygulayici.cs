@@ -108,9 +108,12 @@ public class AnomaliUygulayici
     /// KatYoneticisi yalnızca oyuncunun BULUNDUĞU sahanlık için çağırır; merdivenden
     /// görünen üst sahanlıkta hiçbir şey kendiliğinden olmaz.
     /// </summary>
-    public void Ilerlet(float gecenZaman)
+    // Dönüş değeri: bu çağrıda kaç zamanlı etki gerçekleşti. KatYoneticisi buna bakıp
+    // olaylı bir anomali anından sonra müziği kabartır (#40); çağıranlar isterse yok sayar.
+    public int Ilerlet(float gecenZaman)
     {
-        if (bekleyenler.Count == 0 || UygulananKart == null) return;
+        if (bekleyenler.Count == 0 || UygulananKart == null) return 0;
+        int olan = 0;
 
         gecenSure += gecenZaman;
 
@@ -120,6 +123,7 @@ public class AnomaliUygulayici
             AnomaliEtkisi etki = bekleyenler[0];
             bekleyenler.RemoveAt(0);
             EtkiUygula(UygulananKart, etki, uygulananSahanlik);
+            olan++;
 
             // Senaryolu anlar kısa sürüyor (ışık 0,35 sn söner); gözle kaçırmak kolay.
             // Console'a yazmak hangi etkinin tam ne zaman oynadığını gösterir.
@@ -128,6 +132,7 @@ public class AnomaliUygulayici
             if (Application.isPlaying)
                 Debug.Log($"[ANOMALİ] '{UygulananKart.Kimlik}' {gecenSure:0.00} sn: {etki}");
         }
+        return olan;
     }
 
     private void EtkiUygula(AnomaliKarti kart, AnomaliEtkisi etki, Transform sahanlik)
