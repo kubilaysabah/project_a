@@ -107,7 +107,7 @@ onları da susturur. Test göstergesi o katın olayını yazar ("olay: Bebek").
 | **S24** | **Gerilim müziği.** Joth'un 5 karanlık ambiyans parçası (OpenGameArt, CC0) 3 sn'lik geçişlerle tek döngü; seviyesi yavaş bir dengeleyiciyle düzleştirildi | 2B, oyun boyunca döngüde (başlık ekranı dahil); ceza karanlığında durur, çatı kapısı açılınca 4 sn'de susar (`ArkaMuzik.cs`, sahnede `Arka_Muzik`) | `Assets/Audio/Muzik/Muzik_Gerilim.wav` · `kayit_isle.py` → `muzik()` | 0,15 · 268,5 sn, stereo | Şahan adaylar arasından seçti (Joth), "beşi sırayla" |
 | **S25** | **Uzak silah sesi.** Tek atış ve 1,1 sn arayla iki atış; boğuk, şehir yankılı | Dış katman (`DisSesleri.cs`, `Dis_Sesler`): 2B, 40-90 sn'de bir, türler art arda tekrar etmez; kat olayı, anomali sesi ya da ceza sürerken araya girmez, kat olayları da onu bekler | `Assets/Audio/Dis/Dis_Silah_1/2.wav` · `kayit_isle.py` → `dis_silah()` (BigSoundBank #2854) | 0,5 · 4,1 / 5,2 sn | Şahan seçti |
 | **S26** | **Pencereden içeri süzülen cılız rüzgâr.** Üç esinti | Dış katman, aynı kurallar | `Assets/Audio/Dis/Dis_Ruzgar_1..3.wav` · `dis_ruzgar()` (BigSoundBank #0147) | 0,5 · 13-14 sn | Şahan: "dışarıda esen değil, bina içine girecek cılız rüzgâr" |
-| **S27** | **Uzaktan köpek havlaması** | Dış katman, aynı kurallar | *Kayıt bekleniyor* (spirit.zip, Freesound; Şahan indirecek) | — | |
+| **S27** | **Uzaktan köpek havlaması.** İki çeşit: seyrek uzak havlamalar, daha sık bir nöbet | Dış katman, aynı kurallar | `Assets/Audio/Dis/Dis_Kopek_1/2.wav` · `kayit_isle.py` → `dis_kopek()` (spirit.zip, Freesound, CC0) | 0,5 · 11,0 / 9,5 sn | Şahan seçti ve indirdi |
 
 ---
 

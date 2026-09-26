@@ -289,8 +289,20 @@ def dis_ruzgar():
         ortak.kaydet(os.path.join(DIS, f"Dis_Ruzgar_{i}.wav"), parca, HIZ, 0.8)
 
 
+# Kayıt: "Dog Barking at Night" (spirit.zip, Freesound, CC0; Şahan indirdi): sessiz bir
+# mahallede gece uzaktan havlayan köpek, 22,7 sn. İki parça kesiliyor: 3,0-12,5 sn arası
+# seyrek ve uzak havlamalar, 12,6-20,6 sn arası daha sık ve yakın bir nöbet. Kayıt zaten
+# uzaktan alınmış; pencerenin ardından duyulsun diye tizleri hafifçe törpülenip kısa bir
+# sokak yankısı ekleniyor.
+def dis_kopek():
+    kayit = oku("849570__spiritzip__dog-barking-at-night.wav")
+    for i, (bas, son) in enumerate(((3.0, 12.5), (12.6, 20.6)), 1):
+        parca = ortak.yuksek(kes(kayit, bas, son, giris=0.3, cikis=0.6), 120, HIZ)
+        ortak.kaydet(os.path.join(DIS, f"Dis_Kopek_{i}.wav"), uzaklastir(parca, HIZ, 2600, 0.3, 1.5), HIZ, 0.8)
+
+
 URETICILER = {"bebek": bebek, "tv": tv, "guvercin": guvercin, "kapi_carpma": kapi_carpma, "kapi_tiklatma": kapi_tiklatma,
-              "muzik": muzik, "dis_silah": dis_silah, "dis_ruzgar": dis_ruzgar}
+              "muzik": muzik, "dis_silah": dis_silah, "dis_ruzgar": dis_ruzgar, "dis_kopek": dis_kopek}
 
 if __name__ == "__main__":
     for ad in (sys.argv[1:] or list(URETICILER)):

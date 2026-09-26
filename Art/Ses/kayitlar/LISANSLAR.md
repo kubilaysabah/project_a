@@ -16,6 +16,7 @@ zorunluluğu getirmez; yine de kaynakları burada kayıtlı.
 | `joth_The_Surreal_Truth.mp3`, `joth_Infestation_in_the_Control_Room.mp3`, `joth_Final_Captains_Log.mp3`, `joth_The_Depths_of_Hell.mp3`, `joth_Cage_of_the_Cryptid.mp3` | Gerilim müziği (#36), beşi sırayla tek döngü | https://opengameart.org/content/ambience-pack-1-sci-fi-horror | Joth | CC0 1.0 |
 | `bigsoundbank_2854_rifle_shot_2.wav` | Uzak silah sesi (#37), tek ve çift atış | https://bigsoundbank.com/rifle-shot-2-s2854.html | Joseph Sardin | CC0 1.0 |
 | `bigsoundbank_0147_whistling_of_the_wind_1.wav` | Pencereden içeri süzülen cılız rüzgâr (#37), üç esinti | https://bigsoundbank.com/whistling-of-the-wind-1-s0147.html | Joseph Sardin | CC0 1.0 |
+| `849570__spiritzip__dog-barking-at-night.wav` | Uzaktan köpek havlaması (#37), iki parça | https://freesound.org/people/spirit.zip/sounds/849570/ | spirit.zip | CC0 1.0 |
 
 **Notlar**
 - **Pixabay Content License:** ticari kullanım serbest, isim belirtmek gerekmez. Yasak olan,
