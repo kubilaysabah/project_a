@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Huzur.Anomali::AnomaliKarti
   kimlik: eksik_plaka
   katman: 0
-  zorluk: 2
+  zorluk: 4
   aciklama: Sol uzaktaki (2.) kapinin numara plakasi yok. Diger kapilarda duruyor.
   etkiler:
   - hedefYol: Kapi_2/Mentese/Numaralik

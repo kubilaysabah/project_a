@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Huzur.Anomali::AnomaliKarti
   kimlik: eksik_paspas
   katman: 0
-  zorluk: 2
+  zorluk: 3
   aciklama: Sag uzaktaki (3.) kapinin onunde paspas yok; terlikler ciplak zeminde.
   etkiler:
   - hedefYol: Kapi_3/Paspas

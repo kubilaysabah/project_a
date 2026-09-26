@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Huzur.Anomali::AnomaliKarti
   kimlik: besinci_kapi
   katman: 2
-  zorluk: 1
+  zorluk: 3
   aciklama: On duvarda, oyuncuya gore asansorun saginda olmamasi gereken besinci bir daire kapisi var. Numarasi yok.
   etkiler:
   - hedefYol: Kapi_5

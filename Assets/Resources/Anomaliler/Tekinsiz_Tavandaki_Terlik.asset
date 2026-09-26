@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Huzur.Anomali::AnomaliKarti
   kimlik: tavandaki_terlik
   katman: 1
-  zorluk: 2
+  zorluk: 4
   aciklama: Merdivene yakin sol (1.) kapinin terliklerinden biri tavanda, ters duruyor.
   etkiler:
   - hedefYol: Kapi_1/Terlikler/Terlik_Sag
