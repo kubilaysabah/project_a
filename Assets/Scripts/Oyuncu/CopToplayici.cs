@@ -21,6 +21,13 @@ public class CopToplayici : MonoBehaviour
     /// <summary>Oyuncunun taşıdığı poşet sayısı.</summary>
     public int TasinanPoset { get { return tasinanPoset; } }
 
+    // Taşınan poşet sayısını köşede kısa süre gösteren işaret (#43). Oyun başlarken
+    // eklenir; sahnede ayrıca kurmak gerekmez.
+    private void Awake()
+    {
+        if (GetComponent<PosetGostergesi>() == null) gameObject.AddComponent<PosetGostergesi>();
+    }
+
     /// <summary>Bir poşet daha toplandı. CopPoseti çağırır.</summary>
     public void PosetSay()
     {

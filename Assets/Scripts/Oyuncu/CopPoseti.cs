@@ -41,6 +41,8 @@ public class CopPoseti : MonoBehaviour, IEtkilesimli
             return;
         }
 
+        // Poşetin görsel bir kopyası ele doğru süzülür (#43); asıl poşet hemen alınır.
+        PosetUcusu.Baslat(transform);
         Al();
         toplayici.PosetSay();
 
