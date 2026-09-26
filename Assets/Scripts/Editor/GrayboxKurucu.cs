@@ -102,6 +102,14 @@ public static class GrayboxKurucu
             GameObject c = CekirdekKur($"Cekirdek_Alt{i}");
             c.transform.SetParent(alt.transform, false);
             c.transform.localPosition = new Vector3(0f, -i * DikeyOfset, 0f);
+
+            // Alt katlar oyuncunun geride bıraktığı katlar: kat kapıları AÇIK kurulur (#52).
+            // Şart da: açılışta oyuncu zemin kattan 1. kata Cekirdek_Alt1'in kolundan çıkıyor.
+            // Bu kapıyı KatYoneticisi yönetmiyor (yalnızca A ile B'yi yönetir); kilitli
+            // kurulursa oyuncu daha ilk merdivende, anahtarı olmayan bir kapıya takılır.
+            Transform altKapi = c.transform.Find("Kat_Kapisi");
+            KatKapisi altKapiBileseni = altKapi != null ? altKapi.GetComponent<KatKapisi>() : null;
+            if (altKapiBileseni != null) altKapiBileseni.Ayarla(0, true);   // 0: hiçbir katın anahtarı açmaz
         }
 
         // ZEMİN KAT (#16, açılış): oyun burada, kapıcı dairesinde başlar. Normal bir

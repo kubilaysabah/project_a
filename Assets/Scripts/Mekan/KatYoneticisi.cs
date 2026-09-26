@@ -638,9 +638,12 @@ public class KatYoneticisi : MonoBehaviour
     // ---------- KAT KAPISI VE ANAHTAR (#52) ----------
     private void KapilariBul()
     {
-        GameObject cA = KokBul("Cekirdek_A"), cB = KokBul("Cekirdek_B");
+        // A'nın çekirdeği sahnenin kökünde; B'ninki ise sahte üst katların altında
+        // (Sahte_Katlar/Ust/Cekirdek_B). Kökte aranırsa bulunamaz ve B'nin kapısı hiç
+        // yönetilmez: merdiven gözünden yukarı bakınca yanlış hâlde görünür.
+        GameObject cA = KokBul("Cekirdek_A"), sahte = KokBul("Sahte_Katlar");
         Transform kA = cA != null ? cA.transform.Find("Kat_Kapisi") : null;
-        Transform kB = cB != null ? cB.transform.Find("Kat_Kapisi") : null;
+        Transform kB = sahte != null ? sahte.transform.Find("Ust/Cekirdek_B/Kat_Kapisi") : null;
         kapiA = kA != null ? kA.GetComponent<KatKapisi>() : null;
         kapiB = kB != null ? kB.GetComponent<KatKapisi>() : null;
         if (kapiA != null) kapiA.Acildi += KapiAcildi;
@@ -650,6 +653,7 @@ public class KatYoneticisi : MonoBehaviour
         anahtarA = aA != null ? aA.GetComponent<KatAnahtari>() : null;
         anahtarB = aB != null ? aB.GetComponent<KatAnahtari>() : null;
         if (kapiA == null) Debug.LogWarning("[KAPI] Cekirdek_A/Kat_Kapisi bulunamadı; kat kapısı yok.");
+        if (kapiB == null) Debug.LogWarning("[KAPI] Sahte_Katlar/Ust/Cekirdek_B/Kat_Kapisi bulunamadı.");
     }
 
     // Bir katın kapısı açık mı: bu turda açıldıysa ya da kat zaten geride kaldıysa (kayıttan
