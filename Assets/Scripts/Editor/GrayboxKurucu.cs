@@ -579,11 +579,14 @@ public static class GrayboxKurucu
         // Terlik modelinin burnu -Z'ye bakar; -90 x yon derece dönüş burnu duvara çevirir.
         // Sağ terlik, sol terliğin AYNASI: x ölçeği -1. Ayrı nesneler olmaları şart,
         // çünkü "tek terlik" anomalisi yalnızca birini gizliyor.
-        GameObject terlikSol = Model("Terlik_Sol", terlikler.transform, "Terlik", null,
+        // #42: her dairenin terliği farklı (erkek, kadın, çocuk, yaşlı). Nesne adları ve
+        // yolları aynı kaldı; terlik anomalileri hangi model olduğunu bilmeden çalışır.
+        string terlikModeli = TerlikModeli(ad);
+        GameObject terlikSol = Model("Terlik_Sol", terlikler.transform, terlikModeli, null,
                                      new Vector3(duvarYuzu - yon * 0.30f, 0f, -0.07f), -90f * yon, false);
         if (terlikSol != null)
         {
-            GameObject terlikSag = Model("Terlik_Sag", terlikler.transform, "Terlik", null,
+            GameObject terlikSag = Model("Terlik_Sag", terlikler.transform, terlikModeli, null,
                                          new Vector3(duvarYuzu - yon * 0.30f, 0f, 0.07f), -90f * yon, false);
             terlikSag.transform.localScale = new Vector3(-1f, 1f, 1f);
         }
@@ -605,6 +608,20 @@ public static class GrayboxKurucu
 
         // Çöpler: kapının yanında en fazla üç poşet, büyükten küçüğe.
         CoplerKur(k, duvarYuzu, yon);
+    }
+
+    // Hangi dairenin kapısında hangi terlik (#42). Oyuncu bir süre sonra bunu öğrenir:
+    // 1 numarada lacivert erkek terliği, 2'de pembe kadın terliği... Bir terlik yer
+    // değiştirir ya da kaybolursa fark etmesi kolaylaşır.
+    static string TerlikModeli(string kapiAdi)
+    {
+        switch (kapiAdi)
+        {
+            case "Kapi_1": return "Terlik_Erkek";
+            case "Kapi_2": return "Terlik_Kadin";
+            case "Kapi_3": return "Terlik_Cocuk";
+            default:       return "Terlik_Yasli";   // Kapi_4 (ve zemin kattaki kapılar)
+        }
     }
 
     // ---------- ÇÖP POŞETLERİ ----------
@@ -632,12 +649,25 @@ public static class GrayboxKurucu
         const float Aralik = 0.04f;
         float z = -(KapiGen / 2f + 0.10f);   // kapı kenarının biraz ötesinden başla, ön duvara doğru diz
 
+        // #42: kutular yerine gerçek poşet modelleri (Cop_Poseti.fbx: Poset_A, B, C).
+        // Hangi şeklin hangi yere geleceği ve ne kadar dönük duracağı kapıya ve sıraya
+        // bağlı SABİT değerler, rastgele değil: bütün katlarda aynı dizilmeli, yoksa
+        // ışınlanmada poşetler bir anda şekil değiştirirdi.
+        int kapiNo = kapi.name.Length > 0 ? kapi.name[kapi.name.Length - 1] - '0' : 0;
+        string[] sekiller = { "Poset_A", "Poset_B", "Poset_C" };
+        float[] donusler = { 25f, -40f, 65f };
+
         for (int i = 0; i < olculer.Length; i++)
         {
             Vector3 o = olculer[i];
             z -= o.z / 2f;                   // bu poşetin merkezi
 
-            GameObject poset = Kutu($"Poset_{i + 1}", kok.transform,
+            // Model 1 m yüksekliğinde üretildi; ölçek = poşetin boyu.
+            // Duvardan uzaklık: en geniş poşet şekli boyunun ~1,1 katı; dönük dursa da duvara girmesin.
+            GameObject poset = Model($"Poset_{i + 1}", kok.transform, "Cop_Poseti", sekiller[(i + kapiNo) % 3],
+                new Vector3(duvarYuzu - yon * (o.y * 0.56f + 0.05f), 0f, z), donusler[i] + kapiNo * 37f, true);
+            if (poset != null) poset.transform.localScale = Vector3.one * o.y;
+            else poset = Kutu($"Poset_{i + 1}", kok.transform,
                 new Vector3(duvarYuzu - yon * (o.x / 2f + 0.05f), o.y / 2f, z),
                 o);
 
