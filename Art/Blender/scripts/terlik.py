@@ -117,7 +117,7 @@ def terlik(ad, boy, en, taban_kalinlik, taban_renk, ust_renk, ust_puruz, kapali,
 
 
 # (ad, boy, en, taban kalınlığı, taban rengi, üst rengi, üst pürüzü, burnu kapalı, ponpon)
-terlik("Terlik_Erkek", 0.28, 0.105, 0.024, (0.03, 0.05, 0.12), (0.05, 0.07, 0.16), 0.5, False)
+terlik("Terlik_Erkek", 0.28, 0.105, 0.024, (0.10, 0.20, 0.42), (0.16, 0.30, 0.58), 0.5, False)   # açık lacivert: koyusu karanlık paspasta kayboluyordu (görünürlük denetimi)
 terlik("Terlik_Kadin", 0.25, 0.095, 0.020, (0.55, 0.40, 0.42), (0.75, 0.30, 0.42), 0.9, True, ponpon=True)
 terlik("Terlik_Cocuk", 0.18, 0.075, 0.018, (0.85, 0.65, 0.05), (0.08, 0.30, 0.75), 0.5, False)
 terlik("Terlik_Yasli", 0.27, 0.105, 0.030, (0.62, 0.55, 0.42), (0.22, 0.13, 0.08), 0.95, True)
