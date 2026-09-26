@@ -1,0 +1,91 @@
+# kapi_sesleri_uret.py
+# Kat kapısının sesleri (#52): kilitli kapıyı sarsma, kilidin açılması, demir kapının gıcırtısı.
+#
+# ÇALIŞTIRMA:  python Art/Ses/scripts/kapi_sesleri_uret.py
+#
+# Hepsi ses_ortak.py'deki yöntemle: gürültü darbesi → cismin (demir) modları → merdiven yankısı.
+# Demir, tahtadan farklı olarak İNCE ve UZUN çınlar (q büyük); parmaklıklı kapıda birçok
+# çubuk birlikte titrediği için birkaç yakın mod üst üste biner ("şangırtı").
+
+import math, os, random, sys
+sys.path.append(os.path.dirname(__file__))
+from ses_ortak import alcak, yuksek, bant, modlar, darbe, gurultu, ekle, yanki, tepeyi_esitle, yumusak_sinirla, kaydet
+
+HIZ = 44100
+KOK = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+SESLER = os.path.join(KOK, "Assets", "Resources", "Sesler")
+
+# Demir parmaklığın modları: birbirine yakın, dar, uzun çınlayan frekanslar.
+PARMAKLIK = [(410, 60, 0.6), (620, 80, 1.0), (935, 90, 0.7), (1380, 70, 0.5), (2100, 50, 0.3), (3300, 40, 0.15)]
+# Kilit mekanizmasının modları: küçük, sert metal parçalar; kısa ve tiz.
+KILIT = [(1800, 25, 0.8), (2700, 30, 1.0), (4100, 20, 0.5), (6200, 15, 0.25)]
+
+
+def sarsma():
+    """Kilitli kapı: kanadı çekip bırakma; kanat kasaya iki üç kez çarpar, çubuklar şangırdar."""
+    random.seed(21)
+    n = int(1.2 * HIZ)
+    s = [0.0] * n
+    for t, guc in ((0.0, 1.0), (0.09, 0.7), (0.21, 0.45)):
+        vurus = tepeyi_esitle(modlar(darbe(int(0.6 * HIZ), HIZ, 0.003), HIZ, PARMAKLIK))
+        gum = tepeyi_esitle(alcak(darbe(int(0.3 * HIZ), HIZ, 0.008), 220, HIZ))
+        ekle(s, vurus, int(t * HIZ), guc)
+        ekle(s, gum, int(t * HIZ), guc * 0.8)
+    s = yanki(s, HIZ, boyut=0.8, sonum=0.4, islak=0.35, oda=1.2)
+    kaydet(os.path.join(SESLER, "KatKapisi_Kilitli.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.8)
+
+
+def kilit_acilma():
+    """Anahtar deliğe girer (sürtünme), döner (iki tık), dil çekilir (tok bir şak)."""
+    random.seed(22)
+    n = int(1.0 * HIZ)
+    s = [0.0] * n
+    surt = bant(gurultu(n), 3500, HIZ, 1.2)
+    for i in range(int(0.02 * HIZ), int(0.14 * HIZ)):
+        s[i] += 0.12 * surt[i] * math.sin(math.pi * (i / HIZ - 0.02) / 0.12)
+    for t, guc in ((0.28, 0.7), (0.40, 1.0)):
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.25 * HIZ), HIZ, 0.001), HIZ, KILIT)), int(t * HIZ), guc)
+    sak = tepeyi_esitle(modlar(darbe(int(0.4 * HIZ), HIZ, 0.004), HIZ, [(300, 8, 1.0), (760, 20, 0.6), (1500, 25, 0.4)]))
+    ekle(s, sak, int(0.55 * HIZ), 1.0)
+    s = yanki(s, HIZ, boyut=0.7, sonum=0.45, islak=0.25, oda=1.0)
+    kaydet(os.path.join(SESLER, "KatKapisi_Kilit.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.75)
+
+
+def gicirti():
+    """Ağır demir kanadın menteşede gıcırdaması: 1,6 sn boyunca perdesi kayan, kesik kesik sürtünme."""
+    random.seed(23)
+    n = int(1.8 * HIZ)
+    s = [0.0] * n
+    faz = 0.0
+    for i in range(n):
+        t = i / HIZ
+        if t > 1.6:
+            break
+        f = 900 + 500 * math.sin(2 * math.pi * 0.4 * t) + 120 * math.sin(2 * math.pi * 7 * t)   # perde kayar
+        faz += 2 * math.pi * f / HIZ
+        # "yapış-kay": sürtünme kesik kesik; 9 Hz'lik bir titreme ve rastgele kopmalar
+        zarf = 0.5 + 0.5 * math.sin(2 * math.pi * 9 * t) ** 2
+        zarf *= 1.0 if random.random() > 0.002 else 0.0
+        e = min(1.0, t / 0.15, (1.6 - t) / 0.4)
+        s[i] = e * zarf * (math.sin(faz) + 0.5 * math.sin(2 * faz) + 0.25 * math.sin(3 * faz))
+    s = bant(s, 1400, HIZ, 0.5)
+    ekle(s, tepeyi_esitle(alcak(darbe(int(0.3 * HIZ), HIZ, 0.01), 180, HIZ)), int(1.62 * HIZ), 0.7)   # kanat sona dayanır
+    s = yanki(s, HIZ, boyut=0.8, sonum=0.4, islak=0.3, oda=1.2)
+    kaydet(os.path.join(SESLER, "KatKapisi_Gicirti.wav"), s, HIZ, 0.7)
+
+
+def anahtar_al():
+    """Anahtarı yerden alma: küçük bir pirinç şıkırtı."""
+    random.seed(24)
+    n = int(0.5 * HIZ)
+    s = [0.0] * n
+    for t, guc in ((0.0, 1.0), (0.05, 0.6)):
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.3 * HIZ), HIZ, 0.0008), HIZ, [(3200, 40, 1.0), (5100, 35, 0.6), (7400, 25, 0.3)])), int(t * HIZ), guc)
+    kaydet(os.path.join(SESLER, "Anahtar_Al.wav"), s, HIZ, 0.6)
+
+
+URETICILER = {"sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al}
+
+if __name__ == "__main__":
+    for ad in (sys.argv[1:] or list(URETICILER)):
+        URETICILER[ad]()

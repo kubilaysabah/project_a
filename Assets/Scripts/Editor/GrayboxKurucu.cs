@@ -315,6 +315,9 @@ public static class GrayboxKurucu
         // hafifçe duyulur ve ışınlanmada ses ortamı değişmez.
         OrtamSesleriKur(t);
 
+        // Katın anahtarı (#52): yalnızca gerçek sahanlıklarda (A ve B).
+        if (tam) KatAnahtariKur(t);
+
         return kok;
     }
 
@@ -843,6 +846,9 @@ public static class GrayboxKurucu
 
         // ARKA DUVAR ve PENCERE.
         PencereliArkaDuvarKur(t);
+
+        // KİLİTLİ KAT KAPISI (#52): çıkış kolunun tepesinde, ara sahanlığın girişinde.
+        KatKapisiKur(t);
 
         // KORKULUKLAR: merdiven gözünü çevreler. Oyuncu gözden düşemesin ama
         // üstünden eğilip aşağı ve yukarı bakabilsin diye dolu duvar değil,
@@ -1604,6 +1610,56 @@ public static class GrayboxKurucu
         g.transform.localPosition = (a + b) / 2f;
         g.transform.localRotation = Quaternion.LookRotation(fark);
         g.transform.localScale = new Vector3(kalinlik, kalinlik, fark.magnitude);
+    }
+
+    // ---------- KİLİTLİ KAT KAPISI (#52) ----------
+    // Demir parmaklıklı kapı (kat_kapisi.py). Menteşe duvar tarafında (x = kolun dış kenarı),
+    // kanat merdiven gözüne doğru (-X) uzanır ve açılınca merdivene (+Z, ara sahanlığa) döner.
+    // Kolun DİBİNE değil TEPESİNE konuyor: dipte açılan kanat basamaklara çarpardı; ara
+    // sahanlık düz ve 1,4 m derin, 1,3 m'lik kanat oraya rahat açılır. Oyuncu sekiz basamak
+    // çıkıp dönüşte parmaklığa dayanır, üst kolun karanlığını çubukların arasından görür.
+    static void KatKapisiKur(Transform cekirdek)
+    {
+        GameObject kok = new GameObject("Kat_Kapisi");
+        kok.transform.SetParent(cekirdek, false);
+        kok.transform.localPosition = new Vector3(CikisKoluX + KolGen / 2f - 0.02f, AraKot, KolUzunluk + 0.05f);
+
+        GameObject kasa = Model("Kasa", kok.transform, "Kat_Kapisi", "Kasa", Vector3.zero, 0f, carpisma: false);
+        GameObject kanat = Model("Kanat", kok.transform, "Kat_Kapisi", "Kanat", Vector3.zero, 0f, carpisma: false);
+        if (kasa == null || kanat == null) { Debug.LogWarning("[GRAYBOX] Kat_Kapisi.fbx bulunamadı; kat kapısı kurulmadı."); return; }
+
+        // Kanadın çarpışma kutusu kanatla döner: kapalıyken geçit kapalı, açıkken serbest.
+        BoxCollider kc = kanat.AddComponent<BoxCollider>();
+        kc.center = new Vector3(-KolGen / 2f + 0.05f, 1.05f, 0f);
+        kc.size = new Vector3(KolGen - 0.1f, 2.1f, 0.08f);
+        // Kasanın dikmeleri de dursun (ince ama oyuncu içinden geçmesin).
+        foreach (float x in new[] { -0.03f, -(KolGen - 0.03f) })
+        {
+            BoxCollider dc = kasa.AddComponent<BoxCollider>();
+            dc.center = new Vector3(x, 1.08f, 0f);
+            dc.size = new Vector3(0.06f, 2.16f, 0.07f);
+        }
+
+        KatKapisi bilesen = kok.AddComponent<KatKapisi>();
+        var seri = new SerializedObject(bilesen);
+        seri.FindProperty("kanat").objectReferenceValue = kanat.transform;
+        seri.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // ---------- KATIN ANAHTARI (#52) ----------
+    // Şimdilik her katta aynı yerde: 1 numaranın ayakkabılığının üstünde. #55'te her katın
+    // içerik dosyası anahtarın yerini (paspas altı, sayaç dolabı, asansör...) söyleyecek.
+    static void KatAnahtariKur(Transform sahanlik)
+    {
+        float sol = -(SahanlikGen / 2f);
+        GameObject anahtar = Model("Kat_Anahtari", sahanlik, "Anahtar", null,
+                                   new Vector3(sol + RafDerin / 2f + 0.01f, 1.025f, YakinKapiZ - (KapiGen / 2f + 0.04f + RafEn / 2f)), 35f, carpisma: true);
+        if (anahtar == null) return;
+        // Anahtar 4 x 9 cm: nişan ışını ıskalamasın diye çarpışma kutusu büyütülüyor.
+        BoxCollider c = anahtar.GetComponent<BoxCollider>();
+        c.center = new Vector3(0f, 0.02f, 0f);
+        c.size = new Vector3(0.16f, 0.06f, 0.16f);
+        anahtar.AddComponent<KatAnahtari>();
     }
 
     // ---------- LAMBA (#11) ----------

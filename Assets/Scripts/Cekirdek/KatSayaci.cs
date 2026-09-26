@@ -63,6 +63,22 @@ public class KatSayaci
     /// <summary>Çatıya ulaşıldı mı? Ulaşıldıysa tur bitmiştir.</summary>
     public bool TurBitti { get; private set; }
 
+    // ---------- KAYITTAN YÜKLE (#52) ----------
+
+    /// <summary>
+    /// Oyunu kaldığı kattan sürdürür: sayaç verilen katta, hatasız, tur bitmemiş başlar.
+    /// Aralık dışı bir değer sınıra çekilir; bozuk bir kayıt dosyası oyunu 9. kata ya da
+    /// 0. kata düşürmesin.
+    /// </summary>
+    public void Yukle(int kat)
+    {
+        if (kat < BaslangicKati) kat = BaslangicKati;
+        if (kat > CatiKati) kat = CatiKati;
+        MevcutKat = kat;
+        AnomaliVar = false;
+        TurBitti = false;
+    }
+
     // ---------- SAHANLIĞI HAZIRLA ----------
 
     /// <summary>

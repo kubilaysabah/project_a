@@ -16,6 +16,20 @@ using NUnit.Framework;   // Test, SetUp, Assert gibi test araçları bu kütüph
 [TestFixture]
 public class KatSayaciTestleri
 {
+    // #52: kayıttan yükleme. Sınır dışı değerler sınıra çekilir; bozuk kayıt oyunu bozmaz.
+    [Test]
+    public void Yukle_kati_ayarlar_ve_sinirlari_asmaz()
+    {
+        var s = new KatSayaci();
+        s.Yukle(5);
+        Assert.AreEqual(5, s.MevcutKat);
+        Assert.IsFalse(s.TurBitti);
+        s.Yukle(99);
+        Assert.AreEqual(KatSayaci.CatiKati, s.MevcutKat);
+        s.Yukle(-3);
+        Assert.AreEqual(KatSayaci.BaslangicKati, s.MevcutKat);
+    }
+
     // Her testin kendi taze sayacı olsun diye burada tutuyoruz.
     private KatSayaci sayac;
 

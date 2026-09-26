@@ -135,6 +135,14 @@ public class KatYoneticisi : MonoBehaviour
     private GameObject[,] aRaflar, bRaflar;              // [daire, raf] raftaki çiftler
     private DaginikAyakkabi[,] aDaginik, bDaginik;       // [daire, sıra] kapı önündeki çiftler
 
+    // ---- KAT KAPISI VE ANAHTAR (#52) ----
+    // Her çekirdeğin (A ve B) ara sahanlığında kilitli demir kapı, her gerçek sahanlıkta
+    // katın anahtarı. Hangi katların kapısının açıldığı burada tutulur; kayıt (Kayit)
+    // yalnızca ulaşılan katı saklar, alt katların kapıları yüklemede açık sayılır.
+    private KatKapisi kapiA, kapiB;
+    private KatAnahtari anahtarA, anahtarB;
+    private readonly System.Collections.Generic.HashSet<int> acilanKatlar = new System.Collections.Generic.HashSet<int>();
+
     // ---- KAT OLAYLARI (#35) ----
     // Her katta bir iki kez çalan tek bir olay sesi (bebek, uzak kapı, üst kat adımları,
     // kalorifer, araba). Plan hangisinin ve ne zaman çalacağını bilir; çalıcı yalnızca
@@ -205,6 +213,7 @@ public class KatYoneticisi : MonoBehaviour
         aPosetler = PosetleriBul(sahanlikA);
         bPosetler = PosetleriBul(sahanlikB);
         olayCaliciA = new KatOlayCalici(sahanlikA);
+        KapilariBul();
         AyakkabilariBul(sahanlikA, out aRaflar, out aDaginik);
         AyakkabilariBul(sahanlikB, out bRaflar, out bDaginik);
         aKatSesleri = KatSesleriniBul(sahanlikA);
@@ -319,10 +328,19 @@ public class KatYoneticisi : MonoBehaviour
         // Kat olayları da kendi tohumuyla (aynı sebep: planlar birbirine gizlice bağlanmasın).
         olayPlani = new KatOlayPlani(gercekTohum + 104729);
 
+        // Kayıt varsa (#52) oyun kaldığı kattan sürer: açılış atlanır, oyuncu sahnedeki yerinde
+        // (1. kat sahanlığının başlangıcı) o katın sahanlığında uyanır.
+        bool kayittanDevam = Kayit.Var && testKarti == null;
+        if (kayittanDevam)
+        {
+            sayac.Yukle(Kayit.Kat);
+            Debug.Log($"[KAYIT] Kaldığı yerden: {sayac.MevcutKat}. kat");
+        }
+
         referansDongu = merdiven != null ? merdiven.NetDongu : 0;
         SahanliklariGuncelle(zorla: true);
 
-        if (acilisIleBasla && zeminKat != null) AcilisiBaslat();
+        if (acilisIleBasla && zeminKat != null && !kayittanDevam) AcilisiBaslat();
     }
 
     // ---------- AÇILIŞ (#16) ----------
@@ -478,6 +496,8 @@ public class KatYoneticisi : MonoBehaviour
                 // Sahanlık burada yenilenmiyor; hemen ardından SahanliklariGuncelle
                 // karar noktasının değiştiğini görüp yeniliyor.
                 Debug.Log($"[KAT] Doğru karar ({karar}). {eskiKat} -> {sayac.MevcutKat}");
+                // Otomatik kayıt (#52): yeni bir kata ulaşıldı.
+                if (sayac.MevcutKat > Kayit.Kat) Kayit.Kat = sayac.MevcutKat;
                 break;
 
             case KararSonucu.Sifirla:
@@ -569,6 +589,9 @@ public class KatYoneticisi : MonoBehaviour
         if (sahanlikA != null) uygulayiciA.Uygula(aKart as AnomaliKarti, sahanlikA);
         if (sahanlikB != null && !cati) uygulayiciB.Uygula(bKart as AnomaliKarti, sahanlikB);
 
+        // Kat kapıları ve anahtarlar (#52).
+        KapilariAyarla(aKat, bKat, cati);
+
         // A'nın kat olayı (#35). Kartın kendi sesi varsa (kapı çarpması, zil, tersten
         // ağlama...) o katta olay çalmaz: Şahan'ın kuralı "her katta bunlardan biri",
         // o katın sesi zaten anomalinin sesi. Olay ile anomali sesi üst üste binmez.
@@ -611,6 +634,48 @@ public class KatYoneticisi : MonoBehaviour
 
     /// <summary>Tur bitti mi (çatıya ulaşıldı)? Dış sesler ve müzik buna bakar.</summary>
     public bool TurBitti { get { return sayac != null && sayac.TurBitti; } }
+
+    // ---------- KAT KAPISI VE ANAHTAR (#52) ----------
+    private void KapilariBul()
+    {
+        GameObject cA = KokBul("Cekirdek_A"), cB = KokBul("Cekirdek_B");
+        Transform kA = cA != null ? cA.transform.Find("Kat_Kapisi") : null;
+        Transform kB = cB != null ? cB.transform.Find("Kat_Kapisi") : null;
+        kapiA = kA != null ? kA.GetComponent<KatKapisi>() : null;
+        kapiB = kB != null ? kB.GetComponent<KatKapisi>() : null;
+        if (kapiA != null) kapiA.Acildi += KapiAcildi;
+        if (kapiB != null) kapiB.Acildi += KapiAcildi;
+        Transform aA = sahanlikA != null ? sahanlikA.Find("Kat_Anahtari") : null;
+        Transform aB = sahanlikB != null ? sahanlikB.Find("Kat_Anahtari") : null;
+        anahtarA = aA != null ? aA.GetComponent<KatAnahtari>() : null;
+        anahtarB = aB != null ? aB.GetComponent<KatAnahtari>() : null;
+        if (kapiA == null) Debug.LogWarning("[KAPI] Cekirdek_A/Kat_Kapisi bulunamadı; kat kapısı yok.");
+    }
+
+    // Bir katın kapısı açık mı: bu turda açıldıysa ya da kat zaten geride kaldıysa (kayıttan
+    // yüklemede alt katların kapıları açılmış sayılır). 8. katta kapı yok gibi: yukarısı çatı,
+    // çatı kapısı ayrı kilit (KatYoneticisi.CatiKapisiniAc).
+    private bool KapiAcikMi(int kat)
+    {
+        return kat >= KatSayaci.CatiKati || kat < sayac.MevcutKat || acilanKatlar.Contains(kat);
+    }
+
+    private void KapilariAyarla(int aKat, int bKat, bool cati)
+    {
+        if (kapiA != null) kapiA.Ayarla(aKat, KapiAcikMi(aKat));
+        if (kapiB != null && !cati) kapiB.Ayarla(bKat, KapiAcikMi(bKat));
+        // Anahtar: kapısı henüz açılmamış ve anahtarı cepte olmayan katlarda görünür.
+        if (anahtarA != null) anahtarA.Ayarla(aKat, !KapiAcikMi(aKat) && !Cep.Tasiyor(EsyaTuru.KatAnahtari, aKat));
+        if (anahtarB != null) anahtarB.Ayarla(bKat, !cati && !KapiAcikMi(bKat) && !Cep.Tasiyor(EsyaTuru.KatAnahtari, bKat));
+    }
+
+    private void KapiAcildi(int kat)
+    {
+        acilanKatlar.Add(kat);
+        // Aynı katı gösteren öbür kapı da açılsın (B sahanlığı aynı katı gösteriyorsa).
+        if (kapiA != null && kapiA.Kat == kat && !kapiA.Acik) kapiA.Ayarla(kat, true);
+        if (kapiB != null && kapiB.Kat == kat && !kapiB.Acik) kapiB.Ayarla(kat, true);
+    }
 
     // Kartın etkilerinden biri ses çalıyor mu? (Yalnızca susturan ya da taşıyan kartlar,
     // örneğin susan_tv, "sesli" sayılmaz: onlar yeni bir ses çıkarmıyor.)
@@ -912,6 +977,10 @@ public class KatYoneticisi : MonoBehaviour
         secici.Sifirla();
         copPlani.Sifirla();
         ayakkabiPlani.Sifirla();
+        // #52: ceza 1. kata döndürüyor (bu kural #59 ile kalkacak); kayıt ve kapılar da başa.
+        acilanKatlar.Clear();
+        Cep.Bosalt();
+        Kayit.Sil();
         olayPlani.Sifirla();
         if (toplayici != null) toplayici.Sifirla();
 
