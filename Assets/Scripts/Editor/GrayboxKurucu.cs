@@ -1526,7 +1526,11 @@ public static class GrayboxKurucu
     // her şeyi lamba taşımak zorunda. Işık uzaklığın KARESİYLE zayıflar; tavandaki
     // ampulden 4 m ötedeki köşeye şiddetin ancak onda biri ulaşır. Kapı numaraları
     // ve terlikler okunmalı (anomaliler onlarda), o yüzden şiddet bunu sağlayacak kadar.
-    public const float LambaSiddeti = 10f;        // spotun şiddeti
+    // #38 (2026-09-26): Şahan "ışıklar çok az yansın" dedi; 10'dan 7'ye indi. Işık
+    // kartlarındaki mutlak şiddetler de aynı oranla (0,7) güncellendi. 5,5 denendi:
+    // görünürlük denetiminde görünmez kart 6'dan 10'a çıktı (yerdeki terlikler, yan
+    // kapılar karanlıkta kayboldu); karanlığın geri kalanı ortam ışığı ve vinyetten geliyor.
+    public const float LambaSiddeti = 7f;         // spotun şiddeti
     public const float DolguOrani   = 0.30f;      // dolgu ışığı = spotun bu kadarı
 
     static readonly Color AkkorRengi = new Color(1f, 0.82f, 0.58f);   // 2700 K civarı sıcak sarı
@@ -1577,6 +1581,9 @@ public static class GrayboxKurucu
         MeshRenderer camCizici = cam.GetComponent<MeshRenderer>();
         camCizici.sharedMaterial = CamMalzeme();
         camCizici.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;   // ışığın önünü kesmesin
+
+        // Normal kattaki hafif titreme (#38): bütün lambalar aynı saatle, birlikte titrer.
+        g.AddComponent<LambaTitremesi>();
 
         // KABLO: ampulden tavana ince bir kordon. Dönmüş nesnenin çocuğu olduğu
         // için dünya konumu ve dönüşü ayrıca veriliyor (kordon hep dik dursun).

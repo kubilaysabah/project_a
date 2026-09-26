@@ -45,7 +45,8 @@ public static class AtmosferKurucu
         // Neredeyse siyah, hafif mavi: gece binanın içine sızan en ufak ışık.
         // Tamamen siyah yapmıyoruz; oyuncu karanlık köşede duvarın varlığını
         // hâlâ seçebilmeli, yoksa ekran düz siyah bir leke olur.
-        RenderSettings.ambientLight = new Color(0.018f, 0.020f, 0.028f);
+        // #38: daha karanlık bir gece için üçte bir kısıldı (0,018 / 0,020 / 0,028 idi).
+        RenderSettings.ambientLight = new Color(0.012f, 0.013f, 0.019f);
 
         // Yansımalar da gökyüzünden geliyor: parlak gündüz göğü asansörün çeliğinde
         // ve pirinç isimlikte yansıyıp gece hissini bozuyordu. Neredeyse kapatıyoruz.
@@ -67,7 +68,7 @@ public static class AtmosferKurucu
 
         ay.name = "Ay_Isigi";
         ay.color = new Color(0.55f, 0.65f, 1.0f);
-        ay.intensity = 0.06f;
+        ay.intensity = 0.045f;   // #38: 0,06 idi
         ay.shadows = LightShadows.Soft;
 
         // Işığın yönü: +z'den (pencerenin dışından) içeri ve aşağı doğru.
@@ -146,7 +147,7 @@ public static class AtmosferKurucu
         // VIGNETTE: ekran kenarlarını karartır. Göz ortaya çekilir, çevre görüşü
         // daralır; oyuncu köşelerde bir şey olup olmadığından emin olamaz.
         Vignette vinyet = Ekle<Vignette>(profil);
-        vinyet.intensity.Override(0.38f);
+        vinyet.intensity.Override(0.45f);   // #38: 0,38 idi; kenarlar daha kapalı, daha dar bir görüş
         vinyet.smoothness.Override(0.45f);
 
         // FİLM GRENİ: karanlık alanlarda ince bir kumlanma. Düz, "temiz"
