@@ -128,6 +128,13 @@ public class KatYoneticisi : MonoBehaviour
     private CopPlani copPlani;
     private CopToplayici toplayici;
 
+    // ---- KAT OLAYLARI (#35) ----
+    // Her katta bir iki kez çalan tek bir olay sesi (bebek, uzak kapı, üst kat adımları,
+    // kalorifer, araba). Plan hangisinin ve ne zaman çalacağını bilir; çalıcı yalnızca
+    // alt sahanlıkta (A) çalar, çünkü oyuncu hep A'nın gösterdiği kattadır.
+    private KatOlayPlani olayPlani;
+    private KatOlayCalici olayCaliciA;
+
     // Sahanlıkların şu an hangi katı gösterdiği. -1 = henüz hiçbiri.
     private int gosterilenA = -1, gosterilenB = -1;
     private bool catiModu;
@@ -183,6 +190,7 @@ public class KatYoneticisi : MonoBehaviour
         bNumaralar = NumaralariBul(sahanlikB);
         aPosetler = PosetleriBul(sahanlikA);
         bPosetler = PosetleriBul(sahanlikB);
+        olayCaliciA = new KatOlayCalici(sahanlikA);
 
         toplayici = FindAnyObjectByType<CopToplayici>();
 
@@ -262,6 +270,9 @@ public class KatYoneticisi : MonoBehaviour
         // aynı sayı dizisini üretir ve poşet sayıları anomalilerle gizlice
         // bağlantılı olurdu (örneğin "3 poşetli kat hep anomalili" gibi).
         copPlani = new CopPlani(MekanOlculeri.DaireSayisi, gercekTohum + 7919);
+
+        // Kat olayları da kendi tohumuyla (aynı sebep: planlar birbirine gizlice bağlanmasın).
+        olayPlani = new KatOlayPlani(gercekTohum + 104729);
 
         referansDongu = merdiven != null ? merdiven.NetDongu : 0;
         SahanliklariGuncelle(zorla: true);
@@ -386,6 +397,10 @@ public class KatYoneticisi : MonoBehaviour
         // aşağı inerken A bir sonraki katı gösterir ve saat durur. Üst sahanlığın (B)
         // saati hiç işlemez: merdivenden bakarken bir şey kendiliğinden olmamalı.
         if (gosterilenA == sayac.MevcutKat) uygulayiciA.Ilerlet(Time.deltaTime);
+
+        // Kat olayının saati de aynı kuralla işler (#35). Ceza yoldayken işlemez:
+        // lambaların sönme sesine başka bir ses karışmasın.
+        if (gosterilenA == sayac.MevcutKat && !cezaBekliyor) olayCaliciA.Ilerlet(Time.deltaTime);
     }
 
     // ---------- KARARIN SONUCU ----------
@@ -492,6 +507,12 @@ public class KatYoneticisi : MonoBehaviour
         if (sahanlikA != null) uygulayiciA.Uygula(aKart as AnomaliKarti, sahanlikA);
         if (sahanlikB != null && !cati) uygulayiciB.Uygula(bKart as AnomaliKarti, sahanlikB);
 
+        // A'nın kat olayı (#35). Kartın kendi sesi varsa (kapı çarpması, zil, tersten
+        // ağlama...) o katta olay çalmaz: Şahan'ın kuralı "her katta bunlardan biri",
+        // o katın sesi zaten anomalinin sesi. Olay ile anomali sesi üst üste binmez.
+        bool olayVar = aKat >= KatSayaci.BaslangicKati && aKat <= KatSayaci.CatiKati && !SesliKart(aKart);
+        olayCaliciA.Hazirla(olayVar, olayPlani.KatIcin(aKat), olayPlani.ZamanlarKatIcin(aKat));
+
         gosterilenA = aKat;
         gosterilenB = bKat;
 
@@ -500,6 +521,17 @@ public class KatYoneticisi : MonoBehaviour
 
         string durum = aKart != null ? $"VAR ({aKart.Kimlik})" : "yok";
         Debug.Log($"[KAT] A = {aKat}. kat (anomali: {durum}), B = {(cati ? "çatı" : bKat + ". kat")}");
+    }
+
+    // Kartın etkilerinden biri ses çalıyor mu? (Yalnızca susturan ya da taşıyan kartlar,
+    // örneğin susan_tv, "sesli" sayılmaz: onlar yeni bir ses çıkarmıyor.)
+    private static bool SesliKart(IAnomaliKart kart)
+    {
+        var k = kart as AnomaliKarti;
+        if (k == null || k.Etkiler == null) return false;
+        foreach (AnomaliEtkisi e in k.Etkiler)
+            if (e != null && e.tur == EtkiTuru.Ses) return true;
+        return false;
     }
 
     // Çatının üstünde kat yoktur; seçiciye 9. katı sormuyoruz.
@@ -660,7 +692,12 @@ public class KatYoneticisi : MonoBehaviour
         // değer geliştirme build'inde okunur.
         string fps = $"   ·   FPS {1f / ortalamaKareSuresi:0} ({ortalamaKareSuresi * 1000f:0.0} ms)";
 
-        string alt = $"hata: {sayac.ToplamHata}" + poset + kartAdi + fps +
+        // Bu katın olay sesi; kartın kendi sesi varsa olay çalmıyor (#35).
+        string olay = olayPlani == null || sayac.TurBitti ? ""
+            : SesliKart(KartSec(sayac.MevcutKat)) ? "   ·   olay: yok (kartın sesi var)"
+            : "   ·   olay: " + olayPlani.KatIcin(sayac.MevcutKat);
+
+        string alt = $"hata: {sayac.ToplamHata}" + poset + kartAdi + olay + fps +
                      (catiModu ? "   ·   üstte çatı" : "") +
                      (acilisModu ? "   ·   AÇILIŞ (zemin kat)" : "") +
                      (testKarti != null ? "   ·   TEST KARTI AÇIK" : "") +
@@ -738,6 +775,7 @@ public class KatYoneticisi : MonoBehaviour
         // oyuncu bir önceki denemeyi ezberleyerek ilerleyemez.
         secici.Sifirla();
         copPlani.Sifirla();
+        olayPlani.Sifirla();
         if (toplayici != null) toplayici.Sifirla();
 
         // Sahanlıkların "gösterdiği kat" bilgisi de silinir. Silinmeseydi,

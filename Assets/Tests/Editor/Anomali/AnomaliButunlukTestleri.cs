@@ -258,7 +258,8 @@ public class AnomaliButunlukTestleri
     [Test]
     public void Ortam_ses_katmanlari_sahanlikta_ve_dongude()
     {
-        foreach (string yol in new[] { "Ses_Ugultu", "Kapi_2/Ses_TV", "Kapi_4/Ses_Bebek", "Ses_Boru" })
+        // Bebek artık döngü değil, bir kat olayı (#35); aşağıdaki testte.
+        foreach (string yol in new[] { "Ses_Ugultu", "Kapi_2/Ses_TV", "Ses_Boru" })
         {
             Transform t = sahanlik.Find(yol);
             Assert.IsNotNull(t, $"'{yol}' ses katmanı sahanlıkta yok.");
@@ -271,6 +272,30 @@ public class AnomaliButunlukTestleri
             // oraya başvuramaz. Bileşeni tipiyle değil ADIYLA arıyoruz.
             Assert.IsNotNull(t.GetComponent("OrtamSesi"),
                 $"'{yol}' saate kilitli değil (OrtamSesi yok); ışınlanmada ses atlar.");
+        }
+    }
+
+    // Kat olayı kaynakları (#35). KatOlayCalici bunları bu yollarla buluyor; biri
+    // silinir ya da yeniden adlandırılırsa o olay sessizce hiç çalmaz. Döngüde ya da
+    // saate kilitli OLMAMALILAR: öyle olsalar her katta sürekli çalarlardı (Şahan'ın
+    // şikâyeti tam buydu). Yollar KatOlayCalici.KaynakYollari ile aynı sırada.
+    [Test]
+    public void Kat_olayi_kaynaklari_sahanlikta_ve_tek_seferlik()
+    {
+        string[] yollar = { "Kapi_4/Ses_Bebek", "Ses_Ugultu/Olay_UzakKapi", "Ses_Ugultu/Olay_UstKatAdimlari",
+                            "Ses_Ugultu/Olay_Kalorifer", "Ses_Ugultu/Olay_Araba" };
+        Assert.AreEqual(KatOlayPlani.OlaySayisi, yollar.Length, "Her olay çeşidi için bir kaynak olmalı.");
+
+        foreach (string yol in yollar)
+        {
+            Transform t = sahanlik.Find(yol);
+            Assert.IsNotNull(t, $"'{yol}' olay kaynağı sahanlıkta yok.");
+            AudioSource kaynak = t.GetComponent<AudioSource>();
+            Assert.IsNotNull(kaynak, $"'{yol}' üzerinde AudioSource yok.");
+            Assert.IsNotNull(kaynak.clip, $"'{yol}' için ses dosyası bağlanmamış.");
+            Assert.IsFalse(kaynak.loop, $"'{yol}' döngüde; her katta sürekli çalar.");
+            Assert.IsFalse(kaynak.playOnAwake, $"'{yol}' sahne açılınca kendiliğinden çalıyor.");
+            Assert.IsNull(t.GetComponent("OrtamSesi"), $"'{yol}' saate kilitli; kendiliğinden çalar.");
         }
     }
 

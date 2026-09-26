@@ -27,7 +27,7 @@ Her satırın sonundaki **Revizyon notu** sütunu, Şahan'ın isteğinin yazıla
 
 ---
 
-## A. Ortam katmanları — her katta, sürekli (#14)
+## A. Ortam katmanları — her katta, sürekli (#14; bebek #35 ile E'ye geçti)
 
 Normal bir katın ses dokusu. Hepsi döngüde çalar, 3B'dir ve **saate kilitlidir**: iki
 sahanlıktaki kopyalar aynı anı çalar, ışınlanmada ses atlamaz. Açılıştaki zemin katta
@@ -36,9 +36,9 @@ taşıyarak ya da yerine bozuk bir ses koyarak "bozar" (D bölümü).
 
 | No | Ses | Nerede / ne zaman | Dosya · betik | Seviye · mesafe · uzunluk | Bozan kartlar | Revizyon notu |
 |---|---|---|---|---|---|---|
-| **S01** | **Bina uğultusu.** Gece binasının "sessizliği": çok kısık, alçak bir hava sesi (şebeke vızıltısının yalnızca izi) ve birkaç saniyede bir uzaktan gelen, yankılı küçük sesler (üst katta kapanan kapı, adımlar, geçen araba, kalorifer tıkırtısı). Kesilince fark edilir. | Sahanlığın ortası (`Ses_Ugultu`) | `Assets/Audio/Ortam/Ortam_Ugultu.wav` · `ortam_uret.py` → `ugultu()` | 0,25 · 4–9 m · 30 sn | `karanlik_kat`, `sessizlik` (susturur) | "Daha düşük, ufak yankılar olsun; gereksiz ve yüksek" → vızıltı çıktı, uzak yankılı olaylar, ~11 dB kısık. ✓ 2. turda onay |
+| **S01** | **Bina uğultusu.** Gece binasının "sessizliği": çok kısık, alçak bir hava sesi (şebeke vızıltısının yalnızca izi). Fark edilmez; kesilince fark edilir. | Sahanlığın ortası (`Ses_Ugultu`) | `Assets/Audio/Ortam/Ortam_Ugultu.wav` · `ortam_uret.py` → `ugultu()` | 0,25 · 4–9 m · 30 sn | `karanlik_kat`, `sessizlik` (susturur; E bölümündeki uzak olaylar da onunla susar) | "Daha düşük, ufak yankılar olsun" → vızıltı çıktı, uzak yankılı olaylar eklendi. ✓ 2. turda onay. Build testi: "sürekli olması rahatsız ediyor" → uzak olaylar ayrı kat olaylarına çıktı (E, #35) |
 | **S02** | **Duvar arkasından TV.** Yan odadan kaydedilmiş gerçek bir TV: boğuk konuşmalar (kelimeler seçilmez), arada sessiz anlar. | 2 numaralı dairenin içi (`Kapi_2/Ses_TV`) | `Assets/Audio/Ortam/Ortam_TV.wav` · kayıt (Pixabay) · `kayit_isle.py` → `tv()` | 0,50 · 1,5–9 m · 85,5 sn | `susan_tv`, `sessizlik` (susturur); `yanlis_tv` (9 m sağa, karşı daireye taşır); `calan_zil` (2,5 sn sonra susar); `besinci_kapi` (var olmayan 5. kapıdan da TV) | "TV ile alakası yok" → gerçek kayıt. ✓ 4. turda onay |
-| **S03** | **Ağlayan bebek.** Başka bir dairede gerçek bir bebeğin 9,4 sn'lik ağlama nöbeti (duvar arkası, boğuk); 30 sn'nin geri kalanı sessiz. | 4 numaralı dairenin içi (`Kapi_4/Ses_Bebek`) | `Assets/Audio/Ortam/Ortam_Bebek.wav` · kayıt (Wikimedia) · `kayit_isle.py` → `bebek()` | 0,55 · 1,5–10 m · 30 sn | `sessizlik` (susturur); `ters_aglama` (S12 ile değiştirir); `asansorde_aglama` (S13 ile değiştirir) | "Ağlayan uzaylı gibi" → gerçek kayıt. ✓ 4. turda onay |
+| **S03** | **Ağlayan bebek.** Gerçek bir bebeğin 9,4 sn'lik ağlama nöbeti, duvar arkasından (boğuk). **Artık döngü değil, bir kat olayı** (E bölümü): yalnızca planın bebeği seçtiği katlarda bir iki kez çalar. | 4 numaralı dairenin içi (`Kapi_4/Ses_Bebek`) | `Assets/Audio/Ortam/Ortam_Bebek.wav` · kayıt (Wikimedia) · `kayit_isle.py` → `bebek()` | 0,55 · 1,5–10 m · 10,4 sn, tek seferlik | `sessizlik` (susturur); `ters_aglama` (S12 ile değiştirir); `asansorde_aglama` (S13 ile değiştirir) | "Ağlayan uzaylı gibi" → gerçek kayıt. ✓ 4. turda onay. Build testi: her katta ağlaması rahatsız etti → kat olayı (#35) |
 | **S04** | **Boru tıkırtıları.** Duvarın içinde düzensiz aralıklarla boğuk metalik vuruş ve uzun boru-beton yankısı. | Sahanlık duvarının içi (`Ses_Boru`) | `Assets/Audio/Ortam/Ortam_Boru.wav` · `ortam_uret.py` → `boru()` | 0,50 · 1–8 m · 16 sn | `sessizlik` (susturur); `duzenli_boru` (S14 ile değiştirir) | "Daha yankılı, net gelmesin" → boğuk + uzun yankı. ✓ 2. turda onay |
 | **S05** | **Rüzgâr.** Merdiven boşluğunun penceresinden gelen hafif rüzgâr. | Merdiven çekirdeği (`Cekirdek_A/Ses_Ruzgar`) | `Assets/Audio/Ortam/Ortam_Ruzgar.wav` · `ortam_uret.py` → `ruzgar()` | 0,30 · 1–6 m · 12 sn | — | ✓ 1. turda onay (2026-09-26) |
 
@@ -79,6 +79,26 @@ süre.
 `susan_tv` (S02 susar) · `yanlis_tv` (S02 karşı daireden gelir) · `sessizlik` (S01-S04
 hepsi susar) · `karanlik_kat` (S01 susar, ışıklar da söner) · `besinci_kapi` (S02
 var olmayan 5. kapının arkasından da çalar, seviye 0,45).
+
+## E. Kat olayları — her katta yalnızca biri (#35)
+
+Şahan build'de dinledikten sonra (2026-09-26): "bazı seslerin sürekli olması rahatsızlık
+veriyor; her katta damlayan su sesi, bebek ağlaması, kapı çarpması olmasın ama her katta
+bunlardan biri olsun". Her kata bu beş olaydan **yalnızca biri** düşer (`KatOlayPlani.cs`):
+tur başında çekilir, tur boyunca sabit, cezadan sonra yeniden çekilir; komşu iki kata aynı
+olay düşmez. Olay, kata varıştan 4-9 sn sonra bir kez, ondan 16-24 sn sonra bir kez daha
+çalar (`KatOlayCalici.cs`, saatini `KatYoneticisi` ilerletir; yalnızca oyuncunun bulunduğu
+katta). **Kendi sesi olan bir anomali kartı gelen katta olay çalmaz**: o katın sesi
+anomalinin sesidir. Uzak olaylar uğultunun çocuğu olduğu için `sessizlik` ve `karanlik_kat`
+onları da susturur. Test göstergesi o katın olayını yazar ("olay: Bebek").
+
+| No | Olay | Nerede | Dosya · betik | Seviye · mesafe · uzunluk | Revizyon notu |
+|---|---|---|---|---|---|
+| **S03** | Bebek ağlaması | 4 numaranın içi (`Kapi_4/Ses_Bebek`) | yukarıda, A bölümü | 0,55 · 1,5–10 m · 10,4 sn | |
+| **S20** | Uzakta kapanan kapı: alçak, boğuk bir güm ve uzun yankısı | Bir kat yukarıda (`Ses_Ugultu/Olay_UzakKapi`) | `Assets/Audio/Olay/Olay_UzakKapi.wav` · `ortam_uret.py` → `kat_olaylari()` | 0,20 · 2–14 m · 3,4 sn | eskiden uğultunun içindeydi (S01) |
+| **S21** | Üst katta dört yavaş adım | Tavanın üstü (`Ses_Ugultu/Olay_UstKatAdimlari`) | `Assets/Audio/Olay/Olay_UstKatAdimlari.wav` · `kat_olaylari()` | 0,20 · 1,5–10 m · 5,4 sn | eskiden uğultunun içindeydi |
+| **S22** | Kalorifer borusunun metalik tıkırtısı | Sol duvarın dibi (`Ses_Ugultu/Olay_Kalorifer`) | `Assets/Audio/Olay/Olay_Kalorifer.wav` · `kat_olaylari()` | 0,12 · 1–8 m · 3,3 sn | eskiden uğultunun içindeydi; "su damlası gibi" duyulan buydu |
+| **S23** | Dışarıdan geçen araba | Sokak (`Ses_Ugultu/Olay_Araba`) | `Assets/Audio/Olay/Olay_Araba.wav` · `kat_olaylari()` | 0,15 · 4–18 m · 7,0 sn | eskiden uğultunun içindeydi |
 
 ---
 

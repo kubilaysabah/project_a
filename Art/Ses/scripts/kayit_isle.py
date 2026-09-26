@@ -76,8 +76,10 @@ def sessizlik(saniye, hiz=HIZ):
 # 0-3,3 sn kısa bir ağlama, 8-23 sn uzun ve yoğun bir ağlama. Oyunda kullanılan parça
 # uzun nöbetin ilk 9,4 saniyesi (8,0-17,4 sn): güçlü bir "vaaa" ile başlıyor, arada
 # nefes alışlar var.
-#   S03 Ortam_Bebek: 30 sn'lik döngü; ağlama 5. saniyede başlar, geri kalanı sessizdir
-#       (bebek arada bir ağlar). Duvar arkasından: boğuk.
+#   S03 Ortam_Bebek: tek seferlik bir "kat olayı" (#35): yalnızca planın bebeği seçtiği
+#       katlarda, kata varıştan birkaç saniye sonra bir iki kez çalar. Duvar arkasından:
+#       boğuk. (Önce 30 sn'lik bir döngüydü ve her katta çalıyordu; Şahan build'de
+#       "sürekli olması rahatsız ediyor" dedi.)
 #   S12 Bebek_Ters:  aynı parça TERSTEN, yine boğuk (anomali). Kata varınca hemen duyulsun
 #       diye 1. saniyede başlar.
 #   S13 Bebek_Yakin: aynı parça boğuk DEĞİL: duvar arkasından değil, asansör kuyusundan,
@@ -87,9 +89,7 @@ def bebek():
     parca = kes(kayit, 8.0, 17.4)
     boguk = duvar_arkasi(parca)
 
-    ortam = sessizlik(5.0) + boguk
-    ortam += sessizlik(30.0 - len(ortam) / HIZ)
-    ortak.kaydet(os.path.join(ORTAM, "Ortam_Bebek.wav"), ortam[:int(30 * HIZ)], HIZ, 0.8)
+    ortak.kaydet(os.path.join(ORTAM, "Ortam_Bebek.wav"), boguk, HIZ, 0.8)
 
     ters = sessizlik(1.0) + duvar_arkasi(parca[::-1])
     ters += sessizlik(14.0 - len(ters) / HIZ)

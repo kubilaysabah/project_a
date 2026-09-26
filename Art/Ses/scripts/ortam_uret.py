@@ -4,7 +4,9 @@
 # ÇALIŞTIRMA:  python Art/Ses/scripts/ortam_uret.py [ses adları]   (ör. ugultu boru)
 #
 # ÜRETİLEN DOSYALAR (Assets/Audio/Ortam ve Assets/Audio/Anomali):
-#   Ortam_Ugultu      binanın sürekli, alçak uğultusu (şebeke vızıltısı + hava)
+#   Ortam_Ugultu      binanın sürekli, çok kısık hava uğultusu
+#   Olay_*            katta bir iki kez çalan uzak olaylar: kapı, üst kat adımları,
+#                     kalorifer, araba (Assets/Audio/Olay, #35)
 #   Ortam_Boru        duvarın içinde düzensiz boru tıkırtıları
 #   Ortam_Ruzgar      merdiven penceresinden gelen rüzgâr
 #   Boru_Damla        sızdıran borudan makine gibi düzenli su damlası (anomali)
@@ -79,16 +81,33 @@ def zarf(t, bas, sure, giris=0.05, cikis=0.1):
 
 
 # ---------- UĞULTU ----------
-# Revizyon (Şahan, 2026-09-26): "daha düşük sesli ve ufak ses yankıları olabilir; çok
-# gereksiz ve yüksek bir ses". Eski uğultu sürekli, yüksek bir 50 Hz vızıltısıydı.
-# Yeni hâli gece binasının "sessizliği":
-#   ZEMİN:  çok alçak, kısık bir hava gürültüsü; vızıltının yalnızca izi kaldı.
-#   UZAK OLAYLAR: birkaç saniyede bir binanın başka bir yerinden gelen küçük sesler
-#           (üst katta kapanan bir kapı, birkaç adım, dışarıdan geçen bir araba, bir
-#           kalorifer tıkırtısı). Uzaktan geldikleri için boğukturlar ve neredeyse
-#           yalnızca YANKILARI duyulur: sesin kendisi az, merdiven boşluğunun yankısı çok.
-# Kayıt 30 sn (eskisi 8 sn): olaylar her turda aynı yerde tekrar etmesin diye uzun.
-# Anomali kartı bu katmanı susturunca uzak sesler de kesilir; boşluk daha iyi hissedilir.
+# Gece binasının "sessizliği": çok kısık, alçak bir hava gürültüsü; şebeke vızıltısının
+# yalnızca izi. Her katta sürekli çalar, fark edilmez; kesilince (karanlik_kat, sessizlik)
+# boşluk hissedilir.
+# Revizyon geçmişi (Şahan):
+#   1. tur: "daha düşük sesli, ufak ses yankıları olabilir" -> vızıltı çıktı, içine uzak
+#      yankılı olaylar kondu (kapı, adımlar, araba, kalorifer).
+#   Build testi: "bazı seslerin sürekli olması rahatsızlık veriyor" (#35) -> uzak olaylar
+#      bu kayıttan çıkıp ayrı "kat olayı" seslerine dönüştü (aşağıda); her katta
+#      yalnızca biri çalar. Zeminin seviyesi onaylanan kayıttaki seviyenin aynısı (0,092).
+def ugultu():
+    L = 30.0
+    n, gecis = int(L * HIZ), int(0.5 * HIZ)
+    random.seed(1)
+    hava = ortak.tepeyi_esitle(ortak.alcak(ortak.alcak(ortak.gurultu(n + gecis), 110, HIZ), 110, HIZ))
+    zemin = [0.10 * hava[i] + 0.012 * math.sin(2 * math.pi * 50 * i / HIZ) for i in range(n + gecis)]
+    kaydet(ORTAM, "Ortam_Ugultu", dongule(zemin, n, gecis), 0.092)
+
+
+# ---------- KAT OLAYLARI (#35) ----------
+# Binanın başka bir yerinden gelen tek seferlik küçük sesler. Her katta bunlardan
+# yalnızca BİRİ, kata varıştan birkaç saniye sonra bir iki kez çalar (hangisinin
+# çalacağını KatOlayPlani.cs seçer; bebek de bu olaylardan biri, kayit_isle.py'de).
+# Uzaktan geldikleri için boğukturlar ve neredeyse yalnızca YANKILARI duyulur:
+# sesin kendisi az, merdiven boşluğunun yankısı çok.
+OLAY = os.path.join(KOK, "Assets", "Audio", "Olay")
+
+
 def uzak_olay(tur, H):
     """Binanın başka bir yerinden gelen tek bir küçük ses (yankısız; yankı sonra eklenir)."""
     if tur == "kapi":        # uzakta kapanan bir kapı: alçak, boğuk bir güm
@@ -109,26 +128,13 @@ def uzak_olay(tur, H):
     return [0.25 * x for x in tik]
 
 
-def ugultu():
-    L = 30.0
-    n, gecis = int(L * HIZ), int(0.5 * HIZ)
+def kat_olaylari():
     random.seed(1)
-
-    # Zemin: çok alçak hava gürültüsü + vızıltının izi. Döngü için fazlası başa karışır.
-    hava = ortak.tepeyi_esitle(ortak.alcak(ortak.alcak(ortak.gurultu(n + gecis), 110, HIZ), 110, HIZ))
-    zemin = [0.10 * hava[i] + 0.012 * math.sin(2 * math.pi * 50 * i / HIZ) for i in range(n + gecis)]
-    zemin = dongule(zemin, n, gecis)
-
-    # Uzak olaylar, 30 sn'ye yayılmış. Olaylar kendi başına kısık; asıl duyulan yankıları.
-    olaylar = [0.0] * n
-    for bas, tur, guc in ((1.5, "kapi", 0.8), (6.2, "adim", 1.0), (10.8, "araba", 1.0),
-                          (16.0, "tik", 1.0), (19.4, "kapi", 0.55), (23.1, "adim", 0.8), (27.2, "tik", 0.8)):
-        ortak.ekle(olaylar, uzak_olay(tur, HIZ), int(bas * HIZ), guc)
-    olaylar = ortak.alcak(olaylar, 900, HIZ)                         # uzaktan: tizler yolda kaldı
-    olaylar = ortak.dairesel_yanki(olaylar, HIZ, 3.0, boyut=0.88, sonum=0.5, islak=1.0, kuru=0.25, oda=1.4)
-    olaylar = ortak.tepeyi_esitle(olaylar, 0.6)
-
-    kaydet(ORTAM, "Ortam_Ugultu", [a + b for a, b in zip(zemin, olaylar)], 0.6)
+    for tur, ad in (("kapi", "Olay_UzakKapi"), ("adim", "Olay_UstKatAdimlari"),
+                    ("tik", "Olay_Kalorifer"), ("araba", "Olay_Araba")):
+        s = ortak.alcak(uzak_olay(tur, HIZ), 900, HIZ)                  # uzaktan: tizler yolda kaldı
+        s = ortak.yanki(s + [0.0] * int(3.0 * HIZ), HIZ, boyut=0.88, sonum=0.5, islak=1.0, kuru=0.25, oda=1.4)
+        kaydet(OLAY, ad, s, 0.8)
 
 
 # ---------- TV VE BEBEK ----------
@@ -239,7 +245,7 @@ def asansor_ugultu():
     kaydet(ANOMALI, "Asansor_Ugultu", dongule(s, n, gecis), 0.8)
 
 
-URETICILER = {"ugultu": ugultu, "boru": boru,
+URETICILER = {"ugultu": ugultu, "kat_olaylari": kat_olaylari, "boru": boru,
               "duzenli_damla": duzenli_damla, "ruzgar": ruzgar, "asansor_ugultu": asansor_ugultu}
 
 if __name__ == "__main__":

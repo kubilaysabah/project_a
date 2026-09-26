@@ -1273,13 +1273,52 @@ public static class GrayboxKurucu
         OrtamKaynagi("Ses_TV", sahanlik.Find("Kapi_2"), new Vector3(sol - 0.8f, 1.2f, 0f),
                      "Ortam_TV", 0.5f, 1.5f, 9f);
 
-        // Bebek: 4 numaranın içinden.
-        OrtamKaynagi("Ses_Bebek", sahanlik.Find("Kapi_4"), new Vector3(sag + 0.8f, 1.0f, 0f),
-                     "Ortam_Bebek", 0.55f, 1.5f, 10f);
+        // ---- KAT OLAYLARI (#35) ----
+        // Döngüde DEĞİL: her katta yalnızca biri, KatYoneticisi'nin seçtiği anlarda bir iki
+        // kez çalar (KatOlayPlani + KatOlayCalici). Önce bebek her katta 30 sn'de bir
+        // ağlıyordu ve uzak olaylar uğultunun içindeydi; Şahan build'de "sürekli olması
+        // rahatsız ediyor" dedi.
+        // Bebek: 4 numaranın içinden. Yolu değişmedi; bebek kartları onu hedefliyor.
+        OlayKaynagi("Ses_Bebek", sahanlik.Find("Kapi_4"), new Vector3(sag + 0.8f, 1.0f, 0f),
+                    "Ortam/Ortam_Bebek", 0.55f, 1.5f, 10f);
+
+        // Uzak olaylar uğultunun ÇOCUKLARI: sessizlik ve karanlik_kat kartları uğultuyu
+        // gizleyince bunlar da susar. Konumlar uğultuya göre (uğultu tavanın ortasında).
+        // Seviyeler, onaylanan uğultu kaydının içindeki hâllerine denk (kapı en güçlü,
+        // kalorifer en kısık).
+        Transform ugultu = sahanlik.Find("Ses_Ugultu");
+        OlayKaynagi("Olay_UzakKapi", ugultu, new Vector3(0f, 3.0f, 0f), "Olay/Olay_UzakKapi", 0.2f, 2f, 14f);          // bir üst kat
+        OlayKaynagi("Olay_UstKatAdimlari", ugultu, new Vector3(1.2f, 1.0f, 1.0f), "Olay/Olay_UstKatAdimlari", 0.2f, 1.5f, 10f);   // tavanın üstü
+        OlayKaynagi("Olay_Kalorifer", ugultu, new Vector3(-SahanlikGen / 2f, -1.6f, 1.0f), "Olay/Olay_Kalorifer", 0.12f, 1f, 8f); // sol duvarın dibi
+        OlayKaynagi("Olay_Araba", ugultu, new Vector3(0f, -1.0f, -8f), "Olay/Olay_Araba", 0.15f, 4f, 18f);                 // dışarıda, sokak
 
         // Boru: arka duvarın sol parçasının içinden (elektrik sayacının arkası).
         OrtamKaynagi("Ses_Boru", sahanlik, new Vector3(-(CekirdekGen / 2f + DuvarKalin + 0.85f), 1.0f, DuvarKalin / 2f),
                      "Ortam_Boru", 0.5f, 1f, 8f);
+    }
+
+    // Tek seferlik bir olay sesi kaynağı (#35): üç boyutlu, döngüsüz, kendiliğinden çalmaz.
+    // Çalma zamanını KatOlayCalici belirler. klip: Assets/Audio altındaki yol, uzantısız.
+    static void OlayKaynagi(string ad, Transform ebeveyn, Vector3 konum, string klip,
+                            float ses, float yakin, float uzak)
+    {
+        if (ebeveyn == null) return;
+        AudioClip kayit = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/" + klip + ".wav");
+        if (kayit == null) { Debug.LogWarning("[GRAYBOX] Olay sesi bulunamadı: " + klip); return; }
+
+        GameObject g = new GameObject(ad);
+        g.transform.SetParent(ebeveyn, false);
+        g.transform.localPosition = konum;
+
+        AudioSource kaynak = g.AddComponent<AudioSource>();
+        kaynak.clip = kayit;
+        kaynak.loop = false;               // bir kez çalar ve susar
+        kaynak.playOnAwake = false;        // sahne açılınca çalmasın; zamanı KatOlayCalici seçer
+        kaynak.volume = ses;
+        kaynak.spatialBlend = 1f;
+        kaynak.rolloffMode = AudioRolloffMode.Linear;
+        kaynak.minDistance = yakin;
+        kaynak.maxDistance = uzak;
     }
 
     // Tek bir ortam sesi kaynağı: döngüde çalan, üç boyutlu bir AudioSource ve
