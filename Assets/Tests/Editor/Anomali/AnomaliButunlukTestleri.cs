@@ -201,6 +201,20 @@ public class AnomaliButunlukTestleri
             string.Join(", ", hatalar));
     }
 
+    // Ayakkabılar da rastgele (#44): raftaki çift sayısı (2-3 + rafa konanlar) ve kapı
+    // önündeki dağınık çiftler (0-2) her katta farklı. Poşetlerle aynı sebeple yasak hedef.
+    // Rafın KENDİSİ (Kapi_N/Ayakkabilik) serbest: her katta aynı yerde duruyor.
+    [Test]
+    public void Hicbir_kart_rastgele_ayakkabilara_dokunmaz()
+    {
+        var hatalar = new List<string>();
+        foreach (AnomaliKarti kart in TumKartlar())
+            foreach (AnomaliEtkisi etki in kart.Etkiler)
+                if (etki.hedefYol.Contains("Ayakkabilar") || etki.hedefYol.Contains("Ayakkabilik/Raf_"))
+                    hatalar.Add($"'{kart.Kimlik}' → '{etki.hedefYol}'");
+        Assert.IsEmpty(hatalar, "Şu kartlar rastgele ayakkabıları hedef alıyor (yasak): " + string.Join(", ", hatalar));
+    }
+
     // Kartın yazdığı metin iki dilli tablodan geçmez (kart sadece bir yazı taşır).
     // Harf içeren bir metin ("GİRME" gibi) İngilizce oynayana Türkçe kalırdı. Bugün
     // kartlar yalnızca kapı numarası yazıyor; kelime yazan bir kart gerekirse önce

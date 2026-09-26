@@ -15,9 +15,9 @@ MonoBehaviour:
   kimlik: donmus_ayakkabilik
   katman: 0
   zorluk: 3
-  aciklama: Ayakkabilik duvara paralel degil, kose yapmis duruyor.
+  aciklama: 4 numaranin ayakkabiligi duvara paralel degil, kose yapmis duruyor.
   etkiler:
-  - hedefYol: Ayakkabilik
+  - hedefYol: Kapi_4/Ayakkabilik
     tur: 2
     gorunur: 1
     vektor: {x: 0, y: 34, z: 0}

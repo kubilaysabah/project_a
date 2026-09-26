@@ -42,7 +42,7 @@ public class CopPoseti : MonoBehaviour, IEtkilesimli
         }
 
         // Poşetin görsel bir kopyası ele doğru süzülür (#43); asıl poşet hemen alınır.
-        PosetUcusu.Baslat(transform);
+        UcanKopya.ElineUcur(transform);
         Al();
         toplayici.PosetSay();
 

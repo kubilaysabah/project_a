@@ -15,9 +15,9 @@ MonoBehaviour:
   kimlik: devrik_ayakkabilik
   katman: 1
   zorluk: 2
-  aciklama: Ayakkabilik yuzustu devrilmis, kapaklari yere donuk.
+  aciklama: 4 numaranin ayakkabiligi yuzustu devrilmis, raflari yere donuk.
   etkiler:
-  - hedefYol: Ayakkabilik
+  - hedefYol: Kapi_4/Ayakkabilik
     tur: 1
     gorunur: 1
     vektor: {x: 0, y: 0.2, z: 0}
@@ -25,7 +25,7 @@ MonoBehaviour:
     sayi: 1
     metin: 
     ses: {fileID: 0}
-  - hedefYol: Ayakkabilik
+  - hedefYol: Kapi_4/Ayakkabilik
     tur: 2
     gorunur: 1
     vektor: {x: 90, y: 0, z: 0}

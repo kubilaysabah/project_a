@@ -7,6 +7,7 @@
 ipucu.bicim	{0} ({1})	{0} ({1})
 ipucu.topla	TOPLA	PICK UP
 ipucu.oku	OKU	READ
+ipucu.rafa_koy	RAFA KOY	PUT AWAY
 
 # ---- Yönetici notu (açılış) ----
 not.yonetici	Kapıcı Efendi,\n\nGece çöpleri kat kat topla. Merdivenler hep aynıdır, alışırsın.\n\nBir şey yanlışsa — ne olduğunu sorma — KATA GİRME, geri dön.\n\nSabah çatının kapısını kilitlemeyi unutma.\n\n— Yönetim	Janitor,\n\nCollect the rubbish floor by floor tonight. The stairs are always the same — you'll get used to it.\n\nIf something is wrong — don't ask what — DON'T STEP ONTO THAT FLOOR. Turn back.\n\nDon't forget to lock the roof door in the morning.\n\n— The Management

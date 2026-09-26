@@ -128,6 +128,13 @@ public class KatYoneticisi : MonoBehaviour
     private CopPlani copPlani;
     private CopToplayici toplayici;
 
+    // ---- AYAKKABILAR (#44) ----
+    // Her dairenin 5 raflı ayakkabılığı ve kapı önündeki 0-2 dağınık çift. Plan, katta
+    // kaç çiftin nerede olduğunu ve hangisinin rafa konduğunu bilir (çöp planı gibi).
+    private AyakkabiPlani ayakkabiPlani;
+    private GameObject[,] aRaflar, bRaflar;              // [daire, raf] raftaki çiftler
+    private DaginikAyakkabi[,] aDaginik, bDaginik;       // [daire, sıra] kapı önündeki çiftler
+
     // ---- KAT OLAYLARI (#35) ----
     // Her katta bir iki kez çalan tek bir olay sesi (bebek, uzak kapı, üst kat adımları,
     // kalorifer, araba). Plan hangisinin ve ne zaman çalacağını bilir; çalıcı yalnızca
@@ -196,6 +203,8 @@ public class KatYoneticisi : MonoBehaviour
         aPosetler = PosetleriBul(sahanlikA);
         bPosetler = PosetleriBul(sahanlikB);
         olayCaliciA = new KatOlayCalici(sahanlikA);
+        AyakkabilariBul(sahanlikA, out aRaflar, out aDaginik);
+        AyakkabilariBul(sahanlikB, out bRaflar, out bDaginik);
         aKatSesleri = KatSesleriniBul(sahanlikA);
         bKatSesleri = KatSesleriniBul(sahanlikB);
 
@@ -301,6 +310,9 @@ public class KatYoneticisi : MonoBehaviour
         // aynı sayı dizisini üretir ve poşet sayıları anomalilerle gizlice
         // bağlantılı olurdu (örneğin "3 poşetli kat hep anomalili" gibi).
         copPlani = new CopPlani(MekanOlculeri.DaireSayisi, gercekTohum + 7919);
+
+        // Ayakkabılar da kendi tohumuyla.
+        ayakkabiPlani = new AyakkabiPlani(MekanOlculeri.DaireSayisi, gercekTohum + 15485863);
 
         // Kat olayları da kendi tohumuyla (aynı sebep: planlar birbirine gizlice bağlanmasın).
         olayPlani = new KatOlayPlani(gercekTohum + 104729);
@@ -521,6 +533,8 @@ public class KatYoneticisi : MonoBehaviour
         // uygulayıcı eski katın numarasını geri yazardı.
         DurumuKaydet(aPosetler, gosterilenA);
         DurumuKaydet(bPosetler, gosterilenB);
+        AyakkabiDurumunuKaydet(aDaginik, gosterilenA);
+        AyakkabiDurumunuKaydet(bDaginik, gosterilenB);
 
         uygulayiciA.GeriAl();
         uygulayiciB.GeriAl();
@@ -532,6 +546,8 @@ public class KatYoneticisi : MonoBehaviour
 
         PosetleriYerlestir(aPosetler, aKat);
         if (!cati) PosetleriYerlestir(bPosetler, bKat);
+        AyakkabilariYerlestir(aRaflar, aDaginik, aKat);
+        if (!cati) AyakkabilariYerlestir(bRaflar, bDaginik, bKat);
 
         NumaralariYaz(aNumaralar, aKat);
         NumaralariYaz(bNumaralar, bKat);
@@ -678,6 +694,53 @@ public class KatYoneticisi : MonoBehaviour
     // Sahanlık başka bir katı göstermeye geçmeden önce, oyuncunun o katta
     // topladığı poşetleri plana yazar. Yoksa oyuncu aynı kata döndüğünde
     // topladığı poşetler yerine gelirdi.
+    // ---------- AYAKKABILAR (#44) ----------
+    private void AyakkabilariBul(Transform sahanlik, out GameObject[,] raflar, out DaginikAyakkabi[,] daginik)
+    {
+        raflar = new GameObject[MekanOlculeri.DaireSayisi, AyakkabiPlani.RafSayisi];
+        daginik = new DaginikAyakkabi[MekanOlculeri.DaireSayisi, AyakkabiPlani.DisaridaEnCok];
+        if (sahanlik == null) return;
+        for (int d = 0; d < MekanOlculeri.DaireSayisi; d++)
+        {
+            for (int r = 0; r < AyakkabiPlani.RafSayisi; r++)
+            {
+                Transform t = sahanlik.Find($"Kapi_{d + 1}/Ayakkabilik/Raf_{r + 1}/Cift");
+                if (t != null) raflar[d, r] = t.gameObject;
+            }
+            for (int j = 0; j < AyakkabiPlani.DisaridaEnCok; j++)
+            {
+                Transform t = sahanlik.Find($"Kapi_{d + 1}/Ayakkabilar/Cift_{j + 1}");
+                if (t != null) daginik[d, j] = t.GetComponent<DaginikAyakkabi>();
+            }
+        }
+    }
+
+    // Katın ayakkabılarını plana göre dizer: rafta "dolu raf" kadar çift (başlangıçtakiler +
+    // bu turda rafa konanlar), kapı önünde henüz rafa konmamış dağınık çiftler.
+    private void AyakkabilariYerlestir(GameObject[,] raflar, DaginikAyakkabi[,] daginik, int kat)
+    {
+        if (ayakkabiPlani == null || kat < KatSayaci.BaslangicKati) return;
+        int[] disarida = ayakkabiPlani.Disaridakiler(kat);
+        for (int d = 0; d < MekanOlculeri.DaireSayisi; d++)
+        {
+            int dolu = ayakkabiPlani.DoluRaf(kat, d);
+            for (int r = 0; r < AyakkabiPlani.RafSayisi; r++)
+                if (raflar[d, r] != null) raflar[d, r].SetActive(r < dolu);
+            for (int j = 0; j < AyakkabiPlani.DisaridaEnCok; j++)
+                if (daginik[d, j] != null) daginik[d, j].Ayarla(j < disarida[d], ayakkabiPlani.RafaKonduMu(kat, d, j));
+        }
+    }
+
+    // Sahanlık başka bir kata geçmeden önce: bu katta rafa konan çiftler plana işlenir,
+    // yoksa oyuncu kata geri döndüğünde çiftler yine kapı önünde dururdu.
+    private void AyakkabiDurumunuKaydet(DaginikAyakkabi[,] daginik, int kat)
+    {
+        if (ayakkabiPlani == null || kat < KatSayaci.BaslangicKati) return;
+        for (int d = 0; d < MekanOlculeri.DaireSayisi; d++)
+            for (int j = 0; j < AyakkabiPlani.DisaridaEnCok; j++)
+                if (daginik[d, j] != null && daginik[d, j].RafaKondu) ayakkabiPlani.RafaKonduOlarakIsaretle(kat, d, j);
+    }
+
     private void DurumuKaydet(CopPoseti[,] posetler, int kat)
     {
         if (kat < KatSayaci.BaslangicKati || copPlani == null) return;
@@ -837,6 +900,7 @@ public class KatYoneticisi : MonoBehaviour
         // oyuncu bir önceki denemeyi ezberleyerek ilerleyemez.
         secici.Sifirla();
         copPlani.Sifirla();
+        ayakkabiPlani.Sifirla();
         olayPlani.Sifirla();
         if (toplayici != null) toplayici.Sifirla();
 

@@ -15,19 +15,19 @@ MonoBehaviour:
   kimlik: yer_degistiren_ayakkabilik
   katman: 0
   zorluk: 3
-  aciklama: Ayakkabilik sag duvardaki yerinde degil; on duvarda, ilan panosunun yaninda.
+  aciklama: 4 numaranin ayakkabiligi duvarda degil; sahanligin ortasina dogru cikmis, yan donmus.
   etkiler:
-  - hedefYol: Ayakkabilik
+  - hedefYol: Kapi_4/Ayakkabilik
     tur: 1
     gorunur: 1
-    vektor: {x: -0.8, y: 0, z: -4.25}
+    vektor: {x: -1.3, y: 0, z: 0}
     renk: {r: 1, g: 1, b: 1, a: 1}
     sayi: 1
     metin: 
     ses: {fileID: 0}
     dongu: 0
     gecikme: 0
-  - hedefYol: Ayakkabilik
+  - hedefYol: Kapi_4/Ayakkabilik
     tur: 2
     gorunur: 1
     vektor: {x: 0, y: 90, z: 0}

@@ -274,13 +274,9 @@ public static class GrayboxKurucu
             // Modellerin ön yüzü +Z'ye bakar (FBX aktarımının sonucu, bkz. ortak.py);
             // y ekseni etrafındaki dönüş ön yüzü doğru yöne çevirir.
 
-            // Ayakkabılık: 4 numaranın yanında, sağ duvara dayalı, merdiven tarafında.
-            // -90° dönüş ön yüzü -x'e, yani sahanlığın ortasına çevirir.
-            if (Model("Ayakkabilik", t, "Ayakkabilik", null,
-                      new Vector3(SahanlikGen / 2f - 0.2f, 0f, -0.55f), -90f, carpisma: true) == null)
-                Kutu("Ayakkabilik", t,
-                     new Vector3(SahanlikGen / 2f - 0.18f, 0.3f, -0.55f),
-                     new Vector3(0.35f, 0.6f, 0.8f));
+            // Ayakkabılık: eskiden burada bütün dairelerin ortak kullandığı tek bir ayakkabılık
+            // vardı. #44'ten beri her dairenin kendi 5 raflı ayakkabılığı var (KapiKur ->
+            // AyakkabilikKur); onu hedefleyen kartlar Kapi_4/Ayakkabilik'e taşındı.
 
             // Elektrik sayacı: arka duvarın sol parçasında. Pivotu arka yüzünde; 180°
             // dönüşle ön yüzü sahanlığa (-z) bakar. Menteşeli kapağı "Kapak" adlı çocuğu;
@@ -606,8 +602,77 @@ public static class GrayboxKurucu
         // Kapının arkasındaki karanlık hol.
         DaireIciKur(k, yon);
 
+        // #44: iki kapının arası (1,1 m) hem poşetlere hem bir rafa yetmiyor. Yakın kapıların
+        // (1 ve 4) poşetleri arka duvar tarafına, rafları iki kapının arasına; uzak kapıların
+        // (2 ve 3) poşetleri ön duvar tarafında kalır, rafları yine iki kapının arasında.
+        // Böylece iki kapının arasında iki raf yan yana durur.
+        bool yakinKapi = Mathf.Approximately(zMerkez, YakinKapiZ);
+        float arayaDogru = yakinKapi ? -1f : 1f;     // iki kapının arası: yakın kapı için -z, uzak için +z
+
         // Çöpler: kapının yanında en fazla üç poşet, büyükten küçüğe.
-        CoplerKur(k, duvarYuzu, yon);
+        CoplerKur(k, duvarYuzu, yon, -arayaDogru);
+
+        // Kendi ayakkabılığı ve kapı önündeki dağınık çiftler.
+        AyakkabilikKur(k, duvarYuzu, yon, arayaDogru);
+    }
+
+    // ---------- DAİRENİN AYAKKABILIĞI (#44) ----------
+    // 5 raflı dar ayakkabılık (ayakkabilik.py) ve her rafta bir çift için yer. Raftaki
+    // çiftlerin kaçının görüneceğine KatYoneticisi, AyakkabiPlani'na sorarak karar verir.
+    // Kapı önünde 0-2 dağınık çift (DaginikAyakkabi): oyuncu E ile rafa koyabilir.
+    //
+    // Raf ve dağınık çiftler rastgele olduğu için hiçbir anomali kartı onları hedefleyemez
+    // (poşetlerle aynı kural, bütünlük testi denetliyor). Kartlar yalnızca rafın kendisini
+    // (Kapi_N/Ayakkabilik) hedefleyebilir; çiftler rafın çocuğu olduğu için onunla birlikte hareket eder.
+    public static readonly float[] RafYukseklikleri = { 0.05f, 0.24f, 0.43f, 0.62f, 0.81f };   // ayakkabilik.py ile aynı
+    const float RafEn = 0.34f, RafDerin = 0.33f;
+
+    static void AyakkabilikKur(Transform kapi, float duvarYuzu, float yon, float arayaDogru)
+    {
+        float z = arayaDogru * (KapiGen / 2f + 0.04f + RafEn / 2f);
+        GameObject raf = Model("Ayakkabilik", kapi, "Ayakkabilik", null,
+                               new Vector3(duvarYuzu - yon * (RafDerin / 2f + 0.01f), 0f, z), -90f * yon, carpisma: true);
+        if (raf == null) return;
+
+        // Beş raf yuvası. Rafın yerel ekseninde: ön yüz +Z, ayakkabının burnu -Z'ye (rafın
+        // içine) bakar; model zaten burnu -Z'ye bakacak biçimde geliyor, dönüş gerekmiyor.
+        for (int s = 0; s < RafYukseklikleri.Length; s++)
+        {
+            GameObject yuva = new GameObject($"Raf_{s + 1}");
+            yuva.transform.SetParent(raf.transform, false);
+            yuva.transform.localPosition = new Vector3(0f, RafYukseklikleri[s], -0.015f);
+            CiftKur("Cift", yuva.transform, Vector3.zero, 0f);
+        }
+
+        // Kapı önündeki dağınık çiftler: paspasın önünde, sahanlığın ortasına doğru, gelişigüzel.
+        GameObject kok = new GameObject("Ayakkabilar");
+        kok.transform.SetParent(kapi, false);
+        int kapiNo = kapi.name[kapi.name.Length - 1] - '0';
+        float[] zler = { -0.20f, 0.22f };
+        float[] donusler = { 20f + kapiNo * 31f, -35f + kapiNo * 17f };
+        for (int j = 0; j < zler.Length; j++)
+        {
+            GameObject cift = CiftKur($"Cift_{j + 1}", kok.transform,
+                                      new Vector3(duvarYuzu - yon * 0.80f, 0f, zler[j]), donusler[j]);
+            if (cift == null) continue;
+            BoxCollider c = cift.AddComponent<BoxCollider>();   // nişan ışını çarpsın diye
+            c.center = new Vector3(0f, 0.06f, 0f);
+            c.size = new Vector3(0.26f, 0.12f, 0.30f);
+            cift.AddComponent<DaginikAyakkabi>();
+        }
+    }
+
+    // Bir çift ayakkabı: iki ayakkabı modeli yan yana, sağdaki soldakinin aynası.
+    static GameObject CiftKur(string ad, Transform ebeveyn, Vector3 konum, float yDonus)
+    {
+        GameObject cift = new GameObject(ad);
+        cift.transform.SetParent(ebeveyn, false);
+        cift.transform.localPosition = konum;
+        cift.transform.localRotation = Quaternion.Euler(0f, yDonus, 0f);
+        GameObject sol = Model("Sol", cift.transform, "Ayakkabi", null, new Vector3(-0.055f, 0f, 0f), 0f, false);
+        GameObject sag = Model("Sag", cift.transform, "Ayakkabi", null, new Vector3(0.055f, 0f, 0f), 0f, false);
+        if (sag != null) sag.transform.localScale = new Vector3(-1f, 1f, 1f);
+        return sol != null ? cift : null;
     }
 
     // Hangi dairenin kapısında hangi terlik (#42). Oyuncu bir süre sonra bunu öğrenir:
@@ -633,7 +698,8 @@ public static class GrayboxKurucu
     // DİKKAT: poşet sayısı rastgele olduğu için hiçbir anomali kartı poşetleri
     // hedef alamaz. "Eksik poşet" anomalisi artık anlamsız: oyuncu kaç poşet
     // olması gerektiğini bilmiyor. Bütünlük testi bu kuralı denetliyor.
-    static void CoplerKur(Transform kapi, float duvarYuzu, float yon)
+    // yonZ: poşetlerin kapının hangi yanına dizileceği (-1 ön duvara doğru, +1 arka duvara doğru).
+    static void CoplerKur(Transform kapi, float duvarYuzu, float yon, float yonZ)
     {
         GameObject kok = new GameObject("Copler");
         kok.transform.SetParent(kapi, false);
@@ -647,7 +713,7 @@ public static class GrayboxKurucu
         };
 
         const float Aralik = 0.04f;
-        float z = -(KapiGen / 2f + 0.10f);   // kapı kenarının biraz ötesinden başla, ön duvara doğru diz
+        float z = yonZ * (KapiGen / 2f + 0.10f);   // kapı kenarının biraz ötesinden başla, dışa doğru diz
 
         // #42: kutular yerine gerçek poşet modelleri (Cop_Poseti.fbx: Poset_A, B, C).
         // Hangi şeklin hangi yere geleceği ve ne kadar dönük duracağı kapıya ve sıraya
@@ -660,7 +726,7 @@ public static class GrayboxKurucu
         for (int i = 0; i < olculer.Length; i++)
         {
             Vector3 o = olculer[i];
-            z -= o.z / 2f;                   // bu poşetin merkezi
+            z += yonZ * o.z / 2f;            // bu poşetin merkezi
 
             // Model 1 m yüksekliğinde üretildi; ölçek = poşetin boyu.
             // Duvardan uzaklık: en geniş poşet şekli boyunun ~1,1 katı; dönük dursa da duvara girmesin.
@@ -675,7 +741,7 @@ public static class GrayboxKurucu
             // bir poşet" olduğunu anlıyor. İsme değil bileşene bakıyoruz.
             poset.AddComponent<CopPoseti>();
 
-            z -= o.z / 2f + Aralik;          // bir sonrakinin başlangıcı
+            z += yonZ * (o.z / 2f + Aralik); // bir sonrakinin başlangıcı
         }
     }
 
@@ -1453,8 +1519,10 @@ public static class GrayboxKurucu
         float sol = -(SahanlikGen / 2f), sag = SahanlikGen / 2f;
 
         // Saksı: 1 numaranın merdiven tarafında, duvara yakın. Normalde VAR (F30 onu gizler).
+        // #44: saksı eskiden 1 numaranın arka tarafındaydı; orası artık poşetlerin yeri.
+        // İki kapının arasındaki iki ayakkabılığın ortasında (1 numaraya göre z = -1,0).
         Model("Saksi", sahanlik.Find("Kapi_1"), "Saksi", null,
-              new Vector3(sol + 0.18f, 0f, KapiGen / 2f + 0.35f), 0f, true);
+              new Vector3(sol + 0.18f, 0f, -1.0f), 0f, true);
 
         // Tüp: 2 numaranın önünde, kapıdan 75 cm uzakta. Normalde YOK (F29).
         GameObject tup = Model("Tup", sahanlik.Find("Kapi_2"), "Tup", null,
