@@ -306,10 +306,10 @@ public static class GrayboxKurucu
 
         // Sahanlık ampulü. Sahte katlarda da var: merdiven gözünden bakınca
         // alt katların karanlık bir delik gibi değil, ışıklı katlar gibi görünmesi için.
-        // #51 (Şahan'ın build testi): kat ampulleri SÖNÜK; ışığı kafa lambası taşır. Yalnızca
-        // zemin katın (kapıcı odasının önü, güvenli başlangıç) ampulü yanar. Sönük ampul yine
-        // yerinde durur: "ampul değiştir" görevi (#57) ve ışık kartları onu yakabilir.
-        AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.30f, onZ / 2f), 8f, LambaSiddeti, yanik: ad == "Zemin_Kat");
+        // #51 (Şahan'ın build testi): kat ampulleri SÖNÜK, zemin kat dahil; ışığı kafa lambası
+        // taşır. Sönük ampul yine yerinde durur: "ampul değiştir" görevi (#57) ve ışık kartları
+        // onu yakabilir.
+        AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.30f, onZ / 2f), 8f, LambaSiddeti, yanik: false);
 
         // Normal katın ses dokusu (#14). Sahte katlarda da var: komşu katların sesi
         // hafifçe duyulur ve ışınlanmada ses ortamı değişmez.
@@ -1149,7 +1149,7 @@ public static class GrayboxKurucu
         Light isik = lamba.AddComponent<Light>();
         isik.type = LightType.Point;
         isik.range = 4.5f;
-        isik.intensity = 2.2f;
+        isik.intensity = 0f;      // #51: kapıcı odası da karanlık (Şahan); ışık nesnesi duruyor, ileride yakılabilir
         isik.color = new Color(1f, 0.78f, 0.5f);
         isik.shadows = LightShadows.None;
 

@@ -25,9 +25,12 @@ public class KafaLambasi : MonoBehaviour
 {
     // Işığın ayarları. Kurucu (OyuncuKurucu) ışığı bu değerlerle kurar; buradaki kopya
     // Inspector'dan ince ayar içindir.
-    public const float Siddet = 6f;          // spot şiddeti (sahanlık ampulü 2,5; lamba daha güçlü, daha dar)
+    // Şahan'ın build testi (2026-09-26): "çok güçlü ama küçük bir alanı aydınlatıyor" →
+    // şiddet 6'dan 3,5'e, dış koni 44°'den 64°'ye; iç koni 26°'de kaldı ki kenar geniş bir
+    // geçişle yumuşasın.
+    public const float Siddet = 3.5f;
     public const float Menzil = 10f;
-    public const float DisAci = 44f, IcAci = 26f;   // dış koni ve tam şiddet konisi (yumuşak kenar)
+    public const float DisAci = 64f, IcAci = 26f;   // dış koni ve tam şiddet konisi (yumuşak kenar)
     public static readonly Color Renk = new Color(1f, 0.90f, 0.72f);   // sıcak beyaz, ampullerden biraz beyaz
 
     private Light isik;
