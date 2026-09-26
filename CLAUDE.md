@@ -162,7 +162,7 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
-- 2026-09-26 (Lesson 37): **#36 #37 #38 #39 #40 CLOSED** after Şahan's build test ("test ettim sorun yok"): tension music, exterior sounds, darker night with flickering lamps (4 cards relabelled harder), per-floor TV moment, music swell after scripted anomalies. 144/144 tests. Commits `94f402f` `30d0e6e` `936bef4` `acffdce` `633896b`.
+- 2026-09-26 (Lesson 37): **#36 #37 #38 #39 #40 CLOSED** after Şahan's build test ("test ettim sorun yok"): tension music, exterior sounds, darker night with flickering lamps (4 cards relabelled harder), per-floor TV moment, music swell after scripted anomalies. 144/144 tests. Commits `94f402f` `30d0e6e` `936bef4` `acffdce` `633896b`. **#31 and #33 CLOSED** too (Şahan approved the final look; the four easy-but-hidden cards were relabelled, the remaining invisible ones are deliberate FISILTI cards at difficulty ≥3).
 
 - 2026-09-26 (Lesson 36): **#35 built** (`20ef399`): one incidental sound per floor instead of constant layers, after Şahan's build test ("some sounds being constant is disturbing"). 129/129 tests, event verified firing in play mode, builds rebuilt. **#35, #14, #25, #26 CLOSED** after Şahan listened in the release build ("sorun yok"). His first try ran a stale 24-Sep build left in the root of `Builds/Windows/` (from before `BuildAlici`); it was deleted — test builds live only in `Builds/Windows/Yayin|Gelistirme/`.
 
