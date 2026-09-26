@@ -184,6 +184,9 @@ public static class GrayboxKurucu
                   $"{DaireSayisi} daire; merdiven {KolBasamakSayisi}+{KolBasamakSayisi} basamak x " +
                   $"{BasamakYuksek:0.0000} m, göz {KuyuGen:0.00} m; dikey ofset {DikeyOfset:0.00} m");
 
+        // Düz beyaz kutuları gerçek dokularla kapla (#41). En sonda: bütün kutular kurulmuş olmalı.
+        DokuKurucu.Dokula();
+
         SahneyiKaydet("Graybox");
     }
 
