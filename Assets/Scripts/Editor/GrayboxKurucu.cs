@@ -851,9 +851,10 @@ public static class GrayboxKurucu
         OrtamKaynagi("Ses_Ruzgar", t, new Vector3(0f, AraKot + 1.45f, CekirdekDerin + 0.3f),
                      "Ortam_Ruzgar", 0.30f, 1f, 6f);
 
-        // Merdiven ampulü: ara sahanlığın üstünde.
+        // Merdiven ampulü: ara sahanlığın üstünde. #51: neredeyse sönük (0,25); merdiven
+        // karanlık, oyuncu kafa lambasıyla çıkar.
         AmpulKur("Ampul_Merdiven", t,
-                 new Vector3(0f, AraKot + 2.35f, KolUzunluk + AraSahanlikDerin / 2f), 7f, LambaSiddeti * 0.8f);
+                 new Vector3(0f, AraKot + 2.35f, KolUzunluk + AraSahanlikDerin / 2f), 7f, LambaSiddeti * 0.25f);
 
         return kok;
     }
@@ -1631,7 +1632,9 @@ public static class GrayboxKurucu
     // kartlarındaki mutlak şiddetler de aynı oranla (0,7) güncellendi. 5,5 denendi:
     // görünürlük denetiminde görünmez kart 6'dan 10'a çıktı (yerdeki terlikler, yan
     // kapılar karanlıkta kayboldu); karanlığın geri kalanı ortam ışığı ve vinyetten geliyor.
-    public const float LambaSiddeti = 7f;         // spotun şiddeti
+    // #51 (2026-09-26): bina karanlık, ışığı kafa lambası taşıyor; sahanlık ampulü 7'den 2,5'e
+    // indi (sönük, titrek bir ampul), ışık kartları yine aynı oranla (0,357) ölçeklendi.
+    public const float LambaSiddeti = 2.5f;       // spotun şiddeti
     public const float DolguOrani   = 0.30f;      // dolgu ışığı = spotun bu kadarı
 
     static readonly Color AkkorRengi = new Color(1f, 0.82f, 0.58f);   // 2700 K civarı sıcak sarı

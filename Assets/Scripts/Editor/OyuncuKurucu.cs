@@ -82,6 +82,27 @@ public static class OyuncuKurucu
         kamera.fieldOfView = 60f;
         kamera.nearClipPlane = 0.05f;   // buruna çok yakın nesneler kesilmesin
 
+        // ---- KAFA LAMBASI (#51) ----
+        // Kameranın çocuğu bir spot: kamera nereye bakarsa huzme oraya. Bina artık karanlık,
+        // ışığı bu lamba taşır. Ayarları KafaLambasi'nde sabit; bileşen açma-kapama, titreme
+        // ve gölge kalitesini yönetir. Yeniden kurulumda eskisi silinir, çoğalmasın.
+        Transform eskiLamba = kamera.transform.Find("Kafa_Lambasi");
+        if (eskiLamba != null) Object.DestroyImmediate(eskiLamba.gameObject);
+        GameObject lambaNesne = new GameObject("Kafa_Lambasi");
+        lambaNesne.transform.SetParent(kamera.transform, false);
+        lambaNesne.transform.localPosition = new Vector3(0f, 0.08f, 0.05f);   // alnın biraz üstü, biraz önü
+        Light lamba = lambaNesne.AddComponent<Light>();
+        lamba.type = LightType.Spot;
+        lamba.spotAngle = KafaLambasi.DisAci;
+        lamba.innerSpotAngle = KafaLambasi.IcAci;
+        lamba.range = KafaLambasi.Menzil;
+        lamba.intensity = KafaLambasi.Siddet;
+        lamba.color = KafaLambasi.Renk;
+        lamba.shadows = LightShadows.Soft;
+        lamba.shadowStrength = 0.9f;
+        lamba.shadowNearPlane = 0.1f;     // oyuncunun kendi gövdesi gölge atmasın
+        if (kamera.GetComponent<KafaLambasi>() == null) kamera.gameObject.AddComponent<KafaLambasi>();
+
         // ---- KONTROLCÜ ----
         BirinciSahisKontrolcu kontrolcu = oyuncu.AddComponent<BirinciSahisKontrolcu>();
 

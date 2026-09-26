@@ -22,7 +22,7 @@ MonoBehaviour:
     gorunur: 1
     vektor: {x: 0, y: 0, z: 0}
     renk: {r: 1, g: 0.82, b: 0.58, a: 1}
-    sayi: 1.61
+    sayi: 0.575
     metin: 
     ses: {fileID: 0}
   - hedefYol: Ampul/Dolgu
@@ -30,7 +30,7 @@ MonoBehaviour:
     gorunur: 1
     vektor: {x: 0, y: 0, z: 0}
     renk: {r: 1, g: 0.82, b: 0.58, a: 1}
-    sayi: 0.49
+    sayi: 0.175
     metin: 
     ses: {fileID: 0}
   - hedefYol: Ampul/Cam

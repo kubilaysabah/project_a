@@ -47,7 +47,8 @@ public static class AtmosferKurucu
         // Tamamen siyah yapmıyoruz; oyuncu karanlık köşede duvarın varlığını
         // hâlâ seçebilmeli, yoksa ekran düz siyah bir leke olur.
         // #38: daha karanlık bir gece için üçte bir kısıldı (0,018 / 0,020 / 0,028 idi).
-        RenderSettings.ambientLight = new Color(0.012f, 0.013f, 0.019f);
+        // #51: bina karanlık, ışık kafa lambasında; ortam yarıya indi (0,012 / 0,013 / 0,019 idi).
+        RenderSettings.ambientLight = new Color(0.006f, 0.0065f, 0.010f);
 
         // Yansımalar da gökyüzünden geliyor: parlak gündüz göğü asansörün çeliğinde
         // ve pirinç isimlikte yansıyıp gece hissini bozuyordu. Neredeyse kapatıyoruz.
@@ -69,7 +70,7 @@ public static class AtmosferKurucu
 
         ay.name = "Ay_Isigi";
         ay.color = new Color(0.55f, 0.65f, 1.0f);
-        ay.intensity = 0.045f;   // #38: 0,06 idi
+        ay.intensity = 0.03f;    // #38: 0,06 idi; #51: 0,045 idi
         ay.shadows = LightShadows.Soft;
 
         // Işığın yönü: +z'den (pencerenin dışından) içeri ve aşağı doğru.

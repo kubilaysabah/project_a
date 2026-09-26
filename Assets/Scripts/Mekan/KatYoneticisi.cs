@@ -176,6 +176,8 @@ public class KatYoneticisi : MonoBehaviour
         var anaIsiklar = new System.Collections.Generic.List<Light>();
         foreach (var l in FindObjectsByType<Light>())
         {
+            // Kafa lambası (#51) oyuncunun; ceza onu söndürmez, kartlar hedeflemez.
+            if (l.GetComponentInParent<KafaLambasi>() != null) continue;
             if (l.type == LightType.Point || l.type == LightType.Spot) liste.Add(l);
             if (l.type == LightType.Spot) anaIsiklar.Add(l);
         }

@@ -260,6 +260,16 @@ public class DuraklatmaMenusu : MonoBehaviour
         veri.renderPostProcessing = true;
         veri.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing;
         nesne.AddComponent<AudioListener>();
+        // #51: bina karanlık; başlık ekranında merdiven boşluğu okunsun diye kameraya küçük,
+        // sıcak bir ışık (yerde duran bir el feneri gibi). Kamerayla birlikte silinir.
+        GameObject baslikIsigi = new GameObject("Baslik_Isigi");
+        baslikIsigi.transform.SetParent(nesne.transform, false);
+        Light bi = baslikIsigi.AddComponent<Light>();
+        bi.type = LightType.Point;
+        bi.range = 7f;
+        bi.intensity = 1.2f;
+        bi.color = new Color(1f, 0.88f, 0.70f);
+        bi.shadows = LightShadows.None;
         BaslikKamerasiniDondur();
 
         Cursor.lockState = CursorLockMode.None;
