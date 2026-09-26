@@ -459,7 +459,16 @@ public class KatYoneticisi : MonoBehaviour
         bool gorevEksik = !sayac.AnomaliVar && ToplanmamisGorevVar(sayac.MevcutKat);
 
         int eskiKat = sayac.MevcutKat;
+        // Anomali defteri (#45) için: karardan ÖNCE bu katın anomalisini hatırla; KararVer
+        // mevcut katı ilerletiyor.
+        bool anomaliliKat = sayac.AnomaliVar;
+        IAnomaliKart katinKarti = KartSec(eskiKat);
         KararSonucu sonuc = sayac.KararVer(karar, gorevEksik);
+
+        // Anomalili katta doğru biçimde geri döndü: anomaliyi fark ettiğini kanıtladı,
+        // deftere işlenir (Şahan'ın kuralı). Test kartıyla oynarken işlenmez.
+        if (sonuc == KararSonucu.Ilerle && karar == Karar.Geri && anomaliliKat && katinKarti != null && testKarti == null)
+            Defter.Isle(katinKarti.Kimlik);
 
         switch (sonuc)
         {

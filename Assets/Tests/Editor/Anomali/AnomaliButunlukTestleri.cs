@@ -215,6 +215,28 @@ public class AnomaliButunlukTestleri
         Assert.IsEmpty(hatalar, "Şu kartlar rastgele ayakkabıları hedef alıyor (yasak): " + string.Join(", ", hatalar));
     }
 
+    // Anomali defteri (#45): her kartın defterde bir adı olmalı (anomali.<kimlik>), tablodaki
+    // her anomali.* anahtarı da gerçek bir karta ait olmalı. Yeni kart eklenip adı unutulursa
+    // defterde anahtarın kendisi görünürdü; kart silinip adı kalırsa tablo çöplenirdi.
+    [Test]
+    public void Her_kartin_defterde_adi_var()
+    {
+        string yol = System.IO.Path.Combine(Application.dataPath, "Resources", "Metinler.txt");
+        MetinTablosu tablo = MetinTablosu.Oku(System.IO.File.ReadAllText(yol));
+        var kimlikler = new HashSet<string>();
+        var eksik = new List<string>();
+        foreach (AnomaliKarti kart in TumKartlar())
+        {
+            kimlikler.Add(kart.Kimlik);
+            if (!tablo.Var("anomali." + kart.Kimlik)) eksik.Add(kart.Kimlik);
+        }
+        var sahipsiz = new List<string>();
+        foreach (string a in tablo.Anahtarlar)
+            if (a.StartsWith("anomali.") && !kimlikler.Contains(a.Substring(8))) sahipsiz.Add(a);
+        Assert.IsEmpty(eksik, "Defterde adı olmayan kartlar: " + string.Join(", ", eksik));
+        Assert.IsEmpty(sahipsiz, "Hiçbir karta ait olmayan defter adları: " + string.Join(", ", sahipsiz));
+    }
+
     // Kartın yazdığı metin iki dilli tablodan geçmez (kart sadece bir yazı taşır).
     // Harf içeren bir metin ("GİRME" gibi) İngilizce oynayana Türkçe kalırdı. Bugün
     // kartlar yalnızca kapı numarası yazıyor; kelime yazan bir kart gerekirse önce

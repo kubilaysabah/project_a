@@ -23,7 +23,7 @@ using UnityEngine;
 [TestFixture]
 public class MetinButunlukTestleri
 {
-    private static readonly string[] Onekler = { "ipucu", "not", "menu", "dil", "bina", "ayar", "tus" };
+    private static readonly string[] Onekler = { "ipucu", "not", "menu", "dil", "bina", "ayar", "tus", "defter" };
 
     // Tablo dosyasını okuyup kurar. Testlerin hepsi buradan başlar.
     private static MetinTablosu TabloyuOku()
@@ -81,7 +81,9 @@ public class MetinButunlukTestleri
     {
         MetinTablosu tablo = TabloyuOku();
         HashSet<string> kodda = KoddakiAnahtarlar();
-        List<string> olu = tablo.Anahtarlar.Where(a => !kodda.Contains(a)).ToList();
+        // "anomali.<kimlik>" anahtarları kodda tek tek yazılmaz, kart kimliğinden kurulur
+        // (defterdeki adlar, #45). Onları AnomaliButunlukTestleri kart kimlikleriyle eşleştirir.
+        List<string> olu = tablo.Anahtarlar.Where(a => !a.StartsWith("anomali.") && !kodda.Contains(a)).ToList();
 
         Assert.IsEmpty(olu, "Tabloda olup hiçbir kodda kullanılmayan anahtarlar: " + string.Join(", ", olu));
     }

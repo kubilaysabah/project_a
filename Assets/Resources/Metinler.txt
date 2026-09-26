@@ -65,3 +65,77 @@ tus.etkilesim_klavye	E	E
 tus.etkilesim_kol	A	A
 tus.kapat_klavye	E / Esc	E / Esc
 tus.kapat_kol	A / B	A / B
+# Anomali defteri (#45): arayüz ve her anomalinin defterdeki adı. anomali.<kimlik> anahtarları
+# kart kimlikleriyle eşleşmeli (AnomaliButunlukTestleri denetliyor).
+menu.defter	Defter	Journal
+defter.baslik	DEFTER  {0} / {1}	JOURNAL  {0} / {1}
+defter.fisilti	FISILTI	WHISPER
+defter.tekinsiz	TEKİNSİZ	UNCANNY
+defter.kabus	KÂBUS	NIGHTMARE
+defter.bilinmiyor	???	???
+anomali.acik_kapi	Ardına kadar açık kapı	Wide-open door
+anomali.acik_sayac	Açık sayaç	Open meter box
+anomali.acilan_asansor	Açılan asansör	The elevator opens
+anomali.acilan_sayac	Kendi açılan sayaç	Meter box opening itself
+anomali.aralik_asansor	Aralık asansör	Elevator ajar
+anomali.aralik_kapi	Aralık kapı	Door ajar
+anomali.aralik_kapilar	Aralık kapılar	All doors ajar
+anomali.asansorde_aglama	Asansörde ağlama	Crying in the elevator
+anomali.ayni_numara	On üç, on üç, on üç	Thirteen, thirteen, thirteen
+anomali.besinci_kapi	Beşinci kapı	The fifth door
+anomali.bos_plaka	Numarasız plaka	Blank door plate
+anomali.buyuk_paspas	Büyümüş paspas	Oversized doormat
+anomali.calan_zil	Kendi çalan zil	The bell rings itself
+anomali.calisan_gosterge	Çalışan gösterge	Working elevator display
+anomali.carpan_kapi	Çarpan kapı	Slamming door
+anomali.cekilen_gazete	Çekilen gazete	The newspaper pulled inside
+anomali.degisen_numara	Değişen numara	Changing number
+anomali.devrik_ayakkabilik	Devrilmiş ayakkabılık	Toppled shoe rack
+anomali.devrik_saksi	Devrik saksı	Toppled flowerpot
+anomali.dik_paspas	Dikilmiş paspas	Upright doormat
+anomali.dokuzuncu_kat	Dokuzuncu kat	The ninth floor
+anomali.donmus_ayakkabilik	Dönmüş ayakkabılık	Twisted shoe rack
+anomali.donuk_terlik	Dönük terlik	Turned slipper
+anomali.dusmus_ilan	Düşmüş pano	Fallen notice board
+anomali.duzenli_boru	Düzenli damla	Steady drip
+anomali.eksik_dugme	Kayıp düğme	Missing call button
+anomali.eksik_ilan	Kayıp ilan	Missing notice
+anomali.eksik_kapi_gozu	Kör kapı	Door without a peephole
+anomali.eksik_kol	Kolsuz kapı	Door without a handle
+anomali.eksik_not	Kayıp not	Missing note
+anomali.eksik_paspas	Kayıp paspas	Missing doormat
+anomali.eksik_plaka	Kayıp plaka	Missing door plate
+anomali.eksik_saksi	Kayıp sardunya	Missing geranium
+anomali.eksik_sayac	Kayıp sayaç	Missing meter
+anomali.geri_sayim	Geri sayım	Countdown
+anomali.goz_kirpan_isik	Göz kırpan ışık	The blinking light
+anomali.iceri_yuruyen_terlikler	İçeri yürüyen terlikler	Slippers walking in
+anomali.kapi_onunde_tup	Kapı önünde tüp	Gas bottle at the door
+anomali.kapi_tiklatiliyor	İçeriden tıklatma	Knocking from inside
+anomali.karanlik_kat	Karanlık kat	The dark floor
+anomali.kaymis_ampul	Kaymış ampul	Shifted bulb
+anomali.kaymis_paspas	Kaymış paspas	Shifted doormat
+anomali.kaymis_zil	Alçak zil	Low doorbell
+anomali.kirmizi_ampul	Kırmızı ampul	Red bulb
+anomali.kisa_kanat	Kısa kapı	Short door
+anomali.on_uc_numara	On üç numara	Flat thirteen
+anomali.paspasta_gazete	Paspasta gazete	Newspaper on the mat
+anomali.sessizlik	Sessizlik	Silence
+anomali.sonuk_ampul	Sönük ampul	Dim bulb
+anomali.susan_tv	Susan televizyon	Silent television
+anomali.tavandaki_terlik	Tavandaki terlik	Slipper on the ceiling
+anomali.tek_ayakkabi	Sahipsiz ayakkabı	Nobody's shoe
+anomali.tek_terlik	Tek terlik	Single slipper
+anomali.ters_aglama	Tersten ağlama	Crying in reverse
+anomali.ters_not	Ters not	Upside-down note
+anomali.ters_numara	Ters numara	Upside-down number
+anomali.ters_terlikler	Ters terlikler	Reversed slippers
+anomali.titreyen_ampul	Titreyen ampul	Flickering bulb
+anomali.yamuk_ilan	Yamuk pano	Crooked notice board
+anomali.yan_sayac	Yan yatmış sayaç	Sideways meter
+anomali.yanlis_tv	Yanlış daireden TV	TV from the wrong flat
+anomali.yer_degistiren_ayakkabilik	Yürümüş ayakkabılık	Wandering shoe rack
+anomali.yer_degistiren_zil	Yer değiştiren zil	Moved doorbell
+anomali.yesil_ampul	Yeşil ampul	Green bulb
+anomali.yuksek_kol	Yüksek kol	High door handle
+anomali.yuruyen_terlik	Yürüyen terlik	Walking slipper
