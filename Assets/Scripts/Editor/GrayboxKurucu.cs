@@ -306,7 +306,10 @@ public static class GrayboxKurucu
 
         // Sahanlık ampulü. Sahte katlarda da var: merdiven gözünden bakınca
         // alt katların karanlık bir delik gibi değil, ışıklı katlar gibi görünmesi için.
-        AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.30f, onZ / 2f), 8f, LambaSiddeti);
+        // #51 (Şahan'ın build testi): kat ampulleri SÖNÜK; ışığı kafa lambası taşır. Yalnızca
+        // zemin katın (kapıcı odasının önü, güvenli başlangıç) ampulü yanar. Sönük ampul yine
+        // yerinde durur: "ampul değiştir" görevi (#57) ve ışık kartları onu yakabilir.
+        AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.30f, onZ / 2f), 8f, LambaSiddeti, yanik: ad == "Zemin_Kat");
 
         // Normal katın ses dokusu (#14). Sahte katlarda da var: komşu katların sesi
         // hafifçe duyulur ve ışınlanmada ses ortamı değişmez.
@@ -854,7 +857,7 @@ public static class GrayboxKurucu
         // Merdiven ampulü: ara sahanlığın üstünde. #51: neredeyse sönük (0,25); merdiven
         // karanlık, oyuncu kafa lambasıyla çıkar.
         AmpulKur("Ampul_Merdiven", t,
-                 new Vector3(0f, AraKot + 2.35f, KolUzunluk + AraSahanlikDerin / 2f), 7f, LambaSiddeti * 0.25f);
+                 new Vector3(0f, AraKot + 2.35f, KolUzunluk + AraSahanlikDerin / 2f), 7f, LambaSiddeti * 0.25f, yanik: false);
 
         return kok;
     }
@@ -1639,8 +1642,11 @@ public static class GrayboxKurucu
 
     static readonly Color AkkorRengi = new Color(1f, 0.82f, 0.58f);   // 2700 K civarı sıcak sarı
 
-    static void AmpulKur(string ad, Transform ebeveyn, Vector3 konum, float menzil, float siddet)
+    // yanik = false: ampul yerinde ama sönük; ışıklar 0 şiddette AÇIK kalır (kartlar ve görevler
+    // şiddet yazarak yakabilir), camı karanlık malzemeyi kullanır.
+    static void AmpulKur(string ad, Transform ebeveyn, Vector3 konum, float menzil, float siddet, bool yanik = true)
     {
+        if (!yanik) siddet = 0f;
         GameObject g = new GameObject(ad);
         g.transform.SetParent(ebeveyn, false);
         g.transform.localPosition = konum;
@@ -1683,7 +1689,7 @@ public static class GrayboxKurucu
         cam.transform.localScale = Vector3.one * 0.07f;
         Object.DestroyImmediate(cam.GetComponent<Collider>());   // oyuncu ampule takılmasın
         MeshRenderer camCizici = cam.GetComponent<MeshRenderer>();
-        camCizici.sharedMaterial = CamMalzeme();
+        camCizici.sharedMaterial = yanik ? CamMalzeme() : CamSonukMalzeme();
         camCizici.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;   // ışığın önünü kesmesin
 
         // Normal kattaki hafif titreme (#38): bütün lambalar aynı saatle, birlikte titrer.
@@ -1724,6 +1730,21 @@ public static class GrayboxKurucu
     }
 
     // Ampul camının malzemesi: URP'nin ışıktan etkilenmeyen (Unlit) gölgelendiricisi.
+    // Sönük ampulün camı: mat, koyu gri; içinden ışık gelmez.
+    static Material CamSonukMalzeme()
+    {
+        const string Yol = "Assets/Materials/Ampul_Cam_Sonuk.mat";
+        Material mevcut = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (mevcut != null) return mevcut;
+
+        Material yeni = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        yeni.SetColor("_BaseColor", new Color(0.35f, 0.33f, 0.30f));
+        yeni.SetFloat("_Smoothness", 0.6f);
+        AssetDatabase.CreateAsset(yeni, Yol);
+        AssetDatabase.SaveAssets();
+        return yeni;
+    }
+
     static Material CamMalzeme()
     {
         const string Yol = "Assets/Materials/Ampul_Cam.mat";
