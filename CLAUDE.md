@@ -166,6 +166,8 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-26 (Lesson 39): **#50 design approved** by Şahan (`Docs/hikaye.md`, "böyle kalsın"); implementation issues #51-#60 opened, #46 closed, #47 folded into #60, #48 parked. **#51 built** (`5242c14`): headlamp (F / L1, no battery, flicker hooks) and a dark building (landing bulbs 2.5, stair bulbs almost out, ambient halved, light cards rescaled ×0.357); title screen keeps a small light. 155/155 tests, builds rebuilt; waiting for Şahan's build test. Next: #52 locked floor doors, keys and autosave.
+
 - 2026-09-26 (Lesson 38): **#41 #42 #43 #44 CLOSED** (CC0 textures; modelled bags and per-flat slippers; pickup feedback; per-flat five-shelf shoe racks with an optional put-away chore). **#45 journal built** (`64e556f`), waiting for Şahan's build test. Then Şahan reviewed No70 and Phasmophobia and **decided to drop the turn-back/penalty rule (#50)**: design draft in `Docs/hikaye.md` with 8 open decisions; #46 will be superseded, #47/#48 folded in, #49 (music always present, rising and falling) opened. Nothing removed yet. 155/155 tests.
 
 - 2026-09-26 (Lesson 37): **#36 #37 #38 #39 #40 CLOSED** after Şahan's build test ("test ettim sorun yok"): tension music, exterior sounds, darker night with flickering lamps (4 cards relabelled harder), per-floor TV moment, music swell after scripted anomalies. 144/144 tests. Commits `94f402f` `30d0e6e` `936bef4` `acffdce` `633896b`. **#31 and #33 CLOSED** too (Şahan approved the final look; the four easy-but-hidden cards were relabelled, the remaining invisible ones are deliberate FISILTI cards at difficulty ≥3).
