@@ -1,7 +1,7 @@
 # Huzur Apartmanı — Hikâye ve İlerleme Tasarımı (taslak 2, #50)
 
-**Durum:** Şahan'la konuşularak yazıldı (2026-09-26); onayını bekliyor. Onaylanana kadar hiçbir
-mevcut sistem silinmez. Kubilay'ı Şahan bilgilendirecek; Steam konumlandırması ve isim (#1) onun alanı.
+**Durum:** Şahan onayladı (2026-09-26, "böyle kalsın"). Uygulama #51-#60 issue'larında; eski kural
+yalnızca #59 ile, yeni ilerleme çalışır hâle gelince kaldırılır. Kubilay'ı Şahan bilgilendirecek; Steam konumlandırması ve isim (#1) onun alanı.
 
 ## 1. Karar ve gerekçe
 
@@ -93,7 +93,7 @@ Zincir yükselişi: **1-1-2-2-2-3-3-3** (kat başına kilitli oda sayısı).
 | 5 | 2, Cemal'in son çalıştığı daire | **2:** Banyo içeriden kilitli → tornavida salondaki alet çantasında (Cemal'in) → banyoda Oda A anahtarı → Oda A'da kat anahtarı | İlan bırak | Sessizlik, düzenli damla, kendi açılan sayaç | Alet çantası; **telefon 2:** "7. katı atla" |
 | 6 | 3, "kimse oturmuyor" ama sofra kurulu | **3:** Anahtar + şifre + sigorta; **kaçış anı 1** (koridordaki şey, salona sığın) | Zil çal | KÂBUS: sofra, açılan asansör | Sofrada dört tabak: dört kapıcı |
 | 7 | 1, Cemal'in eşyaları; bütün kapılar 13 | **3:** Tornavida + anahtar + şifre (Cemal'in doğum günü); **kaçış anı 2** (kat kapısına koş) | Yok: "atla" | En yoğun kat: aynı numara, aralık kapılar, tersten ağlama | Cemal'in son notu: "asansör beni bekliyor" |
-| 8 | 4, Yönetim dairesi (dosyalar) | **3:** Dosya dolabı anahtarı → şifre: binanın yapım yılı → sigorta: asansör panosu → **çatı anahtarı** | Çatı kapısını kilitle | Sessizlik; asansör "9" der ve gelir | Kapıcıların dosyaları, dokuzuncu katın planı; final |
+| 8 | 4, Yönetim dairesi (dosyalar) | **3:** Dosya dolabı anahtarı → şifre: binanın yapım yılı → sigorta: asansör panosu → **çatı anahtarı** | Çatı kapısını kilitle | Sessizlik; asansör "9" der ve gelir | Kapıcıların dosyaları, dokuzuncu katın planı; **final:** oyuncu çatıya çıkar, şafak; dış cephe planında dokuzuncu katın penceresi yanar ve asansörün geldiği duyulur (Şahan'ın seçimi: c) |
 
 Süre: kat başına 10-15 dk (zincir uzadıkça artar), açılış ve final 10 dk: ilk oynayış **~2 saat**.
 
@@ -109,16 +109,16 @@ Süre: kat başına 10-15 dk (zincir uzadıkça artar), açılış ve final 10 d
 
 ## 9. Tehdit ve kayıt
 
-- Ölüm yok. **İki senaryolu kaçış anı** (6. ve 7. kat): yetişemeyen oyuncu karanlıkta o katın başında uyanır
-  (kaybı 1-2 dakika).
+- Ölüm yok. **İki senaryolu kaçış anı** (6. ve 7. kat): yetişemeyen oyuncu karanlıkta o katın kapısında
+  uyanır; çözülmüş kilitler çözülmüş kalır, elindeki eşya düşmez (kaybı 1-2 dakika). Şahan'ın seçimi.
 - **Kayıt:** her kat kapısı geçilince ve dairede her kilit çözülünce otomatik. Oyun kapanıp açılınca kaldığı
   yerden. (Yeni ihtiyaç: eski turlar kısaydı, artık iki saat.)
 
 ## 10. Kapıcı odası: merkez
 
 Açılış burada (var). Yeni: **pano** (bulunan notlar asılır), **çivi** (1. kat anahtarı, kafa lambası),
-**telefon** (2. ve 5. katta çalar; oyuncu odaya inmeden de sahanlıkta duyar, açmak için iner: isteğe bağlı,
-inmezse mesaj panoda not olarak belirir), **radyo**, **Cemal'in eşyaları**. Aşağı inmek serbest.
+**telefon** (2. ve 5. katta çalar; zil sahanlıktan duyulur; açmak için inmek **isteğe bağlı** (Şahan'ın seçimi):
+inen konuşmayı dinler, inmeyen mesajı sonra panoda not olarak bulur), **radyo**, **Cemal'in eşyaları**. Aşağı inmek serbest.
 
 ## 11. Ses ve müzik
 
@@ -165,10 +165,7 @@ defter, karanlık + kafa lambası, 1994 dokusu. **İsim (#1) artık acil.**
 
 ## 15. Kalan açık kararlar
 
-1. **Final:** 8. katta asansör "9" der ve gelir. Oyuncu (a) çatıya çıkar, mevcut final oynar (şafak, dokuz katlı
-   cephe); (b) asansöre biner, kapılar kapanır, jenerik; (c) ikisi de: çatıya çıkar, dış cephe planında
-   dokuzuncu katın ışığı yanar ve asansörün geldiği duyulur. Öneri: **c**.
-2. Kaçış anlarında yakalanınca "o katın başında uyanma" yeterli mi, yoksa küçük bir bedel (kat anahtarı
-   yeniden bulunur) olsun mu?
-3. Telefon: açmak için odaya inmek isteğe bağlı mı (öneri: evet), zorunlu mu?
-4. 8 katın kimliklerini (taşınmış aile, yaşlı, çocuklu aile…) böyle mi kuralım? Değiştirmek istediğin kat var mı?
+Final (c), kaçış bedeli (katın kapısında uyanma) ve telefon (isteğe bağlı) Şahan'ın seçimiyle kapandı;
+yukarıdaki bölümlere işlendi.
+
+1. **Kat kimlikleri (§7):** Şahan değişiklik istiyor; hangi katların ne olacağı bekleniyor.
