@@ -160,7 +160,7 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
-- 2026-09-26 (Lesson 36): **#35 built** (`20ef399`): one incidental sound per floor instead of constant layers, after Şahan's build test ("some sounds being constant is disturbing"). 129/129 tests, event verified firing in play mode, builds rebuilt. Waiting for Şahan's build listening test for #35, and for his "sorun yok" to close #14, #25, #26.
+- 2026-09-26 (Lesson 36): **#35 built** (`20ef399`): one incidental sound per floor instead of constant layers, after Şahan's build test ("some sounds being constant is disturbing"). 129/129 tests, event verified firing in play mode, builds rebuilt. **#35, #14, #25, #26 CLOSED** after Şahan listened in the release build ("sorun yok"). His first try ran a stale 24-Sep build left in the root of `Builds/Windows/` (from before `BuildAlici`); it was deleted — test builds live only in `Builds/Windows/Yayin|Gelistirme/`.
 
 - 2026-09-26 (Lesson 35): **sound revision** (`c5f9593`): Şahan listened to all 19 catalogued sounds in four rounds on a local listening page and approved every one; 9 rebuilt from noise-based synthesis, 7 replaced by CC0/Pixabay recordings (TV, baby ×3, pigeons, door slam, door knock), the regular-pipe anomaly is now a water drip every 1.6 s. 120/120 tests. Builds rebuilt; #14, #25 and #26 close after Şahan hears the new sounds in the release build. `Assets/_Recovery/` (Unity crash backup, only auto-added URP light data) is untracked — do not commit it.
 
