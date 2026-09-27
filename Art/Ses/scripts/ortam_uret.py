@@ -185,23 +185,8 @@ def damla():
     return [a + 0.3 * b for a, b in zip(s, tik)]
 
 
-# ---------- ASANSÖR UĞULTUSU ----------
-def asansor_ugultu():
-    L = 8.0
-    n, gecis = int(L * HIZ), int(0.5 * HIZ)
-    random.seed(6)
-    g = suz([random.uniform(-1, 1) for _ in range(n + gecis)], 0.015)
-    s = []
-    for i in range(n + gecis):
-        t = i / HIZ
-        v = math.sin(2 * math.pi * 38 * t) + 0.5 * math.sin(2 * math.pi * 76 * t) + 0.2 * math.sin(2 * math.pi * 57 * t)
-        v *= 0.8 + 0.2 * math.sin(2 * math.pi * 0.125 * t)            # yavaş kabarma (8 sn'de 1 tur)
-        s.append(v + 4.0 * g[i])
-    kaydet(ANOMALI, "Asansor_Ugultu", dongule(s, n, gecis), 0.8)
-
-
-# #74: boru ve pencere rüzgârı kalktı; lavabo damlası artık kayıt (kayit_isle.py rev_damla).
-URETICILER = {"ugultu": ugultu, "kat_olaylari": kat_olaylari, "asansor_ugultu": asansor_ugultu}
+# #74: boru ve pencere rüzgârı kalktı; asansör uğultusu artık kayıt (kayit_isle.py rev_asansor); lavabo damlası artık kayıt (kayit_isle.py rev_damla).
+URETICILER = {"ugultu": ugultu, "kat_olaylari": kat_olaylari}
 
 if __name__ == "__main__":
     # Ad verilirse yalnızca o sesler üretilir; verilmezse hepsi. Onaylanmış bir sesi

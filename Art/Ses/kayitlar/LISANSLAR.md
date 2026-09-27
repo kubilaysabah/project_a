@@ -34,10 +34,15 @@ zorunluluğu getirmez; yine de kaynakları burada kayıtlı.
 | `479992__craigsmith__r09-13-apartment-buzzer.wav` | S45 daire zili (#74) | https://freesound.org/s/479992/ | craigsmith | CC0 1.0 |
 | `scottelliott_death_is_looming.mp3` | S01 arka plan müziği (#74, eski Joth parçalarının yerine) | https://opengameart.org/content/death-is-looming | Scott Elliott | **CC BY 4.0: jenerikte isim yazılı** |
 | `CarlosGardel-MiNocheTriste(1917).ogg` | S11 Nuri'nin radyosu (#74), tango | https://commons.wikimedia.org/wiki/File:CarlosGardel-MiNocheTriste(1917).ogg | Carlos Gardel (1917 kaydı) | Kamu malı (kayıt: PD-US-record-expired, PD-AR-Music; söz ve beste: yazarları 1932'de öldü) |
+| `bigsoundbank_1159_door_squeaks_and_rubs_1.wav` | S26 daire içi kapı açılışı; çekmece ve kapaklar da (#74) | https://bigsoundbank.com/door-squeaks-and-rubs-1-s1159.html | Joseph Sardin | CC0 1.0 |
+| `bigsoundbank_0683_grinding_metal_gate.wav` | S31 demir kat kapısının gıcırtısı (#74) | https://bigsoundbank.com/grinding-metal-gate-s0683.html | Joseph Sardin | CC0 1.0 |
+| `bigsoundbank_0378_lock_and_big_key.wav` | S32 anahtar-kilit; bütün kilitlerin açılışı (#74) | https://bigsoundbank.com/lock-and-big-key-s0378.html | Joseph Sardin | CC0 1.0 |
+| `bigsoundbank_1712_elevator_6_floors.wav` | S40/S41 asansör: yolculuk uğultusu, varış, kalkış (#74) | https://bigsoundbank.com/elevator-6-floors-s1712.html | Joseph Sardin | CC0 1.0 |
 
 **Notlar**
 - **#74 (2026-09-27):** Freesound dosyalarını Şahan kendi hesabıyla indirdi; Pixabay dosyaları herkese açık
-  dosya sunucusundan indirildi (Şahan'ın izniyle). Dış rüzgâr kaydı (BigSoundBank #0147) ve Joth'un beş parçası (eski müzik ve radyo) artık kullanılmıyor; dosyalar geçmiş için duruyor.
+  dosya sunucusundan indirildi (Şahan'ın izniyle). BigSoundBank'ın indirme sayfasında bot koruması
+  olduğu için dört BigSoundBank dosyasını da Şahan indirdi; dosya adları öbürleriyle aynı düzene getirildi. Dış rüzgâr kaydı (BigSoundBank #0147) ve Joth'un beş parçası (eski müzik ve radyo) artık kullanılmıyor; dosyalar geçmiş için duruyor.
 - **Pixabay Content License:** ticari kullanım serbest, isim belirtmek gerekmez. Yasak olan,
   dosyayı tek başına, değiştirilmemiş hâliyle yeniden dağıtmak; oyunun içinde işlenmiş
   olarak kullanmak serbesttir.

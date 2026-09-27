@@ -60,7 +60,7 @@ public class AsansorPanosu : MonoBehaviour, IEtkilesimli
     private float[] ekYon;
     private AudioSource ugultu;
     private Coroutine hareket;
-    private static AudioClip sigortaSesi, dugmeSesi;
+    private static AudioClip sigortaSesi, dugmeSesi, varisSesi, kalkisSesi;
 
     // Lambanın iki rengi. Lamba ışıktan etkilenmeyen (Unlit) bir malzeme; 1'in üstündeki yeşil
     // (HDR) bloom ile hafifçe parlar. MaterialPropertyBlock: malzemenin kopyasını üretmeden
@@ -186,8 +186,12 @@ public class AsansorPanosu : MonoBehaviour, IEtkilesimli
         if (gosterge != null) gosterge.text = "8";
         yield return new WaitForSeconds(1.2f);
         UgultuyuDurdur();
+        // Gerçek kayıt (#74, BigSoundBank #1712): kabin durur, kapılar açılır; hemen ardından zil.
+        if (varisSesi == null) varisSesi = Resources.Load<AudioClip>("Sesler/Asansor_Varis");
+        if (varisSesi != null) AudioSource.PlayClipAtPoint(varisSesi, KuyuNoktasi(), 0.9f);
+        yield return new WaitForSeconds(0.4f);
         if (dingSesi != null) AudioSource.PlayClipAtPoint(dingSesi, GostergeNoktasi(), 0.9f);
-        yield return new WaitForSeconds(0.6f);
+        yield return new WaitForSeconds(0.5f);
         // Kabin kapıların ardında belirir (kuyu gizlenir), sonra kapılar kayarak açılır.
         if (kuyu != null) kuyu.SetActive(false);
         if (kabin != null) kabin.SetActive(true);
@@ -215,6 +219,9 @@ public class AsansorPanosu : MonoBehaviour, IEtkilesimli
     private IEnumerator Git()
     {
         yield return new WaitForSeconds(2.5f);
+        // Kapılar kapanır ve motor kalkar (gerçek kayıt, #74).
+        if (kalkisSesi == null) kalkisSesi = Resources.Load<AudioClip>("Sesler/Asansor_Kalkis");
+        if (kalkisSesi != null) AudioSource.PlayClipAtPoint(kalkisSesi, KuyuNoktasi(), 0.9f);
         yield return KapilariKaydir(1f, 0f);
         if (kabin != null) kabin.SetActive(false);
         if (kuyu != null) kuyu.SetActive(true);
@@ -276,6 +283,9 @@ public class AsansorPanosu : MonoBehaviour, IEtkilesimli
 
     // ---------- YARDIMCILAR ----------
     private Vector3 GostergeNoktasi() { return gosterge != null ? gosterge.transform.position : transform.position; }
+
+    // Kuyunun ağzı: kapıların ardında, bel hizası (kabinin ve motorun sesi buradan gelir).
+    private Vector3 KuyuNoktasi() { return transform.parent.TransformPoint(new Vector3(0f, 1.2f, -MekanOlculeri.SahanlikDerin - 0.6f)); }
 
     private void UgultuyuBaslat()
     {

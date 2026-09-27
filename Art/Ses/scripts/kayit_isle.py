@@ -474,6 +474,52 @@ URETICILER_74 = {"damla": rev_damla, "anahtar": rev_anahtar, "cam": rev_cam, "de
                  "sifre": rev_sifre, "zil": rev_zil, "ic_kilitli": rev_ic_kilitli, "asansor_zili": rev_asansor_zili,
                  "gicirti": rev_gicirti, "merdiven": rev_merdiven}
 
+
+def rev_ic_acilma():
+    """S26: BigSoundBank #1159, "Door squeaks and rubs #1" (CC0). Kolun gıcırtısı ve kanadın yere
+    sürtünmesi: sarkmış bir 90'lar kapısı. Kaydın ilk 2,8 sn'si açılış (sonrası kapanış, kullanılmıyor).
+    Çekmece, dolap kapağı ve sandık da bu sesi kullanır (eskisi gibi)."""
+    k = oku("bigsoundbank_1159_door_squeaks_and_rubs_1.wav", H44)
+    _kaydet(SESLER, "IcKapi_Acilma.wav", kes(k, 0.0, 2.8, giris=0.005, cikis=0.4, hiz=H44))
+
+
+def rev_demir_gicirti():
+    """S31: BigSoundBank #0683, "Grinding metal gate" (CC0). Demir kat kapısının açılış gıcırtısı;
+    6,4-8,4 sn arası (kaydın en uzun, tek parça gıcırtısı; kanat 1,6 sn'de açılıyor)."""
+    k = oku("bigsoundbank_0683_grinding_metal_gate.wav", H44)
+    _kaydet(SESLER, "KatKapisi_Gicirti.wav", kes(k, 6.4, 8.4, giris=0.02, cikis=0.4, hiz=H44))
+
+
+def rev_kilit():
+    """S32: BigSoundBank #0378, "Lock and big key" (CC0). Büyük eski anahtar deliğe girer ve döner;
+    ilk çekim, 0-1,8 sn. Kat kapısı, çatı kapısı ve her çözülen kilit bu sesi kullanır."""
+    k = oku("bigsoundbank_0378_lock_and_big_key.wav", H44)
+    _kaydet(SESLER, "KatKapisi_Kilit.wav", kes(k, 0.0, 1.8, giris=0.005, cikis=0.3, hiz=H44))
+
+
+def rev_asansor():
+    """S40: BigSoundBank #1712, "Elevator, 6 floors" (CC0). Eski bir Paris binasının küçük asansörü;
+    kayıt: kapılar kapanır ve motor kalkar (1,8-6,5 sn), yolculuk (7-22 sn düzenli uğultu),
+    duruş ve kapıların açılması (35,8 sn - son). Üç parça:
+      Asansor_Ugultu.wav   yolculuk uğultusu, 9-21 sn, son 1 sn başın üstüne karışır: dikişsiz döngü
+                           (asansör gelirken ve dokuzuncu kata dönerken döner)
+      Asansor_Varis.wav    duruş ve kapıların açılması (varışta, zilden hemen önce)
+      Asansor_Kalkis.wav   kapıların kapanması ve motorun kalkışı (asansör geri dönerken)"""
+    k = oku("bigsoundbank_1712_elevator_6_floors.wav", H44)
+    dongu = kes(k, 9.0, 21.0, giris=0.0, cikis=0.0, hiz=H44)
+    gecis = int(1.0 * H44)
+    n = len(dongu)
+    for i in range(gecis):
+        a = i / gecis
+        dongu[i] = dongu[n - gecis + i] * (1 - a) + dongu[i] * a
+    _kaydet(ANOMALI, "Asansor_Ugultu.wav", dongu[:n - gecis])
+    _kaydet(SESLER, "Asansor_Varis.wav", kes(k, 35.8, len(k) / H44, giris=0.05, cikis=0.4, hiz=H44))
+    _kaydet(SESLER, "Asansor_Kalkis.wav", kes(k, 1.8, 6.5, giris=0.01, cikis=0.6, hiz=H44))
+
+
+URETICILER_74.update({"ic_acilma": rev_ic_acilma, "demir_gicirti": rev_demir_gicirti, "kilit": rev_kilit,
+                      "asansor": rev_asansor})
+
 URETICILER = {"bebek": bebek, "tv": tv, "guvercin": guvercin, "kapi_carpma": kapi_carpma, "kapi_tiklatma": kapi_tiklatma,
               "muzik": muzik, "dis_silah": dis_silah, "dis_kopek": dis_kopek,
               "radyo": radyo}
