@@ -42,6 +42,10 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
     private bool kendiAcildi;           // kendiliğinden açılma bir kez olur
     private float bogukluk = 1f;        // 1: tam boğuk, 0: net (yumuşak geçiş için)
     private AudioClip dugmeSesi;
+    private bool kapatilabilir = true;   // E ile açılıp kapanabilir mi (#65: damla hayır)
+    private string susturanKilit = "";   // çözülünce sesi kalıcı olarak susturan kilit (#65)
+    private int kat;
+    private bool susturuldu;
 
     /// <summary>Çalıyor mu?</summary>
     public bool Caliyor { get { return kaynak != null && kaynak.isPlaying; } }
@@ -50,8 +54,16 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
     /// Kat dosyasından kurulur. klip: döngüde çalan ses. oda: eşyanın bulunduğu oda;
     /// kapi: o odanın kapısı (yoksa boğma yapılmaz).
     /// </summary>
-    public void Hazirla(AudioClip klip, float gecikmeSn, float sesDuzeyi, string odaAdi, IcKapi kapi, DaireEksenleri eksenler)
+    public void Hazirla(AudioClip klip, float gecikmeSn, float sesDuzeyi, string odaAdi, IcKapi kapi, DaireEksenleri eksenler,
+                        bool kapatilabilirMi = true, string susturan = "", int katNo = 0)
     {
+        kapatilabilir = kapatilabilirMi;
+        susturanKilit = susturan ?? "";
+        kat = katNo;
+        // Susturan kilit kayıtta zaten çözülmüşse ses hiç başlamaz (oyuncu vanayı önceden kapatmış).
+        susturuldu = susturanKilit != "" && Kayit.KilitCozukMu(kat, susturanKilit);
+        // Kilit.Cozuldu: bütün kilitlerin paylaştığı "static" olay; susturan kilidi dinliyoruz.
+        if (susturanKilit != "") Kilit.Cozuldu += KilitCozuldu;
         gecikme = gecikmeSn;
         ses = sesDuzeyi;
         oda = odaAdi;
@@ -93,8 +105,20 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
     }
 
     /// <summary>Kat değişirken: susar, eklediklerini söker (bileşenin kendisini ZincirUygulayici siler).</summary>
+    private void KilitCozuldu(int cozulenKat, string kimlik)
+    {
+        if (cozulenKat != kat || kimlik != susturanKilit || susturuldu) return;
+        susturuldu = true;
+        if (kaynak != null) kaynak.Stop();
+        if (isik != null) isik.enabled = false;
+        Debug.Log($"[SES] {name} sustu ('{kimlik}' çözüldü).");
+    }
+
+    private void OnDestroy() { Kilit.Cozuldu -= KilitCozuldu; }
+
     public void Sifirla()
     {
+        Kilit.Cozuldu -= KilitCozuldu;
         if (kaynak != null) Destroy(kaynak);
         if (suzgec != null) Destroy(suzgec);
         if (isik != null) Destroy(isik.gameObject);
@@ -109,7 +133,7 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
         string oyuncununOdasi = DairePlani.NoktaninOdasi(u, v);
 
         // 1. Kendiliğinden açılma: oyuncu dairenin içindeyken süre işler.
-        if (!kendiAcildi)
+        if (!kendiAcildi && !susturuldu)
         {
             if (oyuncununOdasi != null) iceridekiSure += Time.deltaTime;
             if (iceridekiSure >= gecikme)
@@ -121,7 +145,7 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
         }
 
         // 2. Boğma: oyuncu eşyanın odasında değilse ve odanın kapısı kapalıysa boğuk.
-        bool boguk = oyuncununOdasi != oda && odaKapisi != null && !odaKapisi.Acik;
+        bool boguk = oyuncununOdasi != oda && odaKapisi != null && !odaKapisi.Acik && !odaKapisi.Devrik;
         // MoveTowards: değeri hedefe doğru en fazla verilen adım kadar yaklaştırır.
         bogukluk = Mathf.MoveTowards(bogukluk, boguk ? 1f : 0f, GecisHizi * Time.deltaTime);
         // Kesim frekansı logaritmik ölçekte geçer: kulak frekansları oranla duyar
@@ -133,14 +157,15 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
     private void Ac(bool ac)
     {
         if (ac) kaynak.Play(); else kaynak.Stop();
-        isik.enabled = ac;
-        if (dugmeSesi != null) AudioSource.PlayClipAtPoint(dugmeSesi, transform.position, 0.6f);
+        // Işık ve düğme sesi yalnızca açılıp kapanan cihazlarda (radyo); damlayan muslukta yok.
+        isik.enabled = ac && kapatilabilir;
+        if (kapatilabilir && dugmeSesi != null) AudioSource.PlayClipAtPoint(dugmeSesi, transform.position, 0.6f);
     }
 
     // ---------- IEtkilesimli ----------
     public string Ipucu { get { return Dil.Getir(Caliyor ? "ipucu.kapat" : "ipucu.ac"); } }
 
-    public bool EtkilesimeAcik { get { return kaynak != null; } }
+    public bool EtkilesimeAcik { get { return kaynak != null && kapatilabilir && !susturuldu; } }
 
     public void Etkilesim(GameObject oyuncuNesnesi)
     {

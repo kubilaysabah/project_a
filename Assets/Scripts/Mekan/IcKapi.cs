@@ -34,6 +34,8 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
 
     public bool Acik { get { return acik; } }
     public bool Kilitli { get { return kilitli; } }
+    /// <summary>Menteşeleri sökülüp devrildi mi (#54)? Devrik kapı açık bir kapı gibidir: sesi boğmaz.</summary>
+    public bool Devrik { get { return devrik; } }
 
     private void Awake()
     {

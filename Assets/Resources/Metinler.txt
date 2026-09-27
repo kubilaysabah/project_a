@@ -16,6 +16,8 @@ ipucu.sifre	ŞİFRE	CODE
 ipucu.cek	ÇEK	PULL
 ipucu.tak	TAK	INSERT
 ipucu.sok	SÖK	UNSCREW
+ipucu.it	İT	PUSH
+ipucu.cevir	ÇEVİR	TURN
 ipucu.kir	KIR	BREAK
 
 # ---- Yönetici notu (açılış) ----
@@ -27,6 +29,7 @@ not.kat2_kiler	Kilerin kilidi yine aklımdan çıktı.\nNumarası radyonun istas
 not.kat3_anne	Murat,\nKerem bu gece de uyandı. "Yukarıdaki amca camdan bakıyor" diyor.\nBu binada dokuzuncu kat yok ki.\nÇizdiği resmi yırtıp evin her yerine saklamış.\nYatak odasının kilidini değiştirdim; şifresi o resimde.\n\n— Ayla	Murat,\nKerem woke up again tonight. He says "the man upstairs is looking through the window".\nThere is no ninth floor in this building.\nHe tore up his drawing and hid the pieces all over the flat.\nI changed the bedroom lock; the code is in that drawing.\n\n— Ayla
 not.kat4_giris	Elektriği ben kestim. Bu evde ışık yalan söylüyor.\nSigortayı mutfak dolabına kilitledim.\nŞifresini ancak karanlık gösterir:\nlambanı söndür ve bekle.\n\n— Hasan	I cut the power myself. In this flat, the light lies.\nI locked the fuse in the kitchen cupboard.\nOnly the dark will show you its code:\nswitch off your lamp and wait.\n\n— Hasan
 not.kat4_buzdolabi	Işıklar yanınca o da geliyor.\nGece asansörün dokuzuncu kattan indiğini duydum.\nBenden önceki kapıcı Rıza Efendi de duymuş.\nYarın bırakıyorum. Anahtar burada; sen de çok kalma.\n\n— Hasan	When the lights come on, so does he.\nAt night I heard the lift coming down from the ninth floor.\nRıza Efendi, the janitor before me, heard it too.\nI quit tomorrow. The key is here; don't stay long either.\n\n— Hasan
+not.kat5_liste	İŞ LİSTESİ — Daire 18\n1. Banyo lavabosu damlatıyor. Sifonu sökmeden önce ana vanayı kapat!\n   Vana salonda, gardırobun arkasında.\n2. Banyo kapısı içeriden kilitlenmiş. Kimse yokken nasıl? Menteşeleri sök.\n3. Asansör yine kendi kendine çalışıyor. Yönetime söyle.\n\n— Cemal	JOB LIST — Flat 18\n1. The bathroom sink drips. Close the main valve before taking the trap off!\n   The valve is in the living room, behind the wardrobe.\n2. The bathroom door is locked from the inside. How, with nobody here? Take the hinges off.\n3. The lift is running by itself again. Tell the management.\n\n— Cemal
 not.kapat	{0}: kapat	{0}: close
 
 # ---- Jenerik: ilk satır başlık, boş satırlar aralık ----

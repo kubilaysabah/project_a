@@ -21,6 +21,9 @@ public class CekilenKol : MonoBehaviour, IEtkilesimli
 
     private readonly List<Kilit> kilitler = new List<Kilit>();
     private float aci = 120f;            // kolun çekilince döneceği açı (derece)
+    private Vector3 eksen = Vector3.right;   // dönüş ekseni (yerel); KolAyari değiştirebilir (#65)
+    private float sure = CekmeSuresi;
+    private string ipucuAnahtari = "ipucu.cek";
     private Quaternion ilkDonus;
     private bool cekildi;
     private bool harekette;
@@ -32,9 +35,12 @@ public class CekilenKol : MonoBehaviour, IEtkilesimli
         if (kilitler.Count == 0) ilkDonus = transform.localRotation;
         if (kilit != null && !kilitler.Contains(kilit)) kilitler.Add(kilit);
         aci = donusAcisi;
+        // Parçanın kendi hareket ayarı varsa (vananın çarkı) o geçerli (#65).
+        KolAyari ayar = GetComponent<KolAyari>();
+        if (ayar != null) { eksen = ayar.eksen; aci = ayar.aci; sure = ayar.sure; ipucuAnahtari = ayar.ipucuAnahtari; }
     }
 
-    public string Ipucu { get { return Dil.Getir("ipucu.cek"); } }
+    public string Ipucu { get { return Dil.Getir(ipucuAnahtari); } }
 
     // Bir kez çekilir; aşağıda kalır.
     public bool EtkilesimeAcik { get { return !cekildi && !harekette; } }
@@ -50,14 +56,15 @@ public class CekilenKol : MonoBehaviour, IEtkilesimli
         harekette = true;
         if (ses == null) ses = Resources.Load<AudioClip>("Sesler/Kol_Cekme");
         if (ses != null) AudioSource.PlayClipAtPoint(ses, transform.position, 0.7f);
-        for (float t = 0f; t < CekmeSuresi; t += Time.deltaTime)
+        for (float t = 0f; t < sure; t += Time.deltaTime)
         {
             // Hızlanarak iner (t*t): ağır bir kol önce direnir, sonra düşer.
-            float e = Mathf.Clamp01(t / CekmeSuresi);
-            transform.localRotation = ilkDonus * Quaternion.Euler(aci * e * e, 0f, 0f);
+            float e = Mathf.Clamp01(t / sure);
+            // AngleAxis: verilen eksen etrafında verilen açı kadar dönüş (360'tan büyük de olur).
+            transform.localRotation = ilkDonus * Quaternion.AngleAxis(aci * e * e, eksen);
             yield return null;
         }
-        transform.localRotation = ilkDonus * Quaternion.Euler(aci, 0f, 0f);
+        transform.localRotation = ilkDonus * Quaternion.AngleAxis(aci, eksen);
         cekildi = true;
         harekette = false;
         // Kısa bir gecikmeyle uzaktaki kilit açılsın: önce kolun sesi, sonra kapının "tak"ı.
@@ -70,7 +77,7 @@ public class CekilenKol : MonoBehaviour, IEtkilesimli
     public void CekilmisBaslat()
     {
         StopAllCoroutines();
-        transform.localRotation = ilkDonus * Quaternion.Euler(aci, 0f, 0f);
+        transform.localRotation = ilkDonus * Quaternion.AngleAxis(aci, eksen);
         cekildi = true;
         harekette = false;
     }

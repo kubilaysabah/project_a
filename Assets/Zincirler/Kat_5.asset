@@ -1,0 +1,122 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
+  m_Name: Kat_5
+  m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
+  aciklama: "5. kat, daire 2, Cemal'in son \xE7al\u0131\u015Ft\u0131\u011F\u0131
+    daire (mekanizma). Banyo i\xE7eriden kilitli: mente\u015Feler tornavidayla s\xF6k\xFCl\xFCr.
+    Salondaki gard\u0131rop itilince arkas\u0131nda ana vana; \xE7ark \xE7evrilince
+    su kesilir, damla susar, lavabonun sifonu s\xF6k\xFCl\xFCr, i\xE7inde kat\u0131n
+    anahtar\u0131. Mutfak, Oda A, Oda B kapal\u0131."
+  zincir:
+    KapaliOdalar:
+    - Mutfak
+    - Oda_A
+    - Oda_B
+    Yerler:
+    - Kimlik: alet_cantasi
+      Yol: Esyalar/Alet_Cantasi
+      Oda: Oda_C
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: vana
+      Yol: Esyalar/Vana/Cark
+      Oda: Salon
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: sifon
+      Yol: Esyalar/Lavabo/Sifon
+      Oda: Banyo
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    Esyalar:
+    - Kimlik: tornavida
+      Tur: 4
+      Yer: alet_cantasi
+      X: 0
+      Y: 0.03
+      Z: 0
+      Donus: 20
+    - Kimlik: kat_anahtari
+      Tur: 1
+      Yer: sifon
+      X: 0
+      Y: -0.02
+      Z: 0
+      Donus: 30
+    Kilitler:
+    - Kimlik: banyo
+      Tur: 4
+      OdaKapisi: 1
+      Hedef: Banyo
+      Gerekli: tornavida
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+    - Kimlik: sifon
+      Tur: 2
+      OdaKapisi: 0
+      Hedef: sifon
+      Gerekli: vana
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+  notlar:
+  - Yol: Esyalar/Sigorta_Kutusu
+    X: 0.3
+    Y: -0.1
+    Z: 0.002
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat5_liste
+  suslar: []
+  sesler:
+  - Yol: Esyalar/Lavabo
+    Oda: Banyo
+    Klip: {fileID: 8300000, guid: cb71ab2e32efd914cacdf7656f724330, type: 3}
+    Gecikme: 0
+    Ses: 0.7
+    Kapatilabilir: 0
+    SusturanKilit: sifon
+  parcalar: []
+  yananOdalar: []
+  cizimBoyu: 0.3

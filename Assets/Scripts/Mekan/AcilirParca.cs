@@ -25,6 +25,8 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
     [SerializeField] private float miktar = 0.3f;              // metre (Kaydir) ya da derece (Dondur)
     [SerializeField] private float sure = 0.5f;
     [SerializeField] private bool kilitli;
+    // Ekrandaki eylem adları (#65): çekmece "AÇ / KAPAT" der, gardırop "İT", sifon "SÖK / TAK".
+    [SerializeField] private string ipucuAc = "ipucu.ac", ipucuKapat = "ipucu.kapat";
 
     private Vector3 kapaliKonum;
     private Quaternion kapaliDonus;
@@ -54,7 +56,7 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
             Kilit kilit = GetComponent<Kilit>();
             if (kilit != null && !kilit.Cozuk) return kilit.Ipucu;
             if (kilitli) return Dil.Getir("ipucu.kilitli");
-            return acik ? Dil.Getir("ipucu.kapat") : Dil.Getir("ipucu.ac");
+            return acik ? Dil.Getir(ipucuKapat) : Dil.Getir(ipucuAc);
         }
     }
 

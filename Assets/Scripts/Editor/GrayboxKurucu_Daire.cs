@@ -509,6 +509,56 @@ public static partial class GrayboxKurucu
         Acilir(alet, "Kapak", AcilirParca.Hareket.Dondur, Vector3.right, -100f, 0.5f);
         Yonlendir(alet, "Kapak");
         DaireEsyasi("Duvar_Kolu", e, d, 6.7f, 1.1f, 1.2f, -1f, 0f, "Kol");
+
+        // BANYO (#65): dış duvara asılı lavabo; altındaki sifon sökülünce aşağı ve öne inip
+        // lavabonun önünde yere oturur (45 cm aşağı, 22 cm öne). Teknenin altında kalsaydı
+        // ayaktaki oyuncu içindeki anahtarı göremezdi (ilk denemenin görüntüsü).
+        // Pivot duvarın dibi: v = -0,8 banyonun dış duvarının iç yüzü.
+        GameObject lavabo = DaireEsyasi("Lavabo", e, d, 3.6f, 0f, -0.8f, 0f, 1f, "Sifon");
+        Acilir(lavabo, "Sifon", AcilirParca.Hareket.Kaydir, new Vector3(0f, -0.9f, 0.44f).normalized, 0.5f, 0.9f);
+        IpuclariniAyarla(lavabo, "Sifon", "ipucu.sok", "ipucu.tak");
+
+        // SALON (#65): landing tarafındaki duvarın dibinde ana su vanası; önünde, duvardan 14 cm
+        // açıkta bir gardırop saklıyor. Gardırop plan +v yönünde (pencereye doğru) 95 cm itilir.
+        GameObject vana = DaireEsyasi("Vana", e, d, 0.03f, 0f, 6.6f, 1f, 0f, "Cark");
+        if (vana != null)
+        {
+            KolAyari ayar = vana.transform.Find("Cark").gameObject.AddComponent<KolAyari>();
+            ayar.eksen = Vector3.forward;          // çarkın kendi ön ekseni (modelin +Z'si)
+            ayar.aci = 540f;                       // bir buçuk tur
+            ayar.sure = 1.6f;
+            ayar.ipucuAnahtari = "ipucu.cevir";
+        }
+        GameObject gardirop = DaireEsyasi("Gardirop", e, d, 0.03f + 0.14f + 0.275f, 0f, 6.6f, 1f, 0f);
+        if (gardirop != null)
+        {
+            // Plan +v yönünün gardırobun kendi eksenlerindeki karşılığı: dört aynalı dairede de
+            // gardırop pencereye doğru kaysın (yerel +x bir dairede +v, öbüründe -v olabilir).
+            Vector3 dunyaYonu = daire.TransformDirection(d.Yon(0f, 1f));
+            Vector3 yerelYon = gardirop.transform.InverseTransformDirection(dunyaYonu).normalized;
+            AcilirParca a = gardirop.AddComponent<AcilirParca>();
+            var seri = new SerializedObject(a);
+            seri.FindProperty("hareket").enumValueIndex = (int)AcilirParca.Hareket.Kaydir;
+            seri.FindProperty("eksen").vector3Value = yerelYon;
+            seri.FindProperty("miktar").floatValue = 0.95f;
+            seri.FindProperty("sure").floatValue = 1.4f;
+            seri.FindProperty("ipucuAc").stringValue = "ipucu.it";
+            seri.FindProperty("ipucuKapat").stringValue = "ipucu.it";
+            seri.ApplyModifiedPropertiesWithoutUndo();
+        }
+    }
+
+    // Açılır parçanın ekrandaki eylem adları (#65): "SÖK / TAK" gibi.
+    static void IpuclariniAyarla(GameObject govde, string parca, string ac, string kapat)
+    {
+        if (govde == null) return;
+        Transform t = govde.transform.Find(parca);
+        AcilirParca a = t != null ? t.GetComponent<AcilirParca>() : null;
+        if (a == null) return;
+        var seri = new SerializedObject(a);
+        seri.FindProperty("ipucuAc").stringValue = ac;
+        seri.FindProperty("ipucuKapat").stringValue = kapat;
+        seri.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // Buzdolabının iç ışığı (#54): lamba yuvasının hizasında soğuk beyaz, kısa menzilli bir

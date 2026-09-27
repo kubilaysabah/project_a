@@ -63,6 +63,7 @@ public static partial class GrayboxKurucu
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         KatZinciriVarligi kat3 = Kat3Kur();
         KatZinciriVarligi kat4 = Kat4Kur();
+        KatZinciriVarligi kat5 = Kat5Kur();
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
@@ -93,11 +94,12 @@ public static partial class GrayboxKurucu
         katlar.GetArrayElementAtIndex(1).objectReferenceValue = kat2;
         katlar.GetArrayElementAtIndex(2).objectReferenceValue = kat3;
         katlar.GetArrayElementAtIndex(3).objectReferenceValue = kat4;
+        katlar.GetArrayElementAtIndex(4).objectReferenceValue = kat5;
         seri.ApplyModifiedPropertiesWithoutUndo();
 
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
-        Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-4. katlar kuruldu ve bağlandı.");
+        Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-5. katlar kuruldu ve bağlandı.");
     }
 
     static void KlasorHazirla(string ust, string ad)
@@ -431,6 +433,66 @@ public static partial class GrayboxKurucu
         KilitZinciri.Sonuc s4 = z.Cozumle(odalar);
         if (!s4.Cozulebilir) Debug.LogError("[ZINCIR] 4. kat zinciri çözülemiyor: " + string.Join("; ", s4.Hatalar));
         else Debug.Log("[ZINCIR] 4. kat zinciri çözülebilir: " + string.Join(" -> ", s4.AcilanKilitler));
+        EditorUtility.SetDirty(v);
+        return v;
+    }
+
+    // ---------- 5. KAT: MEKANİZMA (#65, Docs/hikaye.md §7) ----------
+    // Daire 2, Cemal'in son çalıştığı daire. Antrede Cemal'in iş listesi: banyo lavabosu
+    // damlatıyor; sifonu sökmeden ana vanayı kapat (salonda gardırobun arkasında); banyo kapısı
+    // içeriden kilitli, menteşeleri sök. Mutfak, Oda A ve Oda B kapalı.
+    //   1. Banyo: menteşeler tornavidayla sökülür (tornavida kapıcıda yoksa kilerde, Cemal'in
+    //      alet çantasında). İçeride lavabo; sifon kilitli ("vana açık, su basar").
+    //   2. MEKANİZMA: salondaki gardırop yana itilir, arkasında ana su vanası.
+    //   3. MEKANİZMA: vananın çarkı çevrilir: su kesilir, lavabonun damlası susar, sifon sökülebilir.
+    //   4. Sifonun içinde katın anahtarı.
+    // İki kilit (banyo menteşeli, sifon vanaya bağlı "kol"): büyüme çizelgesinin 5. katı.
+    static KatZinciriVarligi Kat5Kur()
+    {
+        string yol = $"{ZincirKlasoru}/Kat_5.asset";
+        KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
+        if (v == null)
+        {
+            v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
+            AssetDatabase.CreateAsset(v, yol);
+        }
+        v.aciklama = "5. kat, daire 2, Cemal'in son çalıştığı daire (mekanizma). Banyo içeriden kilitli: menteşeler tornavidayla " +
+                     "sökülür. Salondaki gardırop itilince arkasında ana vana; çark çevrilince su kesilir, damla susar, lavabonun " +
+                     "sifonu sökülür, içinde katın anahtarı. Mutfak, Oda A, Oda B kapalı.";
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Mutfak", "Oda_A", "Oda_B" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "alet_cantasi", Yol = "Esyalar/Alet_Cantasi", Oda = "Oda_C" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "vana", Yol = "Esyalar/Vana/Cark", Oda = "Salon" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "sifon", Yol = "Esyalar/Lavabo/Sifon", Oda = "Banyo" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "alet_cantasi", Y = 0.03f, Donus = 20f });
+        // Anahtar sifonun ağzında, kenarın hemen altında (sifonun pivotu kendi üst ortası; kap 17 cm
+        // derin). 9 cm aşağıdayken yere inen sifonun içinde görünmüyordu (oynatma modu görüntüsü).
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "sifon", Y = -0.02f, Donus = 30f });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "banyo", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "Banyo", Gerekli = "tornavida" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "sifon", Tur = KilitTuru.Kol, OdaKapisi = false, Hedef = "sifon", Gerekli = "vana" });
+        v.zincir = z;
+
+        v.notlar = new List<KatNotu>
+        {
+            new KatNotu { Metin = "not.kat5_liste", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
+        };
+        v.parcalar = new List<KatParcasi>();
+        v.suslar = new List<KatSusu>();
+        v.yananOdalar = new List<string>();
+        // Lavabonun damlası: oyuncu daireye girer girmez duyulur; kapatılamaz; vana çevrilince
+        // ("sifon" kilidi çözülünce) kalıcı olarak susar. Ses 1,6 sn arayla düzenli bir damla.
+        v.sesler = new List<KatSesi>
+        {
+            new KatSesi { Yol = "Esyalar/Lavabo", Oda = "Banyo", Gecikme = 0f, Ses = 0.7f, Kapatilabilir = false, SusturanKilit = "sifon",
+                          Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Boru_Damla.wav") },
+        };
+        if (v.sesler[0].Klip == null) Debug.LogError("[ZINCIR] Boru_Damla.wav bulunamadı.");
+
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        KilitZinciri.Sonuc s5 = z.Cozumle(odalar);
+        if (!s5.Cozulebilir) Debug.LogError("[ZINCIR] 5. kat zinciri çözülemiyor: " + string.Join("; ", s5.Hatalar));
+        else Debug.Log("[ZINCIR] 5. kat zinciri çözülebilir: " + string.Join(" -> ", s5.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
     }

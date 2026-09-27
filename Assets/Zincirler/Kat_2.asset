@@ -92,6 +92,8 @@ MonoBehaviour:
     Klip: {fileID: 8300000, guid: 6f840b9879cafa641948e3e2fa41b79b, type: 3}
     Gecikme: 4
     Ses: 0.8
+    Kapatilabilir: 1
+    SusturanKilit: 
   parcalar: []
   yananOdalar: []
   cizimBoyu: 0.3

@@ -57,6 +57,10 @@ public class KatSesi
     public AudioClip Klip;
     public float Gecikme = 5f;
     [Range(0f, 1f)] public float Ses = 0.8f;
+    // #65: oyuncu E ile açıp kapatabilir mi (radyo evet; damlayan musluk hayır).
+    public bool Kapatilabilir = true;
+    // #65: bu kilit çözülünce ses kalıcı olarak susar (vana kapanınca damla durur). Boş: susmaz.
+    public string SusturanKilit = "";
 }
 
 /// <summary>

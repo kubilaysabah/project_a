@@ -203,7 +203,7 @@ public class ZincirUygulayici
             Transform t = YolBul(daire, ks.Yol);
             if (t == null) { Debug.LogWarning($"[ZINCIR] Çalan eşya '{ks.Yol}' bulunamadı."); continue; }
             CalanEsya c = t.gameObject.AddComponent<CalanEsya>();
-            c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, ks.Oda, KapiBul(daire, ks.Oda), eksen);
+            c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, ks.Oda, KapiBul(daire, ks.Oda), eksen, ks.Kapatilabilir, ks.SusturanKilit, kat);
         }
     }
 
