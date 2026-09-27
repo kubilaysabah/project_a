@@ -31,6 +31,11 @@ public class ArkaMuzik : MonoBehaviour
     private float taban;                // normal (kabarmamış) seviye; sahnede ayarlanan değer
     private float kabarmaBaslangici = -1f, kabarmaBitisi = -1f;
     private bool susturuluyor;
+
+    // Sürekli dalgalanma (#49): seviye kendi kendine dakikalar süren kabarma ve sönmelerle değişir
+    // (MuzikDalgasi, saf C#); merdivende biraz yüksek, sahanlıkta ve dairede biraz alçak.
+    private MuzikDalgasi dalga;
+    private Transform oyuncu;
     private float susturmaHizi;
 
     private void Awake()
@@ -38,11 +43,27 @@ public class ArkaMuzik : MonoBehaviour
         Ornek = this;
         kaynak = GetComponent<AudioSource>();
         taban = kaynak.volume;
+        dalga = new MuzikDalgasi(System.Environment.TickCount);   // her oyun farklı yerden başlar
     }
 
     private void Start()
     {
         if (kaynak.clip != null && !kaynak.isPlaying) kaynak.Play();
+    }
+
+    // Oyuncu merdivende mi? Sahanlıklar ve daireler 3 metrenin katlarında (zemin -3, 1. kat 0, üst
+    // sahanlık 3); arada kalan yükseklik merdivendir. Döngü ışınlaması y'yi 3'er kaydırdığı için
+    // kalan (Repeat) her katta aynı çalışır.
+    private bool Merdivende()
+    {
+        if (oyuncu == null)
+        {
+            BirinciSahisKontrolcu k = FindAnyObjectByType<BirinciSahisKontrolcu>();
+            if (k == null) return false;
+            oyuncu = k.transform;
+        }
+        float y = Mathf.Repeat(oyuncu.position.y, 3f);
+        return y > 0.25f && y < 2.7f;
     }
 
     private void OnDestroy()
@@ -81,7 +102,8 @@ public class ArkaMuzik : MonoBehaviour
         // Hedef seviye: kabarma penceresinin içindeysek yüksek, değilsek normal.
         float simdi = Time.time;
         bool kabarik = simdi >= kabarmaBaslangici && simdi < kabarmaBitisi;
-        float hedef = kabarik ? KabarmaSeviyesi : taban;
+        // Olay kabarması dalganın üstüne biner; kabarma yokken dalga ve oyuncunun yeri belirler.
+        float hedef = kabarik ? KabarmaSeviyesi : taban * dalga.Carpan(Time.time) * MuzikDalgasi.KonumCarpani(Merdivende());
         // MoveTowards: değeri hedefe doğru en fazla verilen adım kadar yaklaştırır.
         // Yükselirken hızlı, inerken yavaş: korku ani gelir, yavaş geçer.
         float hiz = hedef > kaynak.volume ? YukselmeHizi : InmeHizi;
