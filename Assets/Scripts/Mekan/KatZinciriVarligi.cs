@@ -131,4 +131,9 @@ public class KatZinciriVarligi : ScriptableObject
     public AudioClip kacisHaberciSesi;       // anahtar alınınca üst kattan adımlar; siluet sesin ortasında belirir (#74)
     // Parçaların yere serilen kâğıdının gerçek boyu (metre): resmin bütünü bu kadar geniş olurdu.
     public float cizimBoyu = 0.30f;
+
+    // Saklanma anı (#58, 6. kat): anahtar alınınca kapı tıklatılır, Gölge holde devriye gezer;
+    // görülmeden atlatılmalı. Gölge'nin şablonu kacisSablonu'ndan (aynı siluet).
+    public bool saklanmaVar;
+    public AudioClip saklanmaSesi;           // giriş kapısında tıklatma
 }

@@ -245,6 +245,19 @@ public class ZincirUygulayici
             if (Kayit.KilitCozukMu(kat, "kacis")) ka.BittiBaslat();
         }
         // Yırtık çizim (#63): dairenin köküne çizim ekranı; konan parçalar kendi bölgelerini gösterir.
+        // Saklanma anı (#58): Gölge dairenin girişinden holün dibine kadar yürür ve geri döner.
+        // Yol plan noktalarıyla (u, v) verilir; aynalı dairede de doğru yere düşer.
+        if (varlik.saklanmaVar && varlik.kacisSablonu != null && eksen != null)
+        {
+            var yol = new List<Vector3>();
+            float[,] noktalar = { { 0.4f, 0.0f }, { 1.3f, 2.0f }, { 1.3f, 3.8f }, { 9.8f, 3.8f }, { 1.3f, 3.8f }, { 1.3f, 2.0f }, { 0.4f, 0.0f } };
+            for (int i = 0; i < noktalar.GetLength(0); i++)
+                yol.Add(daire.TransformPoint(eksen.Nokta(noktalar[i, 0], 0f, noktalar[i, 1])));
+            SaklanmaAni sa = daire.gameObject.AddComponent<SaklanmaAni>();
+            sa.Hazirla(kat, varlik.kacisSablonu, varlik.saklanmaSesi, yol);
+            if (Kayit.KilitCozukMu(kat, "saklanma")) sa.BittiBaslat();
+        }
+
         if (varlik.parcalar != null && varlik.parcalar.Count > 0)
         {
             CizimEkrani ekran = daire.gameObject.AddComponent<CizimEkrani>();
@@ -522,6 +535,7 @@ public class ZincirUygulayici
         foreach (Yuva y in daire.GetComponentsInChildren<Yuva>(true)) Object.DestroyImmediate(y);
         // Kaçış anı (#58): bileşen sökülürken siluetini de yok eder.
         foreach (KacisAni k in daire.GetComponentsInChildren<KacisAni>(true)) Object.DestroyImmediate(k);
+        foreach (SaklanmaAni k in daire.GetComponentsInChildren<SaklanmaAni>(true)) Object.DestroyImmediate(k);
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);

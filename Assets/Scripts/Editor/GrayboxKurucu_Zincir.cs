@@ -69,8 +69,8 @@ public static partial class GrayboxKurucu
         KatZinciriVarligi kat3 = Kat3Kur();
         KatZinciriVarligi kat4 = Kat4Kur();
         KatZinciriVarligi kat5 = Kat5Kur();
-        KatZinciriVarligi kat6 = Kat6Kur(isimKarti);
         GameObject golge = GolgeSablonuKur();
+        KatZinciriVarligi kat6 = Kat6Kur(isimKarti, golge);
         KatZinciriVarligi kat7 = Kat7Kur(golge);
         KatZinciriVarligi kat8 = Kat8Kur();
 
@@ -622,7 +622,7 @@ public static partial class GrayboxKurucu
     //   bufe     : dört tabak doğru yerlerde -> büfenin sol kapısı; içinde katın anahtarı
     // Tabaklar: Rıza 3'ün mutfak dolabında, Cemal 3'ün yatak odasında, Hasan 4'ün banyosunda,
     // Yeni Kapıcı 4'ün yatak odasında.
-    static KatZinciriVarligi Kat6Kur(GameObject isimKarti)
+    static KatZinciriVarligi Kat6Kur(GameObject isimKarti, GameObject golge)
     {
         string yol = $"{ZincirKlasoru}/Kat_6.asset";
         KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
@@ -706,6 +706,11 @@ public static partial class GrayboxKurucu
             new KatNotu { Metin = "not.kat6_kol", Yol = "Esyalar/Duvar_Kolu", X = 0.35f, Y = 0.25f, Z = 0.002f },
             new KatNotu { Metin = "not.kat6_takvim", Yol = "B:", X = 4.95f, Y = 1.40f, Z = 2.952f, OnU = 0f, OnV = 1f },
         };
+        // Saklanma anı (#58): büfedeki anahtar alınınca kapı tıklatılır, Gölge holde devriye gezer.
+        // Davet notu uyarıyor: misafir gelince kapını kapalı tut.
+        v.saklanmaVar = true;
+        v.kacisSablonu = golge;
+        v.saklanmaSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
         v.parcalar = new List<KatParcasi>();
         v.sesler = new List<KatSesi>();
         v.yananOdalar = new List<string>();

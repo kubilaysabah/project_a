@@ -427,3 +427,5 @@ MonoBehaviour:
   kacisBaslangicSesi: {fileID: 8300000, guid: 3d6fdda3d363f904cbcc1080f538301e, type: 3}
   kacisHaberciSesi: {fileID: 8300000, guid: 057b5962467458945b27a59d3ed2df83, type: 3}
   cizimBoyu: 0.3
+  saklanmaVar: 0
+  saklanmaSesi: {fileID: 0}

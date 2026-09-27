@@ -255,3 +255,5 @@ MonoBehaviour:
   kacisBaslangicSesi: {fileID: 0}
   kacisHaberciSesi: {fileID: 0}
   cizimBoyu: 0.3
+  saklanmaVar: 0
+  saklanmaSesi: {fileID: 0}

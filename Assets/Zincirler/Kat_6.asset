@@ -547,9 +547,11 @@ MonoBehaviour:
   yanlisKapiSesleri: []
   elektrikYok: 0
   kacisVar: 0
-  kacisSablonu: {fileID: 0}
+  kacisSablonu: {fileID: 3859886990552203880, guid: 4b38d86f79492c84d88deb70b8af0bd2, type: 3}
   kacisGecikme: 3
   kacisHizi: 2.2
   kacisBaslangicSesi: {fileID: 0}
   kacisHaberciSesi: {fileID: 0}
   cizimBoyu: 0.3
+  saklanmaVar: 1
+  saklanmaSesi: {fileID: 8300000, guid: 482b44ee12097e34d8f3ffff5677158a, type: 3}

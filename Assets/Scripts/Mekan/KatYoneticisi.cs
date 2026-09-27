@@ -1069,9 +1069,16 @@ public class KatYoneticisi : MonoBehaviour
     private float yakalanmaKarartmasi;       // 0-1: ekranın karalığı
 
     /// <summary>Kaçışta yakalanıldı: katı baştan kurar (KacisAni çağırır).</summary>
-    public void KacistaYakalandi(int kat) { StartCoroutine(KatiBastanKur(kat)); }
+    public void KacistaYakalandi(int kat) { StartCoroutine(KatiBastanKur(kat, kilitleriSil: true)); }
 
-    private IEnumerator KatiBastanKur(int kat)
+    /// <summary>
+    /// 6. katın saklanma anında görüldü (#58, SaklanmaAni): karanlık, oyuncu katın başında uyanır;
+    /// ama kovalamacadan farklı olarak çözülmüş kilitler çözülmüş kalır (#58'in ilk kuralı). Elindeki
+    /// anahtar düşer ve kurulumda büfeye geri konur; an da yeniden kurulur.
+    /// </summary>
+    public void SaklanmadaYakalandi(int kat) { StartCoroutine(KatiBastanKur(kat, kilitleriSil: false)); }
+
+    private IEnumerator KatiBastanKur(int kat, bool kilitleriSil)
     {
         // Karanlıkta oyuncu yürüyemesin.
         BirinciSahisKontrolcu kontrol = oyuncu != null ? oyuncu.GetComponent<BirinciSahisKontrolcu>() : null;
@@ -1083,8 +1090,11 @@ public class KatYoneticisi : MonoBehaviour
 
         // Karanlıkta: elindeki (katın anahtarı) düşer, katın kaydı silinir, oyuncu başa alınır.
         Cep.Bosalt();
-        Kayit.KatiSifirla(kat);
-        EsyaListesi.KatiUnut(kat);   // T listesi de o katı baştan saysın (#75)
+        if (kilitleriSil)
+        {
+            Kayit.KatiSifirla(kat);
+            EsyaListesi.KatiUnut(kat);   // T listesi de o katı baştan saysın (#75)
+        }
         OyuncuyuBasaAl();
         // Sahanlıklar ve daire zorla yeniden kurulur: zincir uygulayıcısı kayda bakar, kayıtta
         // artık bu katın hiçbir kilidi yok, her şey baştan yerine konur. Eski KacisAni sökülürken
