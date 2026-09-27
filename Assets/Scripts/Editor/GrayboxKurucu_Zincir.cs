@@ -788,6 +788,13 @@ public static partial class GrayboxKurucu
             new KatNotu { Metin = "not.kat7_kimlik", Yol = "Esyalar/Lavabo", X = 0f, Y = 1.25f, Z = 0.004f },
             // Cemal'in son notu Oda B'nin arka duvarında (v = 8,1), odaya (-v) bakar.
             new KatNotu { Metin = "not.kat7_son", X = 5.45f, Y = 1.40f, Z = 8.098f, OnU = 0f, OnV = -1f },
+            // İPUÇLARI (Şahan, 2026-09-27: Cemal'in odasının şifresini bulamadı; yatak odasına giden
+            // yolun kilerdeki koldan geçtiğini anlatan bir şey yoktu):
+            //   kilerde kolun yanında: kol mutfağın sürgüsünü açar;
+            //   koridorda Oda B'nin kapısının solunda (kapı u = 5,95-6,75, koridor duvarı v = 4,65):
+            //   şifre yatak odasının duvarında, karanlıkta.
+            new KatNotu { Metin = "not.kat7_kol", Yol = "Esyalar/Duvar_Kolu", X = 0.35f, Y = 0.25f, Z = 0.002f },
+            new KatNotu { Metin = "not.kat7_sifre", X = 5.45f, Y = 1.40f, Z = 4.648f, OnU = 0f, OnV = -1f },
         };
         v.parcalar = new List<KatParcasi>();
         v.suslar = new List<KatSusu>();

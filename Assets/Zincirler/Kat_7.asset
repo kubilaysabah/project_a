@@ -296,6 +296,24 @@ MonoBehaviour:
     OnV: -1
     Yatik: 0
     Metin: not.kat7_son
+  - Yol: Esyalar/Duvar_Kolu
+    X: 0.35
+    Y: 0.25
+    Z: 0.002
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat7_kol
+  - Yol: 
+    X: 5.45
+    Y: 1.4
+    Z: 4.648
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Metin: not.kat7_sifre
   suslar: []
   sesler: []
   parcalar: []
