@@ -7,7 +7,8 @@
 // NASIL ÇALIŞIR
 //   - Kameranın çocuğu olan bir SPOT ışık: kamera nereye bakarsa huzme oraya. Oyuncu yalnızca
 //     huzmedekini görür; korku, bakışa bağlanır (bir şey huzmenin kenarında durabilir).
-//   - F ya da kolun sol omzu (L1) lambayı açıp kapatır; eski bir anahtar tıkı duyulur.
+//   - L ya da kolun sol omzu (L1) lambayı açıp kapatır; eski bir anahtar tıkı duyulur.
+//     (#76, Şahan: ilk hâli F'ydi; "lamba" demek olan L'ye taşındı.)
 //     Karanlıkta durup dinlemek ve saklanmak (#58 kaçış anları) için gerekli.
 //   - Pil YOK (Şahan'ın kararı): sayaç eklenince korku yerine muhasebe olur. Lamba yalnızca
 //     senaryolu anlarda titrer ya da bir anlığına söner; bunun için Titret() ve Sondur() var,
@@ -73,9 +74,9 @@ public class KafaLambasi : MonoBehaviour
         // Menü açıkken ve başlık ekranında tuş okunmaz (kontrolcü zaten kapalı, bu bileşen değil).
         if (DuraklatmaMenusu.BaslikEkraninda || Time.timeScale == 0f) return;
 
-        bool f = Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
+        bool l = Keyboard.current != null && Keyboard.current.lKey.wasPressedThisFrame;
         bool omuz = Gamepad.current != null && Gamepad.current.leftShoulder.wasPressedThisFrame;
-        if (f || omuz) Degistir();
+        if (l || omuz) Degistir();
     }
 
     /// <summary>Lambayı açar ya da kapatır (oyuncunun tuşu).</summary>

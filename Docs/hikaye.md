@@ -31,7 +31,7 @@ sekiz kat vardır ama asansör dokuza kadar sayar; önceki kapıcılar oraya ç�
 
 - Bina karanlık: her katta en fazla bir çalışan sahanlık ampulü, çoğu sönük ya da titrek.
 - Kafa lambası kameraya bağlı sıcak bir spot (~40°, yumuşak kenar, 8-10 m); gölge atar (tek ışık, ucuz;
-  Düşük kalitede gölgesiz). **F / kolun sol omzu** ile açılıp kapanır (karanlıkta durup dinlemek, saklanmak).
+  Düşük kalitede gölgesiz). **L / kolun sol omzu** ile açılıp kapanır (#76; ilk hâli F idi) (karanlıkta durup dinlemek, saklanmak).
 - Pil yönetimi **yok**. Lamba yalnızca senaryolu anlarda titrer ya da bir anlığına söner.
 - Korku bakışa bağlanır: oyuncu yalnızca huzmedekini görür; olaylar huzmenin kenarında olur.
 - "Ampul değiştir" görevi bazı katlarda sahanlık ışığını geri getirir: oyuncu karanlığa karşı bir şey yapabilir.
