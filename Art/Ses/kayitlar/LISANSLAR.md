@@ -17,8 +17,25 @@ zorunluluğu getirmez; yine de kaynakları burada kayıtlı.
 | `bigsoundbank_2854_rifle_shot_2.wav` | Uzak silah sesi (#37), tek ve çift atış | https://bigsoundbank.com/rifle-shot-2-s2854.html | Joseph Sardin | CC0 1.0 |
 | `bigsoundbank_0147_whistling_of_the_wind_1.wav` | Pencereden içeri süzülen cılız rüzgâr (#37), üç esinti | https://bigsoundbank.com/whistling-of-the-wind-1-s0147.html | Joseph Sardin | CC0 1.0 |
 | `849570__spiritzip__dog-barking-at-night.wav` | Uzaktan köpek havlaması (#37), iki parça | https://freesound.org/people/spirit.zip/sounds/849570/ | spirit.zip | CC0 1.0 |
+| `847083__funkelfang__water-drip-leaky-faucet-in-ceramic-sink.wav` | S12 lavabo damlası (#74) | https://freesound.org/people/Funkelfang/sounds/847083/ | Funkelfang | **CC BY 4.0: jenerikte isim yazılı** |
+| `802595__qubodup__creaking-floorboards-13-long-slow.wav` | S20+ parke gıcırtısı (#74) | https://freesound.org/people/qubodup/sounds/802595/ | qubodup | CC0 1.0 |
+| `118041__glamont__concrete-stairs.wav` | S20m merdivende beton adımlar (#74) | https://freesound.org/people/G.Lamont/sounds/118041/ | G.Lamont | CC0 1.0 |
+| `248037__sophiehall3535__pick-up-keys-1.wav` | S24 anahtar alma (#74) | https://freesound.org/s/248037/ | sophiehall3535 | CC0 1.0 |
+| `784151__loganzsound__glass-break-hammer.wav` | S25 kavanoz kırılması (#74) | https://freesound.org/s/784151/ | loganzsound | CC0 1.0 |
+| `pixabay_kodack_trying-to-open-a-locked-door-104302.mp3` | S28 kilitli oda kapısı (#74) | https://pixabay.com/sound-effects/household-trying-to-open-a-locked-door-104302/ | Kodack | Pixabay Content License |
+| `218890__qubodup__door-smash-1.flac` | S29 devrilen kapı, çarpma katmanı (#74) | https://freesound.org/people/qubodup/sounds/218890/ | qubodup | CC0 1.0 |
+| `pixabay_alex_jauk_large-wood-plank-falls-down-230892.mp3` | S29 devrilen kapı, tahta katmanı (#74) | https://pixabay.com/sound-effects/film-special-effects-large-wood-plank-falls-down-230892/ | Alex_Jauk | Pixabay Content License |
+| `747175__fwughox_official__screwing-into-wood.wav` | S30 tornavidayla vida sökme (#74) | https://freesound.org/s/747175/ | Fwughox_Official | CC0 1.0 |
+| `274766__launemax__rattling-at-an-iron-gate.wav` | S33 kilitli demir kapıyı sarsmak (#74) | https://freesound.org/people/launemax/sounds/274766/ | launemax | CC0 1.0 |
+| `451933__kyles__switch-big-breaker-metal-click-on-off.flac` | S34 kol/şalter; S35'teki şalter tıkı (#74) | https://freesound.org/s/451933/ | kyles | CC0 1.0 |
+| `521127__c-v__screwing-in-light-bulb.wav` | S35 buşon takma, vidalama katmanı (#74) | https://freesound.org/s/521127/ | C-V | CC0 1.0 |
+| `708579__group39__sfx-int.wav` | S36 şifre çarkı (#74) | https://freesound.org/s/708579/ | Group39 | CC0 1.0 |
+| `18768__cognito-perceptu__elevator-bell-doors.wav` | S40z asansör zili (#74) | https://freesound.org/people/cognito%20perceptu/sounds/18768/ | cognito perceptu | CC0 1.0 |
+| `479992__craigsmith__r09-13-apartment-buzzer.wav` | S45 daire zili (#74) | https://freesound.org/s/479992/ | craigsmith | CC0 1.0 |
 
 **Notlar**
+- **#74 (2026-09-27):** Freesound dosyalarını Şahan kendi hesabıyla indirdi; Pixabay dosyaları herkese açık
+  dosya sunucusundan indirildi (Şahan'ın izniyle). Dış rüzgâr kaydı (BigSoundBank #0147) artık kullanılmıyor.
 - **Pixabay Content License:** ticari kullanım serbest, isim belirtmek gerekmez. Yasak olan,
   dosyayı tek başına, değiştirilmemiş hâliyle yeniden dağıtmak; oyunun içinde işlenmiş
   olarak kullanmak serbesttir.

@@ -67,7 +67,7 @@ def kaydet(klasor, ad, ornekler, tepe=0.8):
 # zamanlamaları biraz farklı; oyunda perde de her adımda değişiyor (AyakSesi.cs).
 def adimlar():
     H = HIZ_KESKIN
-    for n in range(1, 5):
+    for n in range(1, 2):   # #74: yalnızca Adim_1 (Şahan: mevcut adım sesi kalsın; öbür çeşitler kalktı)
         random.seed(100 + n)
         N = int(0.42 * H)
         k = random.uniform(0.88, 1.12)                       # bu çeşidin "ayakkabı tonu"
@@ -122,22 +122,6 @@ def lamba_sonme():
     s = alcak(yuksek(s, 300, H), 8000, H)
     s = yanki(s, H, boyut=0.5, sonum=0.5, islak=0.08, oda=0.7)      # yalnızca hafif bir oda izi
     kaydet_hiz(os.path.join(SESLER, "Lamba_Sonme.wav"), s, H, 0.7)
-
-
-# ---------- CIZIRTI ----------
-# Titreyen lambanın kıvılcım çıtırtıları. Revizyon (Şahan): "arkadaki fon benzeri ses
-# olmasa cızırtı okey". Arkadaki fon 50 Hz şebeke vızıltısıydı; çıkarıldı. Çıtırtılar
-# aynı tohumla üretildiği için onayladığın çıtırtıların aynısı.
-def lamba_cizirti():
-    random.seed(8)
-    L = 0.9
-    s = [0.0] * int(L * HIZ)
-    for _ in range(40):                                                              # çıtırtılar
-        bas = random.randint(0, len(s) - 400)
-        guc = random.uniform(0.4, 1.2)
-        for j in range(400):
-            s[bas + j] += guc * random.uniform(-1, 1) * math.exp(-j / 40)
-    kaydet(SESLER, "Lamba_Cizirti", suz(s, 0.7), 0.7)
 
 
 # ---------- KÂĞIT POŞET ----------
@@ -213,7 +197,8 @@ def sabah():
 # alakası yok" dendi. 2026-09-26'dan beri gerçek kayıttan: kayit_isle.py -> guvercin.
 
 
-URETICILER = {"adimlar": adimlar, "lamba_sonme": lamba_sonme, "lamba_cizirti": lamba_cizirti,
+# #74: lamba cızırtısı kalktı; adım üreticisi yalnızca Adim_1'i üretir (öbür çeşitler kalktı).
+URETICILER = {"adimlar": adimlar, "lamba_sonme": lamba_sonme,
               "poset": poset, "sabah": sabah}
 
 if __name__ == "__main__":

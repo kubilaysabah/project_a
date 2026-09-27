@@ -353,9 +353,134 @@ def radyo():
     ortak.kaydet(os.path.join(KOK, "Assets", "Resources", "Sesler", "Radyo_Dugme.wav"), ortak.yumusak_sinirla(tik, 2.0), HIZ, 0.8)
 
 
+
+# ---------- #74 SES REVİZYONU: ŞAHAN'IN SEÇTİĞİ KAYITLAR ----------
+# Şahan 49 sesi dinleyip işaretledi, değişecekler için adaylar arasından seçti (2026-09-27).
+# Freesound dosyalarını Şahan kendi hesabıyla indirdi; Pixabay dosyaları herkese açık dosya
+# sunucusundan indirildi. Kesme yerleri kayıtların ses zarfından (50 ms'lik tepe) bulundu.
+# Hepsi 44,1 kHz mono; oyundaki dosya adları değişmedi, kod aynı dosyaları okur.
+SESLER = os.path.join(KOK, "Assets", "Resources", "Sesler")
+H44 = 44100
+
+
+def _kaydet(klasor, ad, ornekler, tepe=0.8):
+    ortak.kaydet(os.path.join(klasor, ad), ornekler, H44, tepe)
+
+
+def rev_damla():
+    """S12: Funkelfang, "Water Drip – Leaky Faucet in Ceramic Sink" (CC-BY 4.0, jenerikte isim).
+    Seramik lavabo, fayanslı banyo. 1,2-21,15 sn arası: iki ucu da iki damla arasındaki sessizlikte,
+    bu yüzden döngü dikişsiz."""
+    k = oku("847083__funkelfang__water-drip-leaky-faucet-in-ceramic-sink.wav", H44)
+    _kaydet(ANOMALI, "Boru_Damla.wav", kes(k, 1.2, 21.15, giris=0.05, cikis=0.05, hiz=H44))
+
+
+def rev_anahtar():
+    """S24: sophiehall3535, "Pick Up Keys 1" (CC0). Anahtar destesi alınıyor, tamamı."""
+    k = oku("248037__sophiehall3535__pick-up-keys-1.wav", H44)
+    _kaydet(SESLER, "Anahtar_Al.wav", kes(k, 0.0, 1.35, giris=0.005, cikis=0.15, hiz=H44))
+
+
+def rev_cam():
+    """S25: loganzsound, "Glass break hammer" (CC0). Çekiçle cam ve saçılan parçalar, tamamı."""
+    k = oku("784151__loganzsound__glass-break-hammer.wav", H44)
+    _kaydet(SESLER, "Cam_Kirilma.wav", kes(k, 0.0, 1.29, giris=0.002, cikis=0.2, hiz=H44))
+
+
+def rev_devrilme():
+    """S29: qubodup "Door Smash 1" (CC0) + Alex_Jauk "Large Wood Plank Falls Down" (Pixabay).
+    Şahan'ın seçimi: ağır kapı çarpması ile düz tahta şaplamasının karışımı. Kapının asıl vuruşu
+    kayıtta 1,95 sn'de; 1,7 sn'den kesilince 0,25 sn'ye, tahtanın vuruşuna (0,2 sn) denk gelir."""
+    kapi = kes(oku("218890__qubodup__door-smash-1.flac", H44), 1.7, 4.4, giris=0.01, cikis=0.6, hiz=H44)
+    tahta = kes(oku("pixabay_alex_jauk_large-wood-plank-falls-down-230892.mp3", H44), 0.0, 1.42, giris=0.002, cikis=0.3, hiz=H44)
+    karisim = [x * 0.9 for x in kapi]
+    ortak.ekle(karisim, tahta, int(0.03 * H44), 0.75)
+    _kaydet(SESLER, "Kapi_Devrilme.wav", karisim)
+
+
+def rev_vida():
+    """S30: Fwughox_Official, "Screwing into wood" (CC0). El tornavidasının tur tur dönüşü;
+    her basışta bir vida, 0,95-2,2 sn arası (iki dönüş)."""
+    k = oku("747175__fwughox_official__screwing-into-wood.wav", H44)
+    _kaydet(SESLER, "Vida_Sokme.wav", kes(k, 0.95, 2.2, giris=0.01, cikis=0.15, hiz=H44))
+
+
+def rev_demir_sarsma():
+    """S33: launemax, "Rattling at an iron gate" (CC0). Kilitli demir kat kapısını sarsmak;
+    5,4-6,9 sn arası yoğun şangırtı."""
+    k = oku("274766__launemax__rattling-at-an-iron-gate.wav", H44)
+    _kaydet(SESLER, "KatKapisi_Kilitli.wav", kes(k, 5.4, 6.9, giris=0.01, cikis=0.3, hiz=H44))
+
+
+def rev_kol():
+    """S34: kyles, "switch big breaker metal click on, off" (CC0). İlk (açma) tıkı, 0-1,2 sn."""
+    k = oku("451933__kyles__switch-big-breaker-metal-click-on-off.flac", H44)
+    _kaydet(SESLER, "Kol_Cekme.wav", kes(k, 0.0, 1.2, giris=0.002, cikis=0.3, hiz=H44))
+
+
+def rev_sigorta():
+    """S35: C-V, "Screwing in light bulb" (CC0) + S34'ün şalter tıkı. Buşonun kaydı hiçbir izinli
+    kaynakta yok; ampulün duya vidalanması aynı mekanik. 0,9-3,2 sn arası vidalama, sonunda
+    elektrik gelirken şalterin tok tıkı."""
+    vida = kes(oku("521127__c-v__screwing-in-light-bulb.wav", H44), 0.9, 3.2, giris=0.02, cikis=0.15, hiz=H44)
+    tik = kes(oku("451933__kyles__switch-big-breaker-metal-click-on-off.flac", H44), 0.1, 0.9, giris=0.002, cikis=0.2, hiz=H44)
+    karisim = list(vida) + sessizlik(0.9, H44)
+    ortak.ekle(karisim, tik, int(2.35 * H44), 0.8)
+    _kaydet(SESLER, "Sigorta_Takma.wav", karisim)
+
+
+def rev_sifre():
+    """S36: Group39, "SFX-Int.-Combination Lock" (CC0). Çarkın tek bir rakam tıkı: 1,28-1,45 sn."""
+    k = oku("708579__group39__sfx-int.wav", H44)
+    _kaydet(SESLER, "Sifre_Cark.wav", kes(k, 1.28, 1.45, giris=0.001, cikis=0.04, hiz=H44))
+
+
+def rev_zil():
+    """S45: craigsmith, "R09-13-Apartment Buzzer" (CC0). Küçük bir dairenin tiz vızıltılı zili;
+    1,6-4,3 sn arası iki çalış. Oyundaki dosya adı eski ding-dong'dan kaldı (Zil_DingDong)."""
+    k = oku("479992__craigsmith__r09-13-apartment-buzzer.wav", H44)
+    _kaydet(ANOMALI, "Zil_DingDong.wav", kes(k, 1.6, 4.3, giris=0.005, cikis=0.3, hiz=H44))
+
+
+def rev_ic_kilitli():
+    """S28: Kodack, "Trying to open a locked door" (Pixabay). Kilitli oda kapısının kolunu zorlamak;
+    0,25-1,55 sn arası."""
+    k = oku("pixabay_kodack_trying-to-open-a-locked-door-104302.mp3", H44)
+    _kaydet(SESLER, "IcKapi_Kilitli.wav", kes(k, 0.25, 1.55, giris=0.005, cikis=0.2, hiz=H44))
+
+
+def rev_asansor_zili():
+    """S40z: cognito perceptu, "elevator bell doors" (CC0). Eski bir asansörün zili; 0,1-2,4 sn."""
+    k = oku("18768__cognito-perceptu__elevator-bell-doors.wav", H44)
+    _kaydet(ANOMALI, "Asansor_Ding.wav", kes(k, 0.1, 2.4, giris=0.005, cikis=0.4, hiz=H44))
+
+
+def rev_gicirti():
+    """S20+: qubodup, "Creaking Floorboards 13 Long Slow" (CC0). Dairelerde adımların arasına ara sıra
+    karışan parke gıcırtısı; uzun gıcırtıdan üç çeşit (Gicirti_1-3)."""
+    k = oku("802595__qubodup__creaking-floorboards-13-long-slow.wav", H44)
+    for i, (bas, son) in enumerate(((0.0, 1.4), (1.4, 2.9), (2.9, 4.0)), 1):
+        _kaydet(SESLER, f"Gicirti_{i}.wav", kes(k, bas, son, giris=0.03, cikis=0.25, hiz=H44), tepe=0.6)
+
+
+def rev_merdiven():
+    """S20m: G.Lamont, "Concrete Stairs" (CC0). Merdivende ve sahanlıkta beton adımlar; kayıttaki
+    dört adım tek tek (Merdiven_Adim_1-4). Adları "Adim" ile başlamıyor: AyakSesi o önekle
+    başlayanların hepsini parke adımı sayıyor."""
+    k = oku("118041__glamont__concrete-stairs.wav", H44)
+    for i, bas in enumerate((4.47, 5.12, 5.72, 6.37), 1):
+        _kaydet(SESLER, f"Merdiven_Adim_{i}.wav", kes(k, bas, bas + 0.4, giris=0.002, cikis=0.12, hiz=H44))
+
+
+URETICILER_74 = {"damla": rev_damla, "anahtar": rev_anahtar, "cam": rev_cam, "devrilme": rev_devrilme,
+                 "vida": rev_vida, "demir_sarsma": rev_demir_sarsma, "kol": rev_kol, "sigorta": rev_sigorta,
+                 "sifre": rev_sifre, "zil": rev_zil, "ic_kilitli": rev_ic_kilitli, "asansor_zili": rev_asansor_zili,
+                 "gicirti": rev_gicirti, "merdiven": rev_merdiven}
+
 URETICILER = {"bebek": bebek, "tv": tv, "guvercin": guvercin, "kapi_carpma": kapi_carpma, "kapi_tiklatma": kapi_tiklatma,
               "muzik": muzik, "dis_silah": dis_silah, "dis_kopek": dis_kopek,
               "radyo": radyo}
+URETICILER.update(URETICILER_74)
 
 if __name__ == "__main__":
     for ad in (sys.argv[1:] or list(URETICILER)):

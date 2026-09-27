@@ -130,8 +130,8 @@ def uzak_olay(tur, H):
 
 def kat_olaylari():
     random.seed(1)
-    for tur, ad in (("kapi", "Olay_UzakKapi"), ("adim", "Olay_UstKatAdimlari"),
-                    ("tik", "Olay_Kalorifer"), ("araba", "Olay_Araba")):
+    # #74: uzak kapı, kalorifer ve araba kalktı; üst kat adımları Gölge'nin habercisi olarak kaldı.
+    for tur, ad in (("adim", "Olay_UstKatAdimlari"),):
         s = ortak.alcak(uzak_olay(tur, HIZ), 900, HIZ)                  # uzaktan: tizler yolda kaldı
         s = ortak.yanki(s + [0.0] * int(3.0 * HIZ), HIZ, boyut=0.88, sonum=0.5, islak=1.0, kuru=0.25, oda=1.4)
         kaydet(OLAY, ad, s, 0.8)
@@ -161,22 +161,6 @@ def boru_vurusu(guc):
     return [guc * (0.6 * a + 1.0 * b) for a, b in zip(metal, gum)]
 
 
-def boru():
-    L = 16.0
-    n = int(L * HIZ)
-    random.seed(4)
-    s = [0.0] * n
-    t = 0.8
-    while t < L - 1.0:
-        ortak.ekle(s, boru_vurusu(random.uniform(0.5, 1.0)), int(t * HIZ))
-        if random.random() < 0.4:                                   # bazen art arda ikinci tık
-            ortak.ekle(s, boru_vurusu(random.uniform(0.3, 0.6)), int((t + random.uniform(0.12, 0.25)) * HIZ))
-        t += random.uniform(1.2, 3.4)
-    s = ortak.alcak(s, 700, HIZ)                                    # duvarın içinden: boğuk
-    s = ortak.dairesel_yanki(s, HIZ, 3.0, boyut=0.88, sonum=0.3, islak=0.7, kuru=0.6, oda=1.2)
-    kaydet(ORTAM, "Ortam_Boru", s, 0.7)
-
-
 # ---------- DÜZENLİ DAMLA (anomali) ----------
 # Revizyon (Şahan, 2026-09-26): "su damlama sesi yaparsan daha güzel olabilir". Kart
 # (duzenli_boru) hâlâ aynı fikri taşıyor: normal katta boru tıkırtıları DÜZENSİZDİR;
@@ -201,35 +185,6 @@ def damla():
     return [a + 0.3 * b for a, b in zip(s, tik)]
 
 
-def duzenli_damla():
-    L = 16.0                                                        # 16 sn / 1,6 sn = tam 10 damla
-    n = int(L * HIZ)
-    s = [0.0] * n
-    tek = damla()
-    t = 0.4
-    while t < L:
-        ortak.ekle(s, tek, int(t * HIZ))
-        t += 1.6
-    s = ortak.alcak(s, 5000, HIZ)
-    s = ortak.dairesel_yanki(s, HIZ, 2.0, boyut=0.6, sonum=0.45, islak=0.15, oda=0.9)
-    kaydet(ANOMALI, "Boru_Damla", s, 0.7)
-
-
-# ---------- RÜZGÂR ----------
-def ruzgar():
-    L = 12.0
-    n, gecis = int(L * HIZ), int(0.8 * HIZ)
-    random.seed(5)
-    g = suz(suz([random.uniform(-1, 1) for _ in range(n + gecis)], 0.04), 0.08)
-    s = []
-    for i in range(n + gecis):
-        t = i / HIZ
-        # Esintiler: 12 sn'de 1, 2 ve 3 tam tur atan yavaş dalgalar.
-        e = 0.55 + 0.25 * math.sin(2 * math.pi * t / 12) + 0.15 * math.sin(2 * math.pi * 2 * t / 12 + 1) + 0.08 * math.sin(2 * math.pi * 3 * t / 12 + 2)
-        s.append(e * g[i])
-    kaydet(ORTAM, "Ortam_Ruzgar", dongule(s, n, gecis), 0.7)
-
-
 # ---------- ASANSÖR UĞULTUSU ----------
 def asansor_ugultu():
     L = 8.0
@@ -245,8 +200,8 @@ def asansor_ugultu():
     kaydet(ANOMALI, "Asansor_Ugultu", dongule(s, n, gecis), 0.8)
 
 
-URETICILER = {"ugultu": ugultu, "kat_olaylari": kat_olaylari, "boru": boru,
-              "duzenli_damla": duzenli_damla, "ruzgar": ruzgar, "asansor_ugultu": asansor_ugultu}
+# #74: boru ve pencere rüzgârı kalktı; lavabo damlası artık kayıt (kayit_isle.py rev_damla).
+URETICILER = {"ugultu": ugultu, "kat_olaylari": kat_olaylari, "asansor_ugultu": asansor_ugultu}
 
 if __name__ == "__main__":
     # Ad verilirse yalnızca o sesler üretilir; verilmezse hepsi. Onaylanmış bir sesi
