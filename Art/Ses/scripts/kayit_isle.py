@@ -266,27 +266,27 @@ def uzaklastir(ornekler, hiz, kesim, yanki_payi, kuyruk):
 
 
 # Kayıt: "Rifle: Shot #2" (BigSoundBank #2854, CC0): açık arazide bir tüfek atışı ve
-# ovadaki yankısı. Uzak bir şehir atışı gibi duyulsun diye boğuklaştırılıp yankısı
-# uzatılıyor. İki çeşit: tek atış ve 1,1 sn arayla iki atış.
+# ovadaki yankısı. İki çeşit: tek atış ve 1,1 sn arayla iki atış.
+# #74 (Şahan, 2026-09-27): ilk hâli (1400 Hz'de iki kez süzgeç + yoğun yankı) "silah sesine
+# hiç benzemiyor" dendi. Üç hafiflikte aday dinlendi; Şahan NEREDEYSE HAMI seçti: yalnızca
+# en tizler (8 kHz) törpülenir, çok hafif bir oda yankısı eklenir.
 def dis_silah():
     H = 44100
     kayit = oku("bigsoundbank_2854_rifle_shot_2.wav", H)
     tek = kes(kayit, 0.0, len(kayit) / H, giris=0.001, cikis=0.2, hiz=H)
-    ortak.kaydet(os.path.join(DIS, "Dis_Silah_1.wav"), uzaklastir(tek, H, 1400, 0.7, 3.0), H, 0.8)
+
+    def neredeyse_ham(ses):
+        s = ortak.alcak(ses, 8000, H) + sessizlik(1.5, H)
+        return ortak.yanki(s, H, boyut=0.9, sonum=0.45, islak=0.15, kuru=1.0, oda=1.5)
+
+    ortak.kaydet(os.path.join(DIS, "Dis_Silah_1.wav"), neredeyse_ham(tek), H, 0.8)
     iki = list(tek) + sessizlik(1.1, H)
     ortak.ekle(iki, tek, int(1.1 * H), 0.8)
-    ortak.kaydet(os.path.join(DIS, "Dis_Silah_2.wav"), uzaklastir(iki, H, 1400, 0.7, 3.0), H, 0.8)
+    ortak.kaydet(os.path.join(DIS, "Dis_Silah_2.wav"), neredeyse_ham(iki), H, 0.8)
 
 
-# Kayıt: "Whistling of the Wind #1" (BigSoundBank #0147, CC0): açık bir pencereden içeri
-# süzülen hafif esinti. Şahan'ın isteği: "bina içine girecek cılız rüzgâr sesi". Kaydın
-# içinden üç esinti kesiliyor (esintinin kabarıp söndüğü yerler), her biri ~13 sn,
-# başı ve sonu yumuşak. Kayıt zaten içeriden alınmış; yalnızca en alttaki uğultu atılıyor.
-def dis_ruzgar():
-    kayit = ortak.yuksek(oku("bigsoundbank_0147_whistling_of_the_wind_1.wav"), 80, HIZ)
-    for i, (bas, son) in enumerate(((22.0, 36.0), (45.0, 58.0), (86.0, 100.0)), 1):
-        parca = kes(kayit, bas, son, giris=2.5, cikis=3.0)
-        ortak.kaydet(os.path.join(DIS, f"Dis_Ruzgar_{i}.wav"), parca, HIZ, 0.8)
+# Dış rüzgâr (Dis_Ruzgar_1-3) #74'te kalktı (Şahan'ın ses kararları); üreticisi de silindi,
+# yoksa betik adsız çalıştırılınca silinen dosyaları geri getirirdi.
 
 
 # Kayıt: "Dog Barking at Night" (spirit.zip, Freesound, CC0; Şahan indirdi): sessiz bir
@@ -354,7 +354,7 @@ def radyo():
 
 
 URETICILER = {"bebek": bebek, "tv": tv, "guvercin": guvercin, "kapi_carpma": kapi_carpma, "kapi_tiklatma": kapi_tiklatma,
-              "muzik": muzik, "dis_silah": dis_silah, "dis_ruzgar": dis_ruzgar, "dis_kopek": dis_kopek,
+              "muzik": muzik, "dis_silah": dis_silah, "dis_kopek": dis_kopek,
               "radyo": radyo}
 
 if __name__ == "__main__":
