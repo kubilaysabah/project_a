@@ -333,7 +333,7 @@ MonoBehaviour:
   kacisVar: 1
   kacisSablonu: {fileID: 3859886990552203880, guid: 4b38d86f79492c84d88deb70b8af0bd2, type: 3}
   kacisGecikme: 3
-  kacisHizi: 2.2
+  kacisHizi: 2
   kacisBaslangicSesi: {fileID: 8300000, guid: 3d6fdda3d363f904cbcc1080f538301e, type: 3}
   kacisDonguSesi: {fileID: 8300000, guid: 1def28a99264f9e4c8896a1f15f41a68, type: 3}
   cizimBoyu: 0.3

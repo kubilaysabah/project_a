@@ -34,6 +34,19 @@ public class KilitKaydi
 
     public void Temizle() { cozulenler.Clear(); }
 
+    /// <summary>Bir katın bütün kayıtlarını siler (#58: kaçışta yakalanınca kat baştan başlar).
+    /// Kaç kayıt silindiğini döndürür.</summary>
+    public int KatiSil(int kat)
+    {
+        // Bir katın kayıtları "7:banyo", "7:salon" gibi "7:" ile başlar. İki noktayı da
+        // öneke katıyoruz: yoksa "1" önekiyle 11. katın kayıtları da silinirdi.
+        string onek = kat + ":";
+        // RemoveWhere: kümeden, verilen koşula uyan her değeri siler ve kaç tane sildiğini söyler.
+        // Koşul küçük bir fonksiyon (lambda): "bu değer bu önekle başlıyor mu?".
+        // Ordinal: harfleri dile göre değil, düz karakter olarak karşılaştır (Türkçe "i/İ" tuzağı yok).
+        return cozulenler.RemoveWhere(a => a.StartsWith(onek, System.StringComparison.Ordinal));
+    }
+
     /// <summary>Saklanacak metin. Sıralı yazılır: aynı kayıt hep aynı metni verir.</summary>
     public string Metin()
     {

@@ -63,6 +63,21 @@ public static class Kayit
     /// <summary>Bu katın bu kilidi daha önce çözülmüş mü?</summary>
     public static bool KilitCozukMu(int kat, string kimlik) { return Kilitler.Iceriyor(kat, kimlik); }
 
+    /// <summary>
+    /// Bir katı baştan başlatır (#58, Şahan'ın kararı): o katta çözülen kilitler ve bulunan
+    /// parçalar silinir. Ulaşılan kat ve bulunan aletler kalır; aletler hangi katta bulunduğunu
+    /// tutmadığı için ayrılamaz, zaten yeniden yere konmazlar (tornavida gibi, hep oyuncuda).
+    /// </summary>
+    public static void KatiSifirla(int kat)
+    {
+        int kilit = Kilitler.KatiSil(kat);
+        int parca = Parcalar.KatiSil(kat);
+        PlayerPrefs.SetString(KilitAnahtari, Kilitler.Metin());
+        PlayerPrefs.SetString(ParcaAnahtari, Parcalar.Metin());
+        PlayerPrefs.Save();
+        Debug.Log($"[KAYIT] {kat}. kat baştan: {kilit} kilit ve {parca} parça silindi.");
+    }
+
     /// <summary>Oyuncunun ulaştığı kat; 1 = başlangıç (kayıt yok).</summary>
     public static int Kat
     {

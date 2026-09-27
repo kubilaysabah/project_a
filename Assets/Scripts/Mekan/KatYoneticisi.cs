@@ -1144,6 +1144,16 @@ public class KatYoneticisi : MonoBehaviour
 
     private void OnGUI()
     {
+        // Kaçışta yakalanınca kararan ekran (#58). Test göstergesinden önce ve ondan bağımsız:
+        // yayın build'inde de çizilmeli.
+        if (yakalanmaKarartmasi > 0f)
+        {
+            ArayuzOlcegi.Uygula();
+            GUI.color = new Color(0f, 0f, 0f, yakalanmaKarartmasi);
+            GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
+            GUI.color = Color.white;
+        }
+
         if (!testGostergesi || !Debug.isDebugBuild || copPlani == null) return;
         if (DuraklatmaMenusu.BaslikEkraninda) return;   // başlık ekranının üstüne çizilmesin (#32)
         ArayuzOlcegi.Uygula();   // gösterge de her ekranda aynı oranda (#34)
@@ -1315,6 +1325,48 @@ public class KatYoneticisi : MonoBehaviour
 
     /// <summary>Kaçış anında yakalanan oyuncu katın başında (sahanlığın başında) uyanır (#58).</summary>
     public void OyuncuyuKatBasinaAl() { OyuncuyuBasaAl(); }
+
+    // ---------- KAÇIŞTA YAKALANMA (#58) ----------
+    // Şahan'ın kararı (2026-09-27): Gölge yakalarsa oyun değil, yalnızca O KAT baştan başlar.
+    // Ekran kararır; karanlıkta elindeki eşya düşer, katın kaydı silinir, oyuncu sahanlığın
+    // başına alınır ve daire sıfırdan kurulur (kilitler kapalı, anahtarlar yerinde, kaçış yeniden
+    // hazır). Sonra ekran açılır.
+    //
+    // Bu iş neden KacisAni'de değil de burada? Daire yeniden kurulurken zincir uygulayıcısı
+    // dairedeki KacisAni bileşenini söker. Karartma KacisAni'nin içinde çalışsaydı bileşen
+    // sökülünce yarıda kalırdı: ekran açılmaz, oyuncunun kontrolü geri verilmezdi. Kat
+    // yöneticisi hep sahnede durur; işi o bitirir.
+    private float yakalanmaKarartmasi;       // 0-1: ekranın karalığı
+
+    /// <summary>Kaçışta yakalanıldı: katı baştan kurar (KacisAni çağırır).</summary>
+    public void KacistaYakalandi(int kat) { StartCoroutine(KatiBastanKur(kat)); }
+
+    private IEnumerator KatiBastanKur(int kat)
+    {
+        // Karanlıkta oyuncu yürüyemesin.
+        BirinciSahisKontrolcu kontrol = oyuncu != null ? oyuncu.GetComponent<BirinciSahisKontrolcu>() : null;
+        if (kontrol != null) kontrol.enabled = false;
+
+        // 0,35 sn'de ekran kararır.
+        for (float t = 0f; t < 0.35f; t += Time.deltaTime) { yakalanmaKarartmasi = t / 0.35f; yield return null; }
+        yakalanmaKarartmasi = 1f;
+
+        // Karanlıkta: elindeki (katın anahtarı) düşer, katın kaydı silinir, oyuncu başa alınır.
+        Cep.Bosalt();
+        Kayit.KatiSifirla(kat);
+        OyuncuyuBasaAl();
+        // Sahanlıklar ve daire zorla yeniden kurulur: zincir uygulayıcısı kayda bakar, kayıtta
+        // artık bu katın hiçbir kilidi yok, her şey baştan yerine konur. Eski KacisAni sökülürken
+        // Gölge'yi de yok eder; yerine takılan yeni KacisAni anahtarı yine bekler.
+        SahanliklariGuncelle(true);
+        Debug.Log($"[KACIS] {kat}. kat baştan kuruldu.");
+
+        yield return new WaitForSeconds(1.4f);
+        if (kontrol != null) kontrol.enabled = true;
+        // 1,2 sn'de ekran açılır.
+        for (float t = 1f; t > 0f; t -= Time.deltaTime / 1.2f) { yakalanmaKarartmasi = t; yield return null; }
+        yakalanmaKarartmasi = 0f;
+    }
 
     private void OyuncuyuBasaAl()
     {

@@ -9,13 +9,15 @@
 // oyalanan yakalanır.
 //
 //   Kaçtı    : oyuncu anahtarı katın kapısına takar (KatKapisi.AcilisBasladi) -> siluet kaybolur.
-//   Yakalandı: siluet oyuncuya 0,8 m'den yaklaşır -> ekran kararır, oyuncu katın başında uyanır.
-//              Ölüm yok (Şahan'ın seçimi): çözülen kilitler çözük, anahtar elde kalır.
-// Kaçış anı her kat için bir kez olur (kayıtta "kacis" olarak işaretlenir).
+//   Yakalandı: siluet oyuncuya 0,8 m'den yaklaşır -> ekran kararır, KAT BAŞTAN başlar
+//              (Şahan'ın kararı, 2026-09-27): katın kilitleri ve parçaları kayıttan silinir,
+//              anahtar elden düşer, oyuncu sahanlığın başında uyanır. Oyun değil, yalnızca kat.
+//              Bu işi KatYoneticisi.KacistaYakalandi yapar (neden orada: oraya bakın).
+// Kaçış kayıtta "kacis" olarak işaretlenir ve bir daha olmaz; yakalanınca bu işaret de silinir,
+// kat yeniden oynanırken Gölge yine çıkar.
 //
 // Bu bileşeni zincir uygulayıcısı "kaçışı olan" katın dairesine ekler; kat değişince söker.
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -37,7 +39,6 @@ public class KacisAni : MonoBehaviour
     private int hedefIz;
     private GameObject golge;
     private Transform oyuncu;
-    private float karartma;                      // 0-1 ekranın karalığı (yakalanınca)
     private static AudioClip[] adimlar;
 
     public void Hazirla(int katNo, GameObject golgeSablonu, float bekleme, float hizi, AudioClip ilkSes, AudioClip dongu)
@@ -142,7 +143,7 @@ public class KacisAni : MonoBehaviour
         Vector3 aradaki = oyuncu.position - golge.transform.position;
         aradaki.y = 0f;
         if (aradaki.magnitude < YakalamaMesafesi && Mathf.Abs(oyuncu.position.y - golge.transform.position.y) < 1.2f)
-            StartCoroutine(Yakalandi());
+            Yakalandi();
     }
 
     private void AdimCal(AudioClip klip)
@@ -155,23 +156,14 @@ public class KacisAni : MonoBehaviour
         Destroy(g, klip.length / a.pitch + 0.1f);
     }
 
-    // Yakalandı: ekran kararır, oyuncu katın başında uyanır, siluet kaybolur.
-    private IEnumerator Yakalandi()
+    // Yakalandı: Gölge durur; ekranı karartıp katı baştan kurmak kat yöneticisinin işi.
+    // "kacis" kayda YAZILMAZ: kat yeniden oynanırken kaçış anı yine olmalı.
+    private void Yakalandi()
     {
         durum = Durum.Bitti;
-        Kayit.KilitCozuldu(kat, "kacis");
-        Debug.Log($"[KACIS] {kat}. kat: yakalandı; katın başında uyanıyor.");
-        BirinciSahisKontrolcu k = oyuncu.GetComponent<BirinciSahisKontrolcu>();
-        if (k != null) k.enabled = false;
-        for (float t = 0f; t < 0.35f; t += Time.deltaTime) { karartma = t / 0.35f; yield return null; }
-        karartma = 1f;
-        if (golge != null) Destroy(golge);
+        Debug.Log($"[KACIS] {kat}. kat: yakalandı; kat baştan başlıyor.");
         KatYoneticisi y = FindAnyObjectByType<KatYoneticisi>();
-        if (y != null) y.OyuncuyuKatBasinaAl();
-        yield return new WaitForSeconds(1.4f);
-        if (k != null) k.enabled = true;
-        for (float t = 1f; t > 0f; t -= Time.deltaTime / 1.2f) { karartma = t; yield return null; }
-        karartma = 0f;
+        if (y != null) y.KacistaYakalandi(kat);
     }
 
     // Kaçtı: anahtar katın kapısına takıldı (kanadın açılması beklenmez).
@@ -188,13 +180,4 @@ public class KacisAni : MonoBehaviour
     public void BittiBaslat() { durum = Durum.Bitti; }
 
     public bool Basladi { get { return durum == Durum.Basladi; } }
-
-    private void OnGUI()
-    {
-        if (karartma <= 0f) return;
-        ArayuzOlcegi.Uygula();
-        GUI.color = new Color(0f, 0f, 0f, karartma);
-        GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
-        GUI.color = Color.white;
-    }
 }

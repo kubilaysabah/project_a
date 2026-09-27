@@ -48,4 +48,21 @@ public class KilitKaydiTestleri
         Assert.IsFalse(KilitKaydi.KimlikGecerli(""));
         Assert.IsTrue(KilitKaydi.KimlikGecerli("odaA_kapisi"));
     }
+
+    [Test]
+    public void Kat_silinince_yalniz_o_katin_kayitlari_gider()
+    {
+        var k = KilitKaydi.Oku("1:salon;7:banyo;7:salon;11:kiler;17:odaB");
+        // 7. kat silinir: iki kaydı gider; 17. kat "7" ile bitse de, 1 ve 11 de dokunulmaz.
+        Assert.AreEqual(2, k.KatiSil(7));
+        Assert.IsFalse(k.Iceriyor(7, "banyo"));
+        Assert.IsFalse(k.Iceriyor(7, "salon"));
+        Assert.IsTrue(k.Iceriyor(17, "odaB"));
+        // 1. kat silinir: 11. katın kaydı "1" ile başlasa da kalır.
+        Assert.AreEqual(1, k.KatiSil(1));
+        Assert.IsTrue(k.Iceriyor(11, "kiler"));
+        Assert.AreEqual("11:kiler;17:odaB", k.Metin());
+        // Kaydı olmayan kat: hiçbir şey silinmez.
+        Assert.AreEqual(0, k.KatiSil(5));
+    }
 }

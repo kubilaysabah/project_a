@@ -739,12 +739,14 @@ public static partial class GrayboxKurucu
         v.elektrikYok = true;
         v.ikinciDaire = 0;
         // KAÇIŞ ANI (#58): sandıktaki anahtar alınınca asansör "ding" der; 3 sn sonra siluet anahtarın
-        // alındığı yerden çıkar ve oyuncunun yolunu 2,2 m/sn izler (oyuncu 1,8). Oda B'den kat
-        // kapısına duraksamadan ~10 sn; siluetin açığı kapatması ~13 sn: yetişilir, oyalanan yakalanır.
+        // alındığı yerden çıkar ve oyuncunun yolunu 2,0 m/sn izler (oyuncu 1,8). Oda B'den kat
+        // kapısına duraksamadan ~10 sn. Gölge 3 sn geç çıktığı için arada 5,4 m var, bu açığı saniyede
+        // 0,2 m kapatır: ~27 sn. Yolu bilen rahat yetişir, 15 sn'den fazla oyalanan yakalanır.
+        // (İlk hâli 2,2 m/sn idi; yakalanınca kat baştan başladığı için Şahan yavaşlattı, 2026-09-27.)
         v.kacisVar = true;
         v.kacisSablonu = golge;
         v.kacisGecikme = 3f;
-        v.kacisHizi = 2.2f;
+        v.kacisHizi = 2.0f;
         v.kacisBaslangicSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ding.wav");
         v.kacisDonguSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ugultu.wav");
 

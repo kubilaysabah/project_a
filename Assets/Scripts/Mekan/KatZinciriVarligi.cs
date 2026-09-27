@@ -126,7 +126,7 @@ public class KatZinciriVarligi : ScriptableObject
     public bool kacisVar;
     public GameObject kacisSablonu;          // siluetin şablonu (prefab)
     public float kacisGecikme = 3f;          // anahtardan kaç saniye sonra belirir
-    public float kacisHizi = 2.2f;           // m/sn (oyuncu 1,8 yürür)
+    public float kacisHizi = 2.0f;           // m/sn (oyuncu 1,8 yürür)
     public AudioClip kacisBaslangicSesi;     // asansör "ding"
     public AudioClip kacisDonguSesi;         // siluetin çevresindeki uğultu
     // Parçaların yere serilen kâğıdının gerçek boyu (metre): resmin bütünü bu kadar geniş olurdu.
