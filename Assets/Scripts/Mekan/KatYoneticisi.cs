@@ -32,8 +32,14 @@ public class KatYoneticisi : MonoBehaviour
     [Tooltip("Oyuncunun kendisi. Boş bırakılırsa döngü scriptinin sahibi kullanılır.")]
     [SerializeField] private Transform oyuncu;
 
+    [Header("Eski kural (#59'a kadar)")]
+    [Tooltip("Eski oyunun kuralı: anomalili katta geri dön, normal katta devam et; yanlış karar ya da " +
+             "toplanmamış çöp 1. kata ceza. Yeni ilerlemede (kilitli kapılar, anahtarlar, #50) KAPALI " +
+             "kalır; #59 kodunu tamamen kaldıracak. Açarsanız eski oyun aynen oynanır.")]
+    [SerializeField] private bool eskiKural = false;
+
     [Header("Anomali")]
-    [Tooltip("Bir katın anomalili olma olasılığı.")]
+    [Tooltip("Bir katın anomalili olma olasılığı (yalnızca eski kural açıkken).")]
     [Range(0f, 1f)]
     [SerializeField] private float anomaliOlasiligi = 0.5f;
 
@@ -189,6 +195,13 @@ public class KatYoneticisi : MonoBehaviour
 
     // Sahanlıkların şu an hangi katı gösterdiği. -1 = henüz hiçbiri.
     private int gosterilenA = -1, gosterilenB = -1;
+
+    // Yeni ilerlemede (eski kural kapalı) oyuncunun bulunduğu kattan kaç kat AŞAĞI indiği.
+    // Aşağı inmek ceza da ilerleme de değildir; oyuncu bir şey almak için inebilir. Tek
+    // sahanlık döngüsünde aşağıdaki katlar da bu katın görüntüsünü gösterir (aynı kat gibi);
+    // oyuncu yeniden çıkınca sayaç azalır ve kata geri döner. Böylece inip çıkan oyuncu kat
+    // kapısını açmadan bir üst kata geçemez. Gerçek alt katlar #59'un işi.
+    private int asagiInilen;
     private bool catiModu;
 
     // ---- AÇILIŞ ----
@@ -361,7 +374,9 @@ public class KatYoneticisi : MonoBehaviour
         }
         else
         {
-            secici = new AnomaliSecici(kartlar, gercekTohum, anomaliOlasiligi, ilkKatHepNormal);
+            // Eski kural kapalıyken (yeni ilerleme) olasılık 0: hiçbir kat anomalili gelmez.
+            // Kartlar ileride senaryolu olay kütüphanesi olacak (#60); rastgele seçim yok.
+            secici = new AnomaliSecici(kartlar, gercekTohum, eskiKural ? anomaliOlasiligi : 0f, ilkKatHepNormal);
         }
 
         // Çöp planı AYRI bir tohumla kuruluyor. Aynı tohumu verseydik iki üretici
@@ -521,9 +536,22 @@ public class KatYoneticisi : MonoBehaviour
 
     private void KarariIsle(Karar karar)
     {
+        // YENİ İLERLEME (#50): ceza yok. Aşağı inmek sayılır ama katı değiştirmez; aşağıdan
+        // geri çıkmak da yalnızca sayacı azaltır. Bir üst kata ancak bulunduğu kattan, kat
+        // kapısını açıp çıkarak geçilir (kapı kilitli olduğu için başka yol yok).
+        if (!eskiKural)
+        {
+            if (karar == Karar.Geri) { asagiInilen++; Debug.Log($"[KAT] Aşağı inildi ({asagiInilen}); kat {sayac.MevcutKat} kalıyor."); return; }
+            if (asagiInilen > 0) { asagiInilen--; Debug.Log($"[KAT] Geri çıkıldı ({asagiInilen}); kat {sayac.MevcutKat}."); return; }
+            // Test kartı açıksa katta anomali olabilir; yeni ilerlemede anomali bir olaydır,
+            // yukarı çıkmak yanlış karar değil. Sayaç "yanlış" demesin diye bayrak sıfırlanır.
+            if (sayac.AnomaliVar) sayac.KatiHazirla(false);
+        }
+
         // Katta anomali varsa görev aranmaz: anomaliyi görüp geri dönmek zaten
         // doğru davranıştır.
-        bool gorevEksik = !sayac.AnomaliVar && ToplanmamisGorevVar(sayac.MevcutKat);
+        // Toplanmamış çöp cezası yalnızca eski kuralda (yeni ilerlemede sahanlık işleri #59'da yeniden bağlanacak).
+        bool gorevEksik = eskiKural && !sayac.AnomaliVar && ToplanmamisGorevVar(sayac.MevcutKat);
 
         int eskiKat = sayac.MevcutKat;
         // Anomali defteri (#45) için: karardan ÖNCE bu katın anomalisini hatırla; KararVer
@@ -581,6 +609,11 @@ public class KatYoneticisi : MonoBehaviour
     // sahanlığın aniden değişmesine yol açmaz.
     private int GosterilecekKat(int karardanUzaklik)
     {
+        // Yeni ilerleme: karar noktasının altındaki sahanlık (aşağı inen oyuncunun vardığı) ve
+        // oyuncu aşağıdayken üstündeki sahanlık da bu katı gösterir; yalnızca bulunduğu katın
+        // üstü bir sonraki kattır. Böylece inerken ya da geri çıkarken hiçbir sahanlık gözün
+        // önünde değişmez.
+        if (!eskiKural && (karardanUzaklik < 0 || asagiInilen > 0)) return sayac.MevcutKat;
         return karardanUzaklik == 0 ? sayac.MevcutKat : sayac.MevcutKat + 1;
     }
 
