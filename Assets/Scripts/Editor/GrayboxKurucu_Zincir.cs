@@ -74,6 +74,10 @@ public static partial class GrayboxKurucu
         KatZinciriVarligi kat7 = Kat7Kur(golge);
         KatZinciriVarligi kat8 = Kat8Kur();
 
+        // Her katın mobilyası (#73): kat dosyalarının süs listesine eklenir.
+        KatZinciriVarligi[] katDosyalari = { kat1, kat2, kat3, kat4, kat5, kat6, kat7, kat8 };
+        for (int k = 0; k < katDosyalari.Length; k++) MobilyalariEkle(katDosyalari[k], k + 1);
+
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
         if (yonetici == null) { Debug.LogWarning("[ZINCIR] Sahnede KatYoneticisi yok."); return; }
@@ -407,9 +411,12 @@ public static partial class GrayboxKurucu
         var z = new KilitZinciri();
         z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "ayakkabilik", Yol = "Sahanlik:Kapi_{n}/Ayakkabilik", Oda = KilitZinciri.SahanlikOdasi });
-        // Salonun kapısı u = 0,85-1,75'te (v = 4,70 duvarında) ve içeri açılıyor; parça kapının
-        // arkasında kalmasın diye antre duvarı tarafındaki köşede, yerde (u 0,5, v 6,9).
-        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_yeri", PlandaNokta = true, Oda = "Salon", U = 0.55f, Y = 0.004f, V = 6.9f, Donus = 25f });
+        // Parça salonda kanepenin ALTINDA (#79): oyuncu eğilip (Ctrl) bakınca görür ve alır.
+        // Eskiden antre duvarı tarafındaki köşedeydi (u 0,55, v 6,9); 5. katla her daireye gelen
+        // gardırop (#65) o köşeyi kapladı ve parça gardırobun içinde kaldı. Kanepe (Sofa_01, 3. katın
+        // mobilyası, #73) odalar arası duvarın önünde: ön kenarı u 4,32, altında 17 cm boşluk.
+        // Parça ön kenardan 15 cm içeride: ayakta dururken kanepenin kenarı görüşü kapatır.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_yeri", PlandaNokta = true, Oda = "Salon", U = 4.47f, Y = 0.004f, V = 6.45f, Donus = 25f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "cekmece", Yol = "Esyalar/Tezgah/Cekmece_1", Oda = "Mutfak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "buzdolabi", Yol = "Esyalar/Buzdolabi", Oda = "Mutfak", KilitYolu = "Esyalar/Buzdolabi/Kapi" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "oyuncak", Yol = "Esyalar/Oyuncak_Kutusu", Oda = "Oda_B" });
@@ -478,9 +485,11 @@ public static partial class GrayboxKurucu
                      "içinde Hasan'ın notu ve katın anahtarı. Yalnızca salon ve mutfak açık.";
         var z = new KilitZinciri();
         z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_A", "Oda_B", "Oda_C" });
-        // Salonun landing tarafındaki duvarı (u = 0; iç yüzü astarla ~3 cm içeride). Yazı duvarın
-        // 4,5 cm önünde, göz hizasının biraz üstünde; ön yüzü odaya (+u) bakar.
-        z.Yerler.Add(new ZincirYeri { Kimlik = "duvar", PlandaNokta = true, Oda = "Salon", U = 0.045f, Y = 1.60f, V = 6.4f, OnU = 1f, OnV = 0f });
+        // Salonla Oda B arasındaki duvar (u = 5,0), takvimin (v 5,84-6,16) pencere tarafında. Yazı
+        // duvarın 4,5 cm önünde, göz hizasının biraz üstünde; ön yüzü odaya (-u) bakar.
+        // Eskiden landing tarafındaki duvardaydı (u 0,045, v 6,4); 5. katla her daireye gelen
+        // gardırop (#65) tam önünde durduğu için yazı görünmüyordu.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "duvar", PlandaNokta = true, Oda = "Salon", U = 4.955f, Y = 1.60f, V = 7.2f, OnU = -1f, OnV = 0f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "dolap", Yol = "Esyalar/Tezgah", Oda = "Mutfak", KilitYolu = "Esyalar/Tezgah/Kapak_1" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "buzdolabi", Yol = "Esyalar/Buzdolabi", Oda = "Mutfak", KilitYolu = "Esyalar/Buzdolabi/Kapi" });
         // Sigorta dolabın iç rafında (tezgah.py: raf üstü 0,47 m; birinci kapağın arkası x 0).

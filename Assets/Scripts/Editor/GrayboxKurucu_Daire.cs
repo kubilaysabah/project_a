@@ -518,6 +518,14 @@ public static partial class GrayboxKurucu
         Acilir(lavabo, "Sifon", AcilirParca.Hareket.Kaydir, new Vector3(0f, -0.9f, 0.44f).normalized, 0.5f, 0.9f);
         IpuclariniAyarla(lavabo, "Sifon", "ipucu.sok", "ipucu.tak");
 
+        // Klozet (#73): antre tarafındaki duvarın (u = 2,7) dibinde, yüzü banyoya dönük. v = 0,4:
+        // lavabodan uzak, 5. katta menteşesi sökülüp içeri devrilen banyo kapısının düştüğü
+        // şeridin (v 0,9 - 2,9) dışında. Kapağı yerel X ekseninde kalkar: kapak menteşeden +Z'ye
+        // uzanır, Unity'de X etrafında eksi dönüş +Z'yi yukarı kaldırır.
+        GameObject klozet = DaireEsyasi("Klozet", e, d, 2.70f, 0f, 0.40f, 1f, 0f, "Kapak");
+        Acilir(klozet, "Kapak", AcilirParca.Hareket.Dondur, Vector3.right, -95f, 0.6f);
+        Yonlendir(klozet, "Kapak");
+
         // SALON (#65): landing tarafındaki duvarın dibinde ana su vanası; önünde, duvardan 14 cm
         // açıkta bir gardırop saklıyor. Gardırop plan +v yönünde (pencereye doğru) 95 cm itilir.
         GameObject vana = DaireEsyasi("Vana", e, d, 0.03f, 0f, 6.6f, 1f, 0f, "Cark");

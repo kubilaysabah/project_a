@@ -392,7 +392,87 @@ MonoBehaviour:
     OnV: 1
     Yatik: 1
     Metin: not.kat8_plan
-  suslar: []
+  suslar:
+  - Yol: 
+    X: 2.95
+    Y: 0
+    Z: 5
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 3203632128626437959, guid: 7a51cc99d41cbc743988af31d966552f, type: 3}
+    Metin: 
+  - Yol: 
+    X: 3.1
+    Y: 0.55
+    Z: 4.98
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 5146463092970874109, guid: 3141259a5e3417b4fb107511340c2873, type: 3}
+    Metin: 
+  - Yol: 
+    X: 1.4
+    Y: 0
+    Z: 7.6
+    Donus: 0
+    OnU: 0.3
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 6283401388694094786, guid: dbb348bd62ed5a041a7668aa64d74730, type: 3}
+    Metin: 
+  - Yol: 
+    X: 4.4
+    Y: 0
+    Z: 6.6
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 5902982433520243845, guid: 7d6fa98f2460d534c8b686b82e22f2c0, type: 3}
+    Metin: 
+  - Yol: 
+    X: 2.8
+    Y: 2.8
+    Z: 6.3
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 7568500997975027366, guid: b85d181cfeb205242b62cba29810d682, type: 3}
+    Metin: 
+  - Yol: 
+    X: 2.6
+    Y: 1.55
+    Z: 1.6
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 5700532249934822304, guid: d17115ac78a35bf4b8e0900cb47f489f, type: 3}
+    Metin: 
+  - Yol: 
+    X: 5
+    Y: 1.9
+    Z: 7.15
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 7651013386221889871, guid: 322d333282f9b6f4fb60c6a02477b035, type: 3}
+    Metin: 
+  - Yol: 
+    X: 8.01
+    Y: 0
+    Z: 5.9
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 197800623002613473, guid: 1c41c69374827784f8976d96979e3ddf, type: 3}
+    Metin: 
   sesler: []
   parcalar: []
   yananOdalar:

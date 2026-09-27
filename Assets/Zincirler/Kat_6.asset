@@ -418,6 +418,106 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 7909031699075652867, guid: 46c9940506df0994dbd998e8c64afca8, type: 3}
     Metin: bina.isim_kapici
+  - Yol: 
+    X: 4.65
+    Y: 0
+    Z: 6.5
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 8804200984019698290, guid: 5d4dcf69c0bedde4d9e8acdd48730ab1, type: 3}
+    Metin: 
+  - Yol: 
+    X: 1.4
+    Y: 0
+    Z: 7.6
+    Donus: 0
+    OnU: 0.3
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 6283401388694094786, guid: dbb348bd62ed5a041a7668aa64d74730, type: 3}
+    Metin: 
+  - Yol: 
+    X: 2.95
+    Y: 0
+    Z: 5.08
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 153209043106312920, guid: d90539b5f3a4290409528ea7992e9688, type: 3}
+    Metin: 
+  - Yol: 
+    X: 2.95
+    Y: 1.18
+    Z: 5.02
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 4565232446795041429, guid: 8e3e8dd50fbfd7840a5ca10201372127, type: 3}
+    Metin: 
+  - Yol: 
+    X: 2.8
+    Y: 2.8
+    Z: 6.3
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 7568500997975027366, guid: b85d181cfeb205242b62cba29810d682, type: 3}
+    Metin: 
+  - Yol: 
+    X: 3.8
+    Y: 1.6
+    Z: 4.65
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 8917934533972976352, guid: eb1f7f93e49b2ed45846cfbcde95aa53, type: 3}
+    Metin: 
+  - Yol: 
+    X: 10.055
+    Y: 0
+    Z: 6.6
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 4861881410216561460, guid: 4080fd92c53173548a46cae984df6e86, type: 3}
+    Metin: 
+  - Yol: 'B:'
+    X: 1.4
+    Y: 0
+    Z: 7.6
+    Donus: 0
+    OnU: 0.3
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 4997426922442264344, guid: 0e605d06fc7ac0d459974be86d6d6a32, type: 3}
+    Metin: 
+  - Yol: 'B:'
+    X: 8.01
+    Y: 0
+    Z: 5.9
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 197800623002613473, guid: 1c41c69374827784f8976d96979e3ddf, type: 3}
+    Metin: 
+  - Yol: 'B:'
+    X: 2.6
+    Y: 1.55
+    Z: 1.6
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 5700532249934822304, guid: d17115ac78a35bf4b8e0900cb47f489f, type: 3}
+    Metin: 
   sesler: []
   parcalar: []
   yananOdalar: []

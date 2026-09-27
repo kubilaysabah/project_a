@@ -1,0 +1,15 @@
+{
+  "kimlik": "mantel_clock_01",
+  "ad": "Mantel Clock 01",
+  "yazarlar": {
+    "Yann Kervran": "Rigging",
+    "Rico Cilliers": "Modeling & Texturing"
+  },
+  "lisans": "CC0 1.0",
+  "adres": "https://polyhaven.com/a/mantel_clock_01",
+  "boyutlar_mm": [
+    483.6633503437042,
+    250.80496072769165,
+    160.9499454498291
+  ]
+}

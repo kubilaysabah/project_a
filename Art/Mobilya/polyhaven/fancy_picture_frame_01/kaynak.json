@@ -1,0 +1,15 @@
+{
+  "kimlik": "fancy_picture_frame_01",
+  "ad": "Fancy Picture Frame 01",
+  "yazarlar": {
+    "Rob Tuytel": "Scan & Painting",
+    "Rico Cilliers": "modeling"
+  },
+  "lisans": "CC0 1.0",
+  "adres": "https://polyhaven.com/a/fancy_picture_frame_01",
+  "boyutlar_mm": [
+    603.030264377594,
+    19.993074471130967,
+    464.12645280361176
+  ]
+}

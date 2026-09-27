@@ -29,11 +29,11 @@ MonoBehaviour:
       Oda: Salon
       KilitYolu: 
       PlandaNokta: 1
-      U: 0.045
+      U: 4.955
       Y: 1.6
-      V: 6.4
+      V: 7.2
       Donus: 0
-      OnU: 1
+      OnU: -1
       OnV: 0
     - Kimlik: dolap
       Yol: Esyalar/Tezgah
@@ -124,7 +124,47 @@ MonoBehaviour:
     OnV: 1
     Yatik: 0
     Metin: not.kat4_buzdolabi
-  suslar: []
+  suslar:
+  - Yol: 
+    X: 2.6
+    Y: 1.55
+    Z: 1.6
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 5700532249934822304, guid: d17115ac78a35bf4b8e0900cb47f489f, type: 3}
+    Metin: 
+  - Yol: 
+    X: 3
+    Y: 0
+    Z: 6.3
+    Donus: 0
+    OnU: 0.2
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 5902982433520243845, guid: 7d6fa98f2460d534c8b686b82e22f2c0, type: 3}
+    Metin: 
+  - Yol: 
+    X: 5
+    Y: 1.9
+    Z: 5.3
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 7651013386221889871, guid: 322d333282f9b6f4fb60c6a02477b035, type: 3}
+    Metin: 
+  - Yol: 
+    X: 8.1
+    Y: 0.55
+    Z: 7.9
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 8041882230845368845, guid: 4dd44763c05de494d980450fff7226d5, type: 3}
+    Metin: 
   sesler: []
   parcalar: []
   yananOdalar:
