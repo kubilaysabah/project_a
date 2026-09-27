@@ -12,19 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
   m_Name: Zincir_Test
   m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
-  aciklama: "Geli\u015Ftirme zinciri (#54): be\u015F kilit t\xFCr\xFC tek dairede.
-    Kavanozda salon anahtar\u0131; takvimde kilerin \u015Fifresi; kilerdeki kol Oda
-    A'y\u0131 a\xE7ar; komodinde sigorta, buzdolab\u0131n\u0131 a\xE7ar; buzdolab\u0131nda
-    tornavida, Oda B'nin mente\u015Felerini s\xF6ker; oyuncak kutusunda kat\u0131n
-    anahtar\u0131. Banyo kapal\u0131."
+  aciklama: "Geli\u015Ftirme zinciri (#54, #61): alt\u0131 kilit t\xFCr\xFC tek dairede.
+    Kap\u0131n\u0131n \xF6n\xFCndeki ayakkab\u0131l\u0131kta tornavida; tornavidayla
+    kavanoz k\u0131r\u0131l\u0131r, i\xE7inde salon anahtar\u0131; takvimde kilerin
+    \u015Fifresi; kilerdeki kol Oda A'y\u0131 a\xE7ar; komodinde sigorta, buzdolab\u0131n\u0131
+    a\xE7ar; buzdolab\u0131nda Oda B'nin anahtar\u0131; oyuncak kutusunda kat\u0131n
+    anahtar\u0131. Banyonun mente\u015Feleri ayn\u0131 tornavidayla s\xF6k\xFCl\xFCr
+    (yan oda)."
   zincir:
-    KapaliOdalar:
-    - Banyo
+    KapaliOdalar: []
     Yerler:
+    - Kimlik: ayakkabilik
+      Yol: Sahanlik:Kapi_{n}/Ayakkabilik
+      Oda: Sahanlik
+      KilitYolu: 
     - Kimlik: kavanoz
       Yol: Esyalar/Tezgah/Kavanoz
       Oda: Mutfak
-      KilitYolu: 
+      KilitYolu: Esyalar/Tezgah/Kavanoz/Kapak
     - Kimlik: takvim
       Yol: Esyalar/Takvim
       Oda: Salon
@@ -62,11 +67,18 @@ MonoBehaviour:
       Donus: 10
     - Kimlik: tornavida
       Tur: 4
+      Yer: ayakkabilik
+      X: 0
+      Y: 1.025
+      Z: 0
+      Donus: 80
+    - Kimlik: odaB_anahtari
+      Tur: 2
       Yer: buzdolabi
       X: 0
       Y: 0.47
       Z: 0
-      Donus: 80
+      Donus: 20
     - Kimlik: kat_anahtari
       Tur: 1
       Yer: oyuncak
@@ -75,6 +87,16 @@ MonoBehaviour:
       Z: 0
       Donus: 20
     Kilitler:
+    - Kimlik: kavanoz
+      Tur: 5
+      OdaKapisi: 0
+      Hedef: kavanoz
+      Gerekli: tornavida
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
     - Kimlik: salon
       Tur: 0
       OdaKapisi: 1
@@ -116,9 +138,19 @@ MonoBehaviour:
       IpucuY: 0
       IpucuZ: 0
     - Kimlik: odaB
-      Tur: 4
+      Tur: 0
       OdaKapisi: 1
       Hedef: Oda_B
+      Gerekli: odaB_anahtari
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+    - Kimlik: banyo
+      Tur: 4
+      OdaKapisi: 1
+      Hedef: Banyo
       Gerekli: tornavida
       Sifre: 
       IpucuMetni: 

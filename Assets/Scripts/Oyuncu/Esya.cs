@@ -54,7 +54,8 @@ public class Esya : MonoBehaviour, IEtkilesimli
                 foreach (Transform kardes in transform.parent)
                 {
                     AcilirParca kapak = kardes.GetComponent<AcilirParca>();
-                    if (kapak != null && !kapak.Acik) return false;
+                    // Kırılan kavanozun kapağı gizlenir (#61): görünmeyen kapak engel değil.
+                    if (kapak != null && kardes.gameObject.activeSelf && !kapak.Acik) return false;
                 }
             return true;
         }

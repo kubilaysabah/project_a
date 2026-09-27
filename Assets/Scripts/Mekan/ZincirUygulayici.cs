@@ -26,6 +26,8 @@ public class ZincirUygulayici
 
     /// <summary>Şifreli kilitlerin kapıya takılan asma kilidi (prefab).</summary>
     public GameObject AsmaKilitSablonu;
+    /// <summary>Kırma kilidinde kırılan camın yere saçılan parçaları (prefab).</summary>
+    public GameObject CamKirikSablonu;
     /// <summary>Tornavida kilitli kapılara takılan menteşe plakası (iki vidalı prefab).</summary>
     public GameObject MentesePlakasiSablonu;
     /// <summary>İpucu yazıları bu yazının yazı tipini ve malzemesini kullanır (kapı numarası).</summary>
@@ -71,6 +73,17 @@ public class ZincirUygulayici
                     if (kol == null) kol = kolYeri.gameObject.AddComponent<CekilenKol>();
                     // Sigorta kutusunun ana şalteri kısa bir kol: daha az döner.
                     kol.KilitEkle(kilit, kolYeri.name == "Salter" ? 100f : 120f);
+                }
+            }
+            if (veri.Tur == KilitTuru.Kirma)
+            {
+                // Kırılacak nesne yerin kendisi (kavanozun gövdesi); kilit KilitYolu'nda (kapağında).
+                Transform kirilacak = YerYolu(daire, zincir, veri.Hedef);
+                if (kirilacak != null)
+                {
+                    Kirilan k = kirilacak.GetComponent<Kirilan>();
+                    if (k == null) k = kirilacak.gameObject.AddComponent<Kirilan>();
+                    k.Hazirla(CamKirikSablonu);
                 }
             }
             if (veri.Tur == KilitTuru.Tornavida)
@@ -137,7 +150,8 @@ public class ZincirUygulayici
     private static bool KullanilmisMi(KilitZinciri zincir, ZincirEsyasi e, int kat)
     {
         foreach (ZincirKilidi k in zincir.Kilitler)
-            if (k.Gerekli == e.Kimlik && k.Tur != KilitTuru.Sifre && k.Tur != KilitTuru.Kol && Kayit.KilitCozukMu(kat, k.Kimlik))
+            // Aletler (tornavida: menteşe ve kırma) kullanılınca bitmez; yalnızca anahtar ve buşon biter.
+            if (k.Gerekli == e.Kimlik && (k.Tur == KilitTuru.Anahtar || k.Tur == KilitTuru.Sigorta) && Kayit.KilitCozukMu(kat, k.Kimlik))
                 return true;
         return false;
     }
@@ -170,6 +184,11 @@ public class ZincirUygulayici
                     MenteseSokucu m = hedef != null ? hedef.GetComponent<MenteseSokucu>() : null;
                     if (m != null) m.DevrikBaslat();
                     break;
+                case KilitTuru.Kirma:
+                    Transform kirilacak = YerYolu(daire, zincir, veri.Hedef);
+                    Kirilan kr = kirilacak != null ? kirilacak.GetComponent<Kirilan>() : null;
+                    if (kr != null) kr.Kir(sesli: false);
+                    break;
             }
             if (kilit != null && !kilit.Cozuk) kilit.CozukBaslat();
         }
@@ -187,6 +206,8 @@ public class ZincirUygulayici
         }
         konanlar.Clear();
         foreach (Kilit k in daire.GetComponentsInChildren<Kilit>(true)) Object.Destroy(k);
+        // Kırılan nesneler bütünleşir. Sahanlıktaki yerler de temizlenir (dairenin ebeveyni).
+        foreach (Kirilan k in daire.GetComponentsInChildren<Kirilan>(true)) { k.Sifirla(); Object.Destroy(k); }
         // Devrilen kapılar yerine konur, vidalar geri takılır.
         foreach (MenteseSokucu m in daire.GetComponentsInChildren<MenteseSokucu>(true)) { m.Sifirla(); Object.Destroy(m); }
         // Sigorta yuvası: eksik sigorta geri görünür, elektrik gelir.
@@ -245,12 +266,26 @@ public class ZincirUygulayici
     {
         ZincirYeri y = zincir.YerBul(yerKimligi);
         if (y == null) return null;
-        return daire.Find(string.IsNullOrEmpty(y.KilitYolu) ? y.Yol : y.KilitYolu);
+        return YolBul(daire, string.IsNullOrEmpty(y.KilitYolu) ? y.Yol : y.KilitYolu);
     }
 
     private static Transform YerYolu(Transform daire, KilitZinciri zincir, string yerKimligi)
     {
         ZincirYeri y = zincir.YerBul(yerKimligi);
-        return y != null ? daire.Find(y.Yol) : null;
+        return y != null ? YolBul(daire, y.Yol) : null;
+    }
+
+    /// <summary>
+    /// Bir yolu bulur. "Sahanlik:" ile başlayan yol dairenin değil sahanlığın (dairenin
+    /// ebeveyninin) kökünden aranır ve içindeki {n} açık dairenin numarasıyla değişir:
+    /// "Sahanlik:Kapi_{n}/Ayakkabilik" 2 numarada "Kapi_2/Ayakkabilik" olur (#61).
+    /// </summary>
+    public static Transform YolBul(Transform daire, string yol)
+    {
+        const string On = "Sahanlik:";
+        if (string.IsNullOrEmpty(yol)) return null;
+        if (!yol.StartsWith(On)) return daire.Find(yol);
+        string numara = daire.name.Substring(daire.name.LastIndexOf('_') + 1);   // "Daire_2" -> "2"
+        return daire.parent != null ? daire.parent.Find(yol.Substring(On.Length).Replace("{n}", numara)) : null;
     }
 }

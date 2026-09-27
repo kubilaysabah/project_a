@@ -421,6 +421,7 @@ public static partial class GrayboxKurucu
         GameObject sigorta = DaireEsyasi("Sigorta_Kutusu", e, d, 1.6f, 1.45f, -0.8f, 0f, 1f,
                                          "Kapak", "Sigorta_1", "Sigorta_2", "Sigorta_3", "Sigorta_4", "Salter");
         Acilir(sigorta, "Kapak", AcilirParca.Hareket.Dondur, Vector3.up, 110f, 0.6f);
+        Yonlendir(sigorta, "Kapak");
 
         // MUTFAK: dip duvarda, pencerenin altında tezgâh; komşu duvarda buzdolabı.
         GameObject tezgah = DaireEsyasi("Tezgah", e, d, 10.2f, 0f, 1.0f, -1f, 0f,
@@ -440,12 +441,14 @@ public static partial class GrayboxKurucu
                 Model("Kapak", kavanoz.transform, "Kavanoz", "Kapak", Vector3.zero, 0f, carpisma: true);
                 // Kapak kalkıp yana alınır.
                 Acilir(kavanoz, "Kapak", AcilirParca.Hareket.Kaydir, new Vector3(0.7f, 1f, 0f), 0.12f, 0.4f);
+                Yonlendir(kavanoz, "Kapak");
             }
         }
         GameObject buzdolabi = DaireEsyasi("Buzdolabi", e, d, 7.25f, 0f, -0.5f, 0f, 1f, "Kapi");
         // Menteşe modelin -x tarafında (önündeki oyuncunun sağı), serbest kenar +x'te: negatif
         // dönüş onu öne açar.
         Acilir(buzdolabi, "Kapi", AcilirParca.Hareket.Dondur, Vector3.up, -105f, 0.8f);
+        Yonlendir(buzdolabi, "Kapi");
         BuzdolabiIsigiKur(buzdolabi);
 
         // SALON: Oda B tarafındaki duvarda takvim.
@@ -454,6 +457,7 @@ public static partial class GrayboxKurucu
         // ODA A: arka duvarda, pencerenin solunda komodin.
         GameObject komodin = DaireEsyasi("Komodin", e, d, 8.1f, 0f, 7.9f, 0f, -1f, "Cekmece");
         Acilir(komodin, "Cekmece", AcilirParca.Hareket.Kaydir, Vector3.forward, 0.26f, 0.4f);
+        Yonlendir(komodin, "Cekmece");
 
         // ODA B: salon tarafındaki duvarda oyuncak kutusu; kapının yanındaki duvarda boy cetveli
         // (0,6 m yükseğe: cetvelin çizgileri gerçek boyu göstersin).
@@ -461,11 +465,13 @@ public static partial class GrayboxKurucu
         // Sandık kapağının menteşesi arka üst kenarda; ön kenar yukarı kalksın diye x ekseninde
         // NEGATİF dönüş (Unity'de x ekseninde pozitif dönüş +Z'yi aşağı indirir).
         Acilir(oyuncak, "Kapak", AcilirParca.Hareket.Dondur, Vector3.right, -100f, 0.7f);
+        Yonlendir(oyuncak, "Kapak");
         DaireEsyasi("Boy_Cetveli", e, d, 7.2f, 0.6f, 4.75f, 0f, 1f);
 
         // ODA C (kiler): yerde alet çantası, dip duvarda kol.
         GameObject alet = DaireEsyasi("Alet_Cantasi", e, d, 5.2f, 0f, -0.69f, 0f, 1f, "Kapak");
         Acilir(alet, "Kapak", AcilirParca.Hareket.Dondur, Vector3.right, -100f, 0.5f);
+        Yonlendir(alet, "Kapak");
         DaireEsyasi("Duvar_Kolu", e, d, 6.7f, 1.1f, 1.2f, -1f, 0f, "Kol");
     }
 
@@ -509,6 +515,26 @@ public static partial class GrayboxKurucu
         foreach (string p in parcalar)
             Model(p, govde.transform, ad, p, Vector3.zero, 0f, carpisma: true);
         return govde;
+    }
+
+    // Eşyanın gövdesine bakınca açılır parçası (kapağı, çekmecesi, kapısı) seçilsin (#61):
+    // oyuncu kavanoza bakar, 2 cm'lik kapağına değil.
+    static void Yonlendir(GameObject govde, params string[] parcaAdlari)
+    {
+        if (govde == null) return;
+        var liste = new List<MonoBehaviour>();
+        foreach (string ad in parcaAdlari)
+        {
+            Transform t = govde.transform.Find(ad);
+            AcilirParca a = t != null ? t.GetComponent<AcilirParca>() : null;
+            if (a != null) liste.Add(a);
+        }
+        Yonlendirici y = govde.AddComponent<Yonlendirici>();
+        var seri = new SerializedObject(y);
+        SerializedProperty dizi = seri.FindProperty("parcalar");
+        dizi.arraySize = liste.Count;
+        for (int i = 0; i < liste.Count; i++) dizi.GetArrayElementAtIndex(i).objectReferenceValue = liste[i];
+        seri.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // Eşyanın bir parçasını açılabilir yapar (AcilirParca). SerializedObject: bileşenin kayıtlı

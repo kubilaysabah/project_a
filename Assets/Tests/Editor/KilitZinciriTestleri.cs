@@ -141,6 +141,40 @@ public class KilitZinciriTestleri
     }
 
     [Test]
+    public void Kirma_aleti_sahanlikta_bulunur_ve_zinciri_baslatir()
+    {
+        // #61: kapının önündeki ayakkabılıkta tornavida; tornavidayla kavanoz kırılır, içinde
+        // salon anahtarı; kat anahtarı salonda. Aynı tornavida banyonun menteşelerini de söker.
+        var z = new KilitZinciri();
+        z.Yerler.Add(Yer("ayakkabilik", KilitZinciri.SahanlikOdasi));
+        z.Yerler.Add(Yer("kavanoz", "Mutfak"));
+        z.Yerler.Add(Yer("takvim", "Salon"));
+        z.Esyalar.Add(Esya("tornavida", EsyaTuru.Tornavida, "ayakkabilik"));
+        z.Esyalar.Add(Esya("salon_anahtari", EsyaTuru.OdaAnahtari, "kavanoz"));
+        z.Esyalar.Add(Esya("kat_anahtari", EsyaTuru.KatAnahtari, "takvim"));
+        z.Kilitler.Add(YerKilidi("kavanoz", KilitTuru.Kirma, "kavanoz", "tornavida"));
+        z.Kilitler.Add(OdaKilidi("salon", KilitTuru.Anahtar, "Salon", "salon_anahtari"));
+        z.Kilitler.Add(OdaKilidi("banyo", KilitTuru.Tornavida, "Banyo", "tornavida"));
+        var s = z.Cozumle(Odalar());
+        Assert.IsTrue(s.Cozulebilir, string.Join("; ", s.Hatalar));
+        Assert.AreEqual("kavanoz", s.AcilanKilitler[0], "önce kavanoz kırılır");
+    }
+
+    [Test]
+    public void Kirma_yalniz_aletle_acilir()
+    {
+        var z = new KilitZinciri();
+        z.Yerler.Add(Yer("kavanoz", "Mutfak"));
+        z.Yerler.Add(Yer("raf", "Mutfak"));
+        z.Esyalar.Add(Esya("bir_anahtar", EsyaTuru.OdaAnahtari, "raf"));
+        z.Esyalar.Add(Esya("kat_anahtari", EsyaTuru.KatAnahtari, "kavanoz"));
+        z.Kilitler.Add(YerKilidi("kavanoz", KilitTuru.Kirma, "kavanoz", "bir_anahtar"));   // anahtarla kırılmaz
+        var s = z.Cozumle(Odalar());
+        Assert.IsFalse(s.Cozulebilir);
+        StringAssert.Contains("Tornavida", string.Join("; ", s.Hatalar));
+    }
+
+    [Test]
     public void Bes_turun_hepsi_tek_zincirde_cozulur()
     {
         // Anahtar -> şifre -> kol -> sigorta -> tornavida: test zincirinin şekli.

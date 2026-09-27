@@ -36,7 +36,10 @@ public enum KilitTuru
     Sifre,       // şifreli asma kilit: 4 hane; ipucu dairede bir yerde yazılı
     Kol,         // bir yerde kol çekilir, başka yerdeki bu kilit "tak" diye açılır
     Sigorta,     // sigorta teli bulunup kutuya takılınca elektrik gelir, kilit açılır
-    Tornavida    // kilidi açılmayan kapının menteşeleri tornavidayla sökülür
+    Tornavida,   // kilidi açılmayan kapının menteşeleri tornavidayla sökülür (alet bitmez)
+    Kirma        // bir yer (cam kavanoz) doğru aletle kırılarak açılır; alet bitmez (#61).
+                 // SONA eklendi: kayıtlı zincir dosyaları türü sayı olarak saklar, araya
+                 // eklemek eski dosyalardaki türleri kaydırırdı.
 }
 
 [System.Serializable]
@@ -83,7 +86,10 @@ public class KilitZinciri
     public List<ZincirKilidi> Kilitler = new List<ZincirKilidi>();
 
     // Antre ve koridor hep açıktır: zincir onlardan başlar, bütün oda kapıları koridora açılır.
-    public static readonly string[] HepAcikOdalar = { "Antre", "Hol" };
+    // "Sahanlik" planda bir oda değil: açık dairenin kapısının önü (ayakkabılık, paspas...).
+    // Yolu "Sahanlik:" ile başlayan yerler oradadır ve hep ulaşılır (#61).
+    public const string SahanlikOdasi = "Sahanlik";
+    public static readonly string[] HepAcikOdalar = { "Antre", "Hol", SahanlikOdasi };
 
     /// <summary>Kuralın sonucu: hangi kilitler hangi sırayla açıldı, katın anahtarına ulaşıldı mı.</summary>
     public class Sonuc
@@ -192,7 +198,7 @@ public class KilitZinciri
         foreach (string o in KapaliOdalar)
             if (!butunOdalar.Contains(o)) sonuc.Hatalar.Add($"kapalı oda '{o}' planda yok");
         foreach (ZincirYeri y in Yerler)
-            if (!butunOdalar.Contains(y.Oda)) sonuc.Hatalar.Add($"'{y.Kimlik}' yerinin odası '{y.Oda}' planda yok");
+            if (y.Oda != SahanlikOdasi && !butunOdalar.Contains(y.Oda)) sonuc.Hatalar.Add($"'{y.Kimlik}' yerinin odası '{y.Oda}' planda yok");
         foreach (ZincirEsyasi e in Esyalar)
             if (YerBul(e.Yer) == null) sonuc.Hatalar.Add($"'{e.Kimlik}' eşyasının yeri '{e.Yer}' tanımlı değil");
 

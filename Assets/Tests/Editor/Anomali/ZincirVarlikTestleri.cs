@@ -34,6 +34,13 @@ public class ZincirVarlikTestleri
         return sonuc;
     }
 
+    // Oyundaki ZincirUygulayici.YolBul ile aynı kural: "Sahanlik:" yolları sahanlıktan, {n} daire numarası.
+    private static Transform Bul(Transform sahanlik, Transform daire, int n, string yol)
+    {
+        const string On = "Sahanlik:";
+        return yol.StartsWith(On) ? sahanlik.Find(yol.Substring(On.Length).Replace("{n}", n.ToString())) : daire.Find(yol);
+    }
+
     [Test]
     public void En_az_bir_zincir_dosyasi_var()
     {
@@ -67,9 +74,9 @@ public class ZincirVarlikTestleri
                     Transform d = a.Find($"Daire_{n}");
                     foreach (ZincirYeri y in z.Value.Yerler)
                     {
-                        Assert.IsNotNull(d.Find(y.Yol), $"{z.Key}: Daire_{n}/{y.Yol} yok ('{y.Kimlik}')");
+                        Assert.IsNotNull(Bul(a, d, n, y.Yol), $"{z.Key}: Daire_{n} için '{y.Yol}' yok ('{y.Kimlik}')");
                         if (!string.IsNullOrEmpty(y.KilitYolu))
-                            Assert.IsNotNull(d.Find(y.KilitYolu), $"{z.Key}: Daire_{n}/{y.KilitYolu} yok ('{y.Kimlik}' kilit yolu)");
+                            Assert.IsNotNull(Bul(a, d, n, y.KilitYolu), $"{z.Key}: Daire_{n} için '{y.KilitYolu}' yok ('{y.Kimlik}' kilit yolu)");
                     }
                     foreach (ZincirKilidi k in z.Value.Kilitler)
                         if (k.OdaKapisi)

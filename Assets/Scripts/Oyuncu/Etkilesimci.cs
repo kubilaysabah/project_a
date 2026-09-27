@@ -17,7 +17,11 @@ public class Etkilesimci : MonoBehaviour
 {
     [Header("Ayarlar")]
     [Tooltip("Kaç metreden etkileşime girilebilir.")]
-    [SerializeField] private float menzil = 2.2f;
+    [SerializeField] private float menzil = 2.8f;   // #61: 2,2'den (Şahan: nesnelere uzanmak zordu)
+
+    // Nişan ışını ince bir KÜRE olarak taranır (#61): anahtar, buşon gibi küçük eşyaları tam
+    // ortalamadan da yakalar. 6 cm: yakındaki duvarın kenarına takılmayacak kadar ince.
+    private const float NisanYaricapi = 0.06f;
 
     [Tooltip("Nişan alınan kamera. Boş bırakılırsa çocuklardan bulunur.")]
     [SerializeField] private Transform kamera;
@@ -181,7 +185,10 @@ public class Etkilesimci : MonoBehaviour
         govde = null;
 
         Ray isin = new Ray(kamera.position, kamera.forward);
-        RaycastHit[] carpmalar = Physics.RaycastAll(isin, menzil);
+        // SphereCastAll: ışın yerine verilen yarıçapta bir küre gönderir; yol boyunca değdiği
+        // bütün çarpışmaları döndürür (başlangıçta küreyle iç içe olanlar 0 uzaklıkla gelir;
+        // oyuncunun kendi kapsülü de onlardan, aşağıda eleniyor).
+        RaycastHit[] carpmalar = Physics.SphereCastAll(isin, NisanYaricapi, menzil);
 
         float enYakinMesafe = float.MaxValue;
         Collider enYakin = null;
@@ -220,19 +227,52 @@ public class Etkilesimci : MonoBehaviour
             }
             if (onundekilerKap) { icteki = h.collider; icMesafe = h.distance; }
         }
-        if (icteki != null) enYakin = icteki;
+        IEtkilesimli bulunan = icteki != null ? Kullanilabilir(icteki) : null;
 
-        // GetComponentInParent: nesne birkaç parçadan oluşuyorsa üst parçada arar.
-        IEtkilesimli bulunan = enYakin.GetComponentInParent<IEtkilesimli>();
+        // KABIN İÇİNDEKİ NESNE (#61). En yakın çarpışmanın kendi etkileşimi yoksa ama arkasında
+        // onun ÇOCUĞU olan bir çarpışma varsa (tezgâhın üstündeki kavanoz; tezgâhın çarpışma
+        // kutusu musluğu da kapsadığı için kavanoz onun içinde kalıyor), içeri bakmaya devam
+        // edilir. İçinde bir şey olmayan engel (duvar) nişanı durdurur.
+        if (bulunan == null)
+        {
+            var sirali = new System.Collections.Generic.List<RaycastHit>();
+            foreach (RaycastHit h in carpmalar) if (!h.collider.transform.IsChildOf(transform)) sirali.Add(h);
+            // Sort: listeyi uzaklığa göre (yakından uzağa) dizer.
+            sirali.Sort((x, y) => x.distance.CompareTo(y.distance));
+            for (int i = 0; i < sirali.Count && bulunan == null; i++)
+            {
+                Collider c = sirali[i].collider;
+                bulunan = Kullanilabilir(c);
+                if (bulunan != null) break;
+                bool icindeBirSeyVar = false;
+                for (int j = i + 1; j < sirali.Count; j++)
+                    if (sirali[j].collider.transform.IsChildOf(c.transform)) { icindeBirSeyVar = true; break; }
+                if (!icindeBirSeyVar) break;   // duvar gibi: arkasına bakılmaz
+            }
+        }
 
-        if (bulunan == null || !bulunan.EtkilesimeAcik) return null;
+        if (bulunan == null) return null;
 
         // Sözleşmeyi imzalayan her nesne aslında bir MonoBehaviour; gövdesini
         // ipucunu yerleştirmek için alıyoruz.
         MonoBehaviour bilesen = bulunan as MonoBehaviour;
         if (bilesen != null) govde = bilesen.transform;
+        // Yönlendirici ise istem yönlendirilen parçanın (kapağın) üstünde görünsün.
+        if (bulunan is Yonlendirici y) govde = y.HedefGovdesi;
 
         return bulunan;
+    }
+
+    // Bir çarpışmanın şu an yapılabilir etkileşimi. GetComponentsInParent: nesne birkaç
+    // parçadan oluşuyorsa üst parçalarda da arar ve BÜTÜN etkileşimleri verir (en yakından
+    // uzağa); yapılabilir olan ilki seçilir (#61). Bir gövdede hem sigorta yuvası hem kapağa
+    // yönlendirici olabilir: elde buşon yokken yuva "yapılamaz" der, sıra yönlendiriciye gelir
+    // ve kapağın "AÇ"ı görünür.
+    private static IEtkilesimli Kullanilabilir(Collider c)
+    {
+        foreach (IEtkilesimli e in c.GetComponentsInParent<IEtkilesimli>())
+            if (e.EtkilesimeAcik) return e;
+        return null;
     }
 
     // ---------- İPUCU ----------

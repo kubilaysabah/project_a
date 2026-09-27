@@ -213,7 +213,24 @@ def kapi_devrilme():
     kaydet(os.path.join(SESLER, "Kapi_Devrilme.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.85)
 
 
-URETICILER = {"vida_sokme": vida_sokme, "kapi_devrilme": kapi_devrilme, "sigorta_takma": sigorta_takma, "kol_cekme": kol_cekme, "sifre_cark": sifre_cark, "sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
+# ---------- KIRMA (#61) ----------
+def cam_kirilma():
+    """Cam kavanozun tornavidayla kırılışı: tok bir vuruş, keskin çatırtı ve saçılan
+    parçaların birkaç yüz milisaniye süren tıngırtısı (yüksek, kısa camsı modlar)."""
+    random.seed(46)
+    n = int(1.3 * HIZ)
+    s = [0.0] * n
+    CAM = [(2400, 60, 1.0), (3700, 70, 0.8), (5200, 60, 0.6), (7300, 50, 0.4)]
+    ekle(s, tepeyi_esitle(modlar(darbe(int(0.3 * HIZ), HIZ, 0.002), HIZ, [(320, 10, 1.0), (900, 20, 0.5)])), 0, 0.6)
+    ekle(s, tepeyi_esitle(yuksek(gurultu(int(0.12 * HIZ)), 2500, HIZ)), int(0.005 * HIZ), 0.9)
+    for j in range(14):
+        t = 0.03 + random.random() * 0.55
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.15 * HIZ), HIZ, 0.0004), HIZ, CAM)), int(t * HIZ), 0.5 * (1 - t))
+    s = yanki(s, HIZ, boyut=0.4, sonum=0.5, islak=0.2, oda=0.6)
+    kaydet(os.path.join(SESLER, "Cam_Kirilma.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.75)
+
+
+URETICILER = {"cam_kirilma": cam_kirilma, "vida_sokme": vida_sokme, "kapi_devrilme": kapi_devrilme, "sigorta_takma": sigorta_takma, "kol_cekme": kol_cekme, "sifre_cark": sifre_cark, "sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
               "ic_acilma": ic_acilma, "ic_kapanma": ic_kapanma, "ic_kilitli": ic_kilitli}
 
 if __name__ == "__main__":
