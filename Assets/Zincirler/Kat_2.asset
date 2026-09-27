@@ -67,6 +67,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
   notlar:
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3
@@ -97,4 +98,7 @@ MonoBehaviour:
     SusturanKilit: 
   parcalar: []
   yananOdalar: []
+  ikinciDaire: 0
+  ikinciKaplamaKati: 0
+  esyaYazilari: []
   cizimBoyu: 0.3

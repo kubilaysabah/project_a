@@ -363,4 +363,40 @@ public class KilitZinciriTestleri
         Assert.AreEqual("Mutfak", KilitZinciri.OdaAdi("B:Mutfak"));
         Assert.AreEqual("Salon", KilitZinciri.OdaAdi("Salon"));
     }
+
+    // ---------- #66: yerleştirme (sofraya tabaklar) ----------
+
+    private static KilitZinciri SofraZinciri()
+    {
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Oda_A", "Oda_B", "Oda_C", "Banyo" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "mutfak_yeri", Yol = "x", Oda = "Mutfak" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "yer_1", Yol = "Esyalar/Sofra/Yer_1", Oda = "Salon" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "yer_2", Yol = "Esyalar/Sofra/Yer_2", Oda = "Salon" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "bufe", Yol = "Esyalar/Bufe", Oda = "Salon" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tabak_1", Tur = EsyaTuru.Tabak, Yer = "mutfak_yeri" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tabak_2", Tur = EsyaTuru.Tabak, Yer = "mutfak_yeri" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "bufe" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "bufe", Tur = KilitTuru.Yerlestirme, OdaKapisi = false, Hedef = "bufe",
+                                          Gerekenler = new List<string> { "tabak_1", "tabak_2" }, Yuvalar = new List<string> { "yer_1", "yer_2" } });
+        return z;
+    }
+
+    [Test]
+    public void Yerlestirme_butun_esyalara_ve_yerlere_ulasilinca_acilir()
+    {
+        Assert.IsTrue(SofraZinciri().Cozumle(Odalar()).Cozulebilir);
+        KilitZinciri z = SofraZinciri();
+        z.KapaliOdalar.Add("Mutfak");                        // tabaklar ulaşılamaz
+        Assert.IsFalse(z.Cozumle(Odalar()).Cozulebilir);
+    }
+
+    [Test]
+    public void Yerlestirmede_esya_ve_yer_sayisi_esit_olmali()
+    {
+        KilitZinciri z = SofraZinciri();
+        z.Kilitler[0].Yuvalar.RemoveAt(1);
+        KilitZinciri.Sonuc s = z.Cozumle(Odalar());
+        Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("eşya ve yer sayısı")), string.Join("; ", s.Hatalar));
+    }
 }

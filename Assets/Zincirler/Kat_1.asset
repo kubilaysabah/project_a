@@ -94,6 +94,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: odaA
       Tur: 0
       OdaKapisi: 1
@@ -108,6 +109,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
   notlar:
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3
@@ -137,6 +139,7 @@ MonoBehaviour:
     OnV: 0.3
     Yatik: 0
     Sablon: {fileID: 6813529233286673208, guid: e3298e1273de64c47bf5913f1ca46af6, type: 3}
+    Metin: 
   - Yol: 
     X: 2.2
     Y: 0.4
@@ -146,6 +149,7 @@ MonoBehaviour:
     OnV: 0.1
     Yatik: 0
     Sablon: {fileID: 2352641571865322946, guid: faf29ac5cd381f14ca67789e90528e05, type: 3}
+    Metin: 
   - Yol: 
     X: 0.55
     Y: 0
@@ -155,6 +159,7 @@ MonoBehaviour:
     OnV: -1
     Yatik: 0
     Sablon: {fileID: 1476046072882310728, guid: 2473b53b40575fd4ca081cf75d05f9e1, type: 3}
+    Metin: 
   - Yol: 
     X: 4.4
     Y: 0
@@ -164,6 +169,7 @@ MonoBehaviour:
     OnV: -1
     Yatik: 0
     Sablon: {fileID: 6813529233286673208, guid: e3298e1273de64c47bf5913f1ca46af6, type: 3}
+    Metin: 
   - Yol: 
     X: 10.1
     Y: 0
@@ -173,6 +179,7 @@ MonoBehaviour:
     OnV: 0
     Yatik: 0
     Sablon: {fileID: 2352641571865322946, guid: faf29ac5cd381f14ca67789e90528e05, type: 3}
+    Metin: 
   - Yol: 
     X: 8.6
     Y: 0
@@ -182,6 +189,7 @@ MonoBehaviour:
     OnV: -1
     Yatik: 0
     Sablon: {fileID: 1476046072882310728, guid: 2473b53b40575fd4ca081cf75d05f9e1, type: 3}
+    Metin: 
   - Yol: 
     X: 9.9
     Y: 0
@@ -191,7 +199,11 @@ MonoBehaviour:
     OnV: 0.2
     Yatik: 0
     Sablon: {fileID: 6813529233286673208, guid: e3298e1273de64c47bf5913f1ca46af6, type: 3}
+    Metin: 
   sesler: []
   parcalar: []
   yananOdalar: []
+  ikinciDaire: 0
+  ikinciKaplamaKati: 0
+  esyaYazilari: []
   cizimBoyu: 0.3

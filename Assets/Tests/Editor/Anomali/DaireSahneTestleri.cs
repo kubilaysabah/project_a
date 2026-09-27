@@ -91,6 +91,8 @@ public class DaireSahneTestleri
             { "Lavabo", new[] { "Sifon" } },
             { "Vana", new[] { "Cark" } },
             { "Gardirop", new string[0] },
+            { "Sofra", new[] { "Yer_1", "Yer_2", "Yer_3", "Yer_4" } },
+            { "Bufe", new[] { "Kapi_1", "Kapi_2" } },
             { "Oyuncak_Kutusu", new[] { "Kapak" } },
             { "Boy_Cetveli", new string[0] },
             { "Alet_Cantasi", new[] { "Kapak" } },

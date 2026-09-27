@@ -42,6 +42,17 @@ public class KatNotu : KatYerlesimi
 public class KatSusu : KatYerlesimi
 {
     public GameObject Sablon;     // koyulacak modelin şablonu (koli...)
+    public string Metin;          // şablonun "Yazi" çocuğuna yazılacak metin anahtarı (isim kartı, #66); boş: yok
+}
+
+/// <summary>Bir zincir eşyasının üstüne yazılacak metin (#66: tabaktaki isim).</summary>
+[System.Serializable]
+public class EsyaYazisi
+{
+    public string Kimlik;         // eşyanın zincirdeki kimliği
+    public string Metin;          // metin tablosu anahtarı
+    public float Yukseklik = 0.02f;
+    public float Boy = 0.0019f;       // 0,0012 masanın başından okunmuyordu
 }
 
 /// <summary>
@@ -94,6 +105,7 @@ public class KatZinciriVarligi : ScriptableObject
     // başka bir katın kaplamasını giyer (ikinciKaplamaKati; 0 = bu katınki).
     public int ikinciDaire;
     public int ikinciKaplamaKati;
+    public List<EsyaYazisi> esyaYazilari = new List<EsyaYazisi>();
     // Parçaların yere serilen kâğıdının gerçek boyu (metre): resmin bütünü bu kadar geniş olurdu.
     public float cizimBoyu = 0.30f;
 }

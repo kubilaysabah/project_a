@@ -147,6 +147,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: odaA
       Tur: 1
       OdaKapisi: 1
@@ -165,6 +166,7 @@ MonoBehaviour:
       - p4
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
   notlar:
   - Yol: 
     X: 5.45
@@ -211,4 +213,7 @@ MonoBehaviour:
       width: 0.515625
       height: 0.5449219
   yananOdalar: []
+  ikinciDaire: 0
+  ikinciKaplamaKati: 0
+  esyaYazilari: []
   cizimBoyu: 0.3

@@ -64,9 +64,12 @@ public static partial class GrayboxKurucu
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
         GameObject kaydirici = SablonKur("Esya_Kaydirici", "Kaydirici", EsyaTuru.Kaydirici, null);
         GameObject anahtarParcasi = AnahtarParcasiSablonuKur();
+        GameObject tabak = SablonKur("Esya_Tabak", "Tabak", EsyaTuru.Tabak, null);
+        GameObject isimKarti = IsimKartiSablonuKur();
         KatZinciriVarligi kat3 = Kat3Kur();
         KatZinciriVarligi kat4 = Kat4Kur();
         KatZinciriVarligi kat5 = Kat5Kur();
+        KatZinciriVarligi kat6 = Kat6Kur(isimKarti);
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
@@ -84,6 +87,7 @@ public static partial class GrayboxKurucu
         seri.FindProperty("levyeSablonu").objectReferenceValue = levye;
         seri.FindProperty("kaydiriciSablonu").objectReferenceValue = kaydirici;
         seri.FindProperty("anahtarParcasiSablonu").objectReferenceValue = anahtarParcasi;
+        seri.FindProperty("tabakSablonu").objectReferenceValue = tabak;
         // #61: nişan menzili 2,8 m (sahnedeki oyuncunun kayıtlı değeri de güncellensin).
         Etkilesimci etk = Object.FindAnyObjectByType<Etkilesimci>(FindObjectsInactive.Include);
         if (etk != null)
@@ -101,11 +105,12 @@ public static partial class GrayboxKurucu
         katlar.GetArrayElementAtIndex(2).objectReferenceValue = kat3;
         katlar.GetArrayElementAtIndex(3).objectReferenceValue = kat4;
         katlar.GetArrayElementAtIndex(4).objectReferenceValue = kat5;
+        katlar.GetArrayElementAtIndex(5).objectReferenceValue = kat6;
         seri.ApplyModifiedPropertiesWithoutUndo();
 
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
-        Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-5. katlar kuruldu ve bağlandı.");
+        Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-6. katlar kuruldu ve bağlandı.");
     }
 
     static void KlasorHazirla(string ust, string ad)
@@ -189,6 +194,34 @@ public static partial class GrayboxKurucu
         Esya esya = gecici.AddComponent<Esya>();
         esya.Ayarla(EsyaTuru.AnahtarParcasi, "", 0);
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Esya_AnahtarParcasi.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // İsim kartı şablonu (#66): kart modeli ve ön yüzünde bir yazı ("Yazi"). Metni kat dosyası
+    // verir (KatSusu.Metin), dile göre YerelYazi yazar. Çarpışma kutusu yok: süs, alınmaz.
+    static GameObject IsimKartiSablonuKur()
+    {
+        GameObject gecici = new GameObject("Isim_Karti");
+        if (Model("Model", gecici.transform, "Isim_Karti", null, Vector3.zero, 0f, carpisma: false) == null)
+        { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Isim_Karti.fbx yok."); return null; }
+        GameObject y = new GameObject("Yazi");
+        y.transform.SetParent(gecici.transform, false);
+        // Kartın ön yüzü z = +0,0015; yazı 2 mm önünde, kartın ortasında. TextMesh'in okunan yüzü
+        // -z'ye baktığı için 180° çevrilir (ön yüzü +Z olan modelin önünden okunsun).
+        y.transform.localPosition = new Vector3(0f, 0.034f, 0.0035f);
+        y.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        TextMesh t = y.AddComponent<TextMesh>();
+        t.text = "?";
+        t.anchor = TextAnchor.MiddleCenter;
+        t.alignment = TextAlignment.Center;
+        t.fontSize = 96;
+        t.characterSize = 0.0016f;          // 0,0011 bir adım öteden okunmuyordu (oynatma modu görüntüsü)
+        t.fontStyle = FontStyle.Bold;
+        t.color = new Color(0.03f, 0.03f, 0.03f);
+        t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        y.GetComponent<MeshRenderer>().sharedMaterial = YaziMalzeme(t.font);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Isim_Karti.prefab");
         Object.DestroyImmediate(gecici);
         return sablon;
     }
@@ -549,6 +582,116 @@ public static partial class GrayboxKurucu
         KilitZinciri.Sonuc s5 = z.Cozumle(odalar);
         if (!s5.Cozulebilir) Debug.LogError("[ZINCIR] 5. kat zinciri çözülemiyor: " + string.Join("; ", s5.Hatalar));
         else Debug.Log("[ZINCIR] 5. kat zinciri çözülebilir: " + string.Join(" -> ", s5.AcilanKilitler));
+        EditorUtility.SetDirty(v);
+        return v;
+    }
+
+    // ---------- 6. KAT: ÇİFT DAİRE + SIRALAMA / YERLEŞTİRME (#70, #66, Docs/hikaye.md §7) ----------
+    // Daire 3 ("kimse oturmuyor" ama sofra kurulmayı bekliyor) ve yanındaki daire 4 birlikte açık.
+    // Salondaki masada dört isim kartı: Rıza Efendi, Hasan, Cemal ve Yeni Kapıcı (oyuncu). Dört
+    // tabak, üstlerinde isimler, iki daireye dağılmış. Hepsi doğru yere konunca büfe açılır.
+    // Altı kilit; iki daire birbirinin kilidini açar (Şahan: "kat geçme zorluğunu da arttıralım"):
+    //   b_kiler  : 4'ün kileri şifreli; şifre 3'ün salon takviminde (1994) -> 4'ün notu "takvime bak"
+    //   a_mutfak : 3'ün mutfağı; anahtarı 4'ün buzdolabında
+    //   a_odaA   : 3'ün yatak odası; anahtarı kırık: başı 4'ün kilerinde, ucu 3'ün mutfak çekmecesinde
+    //   b_banyo  : 4'ün banyosu içeriden kilitli (menteşe, tornavida)
+    //   b_odaA   : 4'ün yatak odası; 3'ün kilerindeki kolla açılır (Cemal'in notu)
+    //   bufe     : dört tabak doğru yerlerde -> büfenin sol kapısı; içinde katın anahtarı
+    // Tabaklar: Rıza 3'ün mutfak dolabında, Cemal 3'ün yatak odasında, Hasan 4'ün banyosunda,
+    // Yeni Kapıcı 4'ün yatak odasında.
+    static KatZinciriVarligi Kat6Kur(GameObject isimKarti)
+    {
+        string yol = $"{ZincirKlasoru}/Kat_6.asset";
+        KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
+        if (v == null)
+        {
+            v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
+            AssetDatabase.CreateAsset(v, yol);
+        }
+        v.aciklama = "6. kat, daire 3 ve 4 birlikte (çift daire, sıralama / yerleştirme). Sofrada dört isim kartı; dört tabak iki " +
+                     "daireye dağılmış. Altı kilit: 4'ün kileri (şifre 3'ün takviminde), 3'ün mutfağı (anahtar 4'ün buzdolabında), " +
+                     "3'ün yatak odası (kırık anahtar, iki dairede), 4'ün banyosu (menteşe), 4'ün yatak odası (3'ün kilerindeki kol), büfe (sofra).";
+        v.ikinciDaire = 4;
+        v.ikinciKaplamaKati = 2;
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_B", "B:Oda_B" });
+        // YERLER: birinci daire (3)
+        z.Yerler.Add(new ZincirYeri { Kimlik = "a_takvim", Yol = "Esyalar/Takvim", Oda = "Salon" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "a_dolap", Yol = "Esyalar/Tezgah", Oda = "Mutfak", KilitYolu = "Esyalar/Tezgah/Kapak_1" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "a_cekmece", Yol = "Esyalar/Tezgah/Cekmece_2", Oda = "Mutfak" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "a_kol", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "a_odaA_yer", PlandaNokta = true, Oda = "Oda_A", U = 9.3f, Y = 0.004f, V = 5.6f, Donus = 20f });
+        for (int i = 1; i <= 4; i++)
+            z.Yerler.Add(new ZincirYeri { Kimlik = "yer_" + i, Yol = "Esyalar/Sofra/Yer_" + i, Oda = "Salon" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "bufe", Yol = "Esyalar/Bufe", Oda = "Salon", KilitYolu = "Esyalar/Bufe/Kapi_1" });
+        // YERLER: ikinci daire (4)
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_buzdolabi", Yol = "B:Esyalar/Buzdolabi", Oda = "B:Mutfak", KilitYolu = "B:Esyalar/Buzdolabi/Kapi" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_alet", Yol = "B:Esyalar/Alet_Cantasi", Oda = "B:Oda_C" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_banyo_yer", PlandaNokta = true, Oda = "B:Banyo", U = 4.2f, Y = 0.004f, V = -0.5f, Donus = -15f });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_odaA_yer", PlandaNokta = true, Oda = "B:Oda_A", U = 9.3f, Y = 0.004f, V = 5.6f, Donus = 35f });
+
+        // EŞYALAR
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "a_mutfak_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "b_buzdolabi", Y = 0.47f, Donus = 20f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "b_alet", Y = 0.03f, Donus = 20f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_bas", Tur = EsyaTuru.AnahtarParcasi, Yer = "b_alet", X = -0.12f, Y = 0.03f, Donus = -25f });
+        // Tezgâhın ikinci çekmecesinin tabanı: x 0,59, y 0,39, z 0,04 (tezgah.py).
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "a_cekmece", X = 0.59f, Y = 0.39f, Z = 0.04f, Donus = 60f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tabak_riza", Tur = EsyaTuru.Tabak, Yer = "a_dolap", X = 0f, Y = 0.475f, Z = 0.02f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tabak_cemal", Tur = EsyaTuru.Tabak, Yer = "a_odaA_yer" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tabak_hasan", Tur = EsyaTuru.Tabak, Yer = "b_banyo_yer" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tabak_kapici", Tur = EsyaTuru.Tabak, Yer = "b_odaA_yer" });
+        // Büfenin sol dolabının tabanı 0,10 m; sol kapı Unity'de +x tarafında (Blender -x).
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "bufe", X = 0.35f, Y = 0.105f, Donus = 15f });
+
+        // KİLİTLER
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "b_kiler", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "B:Oda_C", Gerekli = "a_takvim",
+                                          Sifre = "1994", IpucuMetni = "1994", IpucuY = 0.24f, IpucuZ = 0.011f });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "a_mutfak", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "a_mutfak_anahtari" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "a_odaA", Tur = KilitTuru.KirikAnahtar, OdaKapisi = true, Hedef = "Oda_A",
+                                          Gerekenler = new List<string> { "odaA_anahtari_bas", "odaA_anahtari_uc" } });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "b_banyo", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "B:Banyo", Gerekli = "tornavida" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "b_odaA", Tur = KilitTuru.Kol, OdaKapisi = true, Hedef = "B:Oda_A", Gerekli = "a_kol" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "bufe", Tur = KilitTuru.Yerlestirme, OdaKapisi = false, Hedef = "bufe",
+                                          Gerekenler = new List<string> { "tabak_riza", "tabak_hasan", "tabak_cemal", "tabak_kapici" },
+                                          Yuvalar = new List<string> { "yer_1", "yer_2", "yer_3", "yer_4" } });
+        v.zincir = z;
+
+        // İSİMLER: tabakların üstünde ve sofradaki kartlarda (metin tablosundan).
+        v.esyaYazilari = new List<EsyaYazisi>
+        {
+            new EsyaYazisi { Kimlik = "tabak_riza", Metin = "bina.isim_riza", Boy = 0.0019f },
+            new EsyaYazisi { Kimlik = "tabak_hasan", Metin = "bina.isim_hasan", Boy = 0.0019f },
+            new EsyaYazisi { Kimlik = "tabak_cemal", Metin = "bina.isim_cemal", Boy = 0.0019f },
+            new EsyaYazisi { Kimlik = "tabak_kapici", Metin = "bina.isim_kapici", Boy = 0.0019f },
+        };
+        // Kartlar masanın kenarında, her tabak yerinin önünde; ön yüzü o yerin sandalyesine bakar.
+        // Önde oturanlar (z = +0,25) için kart z = +0,40, arkadakiler için -0,40 ve 180° dönük.
+        KatSusu Kart(float x, float zz, float donus, string metin)
+        { return new KatSusu { Sablon = isimKarti, Yol = "Esyalar/Sofra", X = x, Y = 0.757f, Z = zz, Donus = donus, Metin = metin }; }
+        v.suslar = new List<KatSusu>
+        {
+            Kart(-0.35f, 0.40f, 0f, "bina.isim_riza"),
+            Kart(0.35f, 0.40f, 0f, "bina.isim_hasan"),
+            Kart(-0.35f, -0.40f, 180f, "bina.isim_cemal"),
+            Kart(0.35f, -0.40f, 180f, "bina.isim_kapici"),
+        };
+        v.notlar = new List<KatNotu>
+        {
+            // 3'ün antresinde davet; 3'ün kilerinde kolun yanında Cemal'in notu; 4'ün koridorunda
+            // kilerin kapısının yanında "takvime bak" notu (2. kattaki notun yeri, ikinci dairede).
+            new KatNotu { Metin = "not.kat6_davet", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
+            new KatNotu { Metin = "not.kat6_kol", Yol = "Esyalar/Duvar_Kolu", X = 0.35f, Y = 0.25f, Z = 0.002f },
+            new KatNotu { Metin = "not.kat6_takvim", Yol = "B:", X = 4.95f, Y = 1.40f, Z = 2.952f, OnU = 0f, OnV = 1f },
+        };
+        v.parcalar = new List<KatParcasi>();
+        v.sesler = new List<KatSesi>();
+        v.yananOdalar = new List<string>();
+
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) { odalar.Add(o.Ad); odalar.Add(KilitZinciri.IkinciOnek + o.Ad); }
+        KilitZinciri.Sonuc s6 = z.Cozumle(odalar);
+        if (!s6.Cozulebilir) Debug.LogError("[ZINCIR] 6. kat zinciri çözülemiyor: " + string.Join("; ", s6.Hatalar));
+        else Debug.Log("[ZINCIR] 6. kat zinciri çözülebilir: " + string.Join(" -> ", s6.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
     }

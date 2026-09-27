@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class EsyaGostergesi : MonoBehaviour
 {
-    private Texture2D anahtar, sigorta, tornavida, not, levye, kaydirici, kirikAnahtar;
+    private Texture2D anahtar, sigorta, tornavida, not, levye, kaydirici, kirikAnahtar, tabak;
     private GUIStyle sayacStili;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -60,6 +60,12 @@ public class EsyaGostergesi : MonoBehaviour
             bool dis1 = u > 0.55f && u < 0.68f && v < 0f && v > -0.34f;
             bool dis2 = u > 0.75f && u < 0.86f && v < 0f && v > -0.28f;
             return halkaCizgi || (govde && !bosluk) || dis1 || dis2;
+        });
+        tabak = Ciz((u, v) =>
+        {
+            // Tabak (#66): dış halka ve iç çukurun kenarı.
+            float r = Mathf.Sqrt(u * u + v * v);
+            return (r < 0.85f && r > 0.72f) || (r < 0.52f && r > 0.44f);
         });
         levye = Ciz((u, v) =>
         {
@@ -125,7 +131,8 @@ public class EsyaGostergesi : MonoBehaviour
         if (Cep.Tasinan == EsyaTuru.OdaAnahtari) GUI.color = new Color(0.78f, 0.80f, 0.82f, 1f);
         bool anahtarMi = Cep.Tasinan == EsyaTuru.KatAnahtari || Cep.Tasinan == EsyaTuru.OdaAnahtari;
         Texture2D t = anahtarMi ? anahtar : Cep.Tasinan == EsyaTuru.Sigorta ? sigorta
-                    : Cep.Tasinan == EsyaTuru.Tornavida ? tornavida : not;
+                    : Cep.Tasinan == EsyaTuru.Tornavida ? tornavida
+                    : Cep.Tasinan == EsyaTuru.Tabak ? tabak : not;
         GUI.DrawTexture(new Rect(kutu.x + 8f, kutu.y + 8f, 48f, 48f), t);
         GUI.color = Color.white;
     }

@@ -28,6 +28,9 @@ public class YerelYazi : MonoBehaviour
     public void AnahtariKur(string yeniAnahtar)
     {
         anahtar = yeniAnahtar;
+        // Oyun sırasında koddan eklenen yazı (#66: isim kartı, tabak) zaten açıktır; OnEnable
+        // anahtarsız çalışıp geçti. Metni burada hemen yaz.
+        if (isActiveAndEnabled) Yenile();
     }
 
     // Nesne açılınca: dil haberini dinlemeye başla ve metni hemen yaz.

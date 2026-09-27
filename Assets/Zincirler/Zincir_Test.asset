@@ -150,6 +150,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: salon
       Tur: 0
       OdaKapisi: 1
@@ -164,6 +165,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: kiler
       Tur: 1
       OdaKapisi: 1
@@ -178,6 +180,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: odaA
       Tur: 2
       OdaKapisi: 1
@@ -192,6 +195,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: buzdolabi
       Tur: 3
       OdaKapisi: 0
@@ -206,6 +210,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: odaB
       Tur: 0
       OdaKapisi: 1
@@ -220,6 +225,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: banyo
       Tur: 4
       OdaKapisi: 1
@@ -234,9 +240,13 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
   notlar: []
   suslar: []
   sesler: []
   parcalar: []
   yananOdalar: []
+  ikinciDaire: 0
+  ikinciKaplamaKati: 0
+  esyaYazilari: []
   cizimBoyu: 0.3

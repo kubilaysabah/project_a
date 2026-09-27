@@ -42,8 +42,10 @@ public enum KilitTuru
                  // eklemek eski dosyalardaki türleri kaydırırdı.
     Ekipman,     // (#65) ağır bir şey (gardırop) ancak BİRKAÇ alet birlikte bulununca yerinden
                  // oynar: Gerekenler listesindeki aletlerin hepsi kapıcının çantasında olmalı.
-    KirikAnahtar // (#65) kapının anahtarı kırık: Gerekenler listesindeki anahtar parçalarının
+    KirikAnahtar,// (#65) kapının anahtarı kırık: Gerekenler listesindeki anahtar parçalarının
                  // hepsi bulununca anahtar tamamlanır ve kapı açılır.
+    Yerlestirme  // (#66) Gerekenler'deki eşyaların her biri Yuvalar'daki aynı sıradaki yere konunca
+                 // (sofraya dört tabak, doğru isimlerin önüne) kilit açılır.
 }
 
 [System.Serializable]
@@ -100,6 +102,8 @@ public class ZincirKilidi
     // Yalnızca Ekipman (#65): gereken aletlerin eşya kimlikleri (levye, kaydırıcı...). Hepsi
     // bulununca kilit açılır; aletler bitmez.
     public List<string> Gerekenler = new List<string>();
+    // Yalnızca Yerlestirme (#66): eşyaların konacağı yerlerin kimlikleri; Gerekenler[i] Yuvalar[i]'ye.
+    public List<string> Yuvalar = new List<string>();
 }
 
 [System.Serializable]
@@ -232,6 +236,11 @@ public class KilitZinciri
             case KilitTuru.Kol:
                 // Kolu çekmek için o yere ulaşmak yeter.
                 return YereUlasilir(k.Gerekli, acilan);
+            case KilitTuru.Yerlestirme:
+                // Konacak eşyaların hepsine ve konacakları yerlerin hepsine ulaşılmalı.
+                if (k.Yuvalar == null || k.Yuvalar.Count == 0) return false;
+                foreach (string y in k.Yuvalar) if (!YereUlasilir(y, acilan)) return false;
+                goto case KilitTuru.Ekipman;
             case KilitTuru.Ekipman:
             case KilitTuru.KirikAnahtar:
                 // Gereken aletlerin (ya da anahtar parçalarının) hepsine ulaşılmalı.
@@ -293,6 +302,18 @@ public class KilitZinciri
                     break;
                 case KilitTuru.Kol:
                     if (YerBul(k.Gerekli) == null) sonuc.Hatalar.Add($"'{k.Kimlik}': kol yeri '{k.Gerekli}' yok");
+                    break;
+                case KilitTuru.Yerlestirme:
+                    if (k.Gerekenler == null || k.Yuvalar == null || k.Gerekenler.Count == 0 || k.Gerekenler.Count != k.Yuvalar.Count)
+                        sonuc.Hatalar.Add($"'{k.Kimlik}': eşya ve yer sayısı eşit olmalı (en az bir)");
+                    else
+                        for (int i = 0; i < k.Gerekenler.Count; i++)
+                        {
+                            ZincirEsyasi konan = EsyaBul(k.Gerekenler[i]);
+                            if (konan == null) sonuc.Hatalar.Add($"'{k.Kimlik}': konacak eşya '{k.Gerekenler[i]}' zincirde yok");
+                            else if (konan.Tur != EsyaTuru.Tabak) sonuc.Hatalar.Add($"'{k.Kimlik}': '{k.Gerekenler[i]}' konacak bir eşya değil, {konan.Tur}");
+                            if (YerBul(k.Yuvalar[i]) == null) sonuc.Hatalar.Add($"'{k.Kimlik}': yer '{k.Yuvalar[i]}' tanımlı değil");
+                        }
                     break;
                 case KilitTuru.KirikAnahtar:
                     if (k.Gerekenler == null || k.Gerekenler.Count < 2) sonuc.Hatalar.Add($"'{k.Kimlik}': kırık anahtarın en az iki parçası olmalı");

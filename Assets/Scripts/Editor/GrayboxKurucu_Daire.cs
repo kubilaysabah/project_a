@@ -529,6 +529,7 @@ public static partial class GrayboxKurucu
             ayar.sure = 1.6f;
             ayar.ipucuAnahtari = "ipucu.cevir";
         }
+        SofraKur(e, d);
         GameObject gardirop = DaireEsyasi("Gardirop", e, d, 0.03f + 0.14f + 0.275f, 0f, 6.6f, 1f, 0f);
         if (gardirop != null)
         {
@@ -546,6 +547,34 @@ public static partial class GrayboxKurucu
             seri.FindProperty("ipucuKapat").stringValue = "ipucu.it";
             seri.ApplyModifiedPropertiesWithoutUndo();
         }
+    }
+
+    // SALON SOFRASI VE BÜFE (#66): 6. katın sıralama / yerleştirme bulmacası için (her dairede).
+    // Masa salonun ortasında (uzun kenarı u boyunca), büfe arka duvarda (v = 8,1). Masanın
+    // üstüne dört tabak yeri (Yer_1..4): önde sol / sağ, arkada sol / sağ; nişan için ince kutular.
+    static void SofraKur(Transform e, DaireYonu d)
+    {
+        GameObject sofra = DaireEsyasi("Sofra", e, d, 2.8f, 0f, 6.3f, 0f, -1f);
+        if (sofra != null)
+        {
+            // Sandalyeler modelin y = +-0,62'sinde (Unity'de z); tabak yeri masanın kenarına yakın.
+            Vector3[] yerler = { new Vector3(-0.35f, 0.757f, 0.25f), new Vector3(0.35f, 0.757f, 0.25f),
+                                 new Vector3(-0.35f, 0.757f, -0.25f), new Vector3(0.35f, 0.757f, -0.25f) };
+            for (int i = 0; i < yerler.Length; i++)
+            {
+                GameObject y = new GameObject($"Yer_{i + 1}");
+                y.transform.SetParent(sofra.transform, false);
+                y.transform.localPosition = yerler[i];
+                BoxCollider c = y.AddComponent<BoxCollider>();
+                c.center = new Vector3(0f, 0.02f, 0f);
+                c.size = new Vector3(0.26f, 0.04f, 0.26f);
+            }
+        }
+        // Büfe: pivot tabanın ortası; arkası duvara 1 cm kala (derinlik 0,48).
+        GameObject bufe = DaireEsyasi("Bufe", e, d, 3.6f, 0f, 8.1f - 0.25f, 0f, -1f, "Kapi_1", "Kapi_2");
+        Acilir(bufe, "Kapi_1", AcilirParca.Hareket.Dondur, Vector3.up, 100f, 0.6f);
+        Acilir(bufe, "Kapi_2", AcilirParca.Hareket.Dondur, Vector3.up, -100f, 0.6f);
+        Yonlendir(bufe, "Kapi_1", "Kapi_2");
     }
 
     // Açılır parçanın ekrandaki eylem adları (#65): "SÖK / TAK" gibi.

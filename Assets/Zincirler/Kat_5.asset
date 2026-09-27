@@ -159,6 +159,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: mutfak
       Tur: 2
       OdaKapisi: 1
@@ -173,6 +174,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
     - Kimlik: salon
       Tur: 7
       OdaKapisi: 1
@@ -189,6 +191,7 @@ MonoBehaviour:
       Gerekenler:
       - salon_anahtari_bas
       - salon_anahtari_uc
+      Yuvalar: []
     - Kimlik: gardirop
       Tur: 6
       OdaKapisi: 0
@@ -205,6 +208,7 @@ MonoBehaviour:
       Gerekenler:
       - levye
       - kaydirici
+      Yuvalar: []
     - Kimlik: sifon
       Tur: 2
       OdaKapisi: 0
@@ -219,6 +223,7 @@ MonoBehaviour:
       Parcalar: []
       IpucuKaranlikta: 0
       Gerekenler: []
+      Yuvalar: []
   notlar:
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3
@@ -240,4 +245,7 @@ MonoBehaviour:
     SusturanKilit: sifon
   parcalar: []
   yananOdalar: []
+  ikinciDaire: 0
+  ikinciKaplamaKati: 0
+  esyaYazilari: []
   cizimBoyu: 0.3

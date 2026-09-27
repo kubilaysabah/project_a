@@ -129,6 +129,19 @@ public class ZincirUygulayici
                 }
                 else Debug.LogWarning("[ZINCIR] Sigorta kutusu bulunamadı: " + SigortaKutusuYolu);
             }
+            if (veri.Tur == KilitTuru.Yerlestirme)
+            {
+                // Her yerin nesnesine bir Yuva; hepsi aynı kilide ve birbirine bağlı (#66).
+                var grup = new List<Yuva>();
+                for (int i = 0; i < veri.Yuvalar.Count && i < veri.Gerekenler.Count; i++)
+                {
+                    Transform yer = YerYolu(daire, zincir, veri.Yuvalar[i]);
+                    if (yer == null) { Debug.LogWarning($"[ZINCIR] '{veri.Kimlik}' yeri '{veri.Yuvalar[i]}' bulunamadı."); continue; }
+                    Yuva y = yer.gameObject.AddComponent<Yuva>();
+                    grup.Add(y);
+                }
+                for (int i = 0; i < grup.Count; i++) grup[i].Hazirla(veri.Gerekenler[i], kilit, grup);
+            }
             if (veri.Tur == KilitTuru.Sifre)
             {
                 GameObject asma = kilit.AsmaKilitTak(AsmaKilitSablonu);
@@ -214,7 +227,28 @@ public class ZincirUygulayici
             if (not != null) not.Ayarla(n.Metin);
         }
         foreach (KatSusu s in varlik.suslar)
-            Yerlestir(daire, eksen, s.Sablon, s, "Sus_" + (s.Sablon != null ? s.Sablon.name : "?"));
+        {
+            GameObject g = Yerlestir(daire, eksen, s.Sablon, s, "Sus_" + (s.Sablon != null ? s.Sablon.name : "?"));
+            // Süsün yazısı (isim kartı, #66): şablonun "Yazi" çocuğuna metin tablosundan; dil
+            // değişince YerelYazi yeniler.
+            Transform yaziNesnesi = g != null && !string.IsNullOrEmpty(s.Metin) ? g.transform.Find("Yazi") : null;
+            if (yaziNesnesi != null)
+            {
+                YerelYazi yy = yaziNesnesi.GetComponent<YerelYazi>();
+                if (yy == null) yy = yaziNesnesi.gameObject.AddComponent<YerelYazi>();
+                yy.AnahtariKur(s.Metin);
+            }
+        }
+        // Eşyaların üstündeki yazılar (tabaktaki isim, #66): eşyanın üstüne, yüzü yukarı bakan yazı.
+        foreach (EsyaYazisi ey in varlik.esyaYazilari)
+        {
+            GameObject g = KonanEsya(ey.Kimlik);
+            if (g == null) continue;
+            // (90, 180, 0): yüzü yukarı, masanın önünden (salon kapısı tarafından) düz okunur.
+            // (90, 0, 0) ile oradan ters görünüyordu (oynatma modu görüntüsü).
+            TextMesh t = DunyaYazisi(g.transform, "Yazi", Dil.Getir(ey.Metin), new Vector3(0f, ey.Yukseklik, 0f), Quaternion.Euler(90f, 180f, 0f), ey.Boy);
+            t.gameObject.AddComponent<YerelYazi>().AnahtariKur(ey.Metin);
+        }
         // Tavan lambaları (#64): bu katta lambası yanabilen odalar (elektrik varken yanarlar).
         // "B:" önekli odalar ikinci dairenin lambalarıdır (#70).
         var odalarA = new List<string>();
@@ -339,6 +373,16 @@ public class ZincirUygulayici
                     Kirilan kr = kirilacak != null ? kirilacak.GetComponent<Kirilan>() : null;
                     if (kr != null) kr.Kir(sesli: false);
                     break;
+                case KilitTuru.Yerlestirme:
+                    // Sofra kurulmuştu: tabaklar yerlerine oturtulur (#66).
+                    for (int i = 0; i < veri.Yuvalar.Count && i < veri.Gerekenler.Count; i++)
+                    {
+                        Transform yer = YerYolu(daire, zincir, veri.Yuvalar[i]);
+                        Yuva y = yer != null ? yer.GetComponent<Yuva>() : null;
+                        GameObject esya = KonanEsya(veri.Gerekenler[i]);
+                        if (y != null && esya != null) y.YerlesmisBaslat(esya);
+                    }
+                    break;
             }
             if (kilit != null && !kilit.Cozuk) kilit.CozukBaslat();
         }
@@ -359,6 +403,40 @@ public class ZincirUygulayici
         foreach (Transform t in capalar.Values) if (t != null) Object.Destroy(t.gameObject);
         capalar.Clear();
         DaireyiTemizle(daire);
+    }
+
+    // Konan eşyalardan kimliği verilen (yoksa null).
+    private GameObject KonanEsya(string kimlik)
+    {
+        foreach (GameObject g in konanlar)
+        {
+            Esya e = g != null ? g.GetComponent<Esya>() : null;
+            if (e != null && e.Kimlik == kimlik) return g;
+        }
+        return null;
+    }
+
+    // Bir dünya yazısı (TextMesh) oluşturur: kapı numarasının yazı tipi ve malzemesiyle.
+    private TextMesh DunyaYazisi(Transform ebeveyn, string ad, string metin, Vector3 konum, Quaternion donus, float boy)
+    {
+        GameObject g = new GameObject(ad);
+        g.transform.SetParent(ebeveyn, false);
+        g.transform.localPosition = konum;
+        g.transform.localRotation = donus;
+        TextMesh yazi = g.AddComponent<TextMesh>();
+        yazi.text = metin;
+        yazi.anchor = TextAnchor.MiddleCenter;
+        yazi.alignment = TextAlignment.Center;
+        yazi.fontSize = 96;
+        yazi.characterSize = boy;
+        yazi.fontStyle = FontStyle.Bold;         // porselenin üstünde ince yazı kayboluyordu
+        yazi.color = new Color(0.03f, 0.03f, 0.03f);
+        if (YaziOrnegi != null)
+        {
+            yazi.font = YaziOrnegi.font;
+            g.GetComponent<MeshRenderer>().sharedMaterial = YaziOrnegi.GetComponent<MeshRenderer>().sharedMaterial;
+        }
+        return yazi;
     }
 
     // Bir dairenin kilitlerini, kırılan ve devrilen parçalarını, kollarını, seslerini sıfırlar.
@@ -389,6 +467,8 @@ public class ZincirUygulayici
         foreach (CalanEsya c in daire.GetComponentsInChildren<CalanEsya>(true)) { c.Sifirla(); Object.DestroyImmediate(c); }
         // Çizim ekranı ve planda nokta olan yerlerin çapaları (#63).
         foreach (CizimEkrani c in daire.GetComponentsInChildren<CizimEkrani>(true)) Object.DestroyImmediate(c);
+        // Sofranın yerleri (#66).
+        foreach (Yuva y in daire.GetComponentsInChildren<Yuva>(true)) Object.DestroyImmediate(y);
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);

@@ -19,6 +19,7 @@ ipucu.sok	SÖK	UNSCREW
 ipucu.it	İT	PUSH
 ipucu.cevir	ÇEVİR	TURN
 ipucu.agir	AĞIR	TOO HEAVY
+ipucu.koy	KOY	PLACE
 ipucu.kir	KIR	BREAK
 
 # ---- Yönetici notu (açılış) ----
@@ -31,6 +32,9 @@ not.kat3_anne	Murat,\nKerem bu gece de uyandı. "Yukarıdaki amca camdan bakıyo
 not.kat4_giris	Elektriği ben kestim. Bu evde ışık yalan söylüyor.\nSigortayı mutfak dolabına kilitledim.\nŞifresini ancak karanlık gösterir:\nlambanı söndür ve bekle.\n\n— Hasan	I cut the power myself. In this flat, the light lies.\nI locked the fuse in the kitchen cupboard.\nOnly the dark will show you its code:\nswitch off your lamp and wait.\n\n— Hasan
 not.kat4_buzdolabi	Işıklar yanınca o da geliyor.\nGece asansörün dokuzuncu kattan indiğini duydum.\nBenden önceki kapıcı Rıza Efendi de duymuş.\nYarın bırakıyorum. Anahtar burada; sen de çok kalma.\n\n— Hasan	When the lights come on, so does he.\nAt night I heard the lift coming down from the ninth floor.\nRıza Efendi, the janitor before me, heard it too.\nI quit tomorrow. The key is here; don't stay long either.\n\n— Hasan
 not.kat5_liste	İŞ LİSTESİ — Daire 18\n1. Banyo lavabosu damlatıyor. Sifonu sökmeden önce ana vanayı kapat!\n   Vana salonda, gardırobun arkasında. Gardırop çok ağır:\n   levyeyle kaldırıp altına kaydırıcı koymadan kıpırdamaz.\n2. Banyo kapısı içeriden kilitlenmiş. Kimse yokken nasıl? Menteşeleri sök.\n3. Salonun anahtarı kilitte kırıldı. İki parçası evde bir yerde, atma!\n4. Mutfak kapısı sıkışıyor; kilerdeki kolu çekince sürgüsü açılıyor.\n5. Asansör yine kendi kendine çalışıyor. Yönetime söyle.\n\n— Cemal	JOB LIST — Flat 18\n1. The bathroom sink drips. Close the main valve before taking the trap off!\n   The valve is in the living room, behind the wardrobe. The wardrobe is very heavy:\n   it won't budge unless you lift it with a crowbar and put sliders under it.\n2. The bathroom door is locked from the inside. How, with nobody here? Take the hinges off.\n3. The living-room key broke in the lock. Both pieces are somewhere in the flat, don't throw them away!\n4. The kitchen door sticks; pulling the lever in the pantry releases its bolt.\n5. The lift is running by itself again. Tell the management.\n\n— Cemal
+not.kat6_davet	Bu akşam sofrayı kuruyoruz.\nDördümüz de geleceğiz: Rıza Efendi, Hasan, Cemal.\nSenin yerin de hazır.\nTabakları yerli yerine koymayı unutma.\n\n— Yönetim	We are setting the table tonight.\nAll four of us will be there: Rıza Efendi, Hasan, Cemal.\nYour seat is ready too.\nDon't forget to put the plates in their places.\n\n— The Management
+not.kat6_kol	Bu kolu çektim, yan dairede bir kapı tık diye açıldı.\nİki daire birbirine bağlı gibi.\nBir daha dokunmayacağım.\n\n— C.	I pulled this lever and a door clicked open in the flat next door.\nIt is as if the two flats are connected.\nI won't touch it again.\n\n— C.
+not.kat6_takvim	Kilerin şifresi mi?\nYandaki dairenin takvimine bak.\nOrada hep aynı yıl yazıyor.\n\n— C.	The pantry code?\nLook at the calendar in the flat next door.\nIt always shows the same year.\n\n— C.
 not.kapat	{0}: kapat	{0}: close
 
 # ---- Jenerik: ilk satır başlık, boş satırlar aralık ----
@@ -77,6 +81,10 @@ ayar.parlaklik	Parlaklık: {0}	Brightness: {0}
 # Asansör notu ve takvim İngilizce oyunda çevrilir (Şahan'ın kararı, 2026-09-24):
 # not bir MESAJ ("asansör bozuk"); okunamazsa oyuncu onu anomali ipucu sanabilir.
 bina.tabela	HUZUR APARTMANI	HUZUR APARTMANI
+bina.isim_riza	Rıza Efendi	Rıza Efendi
+bina.isim_hasan	Hasan	Hasan
+bina.isim_cemal	Cemal	Cemal
+bina.isim_kapici	Yeni Kapıcı	New Janitor
 bina.takvim	EKİM\n1994	<size=66>OCTOBER</size>\n1994
 bina.asansor_notu	ARIZALI\n<size=48>Yönetim</size>	<size=78>OUT OF\nORDER</size>\n<size=44>Management</size>
 
