@@ -26,10 +26,20 @@ MonoBehaviour:
       Yol: Esyalar/Radyo
       Oda: Oda_A
       KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
     - Kimlik: alet_cantasi
       Yol: Esyalar/Alet_Cantasi
       Oda: Oda_C
       KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
     Esyalar:
     - Kimlik: kat_anahtari
       Tur: 1
@@ -50,6 +60,7 @@ MonoBehaviour:
       IpucuY: 0.137
       IpucuZ: 0.0705
       IpucuOlcek: 0.7
+      Parcalar: []
   notlar:
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3
@@ -76,3 +87,5 @@ MonoBehaviour:
     Klip: {fileID: 8300000, guid: 6f840b9879cafa641948e3e2fa41b79b, type: 3}
     Gecikme: 4
     Ses: 0.8
+  parcalar: []
+  cizimBoyu: 0.3

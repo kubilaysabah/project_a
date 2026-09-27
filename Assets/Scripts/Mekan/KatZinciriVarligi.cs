@@ -1,5 +1,6 @@
 // KatZinciriVarligi.cs
-// Bir katın içerik dosyası (#54, #55, #62): kilit zinciri, notlar, dekor ve kendiliğinden çalan eşyalar.
+// Bir katın içerik dosyası (#54, #55, #62, #63): kilit zinciri, notlar, dekor, kendiliğinden çalan
+// eşyalar ve yırtık çizimin parçaları.
 //
 // ScriptableObject: sahnedeki bir nesneye değil, projedeki bir DOSYAYA ait veri kabı
 // (anomali kartları da böyle). Zincirin kendisi (KilitZinciri) Unity'siz, düz C# ve testli;
@@ -58,6 +59,20 @@ public class KatSesi
     [Range(0f, 1f)] public float Ses = 0.8f;
 }
 
+/// <summary>
+/// Yırtık bir çizimin bir parçası (#63). Kimlik: zincirdeki Parca eşyasının kimliği; Doku: tam
+/// resim boyunda, yalnızca bu parçanın bölgesi opak doku; Bolge: o bölgenin dokudaki yeri (UV,
+/// 0-1, sol alttan). Dünyadaki kâğıt parçası yalnızca Bolge'yi gösterir; yakın bakış ekranı
+/// bütün dokuyu çizer (parçalar üst üste birleşir).
+/// </summary>
+[System.Serializable]
+public class KatParcasi
+{
+    public string Kimlik;
+    public Texture2D Doku;
+    public Rect Bolge;
+}
+
 // CreateAssetMenu: Project penceresinde sağ tık → Create menüsüne "Huzur/Kat Zinciri" ekler.
 [CreateAssetMenu(fileName = "Zincir_Yeni", menuName = "Huzur/Kat Zinciri")]
 public class KatZinciriVarligi : ScriptableObject
@@ -67,4 +82,7 @@ public class KatZinciriVarligi : ScriptableObject
     public List<KatNotu> notlar = new List<KatNotu>();
     public List<KatSusu> suslar = new List<KatSusu>();
     public List<KatSesi> sesler = new List<KatSesi>();
+    public List<KatParcasi> parcalar = new List<KatParcasi>();
+    // Parçaların yere serilen kâğıdının gerçek boyu (metre): resmin bütünü bu kadar geniş olurdu.
+    public float cizimBoyu = 0.30f;
 }

@@ -38,6 +38,10 @@ public class ZincirUygulayici
     // Bu uygulayıcının dairelere koyduğu eşyalar; bir sonraki temizlikte kaldırılır.
     private readonly List<GameObject> konanlar = new List<GameObject>();
 
+    // Planda nokta olan yerler için konan boş çapa nesneleri (#63), yer kimliğine göre.
+    // Dictionary: bir anahtardan (kimlik) bir değere (nesne) hızlı ulaşan bir sözlük.
+    private readonly Dictionary<string, Transform> capalar = new Dictionary<string, Transform>();
+
     public void SablonEkle(EsyaTuru tur, GameObject sablon)
     {
         if (sablon != null) sablonlar[tur] = sablon;
@@ -133,6 +137,8 @@ public class ZincirUygulayici
             if (KullanilmisMi(zincir, e, kat)) continue;
             // Kapıcının çantasında zaten olan alet (önceki bir katta bulunan tornavida) yeniden konmaz.
             if (AletCantasi.AletMi(e.Tur) && Aletler.Var(e.Kimlik)) continue;
+            // Bulunmuş bir çizim parçası (kayıtta) yeniden konmaz (#63).
+            if (e.Tur == EsyaTuru.Parca && Kayit.ParcaBulunduMu(kat, e.Kimlik)) continue;
             Transform yer = YerYolu(daire, zincir, e.Yer);
             if (yer == null) { Debug.LogWarning($"[ZINCIR] '{e.Kimlik}' eşyasının yeri bulunamadı."); continue; }
             if (!sablonlar.TryGetValue(e.Tur, out GameObject sablon)) { Debug.LogWarning($"[ZINCIR] {e.Tur} şablonu yok."); continue; }
@@ -142,7 +148,7 @@ public class ZincirUygulayici
             nesne.transform.localPosition = new Vector3(e.X, e.Y, e.Z);
             nesne.transform.localRotation = Quaternion.Euler(0f, e.Donus, 0f);
             Esya bilesen = nesne.GetComponent<Esya>();
-            if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari ? kat : 0);
+            if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari || e.Tur == EsyaTuru.Parca ? kat : 0);
             konanlar.Add(nesne);
         }
 
@@ -154,10 +160,23 @@ public class ZincirUygulayici
     /// Katın notlarını ve dekorunu (koliler...) daireye koyar (#55). Uygula'dan SONRA çağrılır;
     /// konanlar bir sonraki katta Uygula'nın temizliğiyle kalkar.
     /// </summary>
-    public void DekorUygula(Transform daire, KatZinciriVarligi varlik)
+    public void DekorUygula(Transform daire, KatZinciriVarligi varlik, int kat)
     {
         if (varlik == null) return;
         DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
+        // Yırtık çizim (#63): dairenin köküne çizim ekranı; konan parçalar kendi bölgelerini gösterir.
+        if (varlik.parcalar != null && varlik.parcalar.Count > 0)
+        {
+            CizimEkrani ekran = daire.gameObject.AddComponent<CizimEkrani>();
+            ekran.Hazirla(kat, varlik.parcalar);
+            foreach (GameObject g in konanlar)
+            {
+                Esya e = g != null ? g.GetComponent<Esya>() : null;
+                if (e == null || e.Tur != EsyaTuru.Parca) continue;
+                foreach (KatParcasi p in varlik.parcalar)
+                    if (p.Kimlik == e.Kimlik) ParcayiGiydir(g, p, varlik.cizimBoyu);
+            }
+        }
         foreach (KatNotu n in varlik.notlar)
         {
             GameObject g = Yerlestir(daire, eksen, NotSablonu, n, "Not_" + n.Metin);
@@ -175,6 +194,24 @@ public class ZincirUygulayici
             CalanEsya c = t.gameObject.AddComponent<CalanEsya>();
             c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, ks.Oda, KapiBul(daire, ks.Oda), eksen);
         }
+    }
+
+    // Kâğıt parçasının yüzüne kendi bölgesini giydirir: şablondaki "Kagit" dörtgeni bölgenin
+    // en-boy oranına göre ölçeklenir, malzemeye yalnızca bölgeyi gösteren döşeme (tiling) ve
+    // kaydırma (offset) verilir. MaterialPropertyBlock: malzemeyi kopyalamadan tek bir nesneye
+    // özel değer vermenin yolu (dört parça tek malzemeyi paylaşır; bkz. anomali renkleri).
+    private static void ParcayiGiydir(GameObject parca, KatParcasi p, float cizimBoyu)
+    {
+        Transform kagit = parca.transform.Find("Kagit");
+        MeshRenderer r = kagit != null ? kagit.GetComponent<MeshRenderer>() : null;
+        if (r == null || p.Doku == null) return;
+        kagit.localScale = new Vector3(cizimBoyu * p.Bolge.width, cizimBoyu * p.Bolge.height, 1f);
+        var blok = new MaterialPropertyBlock();
+        r.GetPropertyBlock(blok);
+        blok.SetTexture("_BaseMap", p.Doku);
+        // _BaseMap_ST: (döşeme x, döşeme y, kaydırma x, kaydırma y).
+        blok.SetVector("_BaseMap_ST", new Vector4(p.Bolge.width, p.Bolge.height, p.Bolge.x, p.Bolge.y));
+        r.SetPropertyBlock(blok);
     }
 
     // Bir şablonu yerleşim bilgisine göre koyar (bkz. KatYerlesimi: çapaya göre ya da plana göre).
@@ -281,6 +318,10 @@ public class ZincirUygulayici
         foreach (CekilenKol kol in daire.GetComponentsInChildren<CekilenKol>(true)) { kol.Sifirla(); Object.Destroy(kol); }
         // Çalan eşyalar susar, sesleri ve ışıkları sökülür (#62).
         foreach (CalanEsya c in daire.GetComponentsInChildren<CalanEsya>(true)) { c.Sifirla(); Object.Destroy(c); }
+        // Çizim ekranı ve planda nokta olan yerlerin çapaları (#63).
+        foreach (CizimEkrani c in daire.GetComponentsInChildren<CizimEkrani>(true)) Object.Destroy(c);
+        foreach (Transform t in capalar.Values) if (t != null) Object.Destroy(t.gameObject);
+        capalar.Clear();
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);
@@ -336,10 +377,21 @@ public class ZincirUygulayici
         return YolBul(daire, string.IsNullOrEmpty(y.KilitYolu) ? y.Yol : y.KilitYolu);
     }
 
-    private static Transform YerYolu(Transform daire, KilitZinciri zincir, string yerKimligi)
+    private Transform YerYolu(Transform daire, KilitZinciri zincir, string yerKimligi)
     {
         ZincirYeri y = zincir.YerBul(yerKimligi);
-        return y != null ? YolBul(daire, y.Yol) : null;
+        if (y == null) return null;
+        if (!y.PlandaNokta) return YolBul(daire, y.Yol);
+        // Planda bir nokta (#63): o noktaya boş bir çapa nesnesi konur (bir kez; sonra aynısı).
+        if (capalar.TryGetValue(y.Kimlik, out Transform mevcut) && mevcut != null) return mevcut;
+        DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
+        if (eksen == null) return null;
+        GameObject g = new GameObject("Yer_" + y.Kimlik);
+        g.transform.SetParent(daire, false);
+        g.transform.localPosition = eksen.Nokta(y.U, y.Y, y.V);
+        g.transform.localRotation = Quaternion.Euler(0f, y.Donus, 0f);
+        capalar[y.Kimlik] = g.transform;
+        return g.transform;
     }
 
     /// <summary>

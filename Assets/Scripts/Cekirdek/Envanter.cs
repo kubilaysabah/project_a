@@ -17,7 +17,9 @@ public enum EsyaTuru
     OdaAnahtari,    // dairedeki tek bir kilidi açar; hangisi olduğu Kimlik'te (#54)
     Sigorta,        // sigorta kutusuna takılır (#54)
     Tornavida,      // menteşe söker (#54)
-    Not             // okunur, panoya asılır (#56)
+    Not,            // okunur, panoya asılır (#56)
+    Parca           // yırtık çizimin bir parçası (#63): ele girmez, kapıcı biriktirir; hepsi
+                    // bulununca çizim birleşir. SONA eklendi: dosyalar türü sayı olarak saklar.
 }
 
 public class Envanter

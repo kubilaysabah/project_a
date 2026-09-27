@@ -155,6 +155,7 @@ public class KatYoneticisi : MonoBehaviour
     [SerializeField] private KatZinciriVarligi[] katZincirleri;
     // Eşya şablonları (prefab): zincir eşyaları bunlardan kopyalanır. ZincirKurucu bağlar.
     [SerializeField] private GameObject odaAnahtariSablonu, katAnahtariSablonu, sigortaSablonu, tornavidaSablonu;
+    [SerializeField] private GameObject cizimParcasiSablonu;   // yırtık çizimin yere serilen parçası (#63)
     [SerializeField] private GameObject asmaKilitSablonu, mentesePlakasiSablonu, camKirikSablonu, notSablonu;
     private ZincirUygulayici zincirUygulayici;
 
@@ -251,6 +252,7 @@ public class KatYoneticisi : MonoBehaviour
         zincirUygulayici.SablonEkle(EsyaTuru.KatAnahtari, katAnahtariSablonu);
         zincirUygulayici.SablonEkle(EsyaTuru.Sigorta, sigortaSablonu);
         zincirUygulayici.SablonEkle(EsyaTuru.Tornavida, tornavidaSablonu);
+        zincirUygulayici.SablonEkle(EsyaTuru.Parca, cizimParcasiSablonu);
         zincirUygulayici.AsmaKilitSablonu = asmaKilitSablonu;
         zincirUygulayici.MentesePlakasiSablonu = mentesePlakasiSablonu;
         zincirUygulayici.CamKirikSablonu = camKirikSablonu;
@@ -772,7 +774,7 @@ public class KatYoneticisi : MonoBehaviour
                     {
                         zincirUygulayici.Uygula(daireler[n].transform, ZincirBul(aKat), aKat);
                         // Katın notları ve dekoru (koliler...), #55.
-                        zincirUygulayici.DekorUygula(daireler[n].transform, VarlikBul(aKat));
+                        zincirUygulayici.DekorUygula(daireler[n].transform, VarlikBul(aKat), aKat);
                     }
                 }
             }

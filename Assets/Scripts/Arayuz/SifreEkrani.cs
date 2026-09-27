@@ -32,6 +32,7 @@ public class SifreEkrani : MonoBehaviour
     private InputAction etkilesimEylemi;
     private static AudioClip tik;
     private GUIStyle rakamStili;
+    private CizimEkrani cizim;                // şifre yırtık bir çizimdeyse (#63): çizim yanda görünür
 
     /// <summary>Herhangi bir şifre ekranı açık mı? (Başka arayüzler buna bakabilir.)</summary>
     public static bool BiriAcik { get; private set; }
@@ -40,6 +41,9 @@ public class SifreEkrani : MonoBehaviour
     {
         kilit = hedef;
         acik = true;
+        // Şifresi parçalı çizimde olan kilit: dairenin çizim ekranı bulunur (kilit dairenin içinde).
+        cizim = kilit != null && kilit.Veri.Parcalar != null && kilit.Veri.Parcalar.Count > 0
+              ? kilit.GetComponentInParent<CizimEkrani>() : null;
         BiriAcik = true;
         acilisKaresi = Time.frameCount;
         if (oyuncu != null)
@@ -140,9 +144,15 @@ public class SifreEkrani : MonoBehaviour
         GUI.color = new Color(0f, 0f, 0f, 0.7f);
         GUI.DrawTexture(new Rect(0, 0, w, h), Texture2D.whiteTexture);
 
-        // Kilidin pirinç gövdesi ve çelik halkası.
+        // Kilidin pirinç gövdesi ve çelik halkası. Çizim varsa kilit sağa kayar, çizim solda durur.
         float en = 420f, boy = 300f;
-        Rect govde = new Rect((w - en) / 2f, (h - boy) / 2f + 60f, en, boy);
+        float kay = cizim != null ? 300f : 0f;
+        Rect govde = new Rect((w - en) / 2f + kay, (h - boy) / 2f + 60f, en, boy);
+        if (cizim != null)
+        {
+            GUI.color = Color.white;
+            cizim.Ciz(new Rect(w / 2f - 660f, (h - 600f) / 2f, 600f, 600f));
+        }
         GUI.color = new Color(0.45f, 0.45f, 0.47f);
         GUI.DrawTexture(new Rect(govde.x + 90f, govde.y - 120f, 34f, 140f), Texture2D.whiteTexture);
         GUI.DrawTexture(new Rect(govde.xMax - 124f, govde.y - 120f, 34f, 140f), Texture2D.whiteTexture);

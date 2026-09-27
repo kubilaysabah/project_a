@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
+  m_Name: Kat_3
+  m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
+  aciklama: "3. kat, daire 1, \xE7ocuklu aile (par\xE7a birle\u015Ftirme). Kerem'in
+    y\u0131rt\u0131k \xE7iziminin d\xF6rt par\xE7as\u0131: ayakkab\u0131l\u0131kta,
+    salonda yerde, buzdolab\u0131nda, Oda B'deki oyuncak sand\u0131\u011F\u0131nda.
+    Oda B'nin anahtar\u0131 mutfak \xE7ekmecesinde. Birle\u015Fen resmin k\xF6\u015Felerinde
+    0 3 0 9: Oda A'n\u0131n \u015Fifresi; komodinde kat\u0131n anahtar\u0131. Banyo
+    ve kiler kapal\u0131."
+  zincir:
+    KapaliOdalar:
+    - Banyo
+    - Oda_C
+    Yerler:
+    - Kimlik: ayakkabilik
+      Yol: Sahanlik:Kapi_{n}/Ayakkabilik
+      Oda: Sahanlik
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+    - Kimlik: salon_yeri
+      Yol: 
+      Oda: Salon
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 0.55
+      Y: 0.004
+      V: 6.9
+      Donus: 25
+    - Kimlik: cekmece
+      Yol: Esyalar/Tezgah/Cekmece_1
+      Oda: Mutfak
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+    - Kimlik: buzdolabi
+      Yol: Esyalar/Buzdolabi
+      Oda: Mutfak
+      KilitYolu: Esyalar/Buzdolabi/Kapi
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+    - Kimlik: oyuncak
+      Yol: Esyalar/Oyuncak_Kutusu
+      Oda: Oda_B
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+    - Kimlik: komodin
+      Yol: Esyalar/Komodin/Cekmece
+      Oda: Oda_A
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+    Esyalar:
+    - Kimlik: p1
+      Tur: 6
+      Yer: ayakkabilik
+      X: 0
+      Y: 1.025
+      Z: 0
+      Donus: -15
+    - Kimlik: p2
+      Tur: 6
+      Yer: salon_yeri
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
+    - Kimlik: odaB_anahtari
+      Tur: 2
+      Yer: cekmece
+      X: 0.59
+      Y: 0.64
+      Z: 0.04
+      Donus: 30
+    - Kimlik: p3
+      Tur: 6
+      Yer: buzdolabi
+      X: 0
+      Y: 0.47
+      Z: 0
+      Donus: 10
+    - Kimlik: p4
+      Tur: 6
+      Yer: oyuncak
+      X: 0
+      Y: 0.03
+      Z: 0
+      Donus: -20
+    - Kimlik: kat_anahtari
+      Tur: 1
+      Yer: komodin
+      X: 0
+      Y: 0.375
+      Z: 0
+      Donus: 15
+    Kilitler:
+    - Kimlik: odaB
+      Tur: 0
+      OdaKapisi: 1
+      Hedef: Oda_B
+      Gerekli: odaB_anahtari
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+    - Kimlik: odaA
+      Tur: 1
+      OdaKapisi: 1
+      Hedef: Oda_A
+      Gerekli: 
+      Sifre: 0309
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar:
+      - p1
+      - p2
+      - p3
+      - p4
+  notlar:
+  - Yol: 
+    X: 5.45
+    Y: 1.4
+    Z: 4.648
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Metin: not.kat3_anne
+  suslar: []
+  sesler: []
+  parcalar:
+  - Kimlik: p1
+    Doku: {fileID: 2800000, guid: d94caded02607234ebcb31c4060da121, type: 3}
+    Bolge:
+      serializedVersion: 2
+      x: 0
+      y: 0.48046875
+      width: 0.5410156
+      height: 0.51953125
+  - Kimlik: p2
+    Doku: {fileID: 2800000, guid: b686f70d372d69a469c56c808dcfea2a, type: 3}
+    Bolge:
+      serializedVersion: 2
+      x: 0.47851562
+      y: 0.484375
+      width: 0.5214844
+      height: 0.515625
+  - Kimlik: p3
+    Doku: {fileID: 2800000, guid: a8f75c98480490641a5a4bfb0163f401, type: 3}
+    Bolge:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0.5410156
+      height: 0.5410156
+  - Kimlik: p4
+    Doku: {fileID: 2800000, guid: a6891bbc987de4546a7b66f140dc34cb, type: 3}
+    Bolge:
+      serializedVersion: 2
+      x: 0.484375
+      y: 0
+      width: 0.515625
+      height: 0.5449219
+  cizimBoyu: 0.3

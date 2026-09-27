@@ -60,6 +60,8 @@ public static partial class GrayboxKurucu
         GameObject koliAcik = ParcaSablonuKur("Koli_Acik", "Koli_Acik");
         KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
         KatZinciriVarligi kat2 = Kat2Kur();
+        GameObject cizimParcasi = CizimParcasiSablonuKur();
+        KatZinciriVarligi kat3 = Kat3Kur();
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
@@ -73,6 +75,7 @@ public static partial class GrayboxKurucu
         seri.FindProperty("mentesePlakasiSablonu").objectReferenceValue = plaka;
         seri.FindProperty("camKirikSablonu").objectReferenceValue = camKirik;
         seri.FindProperty("notSablonu").objectReferenceValue = notSablonu;
+        seri.FindProperty("cizimParcasiSablonu").objectReferenceValue = cizimParcasi;
         // #61: nişan menzili 2,8 m (sahnedeki oyuncunun kayıtlı değeri de güncellensin).
         Etkilesimci etk = Object.FindAnyObjectByType<Etkilesimci>(FindObjectsInactive.Include);
         if (etk != null)
@@ -87,11 +90,12 @@ public static partial class GrayboxKurucu
         // (beş türün hepsi) dosya olarak duruyor ve testlerde denetleniyor ama bir kata bağlı değil.
         katlar.GetArrayElementAtIndex(0).objectReferenceValue = kat1;
         katlar.GetArrayElementAtIndex(1).objectReferenceValue = kat2;
+        katlar.GetArrayElementAtIndex(2).objectReferenceValue = kat3;
         seri.ApplyModifiedPropertiesWithoutUndo();
 
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
-        Debug.Log("[ZINCIR] Şablonlar, test zinciri, 1. ve 2. kat kuruldu ve bağlandı.");
+        Debug.Log("[ZINCIR] Şablonlar, test zinciri, 1., 2. ve 3. kat kuruldu ve bağlandı.");
     }
 
     static void KlasorHazirla(string ust, string ad)
@@ -296,6 +300,158 @@ public static partial class GrayboxKurucu
         else Debug.Log("[ZINCIR] 2. kat zinciri çözülebilir: " + string.Join(" -> ", s2.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
+    }
+
+    // ---------- 3. KAT: PARÇA BİRLEŞTİRME (#63, Docs/hikaye.md §7) ----------
+    // Daire 1, çocuklu aile (Kerem). Kerem "dokuzuncu kattaki adamı" çizmiş, resmi dört parçaya
+    // yırtıp saklamış; annesi yatak odasının (Oda A) kilidinin şifresini o resme yazdırmış
+    // (koridordaki notu). Banyo ve kiler kapalı; salon ve mutfak açık.
+    //   1. Kapının önündeki ayakkabılıkta ilk parça: oyuncu daha içeri girmeden merak eder.
+    //   2. Salonda yerde ikinci parça (kapının arkasındaki köşede).
+    //   3. Mutfakta: çekmecede Oda B'nin (çocuk odası) anahtarı, buzdolabında üçüncü parça.
+    //   4. Oda B'de oyuncak sandığında dördüncü parça -> resim tamam: köşelerde 0 3 0 9.
+    //   5. Oda A şifreli asma kilitli (0309); komodinin çekmecesinde katın anahtarı.
+    // İki kilit (odaB anahtarlı, odaA parçalı şifreli): büyüme çizelgesinin 3. katı (1-1-2-...).
+    static KatZinciriVarligi Kat3Kur()
+    {
+        string yol = $"{ZincirKlasoru}/Kat_3.asset";
+        KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
+        if (v == null)
+        {
+            v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
+            AssetDatabase.CreateAsset(v, yol);
+        }
+        v.aciklama = "3. kat, daire 1, çocuklu aile (parça birleştirme). Kerem'in yırtık çiziminin dört parçası: ayakkabılıkta, " +
+                     "salonda yerde, buzdolabında, Oda B'deki oyuncak sandığında. Oda B'nin anahtarı mutfak çekmecesinde. " +
+                     "Birleşen resmin köşelerinde 0 3 0 9: Oda A'nın şifresi; komodinde katın anahtarı. Banyo ve kiler kapalı.";
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_C" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "ayakkabilik", Yol = "Sahanlik:Kapi_{n}/Ayakkabilik", Oda = KilitZinciri.SahanlikOdasi });
+        // Salonun kapısı u = 0,85-1,75'te (v = 4,70 duvarında) ve içeri açılıyor; parça kapının
+        // arkasında kalmasın diye antre duvarı tarafındaki köşede, yerde (u 0,5, v 6,9).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_yeri", PlandaNokta = true, Oda = "Salon", U = 0.55f, Y = 0.004f, V = 6.9f, Donus = 25f });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "cekmece", Yol = "Esyalar/Tezgah/Cekmece_1", Oda = "Mutfak" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "buzdolabi", Yol = "Esyalar/Buzdolabi", Oda = "Mutfak", KilitYolu = "Esyalar/Buzdolabi/Kapi" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "oyuncak", Yol = "Esyalar/Oyuncak_Kutusu", Oda = "Oda_B" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "komodin", Yol = "Esyalar/Komodin/Cekmece", Oda = "Oda_A" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p1", Tur = EsyaTuru.Parca, Yer = "ayakkabilik", Y = 1.025f, Donus = -15f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p2", Tur = EsyaTuru.Parca, Yer = "salon_yeri" });
+        // Çekmecenin içi: tezgâhın ekseninde x 0,59, y 0,64, z 0,04 (tezgah.py'deki üst çekmecenin tabanı).
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaB_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "cekmece", X = 0.59f, Y = 0.64f, Z = 0.04f, Donus = 30f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p3", Tur = EsyaTuru.Parca, Yer = "buzdolabi", Y = 0.47f, Donus = 10f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p4", Tur = EsyaTuru.Parca, Yer = "oyuncak", Y = 0.03f, Donus = -20f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "komodin", Y = 0.375f, Donus = 15f });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaB", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_B", Gerekli = "odaB_anahtari" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_A", Sifre = "0309",
+                                          Parcalar = new List<string> { "p1", "p2", "p3", "p4" } });
+        v.zincir = z;
+
+        // PARÇALAR: dokular Art/Cizim/scripts/cizim_uret.py'den. Her parçanın dokudaki bölgesi
+        // dosyanın saydam olmayan piksellerinden hesaplanır: resim yeniden üretilince de doğru kalır.
+        v.parcalar = new List<KatParcasi>();
+        for (int i = 1; i <= 4; i++)
+        {
+            string dokuYolu = $"Assets/Textures/Cizim/Cizim_Kat3_P{i}.png";
+            CizimDokusunuAyarla(dokuYolu);
+            v.parcalar.Add(new KatParcasi { Kimlik = "p" + i, Doku = AssetDatabase.LoadAssetAtPath<Texture2D>(dokuYolu), Bolge = ParcaBolgesi(dokuYolu) });
+        }
+        v.cizimBoyu = 0.30f;
+
+        // NOT: annenin babaya notu koridorda, Oda B'nin kapısının solunda (kapı u = 5,95-6,75,
+        // v = 4,70 duvarında). Koridorun o duvardaki yüzü v = 4,65; not koridora (-v) bakar.
+        v.notlar = new List<KatNotu>
+        {
+            new KatNotu { Metin = "not.kat3_anne", X = 5.45f, Y = 1.40f, Z = 4.648f, OnU = 0f, OnV = -1f },
+        };
+        v.suslar = new List<KatSusu>();
+        v.sesler = new List<KatSesi>();
+
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        KilitZinciri.Sonuc s3 = z.Cozumle(odalar);
+        if (!s3.Cozulebilir) Debug.LogError("[ZINCIR] 3. kat zinciri çözülemiyor: " + string.Join("; ", s3.Hatalar));
+        else Debug.Log("[ZINCIR] 3. kat zinciri çözülebilir: " + string.Join(" -> ", s3.AcilanKilitler));
+        EditorUtility.SetDirty(v);
+        return v;
+    }
+
+    // Çizim dokusunun içe aktarma ayarları: saydamlık korunsun, kenardan taşmasın (Clamp),
+    // arayüzde bulanık durmasın diye sıkıştırma yüksek kalite.
+    static void CizimDokusunuAyarla(string yol)
+    {
+        TextureImporter ti = AssetImporter.GetAtPath(yol) as TextureImporter;
+        if (ti == null) { Debug.LogError("[ZINCIR] Çizim dokusu yok: " + yol + " (Art/Cizim/scripts/cizim_uret.py)"); return; }
+        bool degisti = !ti.alphaIsTransparency || ti.wrapMode != TextureWrapMode.Clamp || ti.textureCompression != TextureImporterCompression.CompressedHQ;
+        ti.alphaIsTransparency = true;
+        ti.wrapMode = TextureWrapMode.Clamp;
+        ti.textureCompression = TextureImporterCompression.CompressedHQ;
+        if (degisti) ti.SaveAndReimport();
+    }
+
+    // Dokudaki saydam olmayan piksellerin sınırı, UV olarak (0-1, sol alttan). Dosyayı diskten
+    // okur (içe aktarılmış doku okunamaz olarak işaretli olabilir).
+    static Rect ParcaBolgesi(string yol)
+    {
+        var t = new Texture2D(2, 2);
+        t.LoadImage(System.IO.File.ReadAllBytes(yol));      // PNG'yi çözer; boyu kendisi ayarlar
+        Color32[] p = t.GetPixels32();                       // satırlar ALTTAN başlar (UV ile aynı)
+        int w = t.width, h = t.height, x0 = w, y0 = h, x1 = -1, y1 = -1;
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                if (p[y * w + x].a > 0) { x0 = Mathf.Min(x0, x); x1 = Mathf.Max(x1, x); y0 = Mathf.Min(y0, y); y1 = Mathf.Max(y1, y); }
+        Object.DestroyImmediate(t);
+        if (x1 < 0) return new Rect(0, 0, 1, 1);
+        return new Rect((float)x0 / w, (float)y0 / h, (float)(x1 - x0 + 1) / w, (float)(y1 - y0 + 1) / h);
+    }
+
+    // Yere serilen çizim parçası: nişan için bir çarpışma kutusu, Esya (Parca) ve yüzü yukarı
+    // bakan ince bir dörtgen ("Kagit"). Dörtgenin boyu ve gösterdiği bölge her parçada ayrı;
+    // uygulayıcı yerleştirirken ayarlar (ZincirUygulayici.ParcayiGiydir).
+    static GameObject CizimParcasiSablonuKur()
+    {
+        GameObject gecici = new GameObject("Esya_CizimParcasi");
+        // CreatePrimitive(Quad): Unity'nin hazır 1 x 1 m dörtgeni. Çarpışma bileşenini atıyoruz:
+        // nişanı kökteki kutu karşılıyor.
+        GameObject kagit = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        kagit.name = "Kagit";
+        Object.DestroyImmediate(kagit.GetComponent<Collider>());
+        kagit.transform.SetParent(gecici.transform, false);
+        kagit.transform.localPosition = new Vector3(0f, 0.002f, 0f);
+        // Dörtgenin yüzü -Z'ye bakar; x ekseninde 90° çevirince yukarı bakar.
+        kagit.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+        kagit.transform.localScale = new Vector3(0.16f, 0.16f, 1f);
+        kagit.GetComponent<MeshRenderer>().sharedMaterial = CizimMalzemesi();
+        kagit.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        BoxCollider c = gecici.AddComponent<BoxCollider>();
+        c.center = new Vector3(0f, 0.03f, 0f);
+        c.size = new Vector3(0.18f, 0.06f, 0.18f);
+        Esya esya = gecici.AddComponent<Esya>();
+        esya.Ayarla(EsyaTuru.Parca, "", 0);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Esya_CizimParcasi.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // Parçaların ortak malzemesi: URP Lit, "alfa kırpma" açık (yırtık kenarın dışı görünmez).
+    // Doku ve bölge nesne başına MaterialPropertyBlock ile verilir.
+    static Material CizimMalzemesi()
+    {
+        const string Yol = "Assets/Materials/Cizim_Parca.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            AssetDatabase.CreateAsset(m, Yol);
+        }
+        m.SetFloat("_AlphaClip", 1f);
+        m.SetFloat("_Cutoff", 0.5f);
+        m.EnableKeyword("_ALPHATEST_ON");
+        m.SetFloat("_Smoothness", 0.1f);
+        m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+        m.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Textures/Cizim/Cizim_Kat3_P1.png"));
+        EditorUtility.SetDirty(m);
+        return m;
     }
 
     static Material GumusMalzeme()

@@ -51,6 +51,13 @@ public class ZincirYeri
     public string KilitYolu;    // yer kilitlenirse kilidin takıldığı parça; boşsa Yol.
                                 // Buzdolabı: eşyalar gövdede ("Esyalar/Buzdolabi"), kilitlenen kapısı
                                 // ("Esyalar/Buzdolabi/Kapi"). Çekmecede ikisi aynıdır, boş bırakılır.
+    // PLANDA BİR NOKTA (#63): PlandaNokta işaretliyse yer bir mobilya değil, odanın bir
+    // noktasıdır (yerde duran bir kâğıt parçası); Yol kullanılmaz. U ve V planın eksenleri
+    // (bkz. DairePlani), Y yükseklik, Donus y ekseninde açı. Uygulayıcı oraya boş bir çapa
+    // nesnesi koyar, eşya onun çocuğu olur. (Boş Yol'u işaret saymadık: kuralın testleri
+    // yolsuz yerlerle yazılıyor, yol orada önemsiz.)
+    public bool PlandaNokta;
+    public float U, Y, V, Donus;
 }
 
 [System.Serializable]
@@ -76,6 +83,10 @@ public class ZincirKilidi
     public string IpucuMetni;   // yalnızca Şifre: ipucu yerine yazılacak metin; boşsa şifrenin kendisi
     public float IpucuX, IpucuY, IpucuZ;   // yazının ipucu yerindeki konumu (yerin kendi eksenlerinde)
     public float IpucuOlcek = 1f;          // yazının boy çarpanı (radyonun küçük kadranı için < 1)
+    // Yalnızca Şifre (#63): şifre yırtık bir çizimin parçalarına bölünmüşse, parçaların eşya
+    // kimlikleri. Şifre ancak bu parçaların HEPSİNE ulaşılınca okunabilir. Liste doluysa
+    // Gerekli (ipucu yeri) boş bırakılabilir: ipucu yere yazılmaz, birleşen çizimdedir.
+    public List<string> Parcalar = new List<string>();
 }
 
 [System.Serializable]
@@ -183,8 +194,17 @@ public class KilitZinciri
         switch (k.Tur)
         {
             case KilitTuru.Sifre:
+                // İpucu bir yere yazılıysa oraya, çizime bölünmüşse bütün parçalarına ulaşılmalı.
+                if (!string.IsNullOrEmpty(k.Gerekli) && !YereUlasilir(k.Gerekli, acilan)) return false;
+                if (k.Parcalar != null)
+                    foreach (string p in k.Parcalar)
+                    {
+                        ZincirEsyasi parca = EsyaBul(p);
+                        if (parca == null || !EsyayaUlasilir(parca, acilan)) return false;
+                    }
+                return true;
             case KilitTuru.Kol:
-                // İpucunu okumak ya da kolu çekmek için o yere ulaşmak yeter.
+                // Kolu çekmek için o yere ulaşmak yeter.
                 return YereUlasilir(k.Gerekli, acilan);
             default:
                 ZincirEsyasi e = EsyaBul(k.Gerekli);
@@ -200,6 +220,11 @@ public class KilitZinciri
             if (!butunOdalar.Contains(o)) sonuc.Hatalar.Add($"kapalı oda '{o}' planda yok");
         foreach (ZincirYeri y in Yerler)
             if (y.Oda != SahanlikOdasi && !butunOdalar.Contains(y.Oda)) sonuc.Hatalar.Add($"'{y.Kimlik}' yerinin odası '{y.Oda}' planda yok");
+        // Planda bir nokta olan yer, yazıldığı odanın içinde olmalı (#63): yanlış bir sayı
+        // kâğıdı duvarın içine ya da komşu odaya koyardı; kural o odayı açık sanardı.
+        foreach (ZincirYeri y in Yerler)
+            if (y.PlandaNokta && DairePlani.NoktaninOdasi(y.U, y.V) != y.Oda)
+                sonuc.Hatalar.Add($"'{y.Kimlik}' yerinin noktası ({y.U}, {y.V}) '{y.Oda}' odasında değil");
         foreach (ZincirEsyasi e in Esyalar)
             if (YerBul(e.Yer) == null) sonuc.Hatalar.Add($"'{e.Kimlik}' eşyasının yeri '{e.Yer}' tanımlı değil");
 
@@ -217,7 +242,17 @@ public class KilitZinciri
             switch (k.Tur)
             {
                 case KilitTuru.Sifre:
-                    if (YerBul(k.Gerekli) == null) sonuc.Hatalar.Add($"'{k.Kimlik}': ipucu yeri '{k.Gerekli}' yok");
+                    bool parcali = k.Parcalar != null && k.Parcalar.Count > 0;
+                    if (!parcali && YerBul(k.Gerekli) == null) sonuc.Hatalar.Add($"'{k.Kimlik}': ipucu yeri '{k.Gerekli}' yok");
+                    if (parcali && !string.IsNullOrEmpty(k.Gerekli) && YerBul(k.Gerekli) == null)
+                        sonuc.Hatalar.Add($"'{k.Kimlik}': ipucu yeri '{k.Gerekli}' yok");
+                    if (parcali)
+                        foreach (string p in k.Parcalar)
+                        {
+                            ZincirEsyasi pe = EsyaBul(p);
+                            if (pe == null) sonuc.Hatalar.Add($"'{k.Kimlik}': parça '{p}' zincirde yok");
+                            else if (pe.Tur != EsyaTuru.Parca) sonuc.Hatalar.Add($"'{k.Kimlik}': '{p}' bir Parca değil, {pe.Tur}");
+                        }
                     if (!DortHane(k.Sifre)) sonuc.Hatalar.Add($"'{k.Kimlik}': şifre dört rakam olmalı ('{k.Sifre}')");
                     break;
                 case KilitTuru.Kol:

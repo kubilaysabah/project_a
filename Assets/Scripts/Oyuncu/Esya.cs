@@ -63,6 +63,19 @@ public class Esya : MonoBehaviour, IEtkilesimli
 
     public void Etkilesim(GameObject oyuncu)
     {
+        // ÇİZİM PARÇASI (#63): ele de çantaya da girmez; katın çizim ekranı onu kaydeder ve
+        // o ana kadar birleşen resmi yakından gösterir. Ekran dairenin kökündedir.
+        if (tur == EsyaTuru.Parca)
+        {
+            CizimEkrani ekran = CizimEkraniniBul();
+            SikirtiCal();
+            gameObject.SetActive(false);
+            if (ekran != null) ekran.ParcaAlindi(kimlik, oyuncu);
+            else Debug.LogWarning($"[CIZIM] '{kimlik}' parçasının çizim ekranı bulunamadı.");
+            return;
+        }
+
+
         // ALET (#61): tornavida gibi aletler ele değil kapıcının çantasına gider; eli meşgul
         // etmez, bitmez, sonraki katlarda da işe yarar (Şahan'ın kararı).
         if (AletCantasi.AletMi(tur))
@@ -99,6 +112,18 @@ public class Esya : MonoBehaviour, IEtkilesimli
         UcanKopya.ElineUcur(transform);
         SikirtiCal();
         gameObject.SetActive(false);
+    }
+
+    // Parçanın çizim ekranı: parça dairenin içindeyse yukarı doğru (ebeveynlerinde) bulunur;
+    // sahanlıktaki ayakkabılıkta duruyorsa daireye bağlı değildir, o zaman sahnedeki çizim
+    // ekranlarından bu parçayı tanıyan alınır (aynı anda yalnızca açık dairede bir tane olur).
+    private CizimEkrani CizimEkraniniBul()
+    {
+        CizimEkrani ekran = GetComponentInParent<CizimEkrani>();
+        if (ekran != null) return ekran;
+        foreach (CizimEkrani c in FindObjectsByType<CizimEkrani>(FindObjectsSortMode.None))
+            if (c.ParcasiMi(kimlik)) return c;
+        return null;
     }
 
     private void SikirtiCal()

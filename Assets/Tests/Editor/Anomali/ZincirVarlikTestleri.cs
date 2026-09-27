@@ -74,6 +74,8 @@ public class ZincirVarlikTestleri
                     Transform d = a.Find($"Daire_{n}");
                     foreach (ZincirYeri y in z.Value.Yerler)
                     {
+                        // Planda nokta olan yer (#63) bir nesne değil; odasını kural denetliyor.
+                        if (y.PlandaNokta) continue;
                         Assert.IsNotNull(Bul(a, d, n, y.Yol), $"{z.Key}: Daire_{n} için '{y.Yol}' yok ('{y.Kimlik}')");
                         if (!string.IsNullOrEmpty(y.KilitYolu))
                             Assert.IsNotNull(Bul(a, d, n, y.KilitYolu), $"{z.Key}: Daire_{n} için '{y.KilitYolu}' yok ('{y.Kimlik}' kilit yolu)");

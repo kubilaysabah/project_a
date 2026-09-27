@@ -200,4 +200,57 @@ public class KilitZinciriTestleri
         Assert.IsTrue(s.Cozulebilir, string.Join("; ", s.Hatalar));
         CollectionAssert.AreEqual(new[] { "salon", "kiler", "odaA", "buzdolabi", "banyo" }, s.AcilanKilitler);
     }
+
+    // ---------- #63: yırtık çizim ve planda nokta olan yerler ----------
+
+    // Salonun yerinde bir parça, mutfakta bir parça; şifreli Oda A'da katın anahtarı.
+    private static KilitZinciri ParcaliZincir()
+    {
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Oda_B", "Oda_C", "Banyo" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_yeri", PlandaNokta = true, Oda = "Salon", U = 1.0f, V = 7.0f });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "tezgah", Yol = "Esyalar/Tezgah", Oda = "Mutfak" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "komodin", Yol = "Esyalar/Komodin/Cekmece", Oda = "Oda_A" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p1", Tur = EsyaTuru.Parca, Yer = "salon_yeri" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p2", Tur = EsyaTuru.Parca, Yer = "tezgah" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "komodin" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_A", Sifre = "0309",
+                                          Parcalar = new List<string> { "p1", "p2" } });
+        return z;
+    }
+
+    [Test]
+    public void Parcali_sifre_butun_parcalara_ulasilinca_cozulur()
+    {
+        KilitZinciri.Sonuc s = ParcaliZincir().Cozumle(Odalar());
+        Assert.IsTrue(s.Cozulebilir, string.Join("; ", s.Hatalar));
+    }
+
+    [Test]
+    public void Parcanin_biri_kapali_odadaysa_sifre_okunamaz()
+    {
+        KilitZinciri z = ParcaliZincir();
+        z.KapaliOdalar.Add("Mutfak");                        // ikinci parça artık ulaşılamaz
+        KilitZinciri.Sonuc s = z.Cozumle(Odalar());
+        Assert.IsFalse(s.Cozulebilir);
+        Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("odaA")), string.Join("; ", s.Hatalar));
+    }
+
+    [Test]
+    public void Parca_olmayan_esya_parca_listesinde_hata()
+    {
+        KilitZinciri z = ParcaliZincir();
+        z.Esyalar[0].Tur = EsyaTuru.OdaAnahtari;
+        KilitZinciri.Sonuc s = z.Cozumle(Odalar());
+        Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("Parca değil")), string.Join("; ", s.Hatalar));
+    }
+
+    [Test]
+    public void Planda_nokta_olan_yer_kendi_odasinda_olmali()
+    {
+        KilitZinciri z = ParcaliZincir();
+        z.Yerler[0].U = 9.0f;                               // Oda A'ya düşer, salon yazıyor
+        KilitZinciri.Sonuc s = z.Cozumle(Odalar());
+        Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("salon_yeri")), string.Join("; ", s.Hatalar));
+    }
 }

@@ -14,6 +14,7 @@ public static class Kayit
 {
     private const string KatAnahtari = "kayit_kat";
     private const string KilitAnahtari = "kayit_kilitler";   // çözülen kilitler (#54)
+    private const string ParcaAnahtari = "kayit_parcalar";   // bulunan çizim parçaları (#63)
 
     // Kilit kaydı ilk sorulduğunda PlayerPrefs'ten bir kez okunur, sonra bellekte tutulur.
     private static KilitKaydi kilitler;
@@ -34,6 +35,28 @@ public static class Kayit
         PlayerPrefs.Save();
         Debug.Log($"[KAYIT] {kat}. kat: '{kimlik}' kilidi kaydedildi.");
     }
+
+    // Bulunan çizim parçaları (#63): kilitlerle aynı biçimde ("3:p1;3:p2"), aynı sınıfla tutulur.
+    private static KilitKaydi parcalar;
+    private static KilitKaydi Parcalar
+    {
+        get
+        {
+            if (parcalar == null) parcalar = KilitKaydi.Oku(PlayerPrefs.GetString(ParcaAnahtari, ""));
+            return parcalar;
+        }
+    }
+
+    /// <summary>Bir çizim parçası bulundu: kaydedilir; oyun açılınca yeniden konmaz.</summary>
+    public static void ParcaBulundu(int kat, string kimlik)
+    {
+        if (!Parcalar.Ekle(kat, kimlik)) return;
+        PlayerPrefs.SetString(ParcaAnahtari, Parcalar.Metin());
+        PlayerPrefs.Save();
+        Debug.Log($"[KAYIT] {kat}. kat: '{kimlik}' parçası kaydedildi.");
+    }
+
+    public static bool ParcaBulunduMu(int kat, string kimlik) { return Parcalar.Iceriyor(kat, kimlik); }
 
     /// <summary>Bu katın bu kilidi daha önce çözülmüş mü?</summary>
     public static bool KilitCozukMu(int kat, string kimlik) { return Kilitler.Iceriyor(kat, kimlik); }
@@ -58,7 +81,9 @@ public static class Kayit
     {
         PlayerPrefs.DeleteKey(KatAnahtari);
         PlayerPrefs.DeleteKey(KilitAnahtari);
+        PlayerPrefs.DeleteKey(ParcaAnahtari);
         kilitler = null;
+        parcalar = null;
         Aletler.Bosalt();   // yeni oyun: bulunan aletler de gider (#61)
         PlayerPrefs.Save();
     }

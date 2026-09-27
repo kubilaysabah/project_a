@@ -24,6 +24,7 @@ not.kat1_tahliye	HUZUR APARTMANI YÖNETİMİ\n\nSayın 2 numara sakinleri,\n\nBi
 not.kat1_kavanoz	Kapıcı Bey,\n\nYatak odasının anahtarını kavanoza koydum. Kapağı yine sıkıştı, açamadım; siz bir yolunu bulursunuz. Kalan kolileri pazartesi alacağız.\n\nNermin (2 numara)	Mr Caretaker,\n\nI put the bedroom key in the jar. The lid is stuck again, I could not open it; you will find a way. We will collect the rest of the boxes on Monday.\n\nNermin (no. 2)
 not.kat2_hastane	Sayın sakinler,\nDaire 7'nin sahibi Nuri Bey hastaneye kaldırılmıştır.\nDönüşüne kadar daireye kimse girmeyecektir.\n\n— Yönetim	Dear residents,\nMr Nuri, owner of flat 7, has been taken to hospital.\nNo one is to enter the flat until he returns.\n\n— The Management
 not.kat2_kiler	Kilerin kilidi yine aklımdan çıktı.\nNumarası radyonun istasyonu,\nunutmayayım diye buraya yazıyorum.\n\nNuri	I forgot the pantry lock again.\nIts number is my radio's station,\nso I am writing it down here.\n\nNuri
+not.kat3_anne	Murat,\nKerem bu gece de uyandı. "Yukarıdaki amca camdan bakıyor" diyor.\nBu binada dokuzuncu kat yok ki.\nÇizdiği resmi yırtıp evin her yerine saklamış.\nYatak odasının kilidini değiştirdim; şifresi o resimde.\n\n— Ayla	Murat,\nKerem woke up again tonight. He says "the man upstairs is looking through the window".\nThere is no ninth floor in this building.\nHe tore up his drawing and hid the pieces all over the flat.\nI changed the bedroom lock; the code is in that drawing.\n\n— Ayla
 not.kapat	{0}: kapat	{0}: close
 
 # ---- Jenerik: ilk satır başlık, boş satırlar aralık ----
