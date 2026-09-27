@@ -159,6 +159,8 @@ public class ZincirUygulayici
             if (AletCantasi.AletMi(e.Tur) && Aletler.Var(e.Kimlik)) continue;
             // Bulunmuş bir çizim parçası (kayıtta) yeniden konmaz (#63).
             if ((e.Tur == EsyaTuru.Parca || e.Tur == EsyaTuru.AnahtarParcasi) && Kayit.ParcaBulunduMu(kat, e.Kimlik)) continue;
+            // Bulunmuş tabak (#66) yere değil doğrudan kapıcının yığınına girer (aşağıda).
+            bool yigindakiTabak = e.Tur == EsyaTuru.Tabak && Kayit.ParcaBulunduMu(kat, e.Kimlik);
             Transform yer = YerYolu(daire, zincir, e.Yer);
             if (yer == null) { Debug.LogWarning($"[ZINCIR] '{e.Kimlik}' eşyasının yeri bulunamadı."); continue; }
             if (!sablonlar.TryGetValue(e.Tur, out GameObject sablon)) { Debug.LogWarning($"[ZINCIR] {e.Tur} şablonu yok."); continue; }
@@ -168,7 +170,8 @@ public class ZincirUygulayici
             nesne.transform.localPosition = new Vector3(e.X, e.Y, e.Z);
             nesne.transform.localRotation = Quaternion.Euler(0f, e.Donus, 0f);
             Esya bilesen = nesne.GetComponent<Esya>();
-            if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari || e.Tur == EsyaTuru.Parca || e.Tur == EsyaTuru.AnahtarParcasi ? kat : 0);
+            if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari || e.Tur == EsyaTuru.Parca || e.Tur == EsyaTuru.AnahtarParcasi || e.Tur == EsyaTuru.Tabak ? kat : 0);
+            if (yigindakiTabak) TabakYigini.UsteKoy(nesne);
             // Kırık anahtar parçası: şablonda iki model var; kimliği "_bas" ile bitiyorsa baş görünür.
             if (e.Tur == EsyaTuru.AnahtarParcasi)
             {
@@ -194,6 +197,11 @@ public class ZincirUygulayici
             if (k.Tur == KilitTuru.KirikAnahtar)
                 kiriklar.Add(new KirikAnahtarlar.Takim { Kilit = k.Kimlik, Parcalar = new List<string>(k.Gerekenler) });
         KirikAnahtarlar.Ayarla(kat, kiriklar);
+        // Tabak yığınının paydası: katın yerleştirme kilitlerindeki eşya sayısı (#66).
+        int tabakSayisi = 0;
+        foreach (ZincirKilidi k in zincir.Kilitler)
+            if (k.Tur == KilitTuru.Yerlestirme && k.Gerekenler != null) tabakSayisi += k.Gerekenler.Count;
+        TabakYigini.Ayarla(tabakSayisi);
 
         // 4. Kayıt (#54): bu katta daha önce çözülmüş kilitler çözük başlar.
         KayittanYukle(daire, zincir, kat);
@@ -392,6 +400,7 @@ public class ZincirUygulayici
     private void Temizle(Transform daire)
     {
         KirikAnahtarlar.Temizle();
+        TabakYigini.Temizle();
         foreach (GameObject g in konanlar)
         {
             if (g == null) continue;

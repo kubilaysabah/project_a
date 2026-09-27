@@ -2,9 +2,9 @@
 // Bir eşyanın konacağı yer (#66, 6. kat: sıralama / yerleştirme).
 //
 // 6. katta sofranın dört yeri var: her birinin önünde bir isim kartı (Rıza Efendi, Hasan, Cemal,
-// Yeni Kapıcı). Oyuncu tabakları tek tek taşır (elde tek eşya kuralı) ve bir yere bakınca
-// "KOY (E)" der; tabak o yere oturur. Konan tabak yine alınabilir (yanlış yere konduysa geri
-// almak için); eli doluyken alınırsa elindeki tabak onun yerine geçer (değiş tokuş, Esya'daki kural).
+// Yeni Kapıcı). Oyuncu tabakları bulundukça kucağında üst üste biriktirir (TabakYigini); boş bir
+// yere bakınca "KOY (E)" der ve EN ÜSTTEKİ tabak o yere oturur. Yanlış tabak konduysa geri alınır
+// (Esya) ve yığının altına gider; sıradaki tabak üste çıkar.
 //
 // Dört yerin hepsinde DOĞRU tabak (isim kartıyla aynı isimli) durunca bu yerleri kilitleyen
 // kilit (KilitTuru.Yerlestirme) çözülür ve kilitli parça (büfenin kapısı) açılır. Tabaklar artık
@@ -50,17 +50,17 @@ public class Yuva : MonoBehaviour, IEtkilesimli
 
     public string Ipucu { get { return Dil.Getir("ipucu.koy"); } }
 
-    // Yalnızca boş bir yere, elde bir tabak varken ve kilit henüz çözülmemişken konabilir.
+    // Yalnızca boş bir yere, yığında tabak varken ve kilit henüz çözülmemişken konabilir.
     public bool EtkilesimeAcik
     {
-        get { return Oturan == null && Cep.Tasinan == EsyaTuru.Tabak && Cep.TasinanNesne != null && kilit != null && !kilit.Cozuk; }
+        get { return Oturan == null && TabakYigini.Sayi > 0 && kilit != null && !kilit.Cozuk; }
     }
 
     public void Etkilesim(GameObject oyuncu)
     {
         if (!EtkilesimeAcik) return;
-        GameObject tabak = Cep.TasinanNesne;
-        Cep.Bosalt();
+        GameObject tabak = TabakYigini.UsttenAl();
+        if (tabak == null) return;
         // Tabak bu yerin çocuğu olur ve tam ortasına oturur (yerin kendi eksenleri masaya paraleldir).
         tabak.transform.SetParent(transform, false);
         tabak.transform.localPosition = Vector3.zero;
@@ -70,8 +70,8 @@ public class Yuva : MonoBehaviour, IEtkilesimli
         Denetle();
     }
 
-    // Tabaklar değiş tokuşla da yer değiştirebilir (Esya); bu yüzden her kare bakılır. Dört yer,
-    // birkaç karşılaştırma: ucuz.
+    // Her kare bakılır (dört yer, birkaç karşılaştırma: ucuz); tabaklar yığından ve yığına
+    // birkaç yoldan gidip gelebildiği için tek bir "koyuldu" anına güvenilmez.
     private void Update()
     {
         if (kilit != null && !kilit.Cozuk && grup != null && grup.Count > 0 && grup[0] == this) Denetle();
@@ -91,6 +91,7 @@ public class Yuva : MonoBehaviour, IEtkilesimli
     public void YerlesmisBaslat(GameObject esya)
     {
         if (esya == null) return;
+        TabakYigini.Cikar(esya);
         esya.transform.SetParent(transform, false);
         esya.transform.localPosition = Vector3.zero;
         esya.transform.localRotation = Quaternion.identity;

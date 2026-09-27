@@ -72,6 +72,23 @@ public class Esya : MonoBehaviour, IEtkilesimli
 
     public void Etkilesim(GameObject oyuncu)
     {
+        // TABAK (#66): ele girmez, kapıcının kucağındaki yığına girer. Sofradaki bir yerden
+        // (Yuva) geri alınıyorsa yığının ALTINA (sıradaki tabak üste çıksın), yerde bulunduysa
+        // ÜSTÜNE konur ve kat kaydına yazılır.
+        if (tur == EsyaTuru.Tabak)
+        {
+            bool sofradan = transform.parent != null && transform.parent.GetComponent<Yuva>() != null;
+            SikirtiCal();
+            if (sofradan) TabakYigini.AltaKoy(gameObject);
+            else
+            {
+                Kayit.ParcaBulundu(kat, kimlik);
+                UcanKopya.ElineUcur(transform);
+                TabakYigini.UsteKoy(gameObject);
+            }
+            return;
+        }
+
         // KIRIK ANAHTAR PARÇASI (#65): ele girmez; kat kaydına yazılır, köşedeki sayaç artar.
         // Parçaların hepsi bulununca kilidi (KirikAnahtar) kendiliğinden "AÇ" der.
         if (tur == EsyaTuru.AnahtarParcasi)

@@ -10,7 +10,7 @@ using UnityEngine;
 public class EsyaGostergesi : MonoBehaviour
 {
     private Texture2D anahtar, sigorta, tornavida, not, levye, kaydirici, kirikAnahtar, tabak;
-    private GUIStyle sayacStili;
+    private GUIStyle sayacStili, isimStili;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Olustur()
@@ -119,6 +119,20 @@ public class EsyaGostergesi : MonoBehaviour
             GUI.color = new Color(0.78f, 0.80f, 0.82f, 1f);
             GUI.DrawTexture(new Rect(k.x + 6f, k.y + 2f, 36f, 36f), kirikAnahtar);
             GUI.Label(new Rect(k.x, k.y + 30f, 48f, 18f), $"{kiriklar[i][0]}/{kiriklar[i][1]}", sayacStili);
+        }
+        // TABAK YIĞINI (#66): kırık anahtarların solunda; altında "yığın / toplam", üstünde en
+        // üstteki tabağın ismi (hangisini koyacağını görsün).
+        if (TabakYigini.Sayi > 0)
+        {
+            Rect k = new Rect(w - 270f - 58f * (aletler.Count + kiriklar.Count + 1), h - 98f, 48f, 48f);
+            GUI.color = new Color(0f, 0f, 0f, 0.35f);
+            GUI.DrawTexture(k, Texture2D.whiteTexture);
+            GUI.color = new Color(0.88f, 0.88f, 0.86f, 1f);
+            GUI.DrawTexture(new Rect(k.x + 6f, k.y + 2f, 36f, 36f), tabak);
+            GUI.Label(new Rect(k.x, k.y + 30f, 48f, 18f), $"{TabakYigini.Sayi}/{TabakYigini.Toplam}", sayacStili);
+            if (isimStili == null)
+                isimStili = new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold, alignment = TextAnchor.LowerCenter };
+            GUI.Label(new Rect(k.x - 40f, k.y - 26f, 128f, 22f), TabakYigini.UstIsim, isimStili);
         }
         GUI.color = Color.white;
 
