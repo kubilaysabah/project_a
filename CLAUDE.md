@@ -174,6 +174,8 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-27 (Lesson 46): **#55 floor 1 built** (`3d0fbea`): tutorial chain in `Assets/Zincirler/Kat_1.asset` (built by `GrayboxKurucu.Kat1Kur`): screwdriver on the landing rack → eviction notice by the fuse box → tenant's note beside the jar → break the jar → room A key → nightstand drawer → floor key; living room, room B, pantry, bathroom shut; moving boxes. The floor file now carries notes and dressing (`KatYerlesimi`: anchored to an object path, or plan u/v via `DaireEksenleri` on each flat); `YoneticiNotu` takes its text key from data. Floor 1 is bound to `Kat_1`; `Zincir_Test` stays as a checked asset. 203/203 tests; builds rebuilt; waiting for Şahan's test. Next: floor 2 with sound-guided search (#62).
+
 - 2026-09-27 (Lesson 45, later): **#54 and #61 CLOSED** after Şahan tested the build ("sorun yok").
 
 - 2026-09-27 (Lesson 45): Şahan chose **tools kept separately** (`27c14d0`: `AletCantasi`/`Aletler`, saved in `kayit_aletler`, never in the hand, never consumed, not placed again once owned) and **all eight mechanic families**, one signature mechanic per floor (`a5b115c`, `Docs/hikaye.md` §7); issues #62-#68 opened, timed/chase added to #58. 203/203 tests; builds rebuilt; #54 and #61 wait for his build test.
