@@ -35,9 +35,11 @@ public class ZincirVarlikTestleri
     }
 
     // Oyundaki ZincirUygulayici.YolBul ile aynı kural: "Sahanlik:" yolları sahanlıktan, {n} daire numarası.
+    // İkinci dairenin yolları ("B:...", #70) öneksiz olarak aynı dairede aranır: dört daire aynı planla kurulu.
     private static Transform Bul(Transform sahanlik, Transform daire, int n, string yol)
     {
         const string On = "Sahanlik:";
+        if (yol.StartsWith(KilitZinciri.IkinciOnek)) yol = yol.Substring(KilitZinciri.IkinciOnek.Length);
         return yol.StartsWith(On) ? sahanlik.Find(yol.Substring(On.Length).Replace("{n}", n.ToString())) : daire.Find(yol);
     }
 
@@ -51,7 +53,7 @@ public class ZincirVarlikTestleri
     public void Her_zincir_cozulebilir()
     {
         var odalar = new List<string>();
-        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        foreach (DairePlani.Oda o in DairePlani.Odalar) { odalar.Add(o.Ad); odalar.Add(KilitZinciri.IkinciOnek + o.Ad); }
         foreach (var z in Zincirler())
         {
             KilitZinciri.Sonuc s = z.Value.Cozumle(odalar);
@@ -82,9 +84,9 @@ public class ZincirVarlikTestleri
                     }
                     foreach (ZincirKilidi k in z.Value.Kilitler)
                         if (k.OdaKapisi)
-                            Assert.IsNotNull(d.Find("Kapilar/Kapi_" + k.Hedef), $"{z.Key}: Daire_{n}/Kapilar/Kapi_{k.Hedef} yok");
+                            Assert.IsNotNull(d.Find("Kapilar/Kapi_" + KilitZinciri.OdaAdi(k.Hedef)), $"{z.Key}: Daire_{n}/Kapilar/Kapi_{k.Hedef} yok");
                     foreach (string oda in z.Value.KapaliOdalar)
-                        Assert.IsNotNull(d.Find("Kapilar/Kapi_" + oda), $"{z.Key}: kapalı oda '{oda}' için kapı yok");
+                        Assert.IsNotNull(d.Find("Kapilar/Kapi_" + KilitZinciri.OdaAdi(oda)), $"{z.Key}: kapalı oda '{oda}' için kapı yok");
                 }
         }
         finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
@@ -96,7 +98,7 @@ public class ZincirVarlikTestleri
     public void Her_calan_esyanin_yolu_odasi_ve_sesi_var()
     {
         var odalar = new List<string>();
-        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        foreach (DairePlani.Oda o in DairePlani.Odalar) { odalar.Add(o.Ad); odalar.Add(KilitZinciri.IkinciOnek + o.Ad); }
         Scene sahne = EditorSceneManager.OpenScene(SahneYolu, OpenSceneMode.Additive);
         try
         {

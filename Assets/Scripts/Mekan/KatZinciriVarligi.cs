@@ -89,6 +89,11 @@ public class KatZinciriVarligi : ScriptableObject
     public List<KatParcasi> parcalar = new List<KatParcasi>();
     // Bu katta tavan lambası yanabilen odalar (#64): dairede elektrik varken yanarlar. Boş: hiçbiri.
     public List<string> yananOdalar = new List<string>();
+    // Çift daire (#70): bu katta açık olan ikinci dairenin numarası (1-4); 0 = yok. Zincirde
+    // onun odaları ve yerleri "B:" önekiyle yazılır. İkinci daire, kendi kaplaması olsun diye
+    // başka bir katın kaplamasını giyer (ikinciKaplamaKati; 0 = bu katınki).
+    public int ikinciDaire;
+    public int ikinciKaplamaKati;
     // Parçaların yere serilen kâğıdının gerçek boyu (metre): resmin bütünü bu kadar geniş olurdu.
     public float cizimBoyu = 0.30f;
 }

@@ -35,6 +35,12 @@ public class ZincirUygulayici
     /// <summary>İpucu yazıları bu yazının yazı tipini ve malzemesini kullanır (kapı numarası).</summary>
     public TextMesh YaziOrnegi;
 
+    /// <summary>
+    /// Çift daire (#70): bu katın ikinci açık dairesi; yoksa null. KatYoneticisi Uygula'dan önce
+    /// yazar. Yolu ya da odası "B:" ile başlayan her şey bu dairede aranır.
+    /// </summary>
+    public Transform IkinciDaire;
+
     // Bu uygulayıcının dairelere koyduğu eşyalar; bir sonraki temizlikte kaldırılır.
     private readonly List<GameObject> konanlar = new List<GameObject>();
 
@@ -51,6 +57,7 @@ public class ZincirUygulayici
     public void Uygula(Transform daire, KilitZinciri zincir, int kat)
     {
         Temizle(daire);
+        if (IkinciDaire != null) DaireyiTemizle(IkinciDaire);
         if (zincir == null) return;
         DaireElektrigi elektrik = Elektrik(daire);
 
@@ -161,7 +168,7 @@ public class ZincirUygulayici
             ZincirYeri yerVerisi = zincir.YerBul(e.Yer);
             if (bilesen != null && yerVerisi != null && !yerVerisi.PlandaNokta && !string.IsNullOrEmpty(yerVerisi.KilitYolu))
             {
-                Transform kapak = YolBul(daire, yerVerisi.KilitYolu);
+                Transform kapak = Cozum(daire, yerVerisi.KilitYolu);
                 AcilirParca ap = kapak != null ? kapak.GetComponent<AcilirParca>() : null;
                 if (ap != null) bilesen.KapAyarla(ap);
             }
@@ -209,16 +216,25 @@ public class ZincirUygulayici
         foreach (KatSusu s in varlik.suslar)
             Yerlestir(daire, eksen, s.Sablon, s, "Sus_" + (s.Sablon != null ? s.Sablon.name : "?"));
         // Tavan lambaları (#64): bu katta lambası yanabilen odalar (elektrik varken yanarlar).
+        // "B:" önekli odalar ikinci dairenin lambalarıdır (#70).
+        var odalarA = new List<string>();
+        var odalarB = new List<string>();
+        foreach (string o in varlik.yananOdalar)
+            if (o.StartsWith(KilitZinciri.IkinciOnek)) odalarB.Add(KilitZinciri.OdaAdi(o)); else odalarA.Add(o);
         DaireLambalari lambalar = daire.GetComponent<DaireLambalari>();
-        if (lambalar != null) lambalar.Ayarla(varlik.yananOdalar);
+        if (lambalar != null) lambalar.Ayarla(odalarA);
+        DaireLambalari lambalarB = IkinciDaire != null ? IkinciDaire.GetComponent<DaireLambalari>() : null;
+        if (lambalarB != null) lambalarB.Ayarla(odalarB);
         // Kendiliğinden çalan eşyalar (#62): mobilyanın kendisine CalanEsya eklenir; kapısı
         // kapalıyken sesini boğabilsin diye odasının kapısı da verilir.
         foreach (KatSesi ks in varlik.sesler)
         {
-            Transform t = YolBul(daire, ks.Yol);
+            Transform t = Cozum(daire, ks.Yol);
             if (t == null) { Debug.LogWarning($"[ZINCIR] Çalan eşya '{ks.Yol}' bulunamadı."); continue; }
             CalanEsya c = t.gameObject.AddComponent<CalanEsya>();
-            c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, ks.Oda, KapiBul(daire, ks.Oda), eksen, ks.Kapatilabilir, ks.SusturanKilit, kat);
+            // Oyuncunun odasını eşyanın kendi dairesinin eksenleriyle bulur (ikinci daire olabilir).
+            c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, KilitZinciri.OdaAdi(ks.Oda), KapiBul(daire, ks.Oda), t.GetComponentInParent<DaireEksenleri>(),
+                      ks.Kapatilabilir, ks.SusturanKilit, kat);
         }
     }
 
@@ -247,9 +263,16 @@ public class ZincirUygulayici
         Transform ebeveyn;
         Vector3 konum;
         Quaternion donus;
-        if (!string.IsNullOrEmpty(y.Yol))
+        if (y.Yol == KilitZinciri.IkinciOnek)
         {
-            ebeveyn = YolBul(daire, y.Yol);
+            // Yalnızca "B:": ikinci dairenin planında bir nokta (#70).
+            if (IkinciDaire == null) { Debug.LogWarning($"[ZINCIR] '{ad}' ikinci dairede ama katta ikinci daire yok."); return null; }
+            eksen = IkinciDaire.GetComponent<DaireEksenleri>();
+            daire = IkinciDaire;
+        }
+        if (!string.IsNullOrEmpty(y.Yol) && y.Yol != KilitZinciri.IkinciOnek)
+        {
+            ebeveyn = Cozum(daire, y.Yol);
             if (ebeveyn == null) { Debug.LogWarning($"[ZINCIR] '{ad}' çapası '{y.Yol}' bulunamadı."); return null; }
             konum = new Vector3(y.X, y.Y, y.Z);
             donus = Quaternion.Euler(0f, y.Donus, 0f);
@@ -333,6 +356,15 @@ public class ZincirUygulayici
             Object.Destroy(g);
         }
         konanlar.Clear();
+        foreach (Transform t in capalar.Values) if (t != null) Object.Destroy(t.gameObject);
+        capalar.Clear();
+        DaireyiTemizle(daire);
+    }
+
+    // Bir dairenin kilitlerini, kırılan ve devrilen parçalarını, kollarını, seslerini sıfırlar.
+    // Çift dairede (#70) ikinci daire de bununla temizlenir.
+    private void DaireyiTemizle(Transform daire)
+    {
         // BİLEŞENLER HEMEN SİLİNİR (DestroyImmediate), kare sonunda değil (#64 hatası): Destroy
         // bileşeni ancak karenin sonunda kaldırır; o zamana kadar GetComponent onu bulmaya devam
         // eder. Daire aynı karede ikinci kez kurulunca (kat değişirken olabiliyor) Uygula eski
@@ -357,8 +389,6 @@ public class ZincirUygulayici
         foreach (CalanEsya c in daire.GetComponentsInChildren<CalanEsya>(true)) { c.Sifirla(); Object.DestroyImmediate(c); }
         // Çizim ekranı ve planda nokta olan yerlerin çapaları (#63).
         foreach (CizimEkrani c in daire.GetComponentsInChildren<CizimEkrani>(true)) Object.DestroyImmediate(c);
-        foreach (Transform t in capalar.Values) if (t != null) Object.Destroy(t.gameObject);
-        capalar.Clear();
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);
@@ -404,29 +434,55 @@ public class ZincirUygulayici
         konanlar.Add(g);
     }
 
-    private static Transform KapiYolu(Transform daire, string oda) { return daire.Find("Kapilar/Kapi_" + oda); }
+    // ÇİFT DAİRE (#70): adı "B:" ile başlıyorsa öneki atar ve ikinci daireyi verir; değilse daireyi.
+    private Transform DaireSec(Transform daire, ref string ad)
+    {
+        if (ad != null && ad.StartsWith(KilitZinciri.IkinciOnek))
+        {
+            ad = ad.Substring(KilitZinciri.IkinciOnek.Length);
+            return IkinciDaire;
+        }
+        return daire;
+    }
 
-    private static IcKapi KapiBul(Transform daire, string oda)
+    // Bir yolu doğru dairede çözer ("B:Esyalar/Buzdolabi" ikinci dairede).
+    private Transform Cozum(Transform daire, string yol)
+    {
+        Transform d = DaireSec(daire, ref yol);
+        return d != null ? YolBul(d, yol) : null;
+    }
+
+    private Transform KapiYolu(Transform daire, string oda)
+    {
+        Transform d = DaireSec(daire, ref oda);
+        return d != null ? d.Find("Kapilar/Kapi_" + oda) : null;
+    }
+
+    private IcKapi KapiBul(Transform daire, string oda)
     {
         Transform t = KapiYolu(daire, oda);
         return t != null ? t.GetComponent<IcKapi>() : null;
     }
 
     // Bir yer kilitlenirken kilidin takılacağı parça: KilitYolu doluysa o, değilse yerin kendisi.
-    private static Transform YerinKilitYolu(Transform daire, KilitZinciri zincir, string yerKimligi)
+    private Transform YerinKilitYolu(Transform daire, KilitZinciri zincir, string yerKimligi)
     {
         ZincirYeri y = zincir.YerBul(yerKimligi);
         if (y == null) return null;
-        return YolBul(daire, string.IsNullOrEmpty(y.KilitYolu) ? y.Yol : y.KilitYolu);
+        return Cozum(daire, string.IsNullOrEmpty(y.KilitYolu) ? y.Yol : y.KilitYolu);
     }
 
     private Transform YerYolu(Transform daire, KilitZinciri zincir, string yerKimligi)
     {
         ZincirYeri y = zincir.YerBul(yerKimligi);
         if (y == null) return null;
-        if (!y.PlandaNokta) return YolBul(daire, y.Yol);
+        if (!y.PlandaNokta) return Cozum(daire, y.Yol);
         // Planda bir nokta (#63): o noktaya boş bir çapa nesnesi konur (bir kez; sonra aynısı).
         if (capalar.TryGetValue(y.Kimlik, out Transform mevcut) && mevcut != null) return mevcut;
+        // Noktanın dairesi odasından belli: "B:Banyo" ikinci dairede (#70).
+        string oda = y.Oda;
+        daire = DaireSec(daire, ref oda);
+        if (daire == null) return null;
         DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
         if (eksen == null) return null;
         GameObject g = new GameObject("Yer_" + y.Kimlik);

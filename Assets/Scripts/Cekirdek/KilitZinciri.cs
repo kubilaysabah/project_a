@@ -116,6 +116,18 @@ public class KilitZinciri
     public const string SahanlikOdasi = "Sahanlik";
     public static readonly string[] HepAcikOdalar = { "Antre", "Hol", SahanlikOdasi };
 
+    // ÇİFT DAİRE (#70): bir katta ikinci bir daire de açık olabilir. İkinci dairenin odaları ve
+    // yerleri "B:" önekiyle yazılır ("B:Mutfak", "B:Esyalar/Buzdolabi"). Oda adının öneksiz hâli
+    // plandaki addır; ikinci dairenin antresi ve koridoru da hep açıktır.
+    public const string IkinciOnek = "B:";
+
+    /// <summary>Oda adının plandaki hâli: "B:Mutfak" -> "Mutfak".</summary>
+    public static string OdaAdi(string oda)
+    {
+        if (oda == null) return null;
+        return oda.StartsWith(IkinciOnek) ? oda.Substring(IkinciOnek.Length) : oda;
+    }
+
     /// <summary>Kuralın sonucu: hangi kilitler hangi sırayla açıldı, katın anahtarına ulaşıldı mı.</summary>
     public class Sonuc
     {
@@ -173,7 +185,8 @@ public class KilitZinciri
     // ---------- ULAŞILABİLİRLİK ----------
     private bool OdayaUlasilir(string oda, HashSet<string> acilan)
     {
-        foreach (string a in HepAcikOdalar) if (a == oda) return true;
+        // Öneksiz adla bakılır: iki dairenin de antresi ve koridoru hep açık (#70).
+        foreach (string a in HepAcikOdalar) if (a == OdaAdi(oda)) return true;
         if (KapaliOdalar.Contains(oda)) return false;
         // Odanın kapısını kilitleyen bir kilit varsa, o kilit açılmış olmalı.
         foreach (ZincirKilidi k in Kilitler)
@@ -246,7 +259,7 @@ public class KilitZinciri
         // Planda bir nokta olan yer, yazıldığı odanın içinde olmalı (#63): yanlış bir sayı
         // kâğıdı duvarın içine ya da komşu odaya koyardı; kural o odayı açık sanardı.
         foreach (ZincirYeri y in Yerler)
-            if (y.PlandaNokta && DairePlani.NoktaninOdasi(y.U, y.V) != y.Oda)
+            if (y.PlandaNokta && DairePlani.NoktaninOdasi(y.U, y.V) != OdaAdi(y.Oda))
                 sonuc.Hatalar.Add($"'{y.Kimlik}' yerinin noktası ({y.U}, {y.V}) '{y.Oda}' odasında değil");
         foreach (ZincirEsyasi e in Esyalar)
             if (YerBul(e.Yer) == null) sonuc.Hatalar.Add($"'{e.Kimlik}' eşyasının yeri '{e.Yer}' tanımlı değil");

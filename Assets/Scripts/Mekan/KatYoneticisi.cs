@@ -794,9 +794,13 @@ public class KatYoneticisi : MonoBehaviour
     {
         int aAcik = DairePlani.AcikDaire(aKat);
         int bAcik = DairePlani.AcikDaire(bKat);
+        // Çift daire (#70): kat dosyası ikinci bir açık daire tanımlayabilir.
+        KatZinciriVarligi varlik = VarlikBul(aKat);
+        int ikinci = varlik != null && varlik.ikinciDaire >= 1 && varlik.ikinciDaire <= MekanOlculeri.DaireSayisi
+                     && varlik.ikinciDaire != aAcik && aAcik > 0 ? varlik.ikinciDaire : 0;
         for (int n = 1; n <= MekanOlculeri.DaireSayisi; n++)
         {
-            bool acik = n == aAcik;
+            bool acik = n == aAcik || n == ikinci;
             if (daireler[n] != null)
             {
                 daireler[n].SetActive(acik);
@@ -809,18 +813,22 @@ public class KatYoneticisi : MonoBehaviour
                     // Eşyaların çekmece ve kapakları da kapalı başlar.
                     foreach (AcilirParca p in daireler[n].GetComponentsInChildren<AcilirParca>(true))
                         p.Ayarla(false);
-                    KaplamayiGiydir(n, aKat);
-                    // O katın kilit zinciri (yoksa daire kilitsiz).
-                    if (zincirUygulayici != null)
-                    {
-                        zincirUygulayici.Uygula(daireler[n].transform, ZincirBul(aKat), aKat);
-                        // Katın notları ve dekoru (koliler...), #55.
-                        zincirUygulayici.DekorUygula(daireler[n].transform, VarlikBul(aKat), aKat);
-                    }
+                    // İkinci daire başka bir katın kaplamasını giyer: iki daire birbirine benzemesin.
+                    KaplamayiGiydir(n, n == ikinci && varlik.ikinciKaplamaKati > 0 ? varlik.ikinciKaplamaKati : aKat);
                 }
             }
             SahanlikKapisiniAyarla(sahanlikA, n, acik, gercekDaire: true);
             SahanlikKapisiniAyarla(sahanlikB, n, n == bAcik, gercekDaire: false);
+        }
+
+        // O katın kilit zinciri (yoksa daire kilitsiz): iki daire de açıldıktan SONRA kurulur,
+        // çünkü zincir iki daireye yayılabilir (#70).
+        if (aAcik > 0 && daireler[aAcik] != null && zincirUygulayici != null)
+        {
+            zincirUygulayici.IkinciDaire = ikinci > 0 && daireler[ikinci] != null ? daireler[ikinci].transform : null;
+            zincirUygulayici.Uygula(daireler[aAcik].transform, ZincirBul(aKat), aKat);
+            // Katın notları ve dekoru (koliler...), #55.
+            zincirUygulayici.DekorUygula(daireler[aAcik].transform, varlik, aKat);
         }
     }
 

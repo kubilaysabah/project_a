@@ -335,4 +335,32 @@ public class KilitZinciriTestleri
         s = z.Cozumle(Odalar());
         Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("anahtar parçası değil")), string.Join("; ", s.Hatalar));
     }
+
+    // ---------- #70: çift daire ----------
+
+    [Test]
+    public void Cift_dairede_bir_dairenin_anahtari_obur_dairede_bulunur()
+    {
+        var odalar = Odalar();
+        foreach (string o in Odalar()) odalar.Add(KilitZinciri.IkinciOnek + o);
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Oda_B", "B:Oda_B" });
+        // İkinci dairenin antresinde birinci dairenin mutfak anahtarı; mutfakta katın anahtarı.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_antre", Yol = "B:x", Oda = "B:Antre" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "a_mutfak", Yol = "y", Oda = "Mutfak" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "mutfak_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "b_antre" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "a_mutfak" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "a_mutfak", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "mutfak_anahtari" });
+        Assert.IsTrue(z.Cozumle(odalar).Cozulebilir);
+        // İkinci dairenin antresi hep açık; ama anahtar ikinci dairenin kapalı odasında olsaydı çözülmezdi.
+        z.Yerler[0].Oda = "B:Oda_B";
+        Assert.IsFalse(z.Cozumle(odalar).Cozulebilir);
+    }
+
+    [Test]
+    public void Oda_adi_oneki_atar()
+    {
+        Assert.AreEqual("Mutfak", KilitZinciri.OdaAdi("B:Mutfak"));
+        Assert.AreEqual("Salon", KilitZinciri.OdaAdi("Salon"));
+    }
 }
