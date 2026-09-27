@@ -137,7 +137,17 @@ def ic_kilitli():
     kaydet(os.path.join(SESLER, "IcKapi_Kilitli.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.7)
 
 
-URETICILER = {"sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
+# ---------- ŞİFRELİ ASMA KİLİT (#54) ----------
+def sifre_cark():
+    """Çarkın bir rakam dönüşü: küçük, kuru bir metal tık (yankısız, yakından duyulur)."""
+    random.seed(41)
+    n = int(0.12 * HIZ)
+    s = [0.0] * n
+    ekle(s, tepeyi_esitle(modlar(darbe(int(0.08 * HIZ), HIZ, 0.0004), HIZ, [(3800, 30, 1.0), (5600, 25, 0.5)])), 0, 1.0)
+    kaydet(os.path.join(SESLER, "Sifre_Cark.wav"), s, HIZ, 0.5)
+
+
+URETICILER = {"sifre_cark": sifre_cark, "sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
               "ic_acilma": ic_acilma, "ic_kapanma": ic_kapanma, "ic_kilitli": ic_kilitli}
 
 if __name__ == "__main__":

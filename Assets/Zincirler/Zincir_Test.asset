@@ -81,27 +81,47 @@ MonoBehaviour:
       Hedef: Salon
       Gerekli: salon_anahtari
       Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
     - Kimlik: kiler
       Tur: 1
       OdaKapisi: 1
       Hedef: Oda_C
       Gerekli: takvim
       Sifre: 0612
+      IpucuMetni: 0612
+      IpucuX: 0
+      IpucuY: 0.24
+      IpucuZ: 0.011
     - Kimlik: odaA
       Tur: 2
       OdaKapisi: 1
       Hedef: Oda_A
       Gerekli: kol
       Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
     - Kimlik: buzdolabi
       Tur: 3
       OdaKapisi: 0
       Hedef: buzdolabi
       Gerekli: sigorta
       Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
     - Kimlik: odaB
       Tur: 4
       OdaKapisi: 1
       Hedef: Oda_B
       Gerekli: tornavida
       Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0

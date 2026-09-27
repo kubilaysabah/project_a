@@ -111,6 +111,26 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
         AciyiUygula(acik ? acikAci : 0f);
     }
 
+    /// <summary>
+    /// Kapının DIŞ yüzünde (açıldığı odanın karşı tarafında, koridor tarafında), kolun yanında,
+    /// verilen yükseklikteki nokta ve dışarı bakan yön. Asma kilit buraya takılır.
+    /// ebeveyn: noktanın bağlanacağı nesne (menteşe; kapı dönerse onunla döner).
+    /// </summary>
+    public bool OnNoktasi(float yukseklik, out Vector3 konum, out Vector3 disaYon, out Transform ebeveyn)
+    {
+        konum = Vector3.zero; disaYon = Vector3.forward; ebeveyn = mentese;
+        if (mentese == null || kanat == null) return false;
+        // Menteşeden kanadın serbest kenarına giden yatay vektör (menteşenin kendi ekseninde).
+        Vector3 kenar = new Vector3(kanat.localPosition.x, 0f, kanat.localPosition.z) * 2f;
+        // Kanat açılırken serbest kenarın gittiği yön = odanın tarafı. Küçük bir açıyla bakıyoruz
+        // ki yön kanada dik çıksın; dışarısı bunun tersi.
+        Vector3 odaYonu = (Quaternion.Euler(0f, Mathf.Sign(acikAci) * 10f, 0f) * kenar - kenar).normalized;
+        Vector3 yerel = kenar * 0.82f + Vector3.up * yukseklik - odaYonu * 0.022f;
+        konum = mentese.TransformPoint(yerel);
+        disaYon = mentese.TransformDirection(-odaYonu);
+        return true;
+    }
+
     private void AciyiUygula(float a)
     {
         aci = a;

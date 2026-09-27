@@ -70,6 +70,8 @@ public class ZincirKilidi
     public string Gerekli;      // Anahtar/Sigorta/Tornavida: eşya kimliği. Kol: kol yerinin kimliği.
                                 // Şifre: ipucunun yazılı olduğu yerin kimliği.
     public string Sifre;        // yalnızca Şifre: dört hane ("1987")
+    public string IpucuMetni;   // yalnızca Şifre: ipucu yerine yazılacak metin; boşsa şifrenin kendisi
+    public float IpucuX, IpucuY, IpucuZ;   // yazının ipucu yerindeki konumu (yerin kendi eksenlerinde)
 }
 
 [System.Serializable]

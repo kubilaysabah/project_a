@@ -424647,6 +424647,7 @@ MonoBehaviour:
   katAnahtariSablonu: {fileID: 3980516341085727291, guid: e5bf2807e9cf78045a9455871ed1a5d2, type: 3}
   sigortaSablonu: {fileID: 310231408212479061, guid: c944289e3a50a7f4c80f1141cf53fc87, type: 3}
   tornavidaSablonu: {fileID: 7631636315084247614, guid: 7817f5c67d453374a838eaaaa4990cb8, type: 3}
+  asmaKilitSablonu: {fileID: 2573454495964990403, guid: 69734c060a65f194db8c157b691eac47, type: 3}
   kaplamalar:
   - {fileID: 2100000, guid: a521da2a68c84be4ba3758e749c7b0e8, type: 2}
   - {fileID: 2100000, guid: 8bb76ed6ae4ee27449d71ab340993a58, type: 2}

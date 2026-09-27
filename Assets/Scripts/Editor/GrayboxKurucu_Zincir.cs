@@ -40,6 +40,7 @@ public static partial class GrayboxKurucu
         GameObject katAnahtari = SablonKur("Esya_KatAnahtari", "Anahtar", EsyaTuru.KatAnahtari, null);
         GameObject sigorta = SablonKur("Esya_Sigorta", "Buson", EsyaTuru.Sigorta, null);
         GameObject tornavida = SablonKur("Esya_Tornavida", "Tornavida", EsyaTuru.Tornavida, null);
+        GameObject asmaKilit = ParcaSablonuKur("Asma_Kilit", "Asma_Kilit");
         KatZinciriVarligi test = TestZinciriKur();
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
@@ -50,6 +51,7 @@ public static partial class GrayboxKurucu
         seri.FindProperty("katAnahtariSablonu").objectReferenceValue = katAnahtari;
         seri.FindProperty("sigortaSablonu").objectReferenceValue = sigorta;
         seri.FindProperty("tornavidaSablonu").objectReferenceValue = tornavida;
+        seri.FindProperty("asmaKilitSablonu").objectReferenceValue = asmaKilit;
         SerializedProperty katlar = seri.FindProperty("katZincirleri");
         katlar.arraySize = KatSayaci.CatiKati;
         // Şimdilik yalnızca 1. katta test zinciri; öbür katlar #55'e kadar kilitsiz.
@@ -88,6 +90,22 @@ public static partial class GrayboxKurucu
 
         string yol = $"{SablonKlasoru}/{ad}.prefab";
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, yol);
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // Eşya olmayan bir parça şablonu (asma kilit gibi): yalnızca model ve çarpışma kutusu.
+    // Çarpışma kutusu nişanı kolaylaştırır; etkileşim kilidin takılı olduğu kapıdan gelir.
+    static GameObject ParcaSablonuKur(string ad, string dosya)
+    {
+        GameObject gecici = new GameObject(ad);
+        GameObject model = Model("Model", gecici.transform, dosya, null, Vector3.zero, 0f, carpisma: false);
+        if (model == null) { Object.DestroyImmediate(gecici); Debug.LogWarning($"[ZINCIR] {dosya}.fbx yok."); return null; }
+        Bounds b = model.GetComponent<MeshFilter>().sharedMesh.bounds;
+        BoxCollider c = gecici.AddComponent<BoxCollider>();
+        c.center = b.center;
+        c.size = b.size;
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/{ad}.prefab");
         Object.DestroyImmediate(gecici);
         return sablon;
     }
@@ -131,7 +149,9 @@ public static partial class GrayboxKurucu
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "buzdolabi", Y = 0.47f, Donus = 80f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "oyuncak", Y = 0.03f, Donus = 20f });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "salon", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Salon", Gerekli = "salon_anahtari" });
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "kiler", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_C", Gerekli = "takvim", Sifre = "0612" });
+        // Şifrenin ipucu takvimin yaprağına yazılır (yaprağın üst yarısı, ön yüzün 1 mm önü).
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "kiler", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_C", Gerekli = "takvim",
+                                          Sifre = "0612", IpucuMetni = "0612", IpucuY = 0.24f, IpucuZ = 0.011f });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Kol, OdaKapisi = true, Hedef = "Oda_A", Gerekli = "kol" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "buzdolabi", Tur = KilitTuru.Sigorta, OdaKapisi = false, Hedef = "buzdolabi", Gerekli = "sigorta" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaB", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "Oda_B", Gerekli = "tornavida" });

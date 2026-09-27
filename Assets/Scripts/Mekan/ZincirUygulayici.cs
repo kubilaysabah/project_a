@@ -20,6 +20,11 @@ public class ZincirUygulayici
     // Şablonlar: eşya türü -> prefab. KatYoneticisi bağlı referanslardan verir (build'e girsinler diye).
     private readonly Dictionary<EsyaTuru, GameObject> sablonlar = new Dictionary<EsyaTuru, GameObject>();
 
+    /// <summary>Şifreli kilitlerin kapıya takılan asma kilidi (prefab).</summary>
+    public GameObject AsmaKilitSablonu;
+    /// <summary>İpucu yazıları bu yazının yazı tipini ve malzemesini kullanır (kapı numarası).</summary>
+    public TextMesh YaziOrnegi;
+
     // Bu uygulayıcının dairelere koyduğu eşyalar; bir sonraki temizlikte kaldırılır.
     private readonly List<GameObject> konanlar = new List<GameObject>();
 
@@ -49,6 +54,12 @@ public class ZincirUygulayici
             if (hedef == null) { Debug.LogWarning($"[ZINCIR] '{veri.Kimlik}' kilidinin hedefi bulunamadı."); continue; }
             Kilit kilit = hedef.gameObject.AddComponent<Kilit>();
             kilit.Ayarla(veri, kat);
+            if (veri.Tur == KilitTuru.Sifre)
+            {
+                GameObject asma = kilit.AsmaKilitTak(AsmaKilitSablonu);
+                if (asma != null) konanlar.Add(asma);
+                IpucuYaz(daire, zincir, veri);
+            }
         }
 
         // 3. Eşyalar.
@@ -83,6 +94,32 @@ public class ZincirUygulayici
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);
+    }
+
+    // Şifrenin ipucu: ipucu yerine (takvim, boy cetveli...) yazılan metin. #55'te ipuçları
+    // kata göre biçimlenecek (takvimde işaretli gün gibi); şimdilik verideki metin ya da şifre.
+    private void IpucuYaz(Transform daire, KilitZinciri zincir, ZincirKilidi veri)
+    {
+        Transform yer = YerYolu(daire, zincir, veri.Gerekli);
+        if (yer == null) return;
+        GameObject g = new GameObject("Zincir_Ipucu_" + veri.Kimlik);
+        g.transform.SetParent(yer, false);
+        g.transform.localPosition = new Vector3(veri.IpucuX, veri.IpucuY, veri.IpucuZ);
+        // TextMesh'in okunan yüzü -z'ye bakar; ön yüzü +Z'de olan eşyanın önünden okunsun diye 180°.
+        g.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        TextMesh yazi = g.AddComponent<TextMesh>();
+        yazi.text = string.IsNullOrEmpty(veri.IpucuMetni) ? veri.Sifre : veri.IpucuMetni;
+        yazi.anchor = TextAnchor.MiddleCenter;
+        yazi.alignment = TextAlignment.Center;
+        yazi.fontSize = 96;
+        yazi.characterSize = 0.006f;
+        yazi.color = new Color(0.03f, 0.03f, 0.03f);
+        if (YaziOrnegi != null)
+        {
+            yazi.font = YaziOrnegi.font;
+            g.GetComponent<MeshRenderer>().sharedMaterial = YaziOrnegi.GetComponent<MeshRenderer>().sharedMaterial;
+        }
+        konanlar.Add(g);
     }
 
     private static Transform KapiYolu(Transform daire, string oda) { return daire.Find("Kapilar/Kapi_" + oda); }

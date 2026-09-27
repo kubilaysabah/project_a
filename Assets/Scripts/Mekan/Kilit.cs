@@ -45,6 +45,8 @@ public class Kilit : MonoBehaviour
             {
                 case KilitTuru.Anahtar:
                     return Cep.KimligiTasiyor(Veri.Gerekli) ? Dil.Getir("ipucu.ac") : Dil.Getir("ipucu.kilitli");
+                case KilitTuru.Sifre:
+                    return Dil.Getir("ipucu.sifre");
                 default:
                     return Dil.Getir("ipucu.kilitli");
             }
@@ -60,6 +62,14 @@ public class Kilit : MonoBehaviour
             Coz(acilsin: true);
             return true;
         }
+        if (Veri.Tur == KilitTuru.Sifre)
+        {
+            // Asma kilidin yakın bakış ekranı; doğru şifrede ekran Coz'u kendisi çağırır.
+            SifreEkrani ekran = GetComponent<SifreEkrani>();
+            if (ekran == null) ekran = gameObject.AddComponent<SifreEkrani>();
+            ekran.Ac(this, oyuncu);
+            return true;
+        }
         // Açacak şey yok: kapı ya da parça kendi "kilitli" sesini çalsın.
         return false;
     }
@@ -73,6 +83,8 @@ public class Kilit : MonoBehaviour
         KapiyiKilitle(false);
         if (acilmaSesi == null) acilmaSesi = Resources.Load<AudioClip>("Sesler/KatKapisi_Kilit");
         if (acilmaSesi != null) AudioSource.PlayClipAtPoint(acilmaSesi, transform.position, 0.7f);
+        // Asma kilit açılınca kapıdan düşer (şimdilik yalnızca kaldırılıyor).
+        if (asmaKilit != null) Destroy(asmaKilit);
         if (acilsin)
         {
             IcKapi kapi = GetComponent<IcKapi>();
@@ -89,6 +101,36 @@ public class Kilit : MonoBehaviour
     {
         Cozuk = true;
         KapiyiKilitle(false);
+        if (asmaKilit != null) Destroy(asmaKilit);
+    }
+
+    // ---------- ASMA KİLİT (şifreli kilidin görünen yüzü) ----------
+    private GameObject asmaKilit;
+
+    /// <summary>Şifreli kilidin asma kilidini kapıya ya da parçaya takar; takılan nesneyi döndürür.</summary>
+    public GameObject AsmaKilitTak(GameObject sablon)
+    {
+        if (sablon == null) return null;
+        Vector3 konum, disaYon;
+        Transform ebeveyn;
+        IcKapi kapi = GetComponent<IcKapi>();
+        if (kapi == null || !kapi.OnNoktasi(1.15f, out konum, out disaYon, out ebeveyn))
+        {
+            // Kapı değilse (dolap kapağı, çekmece): parçanın ön yüzünün ortası. Modellerin ön
+            // yüzü +Z'ye baktığı için meshin sınırlarının en ön (max z) yüzü kullanılır.
+            MeshFilter mf = GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null) return null;
+            Bounds b = mf.sharedMesh.bounds;
+            konum = transform.TransformPoint(new Vector3(b.center.x, b.center.y, b.max.z + 0.005f));
+            disaYon = transform.forward;
+            ebeveyn = transform;
+        }
+        asmaKilit = Instantiate(sablon, ebeveyn);
+        asmaKilit.name = "Asma_Kilit";
+        asmaKilit.transform.position = konum;
+        // Modelin ön yüzü +Z: dışarıya (oyuncuya) baksın.
+        asmaKilit.transform.rotation = Quaternion.LookRotation(disaYon, Vector3.up);
+        return asmaKilit;
     }
 
     private void KapiyiKilitle(bool k)
