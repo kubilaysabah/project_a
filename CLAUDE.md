@@ -176,6 +176,13 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-27 (Lesson 51): **#65 CLOSED** after Şahan tested the harder floor 5. **Floor 6 built** (`876a283` two-flat support #70, `8189524` content #66): flats 3 and 4 open together.
+  - **Two-flat model:** `KatZinciriVarligi.ikinciDaire`/`ikinciKaplamaKati`. The chain writes the second flat's rooms and paths as `B:` (rule: `KilitZinciri.OdaAdi`, both entrance halls and corridors open). `ZincirUygulayici.IkinciDaire` routes `B:` doors, places, plan points (`KatYerlesimi.Yol == "B:"`), sounds and lamps. The manager opens both flats first, then applies the chain once.
+  - **Table:** new lock `KilitTuru.Yerlestirme` with `Yuvalar` (item i to place i) and component `Yuva` (PLACE a carried plate; placed plates can be taken back or swapped; opens only when every slot is right; restored from the save). `EsyaTuru.Tabak`. Names on plates (`EsyaYazisi`) and cards (`KatSusu.Metin`) come from the string table; `YerelYazi.AnahtariKur` now refreshes immediately.
+  - **Six locks:** flat 4 pantry (code 1994 on flat 3's calendar), flat 3 kitchen (key in flat 4's fridge), flat 3 bedroom (broken key split across flats), flat 4 bathroom (hinges), flat 4 bedroom (flat 3's pantry lever), sideboard (table).
+  - **New props in every flat:** `Sofra/Yer_1..4`, `Bufe/Kapi_1..2`. Plate text uses Euler(90, 180, 0) to read upright from the table's front.
+  - **Tested in the test slot:** wrong placement keeps the sideboard locked, swapping fixes it, and the table is restored on reload. 220/220 tests. The timed escape moment (#58) is still separate.
+
 - 2026-09-27 (Lesson 50, later): **floor 5 made harder** (`6e1b493`, #65) after Şahan's test: five interlocking locks. Bathroom hinges; the pantry wall lever releases the kitchen; the living-room key is broken, with its bow in the fridge and its bit in the toolbox (`KirikAnahtar`, HUD "1/2"); the wardrobe needs the crowbar and sliders; the valve frees the trap. Şahan's own save had reached floor 6 (after he played the equipment version), so replaying the new floor 5 needs his OK to reset it. Also: a check on 2026-09-27 found the Editor already playing (his session) and stopped it. Check `isPlaying` first. 216/216 tests.
 
 - 2026-09-27 (Lesson 50): **#64 CLOSED** after Şahan tested floor 4. **Floor 5 built** (`ba5bb57`, #65 mechanisms), flat 2, Cemal's job list by the fuse box:
