@@ -392,6 +392,9 @@ public class KatYoneticisi : MonoBehaviour
 
         // Kayıt varsa (#52) oyun kaldığı kattan sürer: açılış atlanır, oyuncu sahnedeki yerinde
         // (1. kat sahanlığının başlangıcı) o katın sahanlığında uyanır.
+        if (KayitYuvasi.Ek != "")
+            Debug.LogWarning($"[KAYIT] TEST YUVASI AÇIK ('{KayitYuvasi.Ek}'): oyun gerçek kayda değil test kaydına yazıyor. " +
+                             $"Normal oyun için EditorPrefs '{KayitYuvasi.EditorAnahtari}' silinmeli.");
         bool kayittanDevam = Kayit.Var && testKarti == null;
         if (kayittanDevam)
         {

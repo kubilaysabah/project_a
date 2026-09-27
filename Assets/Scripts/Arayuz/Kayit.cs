@@ -12,9 +12,11 @@ using UnityEngine;
 
 public static class Kayit
 {
-    private const string KatAnahtari = "kayit_kat";
-    private const string KilitAnahtari = "kayit_kilitler";   // çözülen kilitler (#54)
-    private const string ParcaAnahtari = "kayit_parcalar";   // bulunan çizim parçaları (#63)
+    // Anahtarların adı yuvaya göre (KayitYuvasi): normalde "kayit_kat", Claude'un testinde
+    // "kayit_kat_test". Sabit (const) değil, her okunuşta hesaplanan birer özellik.
+    private static string KatAnahtari { get { return KayitYuvasi.Anahtar("kayit_kat"); } }
+    private static string KilitAnahtari { get { return KayitYuvasi.Anahtar("kayit_kilitler"); } }   // çözülen kilitler (#54)
+    private static string ParcaAnahtari { get { return KayitYuvasi.Anahtar("kayit_parcalar"); } }   // bulunan çizim parçaları (#63)
 
     // Kilit kaydı ilk sorulduğunda PlayerPrefs'ten bir kez okunur, sonra bellekte tutulur.
     private static KilitKaydi kilitler;

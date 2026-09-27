@@ -9,7 +9,7 @@ using UnityEngine;
 
 public static class Aletler
 {
-    private const string KayitAnahtari = "kayit_aletler";
+    private static string KayitAnahtari { get { return KayitYuvasi.Anahtar("kayit_aletler"); } }   // yuvalı (KayitYuvasi)
     private static AletCantasi canta;
 
     private static AletCantasi Canta

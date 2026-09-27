@@ -10,7 +10,7 @@ using UnityEngine;
 
 public static class Defter
 {
-    private const string Anahtar = "defter_bulunan";
+    private static string Anahtar { get { return KayitYuvasi.Anahtar("defter_bulunan"); } }   // yuvalı (KayitYuvasi)
 
     private static AnomaliDefteri defter;
 
