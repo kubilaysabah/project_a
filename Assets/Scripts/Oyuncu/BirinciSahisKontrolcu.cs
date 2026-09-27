@@ -42,6 +42,19 @@ public class BirinciSahisKontrolcu : MonoBehaviour
              "Fare hareketi piksel cinsinden çok daha büyük olduğu için fareyi etkilemez.")]
     [SerializeField] private float oluBolge = 0.15f;
 
+    [Header("Eğilme (#79)")]
+    [Tooltip("Eğilince göz yüksekliği (metre). Koltuk ve yatak altına bakabilmek için alçak.")]
+    [SerializeField] private float egikGoz = 0.6f;
+
+    [Tooltip("Eğilince çarpışma kapsülünün boyu (metre). Yarıçapın iki katından kısa olamaz.")]
+    [SerializeField] private float egikBoy = 0.8f;
+
+    [Tooltip("Eğilmiş yürüme hızı (metre/saniye).")]
+    [SerializeField] private float egikHiz = 0.8f;
+
+    [Tooltip("Eğilip kalkmanın hızı: büyüdükçe göz yeni yüksekliğine daha çabuk varır.")]
+    [SerializeField] private float egilmeGecisi = 8f;
+
     [Header("Bağlantılar")]
     [Tooltip("Oyuncunun çocuğu olan kamera. Boş bırakılırsa çocuklardan otomatik bulunur.")]
     [SerializeField] private Transform kamera;
@@ -57,6 +70,14 @@ public class BirinciSahisKontrolcu : MonoBehaviour
     // "Move" eylemi hem WASD'ye hem de oyun kolunun çubuğuna bağlıdır.
     private InputAction hareketEylemi;
     private InputAction bakisEylemi;
+
+    // ---- EĞİLME ----
+    private float ayaktaBoy, ayaktaGoz;   // ayakta dururken kapsül boyu ve göz yüksekliği (Awake'te okunur)
+    private bool egik;                    // şu an eğik mi (ya da eğilmek üzere mi)
+    private bool koldanEgik;              // oyun kolunda eğilme aç-kapa düğmesiyle; klavyede Ctrl basılı tutulur
+
+    /// <summary>Oyuncu eğik mi (#79)?</summary>
+    public bool Egik { get { return egik; } }
 
     // ---------- AWAKE ----------
     // Awake, nesne sahnede belirdiği anda BİR KEZ çalışır. Start'tan da öncedir.
@@ -88,6 +109,11 @@ public class BirinciSahisKontrolcu : MonoBehaviour
         // FindAction: eylemi "harita/eylem" yoluyla bulur.
         hareketEylemi   = varlik.FindAction("Player/Move");
         bakisEylemi     = varlik.FindAction("Player/Look");
+
+        // Ayaktaki ölçüler, oyuncu kurulurken verilenler (OyuncuKurucu). Eğilince bunlardan
+        // eğik ölçülere, kalkınca yeniden bunlara döneriz.
+        ayaktaBoy = kontrolcu.height;
+        ayaktaGoz = kamera != null ? kamera.localPosition.y : 1.65f;
     }
 
     // ---------- ONENABLE / ONDISABLE ----------
@@ -142,6 +168,7 @@ public class BirinciSahisKontrolcu : MonoBehaviour
     private void Update()
     {
         Bak();
+        Egil();
         Yuru();
 
         // Escape artık burada değil, duraklatma menüsünde (#15): menü fareyi serbest
@@ -226,13 +253,63 @@ public class BirinciSahisKontrolcu : MonoBehaviour
             dikeyHiz += yercekimi * Time.deltaTime;
         }
 
-        // Yatay hareket ile dikey düşmeyi tek bir harekette birleştir.
-        Vector3 hareket = yon * yurumeHizi;
+        // Yatay hareket ile dikey düşmeyi tek bir harekette birleştir. Eğikken daha yavaş.
+        Vector3 hareket = yon * (egik ? egikHiz : yurumeHizi);
         hareket.y = dikeyHiz;
 
         // Move: çarpışmaları hesaba katarak taşır. Duvardan geçmeyi engeller,
         // basamakları (stepOffset kadar) kendiliğinden tırmanır.
         kontrolcu.Move(hareket * Time.deltaTime);
+    }
+
+    // ---------- EĞİLME (#79) ----------
+    // Klavyede Ctrl basılı tutuldukça eğik kalınır; oyun kolunda sağ çubuğa basmak eğilir/kalkar.
+    // Eğilince iki şey değişir:
+    //   1) Çarpışma kapsülü kısalır: oyuncu masanın altına girebilir, alçak yerlere sığar.
+    //   2) Göz (kamera) aşağı iner: koltuğun, yatağın altı görünür, nişan da oradan alınır.
+    // Kapsül hemen kısalır ama göz YUMUŞAKÇA iner; ani bir sıçrama gözü yorar.
+    // Kalkarken önce yukarıda yer var mı bakılır: masanın altındaki oyuncu kafasını masaya
+    // gömmeden, oradan çıkana kadar eğik kalır.
+    private void Egil()
+    {
+        // Oyun kolu: sağ çubuğa basmak (R3) aç-kapa.
+        if (Gamepad.current != null && Gamepad.current.rightStickButton.wasPressedThisFrame)
+            koldanEgik = !koldanEgik;
+        bool klavye = Keyboard.current != null &&
+                      (Keyboard.current.leftCtrlKey.isPressed || Keyboard.current.rightCtrlKey.isPressed);
+        bool istek = klavye || koldanEgik;
+
+        if (istek && !egik) BoyuAyarla(egikBoy, true);
+        else if (!istek && egik && KalkacakYerVar()) BoyuAyarla(ayaktaBoy, false);
+
+        // Göz yeni yüksekliğine yumuşakça yaklaşır. Lerp(a, b, t): a'dan b'ye t oranında git.
+        // Her kare kalan yolun bir kısmını gitmek, sona yaklaştıkça yavaşlayan doğal bir hareket verir.
+        if (kamera == null) return;
+        float hedef = egik ? egikGoz : ayaktaGoz;
+        Vector3 k = kamera.localPosition;
+        k.y = Mathf.Lerp(k.y, hedef, 1f - Mathf.Exp(-egilmeGecisi * Time.deltaTime));
+        kamera.localPosition = k;
+    }
+
+    // Kapsülün boyunu değiştirir. Ayaklar yerde kalsın diye merkez hep boyun yarısında.
+    private void BoyuAyarla(float boy, bool egilsin)
+    {
+        kontrolcu.height = boy;
+        kontrolcu.center = new Vector3(0f, boy / 2f, 0f);
+        egik = egilsin;
+    }
+
+    // Ayağa kalkınca kafanın gireceği yer boş mu? Eğik kapsülün ÜSTÜNDE kalan, ayakta dururken
+    // kaplanacak hacmi (OverlapCapsule) sorarız; oyuncunun kendi çarpıştırıcıları sayılmaz.
+    // Alt taraf sorulmaz: merdivende bir üst basamak ayak hizasındadır ve kalkmayı engellememeli.
+    private bool KalkacakYerVar()
+    {
+        float r = kontrolcu.radius - 0.02f;   // duvara sürtünen oyuncu kalkabilsin diye biraz ince
+        Vector3 alt = transform.position + Vector3.up * (egikBoy - kontrolcu.radius);
+        Vector3 ust = transform.position + Vector3.up * (ayaktaBoy - kontrolcu.radius);
+        foreach (Collider c in Physics.OverlapCapsule(alt, ust, r, ~0, QueryTriggerInteraction.Ignore))
+            if (!c.transform.IsChildOf(transform)) return false;
+        return true;
     }
 
     // ---------- ÖLÜ BÖLGE ----------
