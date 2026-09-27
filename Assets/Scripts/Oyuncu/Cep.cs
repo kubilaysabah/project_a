@@ -15,6 +15,10 @@ public static class Cep
     public static EsyaTuru Tasinan { get { return envanter.Tasinan; } }
     public static int Kat { get { return envanter.Kat; } }
     public static string Kimlik { get { return envanter.Kimlik; } }
+
+    /// <summary>Eldeki eşyanın sahnedeki nesnesi (gizli bekler). El doluyken yeni bir eşya
+    /// alınınca bu nesne yeni eşyanın yerine bırakılır (Esya.cs). Kullanılınca unutulur.</summary>
+    public static UnityEngine.GameObject TasinanNesne { get; set; }
     public static bool ElBos { get { return envanter.ElBos; } }
 
     public static bool Tasiyor(EsyaTuru tur, int kat = 0) { return envanter.Tasiyor(tur, kat); }
@@ -30,6 +34,7 @@ public static class Cep
     public static bool Kullan(EsyaTuru tur, int kat = 0)
     {
         if (!envanter.Kullan(tur, kat)) return false;
+        TasinanNesne = null;
         Degisti?.Invoke();
         return true;
     }
@@ -37,6 +42,7 @@ public static class Cep
     public static bool KimlikleKullan(string kimlik)
     {
         if (!envanter.KimlikleKullan(kimlik)) return false;
+        TasinanNesne = null;
         Degisti?.Invoke();
         return true;
     }
@@ -44,6 +50,7 @@ public static class Cep
     public static void Bosalt()
     {
         envanter.Bosalt();
+        TasinanNesne = null;
         Degisti?.Invoke();
     }
 }

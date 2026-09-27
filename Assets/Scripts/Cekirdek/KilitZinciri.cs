@@ -43,8 +43,11 @@ public enum KilitTuru
 public class ZincirYeri
 {
     public string Kimlik;       // zincirin içinde bu yere verilen ad ("komodin")
-    public string Yol;          // dairenin kökünden yolu ("Esyalar/Komodin/Cekmece")
+    public string Yol;          // dairenin kökünden yolu ("Esyalar/Komodin/Cekmece"); eşyalar buraya konur
     public string Oda;          // bulunduğu oda ("Oda_A"); DairePlani'ndaki adlardan
+    public string KilitYolu;    // yer kilitlenirse kilidin takıldığı parça; boşsa Yol.
+                                // Buzdolabı: eşyalar gövdede ("Esyalar/Buzdolabi"), kilitlenen kapısı
+                                // ("Esyalar/Buzdolabi/Kapi"). Çekmecede ikisi aynıdır, boş bırakılır.
 }
 
 [System.Serializable]

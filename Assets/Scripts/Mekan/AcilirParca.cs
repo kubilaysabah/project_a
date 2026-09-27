@@ -51,6 +51,8 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
     {
         get
         {
+            Kilit kilit = GetComponent<Kilit>();
+            if (kilit != null && !kilit.Cozuk) return kilit.Ipucu;
             if (kilitli) return Dil.Getir("ipucu.kilitli");
             return acik ? Dil.Getir("ipucu.kapat") : Dil.Getir("ipucu.ac");
         }
@@ -60,6 +62,8 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
 
     public void Etkilesim(GameObject oyuncu)
     {
+        Kilit kilit = GetComponent<Kilit>();
+        if (kilit != null && !kilit.Cozuk && kilit.Etkilesim(oyuncu)) return;
         if (kilitli) { Cal(kilitliSesi, 0.5f); return; }
         hareketEden = StartCoroutine(Git(acik ? 0f : 1f));
     }

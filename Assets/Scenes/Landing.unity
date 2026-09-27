@@ -424634,6 +424634,19 @@ MonoBehaviour:
   testGostergesi: 1
   sonmeSuresi: 1.75
   karanlikSuresi: 1.4
+  katZincirleri:
+  - {fileID: 11400000, guid: 580da683d8304bc49865e5f0f4d8461f, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  odaAnahtariSablonu: {fileID: 3966700318423484389, guid: b811140eea68d1841a1bd4c9a4eba894, type: 3}
+  katAnahtariSablonu: {fileID: 3980516341085727291, guid: e5bf2807e9cf78045a9455871ed1a5d2, type: 3}
+  sigortaSablonu: {fileID: 310231408212479061, guid: c944289e3a50a7f4c80f1141cf53fc87, type: 3}
+  tornavidaSablonu: {fileID: 7631636315084247614, guid: 7817f5c67d453374a838eaaaa4990cb8, type: 3}
   kaplamalar:
   - {fileID: 2100000, guid: a521da2a68c84be4ba3758e749c7b0e8, type: 2}
   - {fileID: 2100000, guid: 8bb76ed6ae4ee27449d71ab340993a58, type: 2}

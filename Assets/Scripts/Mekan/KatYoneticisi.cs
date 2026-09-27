@@ -149,6 +149,14 @@ public class KatYoneticisi : MonoBehaviour
     // kapının arkasındaki karanlık hol (Daire_Ici) kalkar, gerçek daire görünür.
     private readonly GameObject[] daireler = new GameObject[MekanOlculeri.DaireSayisi + 1];
 
+    // ---- KİLİT ZİNCİRİ (#54) ----
+    // Katların zincirleri: [kat - 1]. Boş olan katta daire kilitsizdir ve katın anahtarı
+    // sahanlıktaki eski yerindedir. #55 sekiz katı dolduracak; şimdilik 1. katta test zinciri.
+    [SerializeField] private KatZinciriVarligi[] katZincirleri;
+    // Eşya şablonları (prefab): zincir eşyaları bunlardan kopyalanır. ZincirKurucu bağlar.
+    [SerializeField] private GameObject odaAnahtariSablonu, katAnahtariSablonu, sigortaSablonu, tornavidaSablonu;
+    private ZincirUygulayici zincirUygulayici;
+
     // Her katın kaplama malzemeleri: [(kat - 1) * 4 + yüzey]. DokuKurucu üretir ve buraya bağlar.
     // Yüzey sırası KatKaplamalari.Yuzey ile aynı: oda duvarı, parke, ıslak zemin, ıslak duvar.
     [SerializeField] private Material[] kaplamalar;
@@ -237,6 +245,11 @@ public class KatYoneticisi : MonoBehaviour
         olayCaliciA = new KatOlayCalici(sahanlikA);
         KapilariBul();
         DaireleriBul();
+        zincirUygulayici = new ZincirUygulayici();
+        zincirUygulayici.SablonEkle(EsyaTuru.OdaAnahtari, odaAnahtariSablonu);
+        zincirUygulayici.SablonEkle(EsyaTuru.KatAnahtari, katAnahtariSablonu);
+        zincirUygulayici.SablonEkle(EsyaTuru.Sigorta, sigortaSablonu);
+        zincirUygulayici.SablonEkle(EsyaTuru.Tornavida, tornavidaSablonu);
         AyakkabilariBul(sahanlikA, out aRaflar, out aDaginik);
         AyakkabilariBul(sahanlikB, out bRaflar, out bDaginik);
         aKatSesleri = KatSesleriniBul(sahanlikA);
@@ -697,8 +710,9 @@ public class KatYoneticisi : MonoBehaviour
         if (kapiA != null) kapiA.Ayarla(aKat, KapiAcikMi(aKat));
         if (kapiB != null && !cati) kapiB.Ayarla(bKat, KapiAcikMi(bKat));
         // Anahtar: kapısı henüz açılmamış ve anahtarı cepte olmayan katlarda görünür.
-        if (anahtarA != null) anahtarA.Ayarla(aKat, !KapiAcikMi(aKat) && !Cep.Tasiyor(EsyaTuru.KatAnahtari, aKat));
-        if (anahtarB != null) anahtarB.Ayarla(bKat, !cati && !KapiAcikMi(bKat) && !Cep.Tasiyor(EsyaTuru.KatAnahtari, bKat));
+        // Zinciri olan katta katın anahtarı dairenin içindedir (zincirin sonunda); sahanlıktaki gizlenir.
+        if (anahtarA != null) anahtarA.Ayarla(aKat, ZincirBul(aKat) == null && !KapiAcikMi(aKat) && !Cep.Tasiyor(EsyaTuru.KatAnahtari, aKat));
+        if (anahtarB != null) anahtarB.Ayarla(bKat, !cati && ZincirBul(bKat) == null && !KapiAcikMi(bKat) && !Cep.Tasiyor(EsyaTuru.KatAnahtari, bKat));
     }
 
     private void KapiAcildi(int kat)
@@ -744,11 +758,21 @@ public class KatYoneticisi : MonoBehaviour
                     foreach (AcilirParca p in daireler[n].GetComponentsInChildren<AcilirParca>(true))
                         p.Ayarla(false);
                     KaplamayiGiydir(n, aKat);
+                    // O katın kilit zinciri (yoksa daire kilitsiz).
+                    if (zincirUygulayici != null) zincirUygulayici.Uygula(daireler[n].transform, ZincirBul(aKat), aKat);
                 }
             }
             SahanlikKapisiniAyarla(sahanlikA, n, acik, gercekDaire: true);
             SahanlikKapisiniAyarla(sahanlikB, n, n == bAcik, gercekDaire: false);
         }
+    }
+
+    /// <summary>Bu katın kilit zinciri; tanımlı değilse null.</summary>
+    private KilitZinciri ZincirBul(int kat)
+    {
+        if (katZincirleri == null || kat < 1 || kat > katZincirleri.Length) return null;
+        KatZinciriVarligi v = katZincirleri[kat - 1];
+        return v != null ? v.zincir : null;
     }
 
     // Editördeki malzeme adı -> yüzey numarası. DokuKurucu'nun dairelere verdiği adlar.

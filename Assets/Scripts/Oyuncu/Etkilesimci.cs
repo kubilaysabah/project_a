@@ -200,6 +200,28 @@ public class Etkilesimci : MonoBehaviour
 
         if (enYakin == null) return null;
 
+        // KABIN İÇİNDEKİ EŞYA (#54). Çekmecedeki anahtar, çekmecenin (ve komodinin) çarpışma
+        // kutusunun İÇİNDE durur; en yakın çarpışma hep kabın kendisi olur ve anahtar hiç
+        // seçilemezdi. Kural: bir eşyanın önündeki bütün çarpışmalar onu içinde taşıyan
+        // kaplarsa (eşya onların çocuğuysa) eşya seçilir. Arada kapalı bir kapak ya da kapı
+        // varsa (onlar eşyanın ebeveyni değil) seçilmez; araya duvar girerse de seçilmez.
+        Collider icteki = null;
+        float icMesafe = float.MaxValue;
+        foreach (RaycastHit h in carpmalar)
+        {
+            if (h.collider.transform.IsChildOf(transform)) continue;
+            Esya esya = h.collider.GetComponentInParent<Esya>();
+            if (esya == null || !esya.EtkilesimeAcik || h.distance >= icMesafe) continue;
+            bool onundekilerKap = true;
+            foreach (RaycastHit o in carpmalar)
+            {
+                if (o.collider.transform.IsChildOf(transform) || o.distance >= h.distance) continue;
+                if (!esya.transform.IsChildOf(o.collider.transform)) { onundekilerKap = false; break; }
+            }
+            if (onundekilerKap) { icteki = h.collider; icMesafe = h.distance; }
+        }
+        if (icteki != null) enYakin = icteki;
+
         // GetComponentInParent: nesne birkaç parçadan oluşuyorsa üst parçada arar.
         IEtkilesimli bulunan = enYakin.GetComponentInParent<IEtkilesimli>();
 

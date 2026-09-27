@@ -49,6 +49,10 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
     {
         get
         {
+            // Zincirin kilidi varsa ve çözülmemişse ipucunu o belirler (#54): doğru anahtar
+            // eldeyse "AÇ", değilse "KİLİTLİ".
+            Kilit kilit = GetComponent<Kilit>();
+            if (kilit != null && !kilit.Cozuk) return kilit.Ipucu;
             if (kilitli) return Dil.Getir("ipucu.kilitli");
             return acik ? Dil.Getir("ipucu.kapat") : Dil.Getir("ipucu.ac");
         }
@@ -59,6 +63,9 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
 
     public void Etkilesim(GameObject oyuncu)
     {
+        // Önce kilit: doğru anahtar eldeyse kilit çözülür ve kapıyı kendisi açar.
+        Kilit kilit = GetComponent<Kilit>();
+        if (kilit != null && !kilit.Cozuk && kilit.Etkilesim(oyuncu)) return;
         if (kilitli)
         {
             // Kol iner ama dil kilitte: kapı sarsılır, açılmaz. Cevap kapının kendisi.
