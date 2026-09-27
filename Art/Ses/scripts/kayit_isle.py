@@ -195,15 +195,6 @@ def kapi_tiklatma():
 # ---------- GERİLİM MÜZİĞİ (#36) ----------
 # Kayıt: Joth, "Ambience Pack 1 -- Sci Fi Horror" (OpenGameArt, CC0): her biri yaklaşık bir
 # dakikalık, döngüye uygun 5 karanlık ambiyans parçası. Şahan'ın seçimi: beşi sırayla.
-# Parçalar arka arkaya, 3 sn'lik yumuşak geçişle tek bir döngüye birleştiriliyor; son
-# parça da ilkine aynı biçimde bağlanıyor. Toplam ~4,5 dk: tekrar fark edilmez.
-# Parçaların gürlükleri çok farklı (-20 ile -40 dB arası); her biri aynı tipik gürlüğe
-# getiriliyor, yoksa müzik bir parçada kaybolur, ötekinde bağırırdı.
-# Müzik 2B (kafanın içinden) çaldığı için stereo kalıyor. Oyunda çok kısık çalar.
-MUZIK_PARCALARI = ["joth_The_Surreal_Truth.mp3", "joth_Infestation_in_the_Control_Room.mp3",
-                   "joth_Final_Captains_Log.mp3", "joth_The_Depths_of_Hell.mp3", "joth_Cage_of_the_Cryptid.mp3"]
-
-
 def dengele(sol, sag, hedef, hiz=HIZ):
     """
     Yavaş bir seviye dengeleyici: müziğin gürlüğünü birkaç saniyelik ortalamasına göre
@@ -223,31 +214,36 @@ def dengele(sol, sag, hedef, hiz=HIZ):
     return cikti_sol, cikti_sag
 
 
-def muzik():
-    gecis = int(3.0 * HIZ)
-    parcalar = []
-    for ad in MUZIK_PARCALARI:
-        sol, sag = oku(ad, HIZ, kanal=2)
-        # %95'lik dilim: parçanın gür kısımları eşitlenir. (%80 ile, çoğu sessiz ama gür
-        # başlayan Cage of the Cryptid aşırı açılıyor ve başı bağırıyordu.)
-        g = 0.1 / seviye([(a + b) / 2 for a, b in zip(sol, sag)], HIZ, 0.95)
-        parcalar.append(([x * g for x in sol], [x * g for x in sag]))
+def sessizligi_kirp(sol, sag, hiz, esik_db=-40.0):
+    """Baştaki ve sondaki sessizliği atar: tepenin 40 dB altındaki örnekler "sessiz" sayılır."""
+    tepe = max(max(abs(x) for x in sol), max(abs(x) for x in sag), 1e-9)
+    esik = tepe * 10 ** (esik_db / 20)
+    n = len(sol)
+    ilk = next(i for i in range(n) if abs(sol[i]) > esik or abs(sag[i]) > esik)
+    son = next(i for i in range(n - 1, -1, -1) if abs(sol[i]) > esik or abs(sag[i]) > esik)
+    return sol[ilk:son + 1], sag[ilk:son + 1]
 
-    # Zincir: her parçanın son 3 saniyesi bir sonrakinin ilk 3 saniyesiyle karışır.
-    sol, sag = list(parcalar[0][0]), list(parcalar[0][1])
-    for ps, pg in parcalar[1:]:
-        for i in range(gecis):
-            a = i / gecis
-            sol[len(sol) - gecis + i] = sol[len(sol) - gecis + i] * (1 - a) + ps[i] * a
-            sag[len(sag) - gecis + i] = sag[len(sag) - gecis + i] * (1 - a) + pg[i] * a
-        sol += ps[gecis:]
-        sag += pg[gecis:]
-    # Döngü: son 3 saniye, başın üstüne karışır ve sondan kesilir.
+
+# Arka plan müziği (#74, Şahan'ın ikinci tur seçimi): Scott Elliott, "Death is Looming"
+# (OpenGameArt, CC-BY 4.0; jenerikte isim yazılı). Bestecisine göre "yoğun korku ambiyansı".
+# İlk hâli Joth'un beş sakin parçasıydı; Şahan "90'ların korku temasına uygun, arkada tam
+# gerilim ve korku katacak bir müzik" istedi. Döngü için işlem:
+#   1. baştaki ve sondaki sessizlik kırpılır,
+#   2. gürlük eski müzikle aynı düzeye getirilir (%95'lik dilim 0,1),
+#   3. son 4 saniye başın üstüne karışır ve sondan kesilir: döngü dikişsiz,
+#   4. yavaş dengeleyici gür yerleri biraz kısar (oyunun arkasında aniden bağırmasın).
+def muzik():
+    sol, sag = oku("scottelliott_death_is_looming.mp3", HIZ, kanal=2)
+    sol, sag = sessizligi_kirp(sol, sag, HIZ)
+    g = 0.1 / seviye([(a + b) / 2 for a, b in zip(sol, sag)], HIZ, 0.95)
+    sol, sag = [x * g for x in sol], [x * g for x in sag]
+    gecis = int(4.0 * HIZ)
+    n = len(sol)
     for i in range(gecis):
         a = i / gecis
-        sol[i] = sol[len(sol) - gecis + i] * (1 - a) + sol[i] * a
-        sag[i] = sag[len(sag) - gecis + i] * (1 - a) + sag[i] * a
-    sol, sag = sol[:-gecis], sag[:-gecis]
+        sol[i] = sol[n - gecis + i] * (1 - a) + sol[i] * a
+        sag[i] = sag[n - gecis + i] * (1 - a) + sag[i] * a
+    sol, sag = sol[:n - gecis], sag[:n - gecis]
     sol, sag = dengele(sol, sag, hedef=0.02)
     stereo_kaydet(os.path.join(KOK, "Assets", "Audio", "Muzik", "Muzik_Gerilim.wav"), sol, sag, HIZ, 0.8)
 
@@ -310,18 +306,17 @@ def dis_kopek():
 def radyo():
     import math, random
     random.seed(62)                                  # her çalıştırmada aynı ses (onaylanınca değişmesin)
-    sure = 24.0
-    n = int(sure * HIZ)
 
-    # 1. Yayın: müziğin ortasından 24 sn; küçük hoparlör süzgeci (iki kez, dik kenarlı).
-    sol, sag = oku("joth_The_Surreal_Truth.mp3", HIZ, kanal=2)
-    mono = [(a + b) / 2 for a, b in zip(sol, sag)]
-    bas = max(0, (len(mono) - n) // 2)              # parça kısa olabilir: ortadan kes
-    yayin = mono[bas:bas + n]
-    yayin += [0.0] * (n - len(yayin))               # parça 24 sn'den kısaysa sonu sessiz
+    # 1. Yayın (#74, Şahan'ın seçimi): Carlos Gardel, "Mi noche triste" (1917 tango, Wikimedia
+    # Commons, kamu malı; kayıt da beste de). İlk hâli parazitli bir müzik parçasıydı; Şahan
+    # "90'lar haber radyosu, haber ve slow bir şarkı" istedi, ikinci turda yalnızca tangoyu seçti.
+    # Şarkının tamamı çalar (~3 dk). Küçük hoparlör süzgeci: 350-2800 Hz, iki kez, dik kenarlı.
+    yayin = oku("CarlosGardel-MiNocheTriste(1917).ogg", HIZ)
     for _ in range(2):
         yayin = ortak.alcak(ortak.yuksek(yayin, 350, HIZ), 2800, HIZ)
     yayin = ortak.tepeyi_esitle(yayin)
+    n = len(yayin)
+    sure = n / HIZ
 
     # 2. Parazit: bant geçiren gürültü (radyonun "şşşş"si) ve seyrek çıtırtılar.
     parazit = ortak.bant(ortak.gurultu(n), 1800, HIZ, 0.6)
@@ -331,26 +326,28 @@ def radyo():
         ortak.ekle(parazit, cit, random.randrange(n), random.uniform(0.3, 1.0))
 
     # 3. Sinyal gücü: yayın ile parazit birbirinin tersine kabarıp söner (istasyon kayıyor).
-    # İki yavaş sinüsün toplamı; periyotları döngü süresine tam bölünür, yani baş ve son aynı
-    # değerde buluşur: döngüde sıçrama olmaz.
+    # İki yavaş sinüs; periyotları kaydın süresine tam bölünür (13 ve 19 tur), baş ve son aynı
+    # değerde buluşur. Başta ve sonda sinyal en zayıf (parazit en güçlü): şarkının başa
+    # dönüşü parazitin içinde kaybolur.
     sonuc = []
     for i in range(n):
-        t = i / HIZ
-        g = 0.5 + 0.3 * math.sin(2 * math.pi * t / 12.0) + 0.2 * math.sin(2 * math.pi * t / 8.0 + 1.0)
-        g = min(1.0, max(0.0, g))                    # 0: yalnız parazit, 1: temiz yayın
-        sonuc.append(yayin[i] * g * 0.9 + parazit[i] * (0.15 + 0.55 * (1 - g)))
+        t = i / n
+        g = 0.62 + 0.23 * math.cos(2 * math.pi * 13 * t) + 0.15 * math.cos(2 * math.pi * 19 * t)
+        g = 1.0 - g                                  # t = 0'da g en küçük: sinyal zayıf
+        g = min(1.0, max(0.0, 0.25 + 1.1 * g))       # 0: yalnız parazit, 1: temiz yayın
+        sonuc.append(yayin[i] * g * 0.9 + parazit[i] * (0.12 + 0.5 * (1 - g)))
 
-    # 4. Dikiş: son 1 saniye başın üstüne karışır (müzik parçası döngüye göre kesildiği için).
-    gecis = int(1.0 * HIZ)
+    # 4. Dikiş: son 1,5 saniye başın üstüne karışır.
+    gecis = int(1.5 * HIZ)
     for i in range(gecis):
         a = i / gecis
         sonuc[i] = sonuc[n - gecis + i] * (1 - a) + sonuc[i] * a
     sonuc = sonuc[:n - gecis]
     ortak.kaydet(os.path.join(KOK, "Assets", "Audio", "Daire", "Radyo_Istasyon.wav"), sonuc, HIZ, 0.8)
 
-    # Düğme: kısa bir plastik tık (gürültü darbesi + iki tiz mod), yankısız (odanın içinde, yakın).
-    tik = ortak.modlar(ortak.darbe(int(0.12 * HIZ), HIZ, 0.003), HIZ, [(2400, 8, 1.0), (4100, 10, 0.6), (900, 3, 0.4)])
-    ortak.kaydet(os.path.join(KOK, "Assets", "Resources", "Sesler", "Radyo_Dugme.wav"), ortak.yumusak_sinirla(tik, 2.0), HIZ, 0.8)
+    # Radyo_Dugme.wav (düğmenin tıkı) eskiden burada üretiliyordu. Şahan onu onayladı (S37 kalsın);
+    # rastgele sayı dizisini bu fonksiyondaki parazitle paylaştığı için tango gelince değişiyordu.
+    # Artık üretilmiyor: onaylı dosya olduğu gibi kalır (#74).
 
 
 

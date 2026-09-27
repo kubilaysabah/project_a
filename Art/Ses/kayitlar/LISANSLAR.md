@@ -32,10 +32,12 @@ zorunluluğu getirmez; yine de kaynakları burada kayıtlı.
 | `708579__group39__sfx-int.wav` | S36 şifre çarkı (#74) | https://freesound.org/s/708579/ | Group39 | CC0 1.0 |
 | `18768__cognito-perceptu__elevator-bell-doors.wav` | S40z asansör zili (#74) | https://freesound.org/people/cognito%20perceptu/sounds/18768/ | cognito perceptu | CC0 1.0 |
 | `479992__craigsmith__r09-13-apartment-buzzer.wav` | S45 daire zili (#74) | https://freesound.org/s/479992/ | craigsmith | CC0 1.0 |
+| `scottelliott_death_is_looming.mp3` | S01 arka plan müziği (#74, eski Joth parçalarının yerine) | https://opengameart.org/content/death-is-looming | Scott Elliott | **CC BY 4.0: jenerikte isim yazılı** |
+| `CarlosGardel-MiNocheTriste(1917).ogg` | S11 Nuri'nin radyosu (#74), tango | https://commons.wikimedia.org/wiki/File:CarlosGardel-MiNocheTriste(1917).ogg | Carlos Gardel (1917 kaydı) | Kamu malı (kayıt: PD-US-record-expired, PD-AR-Music; söz ve beste: yazarları 1932'de öldü) |
 
 **Notlar**
 - **#74 (2026-09-27):** Freesound dosyalarını Şahan kendi hesabıyla indirdi; Pixabay dosyaları herkese açık
-  dosya sunucusundan indirildi (Şahan'ın izniyle). Dış rüzgâr kaydı (BigSoundBank #0147) artık kullanılmıyor.
+  dosya sunucusundan indirildi (Şahan'ın izniyle). Dış rüzgâr kaydı (BigSoundBank #0147) ve Joth'un beş parçası (eski müzik ve radyo) artık kullanılmıyor; dosyalar geçmiş için duruyor.
 - **Pixabay Content License:** ticari kullanım serbest, isim belirtmek gerekmez. Yasak olan,
   dosyayı tek başına, değiştirilmemiş hâliyle yeniden dağıtmak; oyunun içinde işlenmiş
   olarak kullanmak serbesttir.
