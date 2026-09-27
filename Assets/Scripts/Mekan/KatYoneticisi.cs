@@ -41,6 +41,22 @@ public class KatYoneticisi : MonoBehaviour
     /// <summary>Eski kural (dönüp dolaşma oyunu) açık mı? Çatı kapısı (#68) buna bakar.</summary>
     public bool EskiKural { get { return eskiKural; } }
 
+    /// <summary>Oyuncunun bulunduğu kat (sayaç henüz kurulmadıysa 0).</summary>
+    public int MevcutKat { get { return sayac != null ? sayac.MevcutKat : 0; } }
+
+    /// <summary>
+    /// Gezen Gölge'nin (#71) saati işlesin mi? Oyuncu bir katta, o katın kapısını açıp çıkamadığı
+    /// sürece evet. Açılışta (zemin kat), bulunulan katın kapısı açıldıktan sonra ve çatı kapısı
+    /// açılınca (final) hayır.
+    /// </summary>
+    public bool GolgeSayabilir
+    {
+        get { return sayac != null && !acilisModu && !catiAcildi && !acilanKatlar.Contains(sayac.MevcutKat); }
+    }
+
+    // Çatı kapısı açıldı mı (final başladı)?
+    private bool catiAcildi;
+
     // 8. katta oyuncu çatı odasına çıktı mı (#68)? Yeni ilerlemede çatı odasına çıkmak bir
     // karar değildir: kapı kilitlidir, oyuncu geri inip dairedeki işi bitirebilir.
     private bool catiOdasinda;
@@ -982,6 +998,7 @@ public class KatYoneticisi : MonoBehaviour
         }
 
         kapi.gameObject.SetActive(false);
+        catiAcildi = true;   // final: Gezen Gölge artık çıkmaz (#71)
 
         // Kapı açılınca sabahın sesi içeri dolar (#25): uzak şehir, kuşlar, rüzgâr.
         // Ses kaynağı çatı bölümünde kapalı bekliyor; açmak çalmak demek.

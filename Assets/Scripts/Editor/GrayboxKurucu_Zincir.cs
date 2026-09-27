@@ -113,6 +113,15 @@ public static partial class GrayboxKurucu
         katlar.GetArrayElementAtIndex(7).objectReferenceValue = kat8;
         seri.ApplyModifiedPropertiesWithoutUndo();
 
+        // Gezen Gölge (#71): bütün katlarda 1-2 dakikada bir beliren Gölge, kat yöneticisinin
+        // nesnesinde. 7. kattaki kaçışla aynı şablon ve aynı uğultu.
+        GezenGolge gezen = yonetici.GetComponent<GezenGolge>();
+        if (gezen == null) gezen = yonetici.gameObject.AddComponent<GezenGolge>();
+        var gSeri = new SerializedObject(gezen);
+        gSeri.FindProperty("sablon").objectReferenceValue = golge;
+        gSeri.FindProperty("ugultu").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ugultu.wav");
+        gSeri.ApplyModifiedPropertiesWithoutUndo();
+
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
         Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-8. katlar kuruldu ve bağlandı.");
