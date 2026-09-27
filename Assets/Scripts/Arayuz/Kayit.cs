@@ -45,6 +45,41 @@ public static class Kayit
 
     public static bool FotografBulunduMu(string kimlik) { return Fotograflar.Iceriyor(0, kimlik); }
 
+    // ---------- OKUNAN NOTLAR (#56) ----------
+    // Oyuncunun okuduğu notlar (metin anahtarıyla) ve telefon konuşmaları. Kapıcı odasının panosu
+    // onları listeler; kat sıfırlansa da kalır (fotoğraflar gibi). Biçim yine "0:anahtar".
+    private static string NotAnahtari { get { return KayitYuvasi.Anahtar("kayit_notlar"); } }
+    private static KilitKaydi notlar;
+    private static KilitKaydi Notlar
+    {
+        get
+        {
+            if (notlar == null) notlar = KilitKaydi.Oku(PlayerPrefs.GetString(NotAnahtari, ""));
+            return notlar;
+        }
+    }
+
+    public static void NotOkundu(string anahtar)
+    {
+        if (string.IsNullOrEmpty(anahtar) || !Notlar.Ekle(0, anahtar)) return;
+        PlayerPrefs.SetString(NotAnahtari, Notlar.Metin());
+        PlayerPrefs.Save();
+    }
+
+    public static bool NotOkunduMu(string anahtar) { return Notlar.Iceriyor(0, anahtar); }
+
+    /// <summary>Okunan notların anahtarları (sıralı).</summary>
+    public static System.Collections.Generic.List<string> OkunanNotlar()
+    {
+        var liste = new System.Collections.Generic.List<string>();
+        foreach (string parca in Notlar.Metin().Split(';'))
+        {
+            int iki = parca.IndexOf(':');
+            if (iki > 0) liste.Add(parca.Substring(iki + 1));
+        }
+        return liste;
+    }
+
     // Kilit kaydı ilk sorulduğunda PlayerPrefs'ten bir kez okunur, sonra bellekte tutulur.
     private static KilitKaydi kilitler;
     private static KilitKaydi Kilitler

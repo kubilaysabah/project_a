@@ -247,6 +247,15 @@ public class KatYoneticisi : MonoBehaviour
         bKatSesleri = KatSesleriniBul(sahanlikB);
 
         toplayici = FindAnyObjectByType<CopToplayici>();
+
+        // Telefon zili (#56) her zaman açık bir nesnede durmalı: telefon zemin katta, zemin ise oyuncu
+        // yukarıdayken kapalı. Zil kat yöneticisinin çocuğu olarak kendini kurar.
+        if (GetComponentInChildren<TelefonZili>() == null)
+        {
+            var zil = new GameObject("Telefon_Zili");
+            zil.transform.SetParent(transform, false);
+            zil.AddComponent<TelefonZili>();
+        }
     }
 
     // Sahnenin kök nesneleri arasında isimle arar. GameObject.Find'dan farkı,
@@ -350,6 +359,7 @@ public class KatYoneticisi : MonoBehaviour
         SahanliklariGuncelle(zorla: true);
 
         if (acilisIleBasla && zeminKat != null && !kayittanDevam) AcilisiBaslat();
+        else ZeminiAyarla();   // #56: kayıttan devamda zemin kapalı, 1. katta açık
     }
 
     // ---------- AÇILIŞ (#16) ----------
@@ -380,10 +390,29 @@ public class KatYoneticisi : MonoBehaviour
     private void AcilisiBitir()
     {
         acilisModu = false;
-        zeminKat.SetActive(false);
-        if (sahteAlt1 != null) sahteAlt1.SetActive(true);
-        merdiven.AsagiDonguyuAyarla(true);
-        Debug.Log("[KAT] Açılış bitti: 1. kata varıldı, döngü başladı.");
+        ZeminiAyarla();   // 1. kattayken zemin kat açık kalır: oyuncu kapıcı odasına geri inebilir (#56)
+        Debug.Log("[KAT] Açılış bitti: 1. kata varıldı.");
+    }
+
+    // ---------- GERÇEK ALT KATLAR VE ZEMİN (#56) ----------
+    // Oyuncunun o an bulunduğu kat: ulaştığı kattan aşağı indiği kat sayısı kadar aşağısı. 0 = zemin.
+    // Aşağı inmek ilerlemeyi değiştirmez (kat kapısı hâlâ ulaşılan katta); ama oyuncu çözdüğü
+    // katları bıraktığı gibi görür ve 1. katın altından inince kapıcı odasına varır.
+    private int TabanKat { get { return Mathf.Max(0, sayac.MevcutKat - asagiInilen); } }
+
+    /// <summary>Oyuncunun o an bulunduğu kat (0 = zemin); telefon zili buna göre duyulur (#56).</summary>
+    public int BulunulanKat { get { return TabanKat; } }
+
+    // Zemin kat, oyuncu 1. kattayken ya da zemindeyken açık: 1. katın altındaki sahte katın yerini
+    // alır (açılıştaki gibi) ve aşağı ışınlama kapanır; merdivenden inen oyuncu gerçekten zemine varır.
+    // Daha yukarıda zemin kapalı, sahte kat ve aşağı ışınlama geri gelir (döngü çalışır).
+    private void ZeminiAyarla()
+    {
+        if (zeminKat == null || merdiven == null) return;
+        bool zemin = acilisModu || (!catiAcildi && TabanKat <= 1);
+        if (zeminKat.activeSelf != zemin) zeminKat.SetActive(zemin);
+        if (sahteAlt1 != null && sahteAlt1.activeSelf == zemin) sahteAlt1.SetActive(!zemin);
+        merdiven.AsagiDonguyuAyarla(!zemin);
     }
 
     // ---------- SANAL KOT ----------
@@ -468,8 +497,21 @@ public class KatYoneticisi : MonoBehaviour
     {
         // Çatı odasından 8. kata geri inmek (#68): yalnızca bayrak iner, kat 8 kalır.
         if (yon == Karar.Geri && catiOdasinda) { catiOdasinda = false; Debug.Log("[KAT] Çatı odasından 8. kata inildi."); return; }
-        if (yon == Karar.Geri) { asagiInilen++; Debug.Log($"[KAT] Aşağı inildi ({asagiInilen}); kat {sayac.MevcutKat} kalıyor."); return; }
-        if (asagiInilen > 0) { asagiInilen--; Debug.Log($"[KAT] Geri çıkıldı ({asagiInilen}); kat {sayac.MevcutKat}."); return; }
+        if (yon == Karar.Geri)
+        {
+            if (TabanKat == 0) return;   // zeminin altı yok
+            asagiInilen++;
+            Debug.Log($"[KAT] Aşağı inildi: şimdi {TabanKat}. kat{(TabanKat == 0 ? " (zemin)" : "")}; ulaşılan kat {sayac.MevcutKat}.");
+            ZeminiAyarla();
+            return;
+        }
+        if (asagiInilen > 0)
+        {
+            asagiInilen--;
+            Debug.Log($"[KAT] Geri çıkıldı: şimdi {TabanKat}. kat; ulaşılan kat {sayac.MevcutKat}.");
+            ZeminiAyarla();
+            return;
+        }
 
         // 8. kattan yukarı: çatı odasına çıkıldı. Kapı kendiliğinden AÇILMAZ; çatı anahtarı
         // gerekir (CatiKapisi -> CatiKapisiAnahtarlaAcildi).
@@ -477,6 +519,9 @@ public class KatYoneticisi : MonoBehaviour
 
         int eskiKat = sayac.MevcutKat;
         if (!sayac.Ilerle()) return;
+        ZeminiAyarla();   // 1. kattan 2. kata çıkınca zemin kapanır, aşağı döngü açılır (#56)
+        // Kapıcı odasının telefonu 2. ve 5. kata ilk varışta çalar (#56, Docs/hikaye.md §10).
+        if (sayac.MevcutKat == 2 || sayac.MevcutKat == 5) TelefonZili.Ornek?.Cal(sayac.MevcutKat);
 
         // Sahanlık burada yenilenmiyor; hemen ardından SahanliklariGuncelle ölçüm noktasının
         // değiştiğini görüp yeniliyor.
@@ -502,8 +547,10 @@ public class KatYoneticisi : MonoBehaviour
     // ekranda bir sahanlığın aniden değişmesine yol açmaz.
     private int GosterilecekKat(int karardanUzaklik)
     {
-        if (karardanUzaklik < 0 || asagiInilen > 0) return sayac.MevcutKat;
-        return karardanUzaklik == 0 ? sayac.MevcutKat : sayac.MevcutKat + 1;
+        // #56: her sahanlık oyuncunun bulunduğu kata göre gerçek katı gösterir. Zemindeyken ışınlama
+        // olmadığı için A sahanlığı oyuncunun ÜSTÜNDE kalır: 1. kattır.
+        if (TabanKat == 0) return 1 + Mathf.Max(0, karardanUzaklik);
+        return Mathf.Max(1, TabanKat + karardanUzaklik);
     }
 
     private void SahanliklariGuncelle(bool zorla)
@@ -1129,5 +1176,6 @@ public class KatYoneticisi : MonoBehaviour
         referansDongu = merdiven.NetDongu;
         catiOdasinda = false;   // başa alınan oyuncu çatı odasında değil (#68)
         asagiInilen = 0;        // ve kendi katının sahanlığında duruyor
+        ZeminiAyarla();
     }
 }

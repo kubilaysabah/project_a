@@ -33,6 +33,7 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
     {
         acik = true;
         acilisKaresi = Time.frameCount;
+        Kayit.NotOkundu(metinAnahtari);   // kapıcı odasının panosunda görünsün (#56)
 
         // Oyuncunun yürümesini, bakmasını ve başka şeylerle etkileşimini durdur.
         // "enabled = false" bir bileşeni kapatır: Update'i artık çağrılmaz.

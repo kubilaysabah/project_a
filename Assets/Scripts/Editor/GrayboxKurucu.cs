@@ -1359,6 +1359,39 @@ public static partial class GrayboxKurucu
             menuSeri.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        // TELEFON (#56): masada, radyonun yanında, yüzü odaya (-z). Çalınca açılır; konuşma not
+        // ekranında okunur. Ekran çarpıştırıcısız bir çocukta: nişan hep telefona gelir.
+        GameObject telefon = Model("Telefon", o, "Telefon", "Telefon", new Vector3(disOda + 1.42f, 0.74f, zOn - 0.35f), 180f, carpisma: true);
+        if (telefon != null)
+        {
+            GameObject ahize = Model("Ahize", telefon.transform, "Telefon", "Ahize", Vector3.zero, 0f, carpisma: false);
+            GameObject konusma = new GameObject("Konusma");
+            konusma.transform.SetParent(telefon.transform, false);
+            YoneticiNotu ekran = konusma.AddComponent<YoneticiNotu>();
+            Telefon tel = telefon.AddComponent<Telefon>();
+            var telSeri = new SerializedObject(tel);
+            telSeri.FindProperty("konusmaEkrani").objectReferenceValue = ekran;
+            telSeri.FindProperty("ahize").objectReferenceValue = ahize != null ? ahize.transform : null;
+            telSeri.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // PANO (#56): yatağın üstündeki duvarda (z = zArka, yüzü odaya +z) mantar pano. Okunan notlar
+        // üstüne kâğıt olarak iğnelenir (Pano). Görsel kutular kökün çocuğu; kökte Pano ve çarpıştırıcı.
+        GameObject pano = new GameObject("Pano");
+        pano.transform.SetParent(o, false);
+        pano.transform.localPosition = new Vector3(disOda + 1.3f, 1.45f, zArka);
+        Material mantar = MalzemeBul("Assets/Materials/Pano_Mantar.mat", new Color(0.45f, 0.30f, 0.16f));
+        Kutu("Mantar", pano.transform, new Vector3(0f, 0f, 0f), new Vector3(1.0f, 0.72f, 0.02f)).GetComponent<MeshRenderer>().sharedMaterial = mantar;
+        foreach (var cita in new[] { (0f, 0.375f, 1.06f, 0.03f), (0f, -0.375f, 1.06f, 0.03f), (-0.515f, 0f, 0.03f, 0.72f), (0.515f, 0f, 0.03f, 0.72f) })
+            Kutu("Cita", pano.transform, new Vector3(cita.Item1, cita.Item2, 0.004f), new Vector3(cita.Item3, cita.Item4, 0.03f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
+        foreach (Collider c in pano.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(c);
+        BoxCollider panoCarpisma = pano.AddComponent<BoxCollider>();
+        panoCarpisma.size = new Vector3(1.06f, 0.78f, 0.04f);
+        Pano panoBileseni = pano.AddComponent<Pano>();
+        var panoSeri = new SerializedObject(panoBileseni);
+        panoSeri.FindProperty("kagitMalzemesi").objectReferenceValue = kagit;
+        panoSeri.ApplyModifiedPropertiesWithoutUndo();
+
         // Oda lambası: loş, sıcak, gölgesiz tek bir ampul.
         GameObject lamba = new GameObject("Oda_Lambasi");
         lamba.transform.SetParent(o, false);

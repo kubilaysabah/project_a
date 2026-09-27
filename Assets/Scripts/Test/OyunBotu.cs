@@ -43,6 +43,61 @@ public class OyunBotu : MonoBehaviour
         return Ornek;
     }
 
+    // İNİŞ KİPİ (#56): oyunu oynamaz; yalnızca merdivenden "katSayisi" kat yürüyerek iner (gerçek alt
+    // katlar ve zemin kat sınaması). Zemine varırsa kapıcı odasına girer. Her katta bulunulan katı yazar.
+    private int inisKatSayisi = -1;
+
+    public static OyunBotu Inis(int katSayisi)
+    {
+        OyunBotu b = Baslat();
+        b.inisKatSayisi = katSayisi;
+        return b;
+    }
+
+    // Bir kat aşağı: varış kolundan (x = -1,1) ara sahanlığa iner, dönüp alt katın çıkış kolundan
+    // (x = +1,1) aşağıdaki sahanlığa varır. Yukarı çıkışın (Merdivenden) tam tersi.
+    private IEnumerator BirKatIn()
+    {
+        float kol = MekanOlculeri.KolUzunluk;
+        yield return Yuru(new[] { new Vector3(MekanOlculeri.VarisKoluX, 0, -0.4f),
+                                  new Vector3(MekanOlculeri.VarisKoluX, 0, kol + 0.4f),
+                                  new Vector3(0f, 0, kol + 0.75f),
+                                  new Vector3(MekanOlculeri.CikisKoluX, 0, kol + 0.5f),
+                                  new Vector3(MekanOlculeri.CikisKoluX, 0, -0.3f),
+                                  new Vector3(MekanOlculeri.CikisKoluX - 0.6f, 0, -0.9f) }, "iniş");   // sahanlığın içine: son basamak da inilsin
+        yield return new WaitForSeconds(0.6f);
+    }
+
+    private IEnumerator InisKipi()
+    {
+        Yaz($"iniş kipi: {inisKatSayisi} kat inecek; şimdi {yonetici.BulunulanKat}. kat");
+        for (int i = 0; i < inisKatSayisi; i++)
+        {
+            int once = yonetici.BulunulanKat;
+            yield return BirKatIn();
+            Yaz($"iniş: {once}. kattan inildi, şimdi {yonetici.BulunulanKat}. kat (y {kontrol.transform.position.y:0.00})");
+            if (yonetici.BulunulanKat != once - 1) Sorun($"{once}. kattan inince bulunulan kat {yonetici.BulunulanKat} (beklenen {once - 1})");
+        }
+        if (yonetici.BulunulanKat == 0)
+        {
+            yield return Yuru(new[] { new Vector3(1.1f, 0, -0.3f), new Vector3(-3.4f, 0, -1.45f) }, "sahanlık -> kapıcı odası");
+            Yaz($"kapıcı odasında (x {kontrol.transform.position.x:0.00}, y {kontrol.transform.position.y:0.00})");
+        }
+        // Geri çık: indiği kadar kat yürüyerek yukarı (alt katların kapıları açık olmalı).
+        if (yonetici.BulunulanKat == 0)
+            yield return Yuru(new[] { new Vector3(-3.4f, 0, -1.45f), new Vector3(1.1f, 0, -0.3f) }, "kapıcı odası -> sahanlık");
+        for (int i = 0; i < inisKatSayisi; i++)
+        {
+            int once = yonetici.BulunulanKat;
+            yield return Merdivenden(null);
+            yield return new WaitForSeconds(0.6f);
+            Yaz($"çıkış: {once}. kattan çıkıldı, şimdi {yonetici.BulunulanKat}. kat");
+            if (yonetici.BulunulanKat != once + 1) Sorun($"{once}. kattan çıkınca bulunulan kat {yonetici.BulunulanKat} (beklenen {once + 1})");
+        }
+        Bitti = true;
+        Yaz($"İNİŞ BİTTİ. {Sorunlar.Count} sorun.");
+    }
+
     private void Sorun(string s) { Sorunlar.Add(s); Debug.LogWarning("[BOT] SORUN: " + s); }
     private void Yaz(string s) { Durum = s; Debug.Log("[BOT] " + s); }
 
@@ -52,6 +107,7 @@ public class OyunBotu : MonoBehaviour
         govde = kontrol.GetComponent<CharacterController>();
         yonetici = FindAnyObjectByType<KatYoneticisi>();
         yield return new WaitForSeconds(1f);
+        if (inisKatSayisi >= 0) { yield return InisKipi(); yield break; }
 
         // Açılış: kapıcı odasındaysa (zemin kat, y < -1) merdivenden 1. kata yürü.
         if (kontrol.transform.position.y < -1f)
