@@ -26,6 +26,8 @@ public class ZincirUygulayici
 
     /// <summary>Şifreli kilitlerin kapıya takılan asma kilidi (prefab).</summary>
     public GameObject AsmaKilitSablonu;
+    /// <summary>Dairelere konan okunabilir not kâğıdı (prefab, YoneticiNotu bileşenli).</summary>
+    public GameObject NotSablonu;
     /// <summary>Kırma kilidinde kırılan camın yere saçılan parçaları (prefab).</summary>
     public GameObject CamKirikSablonu;
     /// <summary>Tornavida kilitli kapılara takılan menteşe plakası (iki vidalı prefab).</summary>
@@ -146,6 +148,57 @@ public class ZincirUygulayici
 
         // 4. Kayıt (#54): bu katta daha önce çözülmüş kilitler çözük başlar.
         KayittanYukle(daire, zincir, kat);
+    }
+
+    /// <summary>
+    /// Katın notlarını ve dekorunu (koliler...) daireye koyar (#55). Uygula'dan SONRA çağrılır;
+    /// konanlar bir sonraki katta Uygula'nın temizliğiyle kalkar.
+    /// </summary>
+    public void DekorUygula(Transform daire, KatZinciriVarligi varlik)
+    {
+        if (varlik == null) return;
+        DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
+        foreach (KatNotu n in varlik.notlar)
+        {
+            GameObject g = Yerlestir(daire, eksen, NotSablonu, n, "Not_" + n.Metin);
+            YoneticiNotu not = g != null ? g.GetComponent<YoneticiNotu>() : null;
+            if (not != null) not.Ayarla(n.Metin);
+        }
+        foreach (KatSusu s in varlik.suslar)
+            Yerlestir(daire, eksen, s.Sablon, s, "Sus_" + (s.Sablon != null ? s.Sablon.name : "?"));
+    }
+
+    // Bir şablonu yerleşim bilgisine göre koyar (bkz. KatYerlesimi: çapaya göre ya da plana göre).
+    private GameObject Yerlestir(Transform daire, DaireEksenleri eksen, GameObject sablon, KatYerlesimi y, string ad)
+    {
+        if (sablon == null) { Debug.LogWarning($"[ZINCIR] '{ad}' için şablon yok."); return null; }
+        Transform ebeveyn;
+        Vector3 konum;
+        Quaternion donus;
+        if (!string.IsNullOrEmpty(y.Yol))
+        {
+            ebeveyn = YolBul(daire, y.Yol);
+            if (ebeveyn == null) { Debug.LogWarning($"[ZINCIR] '{ad}' çapası '{y.Yol}' bulunamadı."); return null; }
+            konum = new Vector3(y.X, y.Y, y.Z);
+            donus = Quaternion.Euler(0f, y.Donus, 0f);
+        }
+        else
+        {
+            if (eksen == null) { Debug.LogWarning("[ZINCIR] Dairede DaireEksenleri yok; graybox yeniden kurulmalı."); return null; }
+            ebeveyn = daire;
+            konum = eksen.Nokta(y.X, y.Y, y.Z);
+            Vector3 on = eksen.Yon(y.OnU, y.OnV);
+            // Modellerin ön yüzü +Z'dir; LookRotation onu plandaki yöne çevirir.
+            donus = on.sqrMagnitude > 0.001f ? Quaternion.LookRotation(on, Vector3.up) : Quaternion.identity;
+        }
+        // Yatık: dik duran kâğıt masaya konunca ön yüzü yukarı baksın (x ekseninde -90°).
+        if (y.Yatik) donus = donus * Quaternion.Euler(-90f, 0f, 0f);
+        GameObject g = Object.Instantiate(sablon, ebeveyn, false);
+        g.name = ad;
+        g.transform.localPosition = konum;
+        g.transform.localRotation = donus;
+        konanlar.Add(g);
+        return g;
     }
 
     // Bu eşya, kayıtta çözülmüş görünen bir kilidi açmak için mi kullanıldı?

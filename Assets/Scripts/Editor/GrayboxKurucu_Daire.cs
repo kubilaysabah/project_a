@@ -90,6 +90,14 @@ public static partial class GrayboxKurucu
             DaireKur(daire.transform, DaireYonuBul(n));
             // Dairede elektrik var mı (#54): sigorta kilidi olan katta zincir kapatır.
             daire.AddComponent<DaireElektrigi>();
+            // Dairenin eksenleri (#55): kat dosyasındaki plan konumlarını bu daireye çevirir.
+            DaireYonu yonu = DaireYonuBul(n);
+            var eksen = new SerializedObject(daire.AddComponent<DaireEksenleri>());
+            eksen.FindProperty("yon").floatValue = yonu.yon;
+            eksen.FindProperty("sv").floatValue = yonu.sv;
+            eksen.FindProperty("kapiZ").floatValue = yonu.kapiZ;
+            eksen.FindProperty("disX").floatValue = SahanlikGen / 2f + DuvarKalin;
+            eksen.ApplyModifiedPropertiesWithoutUndo();
             // Kapalı kurulur: kayıtlı sahnede dört daire de gizli, kapılar kapalı.
             daire.SetActive(false);
         }

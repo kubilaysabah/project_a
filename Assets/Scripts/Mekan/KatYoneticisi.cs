@@ -155,7 +155,7 @@ public class KatYoneticisi : MonoBehaviour
     [SerializeField] private KatZinciriVarligi[] katZincirleri;
     // Eşya şablonları (prefab): zincir eşyaları bunlardan kopyalanır. ZincirKurucu bağlar.
     [SerializeField] private GameObject odaAnahtariSablonu, katAnahtariSablonu, sigortaSablonu, tornavidaSablonu;
-    [SerializeField] private GameObject asmaKilitSablonu, mentesePlakasiSablonu, camKirikSablonu;
+    [SerializeField] private GameObject asmaKilitSablonu, mentesePlakasiSablonu, camKirikSablonu, notSablonu;
     private ZincirUygulayici zincirUygulayici;
 
     // Her katın kaplama malzemeleri: [(kat - 1) * 4 + yüzey]. DokuKurucu üretir ve buraya bağlar.
@@ -254,6 +254,7 @@ public class KatYoneticisi : MonoBehaviour
         zincirUygulayici.AsmaKilitSablonu = asmaKilitSablonu;
         zincirUygulayici.MentesePlakasiSablonu = mentesePlakasiSablonu;
         zincirUygulayici.CamKirikSablonu = camKirikSablonu;
+        zincirUygulayici.NotSablonu = notSablonu;
         zincirUygulayici.YaziOrnegi = aNumaralar != null && aNumaralar.Length > 0 ? aNumaralar[0] : null;
         AyakkabilariBul(sahanlikA, out aRaflar, out aDaginik);
         AyakkabilariBul(sahanlikB, out bRaflar, out bDaginik);
@@ -767,7 +768,12 @@ public class KatYoneticisi : MonoBehaviour
                         p.Ayarla(false);
                     KaplamayiGiydir(n, aKat);
                     // O katın kilit zinciri (yoksa daire kilitsiz).
-                    if (zincirUygulayici != null) zincirUygulayici.Uygula(daireler[n].transform, ZincirBul(aKat), aKat);
+                    if (zincirUygulayici != null)
+                    {
+                        zincirUygulayici.Uygula(daireler[n].transform, ZincirBul(aKat), aKat);
+                        // Katın notları ve dekoru (koliler...), #55.
+                        zincirUygulayici.DekorUygula(daireler[n].transform, VarlikBul(aKat));
+                    }
                 }
             }
             SahanlikKapisiniAyarla(sahanlikA, n, acik, gercekDaire: true);
@@ -775,11 +781,17 @@ public class KatYoneticisi : MonoBehaviour
         }
     }
 
+    /// <summary>Bu katın içerik dosyası; tanımlı değilse null.</summary>
+    private KatZinciriVarligi VarlikBul(int kat)
+    {
+        if (katZincirleri == null || kat < 1 || kat > katZincirleri.Length) return null;
+        return katZincirleri[kat - 1];
+    }
+
     /// <summary>Bu katın kilit zinciri; tanımlı değilse null.</summary>
     private KilitZinciri ZincirBul(int kat)
     {
-        if (katZincirleri == null || kat < 1 || kat > katZincirleri.Length) return null;
-        KatZinciriVarligi v = katZincirleri[kat - 1];
+        KatZinciriVarligi v = VarlikBul(kat);
         return v != null ? v.zincir : null;
     }
 

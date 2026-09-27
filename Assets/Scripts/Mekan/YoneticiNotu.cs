@@ -16,7 +16,12 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
 {
     // Notun metni kodda değil, metin tablosunda (Assets/Resources/Metinler.txt)
     // bu anahtarın altında durur; Türkçesi de İngilizcesi de oradan gelir (#15).
-    private const string MetinAnahtari = "not.yonetici";
+    // #55: aynı bileşen dairelerdeki notlar için de kullanılıyor; metnin anahtarı kat dosyasından
+    // gelir (Ayarla). Kapıcı odasındaki yönetici notu varsayılan anahtarla kalır.
+    [SerializeField] private string metinAnahtari = "not.yonetici";
+
+    /// <summary>Notun metnini değiştirir (zincir uygulayıcısı daireye not koyarken).</summary>
+    public void Ayarla(string anahtar) { if (!string.IsNullOrEmpty(anahtar)) metinAnahtari = anahtar; }
 
     // ---------- SÖZLEŞME ----------
     public string Ipucu { get { return Dil.Getir("ipucu.oku"); } }
@@ -123,7 +128,7 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
             yaziStili.normal.textColor = new Color(0.12f, 0.10f, 0.08f);   // mürekkep
         }
 
-        GUI.Label(new Rect(kagit.x + 36, kagit.y + 30, kagit.width - 72, kagit.height - 80), Dil.Getir(MetinAnahtari), yaziStili);
+        GUI.Label(new Rect(kagit.x + 36, kagit.y + 30, kagit.width - 72, kagit.height - 80), Dil.Getir(metinAnahtari), yaziStili);
 
         var ipucu = new GUIStyle(GUI.skin.label) { fontSize = 14, alignment = TextAnchor.LowerRight };
         ipucu.normal.textColor = new Color(0.3f, 0.27f, 0.22f);
