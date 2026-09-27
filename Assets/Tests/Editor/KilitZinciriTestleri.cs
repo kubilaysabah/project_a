@@ -161,6 +161,29 @@ public class KilitZinciriTestleri
     }
 
     [Test]
+    public void Devrilecek_kapinin_altina_esya_konmaz()
+    {
+        // Banyo kapısı (v = 2,9 duvarında, u = 3,6 merkezli, 0,7 m genişlik, 2 m boy) menteşeden
+        // sökülünce banyonun içine devrilir. (3,3; 2,1) kapının altında kalır; (4,2; 1,0) kalmaz.
+        var z = new KilitZinciri();
+        z.Yerler.Add(Yer("ayakkabilik", KilitZinciri.SahanlikOdasi));
+        z.Yerler.Add(new ZincirYeri { Kimlik = "banyo_yer", Oda = "Banyo", PlandaNokta = true, U = 3.3f, V = 2.1f });
+        z.Esyalar.Add(Esya("tornavida", EsyaTuru.Tornavida, "ayakkabilik"));
+        z.Esyalar.Add(Esya("kat_anahtari", EsyaTuru.KatAnahtari, "banyo_yer"));
+        z.Kilitler.Add(OdaKilidi("banyo", KilitTuru.Tornavida, "Banyo", "tornavida"));
+        var s = z.Cozumle(Odalar());
+        Assert.IsFalse(s.Cozulebilir);
+        StringAssert.Contains("devrileceği", string.Join("; ", s.Hatalar));
+
+        z.YerBul("banyo_yer").U = 4.2f;
+        z.YerBul("banyo_yer").V = 1.0f;
+        s = z.Cozumle(Odalar());
+        Assert.IsTrue(s.Cozulebilir, string.Join("; ", s.Hatalar));
+        Assert.IsFalse(KilitZinciri.DevrilmeAlaninda("Banyo", 4.2f, 1.0f));
+        Assert.IsTrue(KilitZinciri.DevrilmeAlaninda("Banyo", 3.6f, 0.95f), "kapının tepesinin düştüğü yer de şeritte");
+    }
+
+    [Test]
     public void Kirma_yalniz_aletle_acilir()
     {
         var z = new KilitZinciri();

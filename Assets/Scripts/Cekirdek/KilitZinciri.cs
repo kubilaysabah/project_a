@@ -282,6 +282,21 @@ public class KilitZinciri
         foreach (ZincirEsyasi e in Esyalar) if (e.Tur == EsyaTuru.KatAnahtari) katAnahtari++;
         if (katAnahtari != 1) sonuc.Hatalar.Add($"zincirde tam bir kat anahtarı olmalı ({katAnahtari} var)");
 
+        // Menteşesi sökülen kapı odanın içine devrilir (MenteseSokucu). Odada, kapının düşeceği
+        // şeritte yerde duran eşya kapının altında kalır ve görünmez: 8. katta kiler anahtarı
+        // banyo kapısının altında kaldı, Şahan bulamadı (2026-09-27). Kural bunu yakalar.
+        foreach (ZincirKilidi k in Kilitler)
+        {
+            if (k.Tur != KilitTuru.Tornavida || !k.OdaKapisi) continue;
+            foreach (ZincirYeri y in Yerler)
+            {
+                if (!y.PlandaNokta || y.Oda != k.Hedef || !DevrilmeAlaninda(OdaAdi(k.Hedef), y.U, y.V)) continue;
+                foreach (ZincirEsyasi e in Esyalar)
+                    if (e.Yer == y.Kimlik)
+                        sonuc.Hatalar.Add($"'{e.Kimlik}' eşyası '{k.Hedef}' kapısının devrileceği yerde ({y.U}, {y.V}); kapının altında kalır");
+            }
+        }
+
         foreach (ZincirKilidi k in Kilitler)
             if (!KilitKaydi.KimlikGecerli(k.Kimlik)) sonuc.Hatalar.Add($"kilit kimliği '{k.Kimlik}' kayda uygun değil (boş ya da ; : içeriyor)");
 
@@ -350,6 +365,31 @@ public class KilitZinciri
                     break;
             }
         }
+    }
+
+    /// <summary>
+    /// Plandaki (u, v) noktası, bu odanın menteşesi sökülen kapısının devrileceği şeritte mi?
+    /// Şerit: kapı boşluğunun genişliği (iki yanda 10 cm pay) çarpı kapının boyu (10 cm pay),
+    /// kapının duvarından odanın içine doğru.
+    /// </summary>
+    public static bool DevrilmeAlaninda(string oda, float u, float v)
+    {
+        const float Pay = 0.10f;
+        foreach (DairePlani.Aciklik a in DairePlani.Acikliklar)
+        {
+            if (a.Tur != DairePlani.AciklikTuru.Kapi || a.Oda != oda) continue;
+            // Odanın ortası duvarın hangi yanında? Kapı o yana devrilir.
+            float ortaU = 0f, ortaV = 0f;
+            foreach (DairePlani.Oda o in DairePlani.Odalar)
+                if (o.Ad == oda) { ortaU = (o.U0 + o.U1) / 2f; ortaV = (o.V0 + o.V1) / 2f; }
+            // UDuvari: duvar u = Cizgi çizgisinde, kapı v boyunca. Değilse duvar v = Cizgi'de.
+            float boyunca = a.UDuvari ? v : u;          // duvar boyunca konum
+            float derinlik = a.UDuvari ? u : v;         // duvara dik konum
+            float yon = (a.UDuvari ? ortaU : ortaV) > a.Cizgi ? 1f : -1f;
+            float icerde = (derinlik - a.Cizgi) * yon;  // duvardan odanın içine uzaklık
+            if (System.Math.Abs(boyunca - a.Merkez) <= a.Gen / 2f + Pay && icerde >= 0f && icerde <= a.Ust + Pay) return true;
+        }
+        return false;
     }
 
     private static bool DortHane(string s)

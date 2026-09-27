@@ -849,8 +849,10 @@ public static partial class GrayboxKurucu
 
         var z = new KilitZinciri();
         z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 2.0f, Y = 0.004f, V = -0.4f, Donus = 70f });
-        // Banyonun lavabodan uzak köşesi (lavabo u = 3,6, v = -0,8'de).
-        z.Yerler.Add(new ZincirYeri { Kimlik = "banyo_yer", PlandaNokta = true, Oda = "Banyo", U = 3.3f, Y = 0.004f, V = 2.1f, Donus = -25f });
+        // Banyonun kapıya göre sağ köşesi. Kapı (u = 3,25-3,95) menteşeden sökülünce banyonun içine
+        // devrilir ve v = 0,9'a kadar zemini örter; ilk yer (3,3; 2,1) onun altında kaldı, Şahan
+        // anahtarı göremedi. Kural artık bunu yakalıyor (KilitZinciri.DevrilmeAlaninda).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "banyo_yer", PlandaNokta = true, Oda = "Banyo", U = 4.2f, Y = 0.004f, V = 1.0f, Donus = -25f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "alet_cantasi", Yol = "Esyalar/Alet_Cantasi", Oda = "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "oyuncak", Yol = "Esyalar/Oyuncak_Kutusu", Oda = "Oda_B" });
