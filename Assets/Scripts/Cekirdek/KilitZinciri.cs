@@ -44,8 +44,10 @@ public enum KilitTuru
                  // oynar: Gerekenler listesindeki aletlerin hepsi kapıcının çantasında olmalı.
     KirikAnahtar,// (#65) kapının anahtarı kırık: Gerekenler listesindeki anahtar parçalarının
                  // hepsi bulununca anahtar tamamlanır ve kapı açılır.
-    Yerlestirme  // (#66) Gerekenler'deki eşyaların her biri Yuvalar'daki aynı sıradaki yere konunca
+    Yerlestirme, // (#66) Gerekenler'deki eşyaların her biri Yuvalar'daki aynı sıradaki yere konunca
                  // (sofraya dört tabak, doğru isimlerin önüne) kilit açılır.
+    Asansor      // (#68) Gerekli sigorta sahanlıktaki asansör panosuna takılır, asansör çağrılır;
+                 // kapıları açılınca kilit çözülür. Hedef, kabindeki yerdir ("Sahanlik:Asansor/Kabin").
 }
 
 [System.Serializable]
@@ -340,8 +342,9 @@ public class KilitZinciri
                     break;
                 default:
                     ZincirEsyasi e = EsyaBul(k.Gerekli);
+                    // Asansör panosuna da (#68) bir sigorta takılır.
                     EsyaTuru beklenen = k.Tur == KilitTuru.Anahtar ? EsyaTuru.OdaAnahtari
-                                      : k.Tur == KilitTuru.Sigorta ? EsyaTuru.Sigorta : EsyaTuru.Tornavida;
+                                      : k.Tur == KilitTuru.Sigorta || k.Tur == KilitTuru.Asansor ? EsyaTuru.Sigorta : EsyaTuru.Tornavida;
                     if (e == null) sonuc.Hatalar.Add($"'{k.Kimlik}': gereken eşya '{k.Gerekli}' yok");
                     else if (e.Tur != beklenen) sonuc.Hatalar.Add($"'{k.Kimlik}': '{k.Gerekli}' bir {beklenen} değil, {e.Tur}");
                     break;

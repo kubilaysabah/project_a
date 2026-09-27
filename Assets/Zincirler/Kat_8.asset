@@ -1,0 +1,415 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
+  m_Name: Kat_8
+  m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
+  aciklama: "8. kat, daire 4, Y\xF6netim dairesi (asans\xF6r). Sekiz kilit: banyo
+    (mente\u015Fe), kiler (anahtar banyoda), Oda B (kilerin kolu), mutfak (anahtar
+    alet \xE7antas\u0131nda), salon (k\u0131r\u0131k anahtar: sand\u0131k + buzdolab\u0131),
+    Oda A (\u015Fifre 1974, salondaki isk\xE2n ruhsat\u0131), dosya dolab\u0131 (anahtar
+    komodinde), asans\xF6r (sigorta dolapta; panoya tak\u0131l\u0131r, \xE7a\u011Fr\u0131l\u0131r,
+    g\xF6sterge 9 der) -> kabinde \xE7at\u0131 anahtar\u0131."
+  zincir:
+    KapaliOdalar: []
+    Yerler:
+    - Kimlik: antre_yer
+      Yol: 
+      Oda: Antre
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 2
+      Y: 0.004
+      V: -0.4
+      Donus: 70
+      OnU: 0
+      OnV: 0
+    - Kimlik: banyo_yer
+      Yol: 
+      Oda: Banyo
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 3.3
+      Y: 0.004
+      V: 2.1
+      Donus: -25
+      OnU: 0
+      OnV: 0
+    - Kimlik: alet_cantasi
+      Yol: Esyalar/Alet_Cantasi
+      Oda: Oda_C
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: kiler_kolu
+      Yol: Esyalar/Duvar_Kolu/Kol
+      Oda: Oda_C
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: oyuncak
+      Yol: Esyalar/Oyuncak_Kutusu
+      Oda: Oda_B
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: buzdolabi
+      Yol: Esyalar/Buzdolabi
+      Oda: Mutfak
+      KilitYolu: Esyalar/Buzdolabi/Kapi
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: salon_ruhsat
+      Yol: 
+      Oda: Salon
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 2.9
+      Y: 1.6
+      V: 4.8
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: komodin
+      Yol: Esyalar/Komodin/Cekmece
+      Oda: Oda_A
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: dosya_ust
+      Yol: Esyalar/Dosya_Dolabi/Cekmece_1
+      Oda: Salon
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: kabin
+      Yol: Sahanlik:Asansor/Kabin
+      Oda: Sahanlik
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    Esyalar:
+    - Kimlik: tornavida
+      Tur: 4
+      Yer: antre_yer
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
+    - Kimlik: kiler_anahtari
+      Tur: 2
+      Yer: banyo_yer
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
+    - Kimlik: mutfak_anahtari
+      Tur: 2
+      Yer: alet_cantasi
+      X: 0
+      Y: 0.03
+      Z: 0
+      Donus: 20
+    - Kimlik: salon_anahtari_bas
+      Tur: 9
+      Yer: oyuncak
+      X: 0
+      Y: 0.03
+      Z: 0
+      Donus: -30
+    - Kimlik: salon_anahtari_uc
+      Tur: 9
+      Yer: buzdolabi
+      X: 0
+      Y: 0.47
+      Z: 0
+      Donus: 10
+    - Kimlik: dosya_anahtari
+      Tur: 2
+      Yer: komodin
+      X: 0
+      Y: 0.375
+      Z: 0
+      Donus: -15
+    - Kimlik: asansor_sigortasi
+      Tur: 3
+      Yer: dosya_ust
+      X: 0.09
+      Y: 1
+      Z: 0.02
+      Donus: 80
+    - Kimlik: cati_anahtari
+      Tur: 1
+      Yer: kabin
+      X: 0.12
+      Y: 0.012
+      Z: -5.75
+      Donus: 35
+    Kilitler:
+    - Kimlik: banyo
+      Tur: 4
+      OdaKapisi: 1
+      Hedef: Banyo
+      Gerekli: tornavida
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: kiler
+      Tur: 0
+      OdaKapisi: 1
+      Hedef: Oda_C
+      Gerekli: kiler_anahtari
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: odaB
+      Tur: 2
+      OdaKapisi: 1
+      Hedef: Oda_B
+      Gerekli: kiler_kolu
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: mutfak
+      Tur: 0
+      OdaKapisi: 1
+      Hedef: Mutfak
+      Gerekli: mutfak_anahtari
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: salon
+      Tur: 7
+      OdaKapisi: 1
+      Hedef: Salon
+      Gerekli: 
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler:
+      - salon_anahtari_bas
+      - salon_anahtari_uc
+      Yuvalar: []
+    - Kimlik: odaA
+      Tur: 1
+      OdaKapisi: 1
+      Hedef: Oda_A
+      Gerekli: salon_ruhsat
+      Sifre: 1974
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 1
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: dosya
+      Tur: 0
+      OdaKapisi: 0
+      Hedef: dosya_ust
+      Gerekli: dosya_anahtari
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: asansor
+      Tur: 9
+      OdaKapisi: 0
+      Hedef: kabin
+      Gerekli: asansor_sigortasi
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+  notlar:
+  - Yol: Esyalar/Sigorta_Kutusu
+    X: 0.42
+    Y: 0
+    Z: 0.004
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat8_yonetim
+  - Yol: Esyalar/Duvar_Kolu
+    X: 0.35
+    Y: 0.25
+    Z: 0.002
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat8_kiler
+  - Yol: 
+    X: 2.2
+    Y: 1.4
+    Z: 4.648
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Metin: not.kat8_salon
+  - Yol: 
+    X: 8.2
+    Y: 1.4
+    Z: 4.648
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Metin: not.kat8_arsiv
+  - Yol: 
+    X: 2.9
+    Y: 1.55
+    Z: 4.752
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat8_ruhsat
+  - Yol: Esyalar/Dosya_Dolabi/Cekmece_1
+    X: -0.08
+    Y: 1
+    Z: 0
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 1
+    Metin: not.kat8_sigorta
+  - Yol: Esyalar/Dosya_Dolabi/Cekmece_2
+    X: 0
+    Y: 0.69
+    Z: 0
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 1
+    Metin: not.kat8_dosyalar
+  - Yol: Esyalar/Dosya_Dolabi/Cekmece_3
+    X: 0
+    Y: 0.38
+    Z: 0
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 1
+    Metin: not.kat8_plan
+  suslar: []
+  sesler: []
+  parcalar: []
+  yananOdalar:
+  - Salon
+  ikinciDaire: 0
+  ikinciKaplamaKati: 0
+  esyaYazilari: []
+  kapiNumarasi: 
+  girisKapali: 0
+  sahanlikKarti: {fileID: 0}
+  tiklatmaSesi: {fileID: 0}
+  yanlisKapiSesleri: []
+  elektrikYok: 0
+  kacisVar: 0
+  kacisSablonu: {fileID: 0}
+  kacisGecikme: 3
+  kacisHizi: 2
+  kacisBaslangicSesi: {fileID: 0}
+  kacisDonguSesi: {fileID: 0}
+  cizimBoyu: 0.3

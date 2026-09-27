@@ -410,9 +410,16 @@ public static partial class GrayboxKurucu
 
         // Blender modeli varsa (#24) kasa, kanatlar, gösterge ve düğme modelden gelir.
         // Model parçalarının pivotu boşluğun alt ortası; hepsi aynı noktaya konur.
-        bool model = Model("Kasa", a, "Asansor", "Kasa", new Vector3(0f, 0f, yuz), 0f, carpisma: true) != null;
+        GameObject kasa = Model("Kasa", a, "Asansor", "Kasa", new Vector3(0f, 0f, yuz), 0f, carpisma: true);
+        bool model = kasa != null;
         if (model)
         {
+            // Kasanın kutu biçimli çarpışma alanı kapı boşluğunu da kaplıyordu (kutu, meshin dış
+            // sınırlarına oturur): 8. katta kapılar açılınca oyuncu kabine giremiyor, içindeki
+            // anahtara nişan alamıyordu (#68). MeshCollider çerçevenin kendi biçimini sarar.
+            Collider eski = kasa.GetComponent<Collider>();
+            if (eski != null) Object.DestroyImmediate(eski);
+            kasa.AddComponent<MeshCollider>().sharedMesh = kasa.GetComponent<MeshFilter>().sharedMesh;
             Model("Kapi_Sol", a, "Asansor", "Kapi_Sol", new Vector3(0f, 0f, yuz), 0f, carpisma: true);
             Model("Kapi_Sag", a, "Asansor", "Kapi_Sag", new Vector3(0f, 0f, yuz), 0f, carpisma: true);
             Model("Gosterge", a, "Asansor", "Gosterge", new Vector3(0f, 0f, yuz), 0f, carpisma: false);
@@ -465,6 +472,154 @@ public static partial class GrayboxKurucu
             YerelYap(a.Find("Not_Yazi").gameObject, "bina.asansor_notu");
         }
 
+        // PANO (#68): asansörün solunda (oyuncuya göre; dünyada +x) sigorta panosu. Üç sigortadan
+        // biri eksik: asansör bu yüzden arızalı. Her sahanlıkta aynı görünür (döngü aynı katları
+        // göstermeli); yalnızca 8. katta zincirin parçasıdır.
+        GameObject pano = PanoKur(a, yuz);
+
+        if (tam)
+        {
+            // KABİN: kapıların ardında, gizli. Asansör 8. katta gelince görünür (AsansorPanosu).
+            GameObject kabin = KabinKur(a, yuz);
+            kabin.SetActive(false);
+
+            // Çağrı düğmesine nişan alınabilsin: modelde çarpışma kutusu yok (duvara yapışık küçük
+            // bir parça). BoxCollider eklenince meshin sınırlarına kendiliğinden oturur.
+            Transform dugme = a.Find("Cagri_Dugmesi");
+            if (dugme != null && dugme.GetComponent<Collider>() == null) dugme.gameObject.AddComponent<BoxCollider>();
+
+            AsansorPanosu ap = pano.AddComponent<AsansorPanosu>();
+            var seri = new SerializedObject(ap);
+            seri.FindProperty("eksikSigorta").objectReferenceValue = pano.transform.Find("Sigorta_3").gameObject;
+            seri.FindProperty("lamba").objectReferenceValue = pano.transform.Find("Lamba").GetComponent<MeshRenderer>();
+            seri.FindProperty("kapiSol").objectReferenceValue = a.Find("Kapi_Sol");
+            seri.FindProperty("kapiSag").objectReferenceValue = a.Find("Kapi_Sag");
+            // "ARIZALI" kâğıdı ve yazısı sol kanatla birlikte kayar.
+            SerializedProperty ekler = seri.FindProperty("solKanattakiler");
+            ekler.arraySize = 2;
+            ekler.GetArrayElementAtIndex(0).objectReferenceValue = a.Find("Not");
+            ekler.GetArrayElementAtIndex(1).objectReferenceValue = a.Find("Not_Yazi");
+            seri.FindProperty("kabin").objectReferenceValue = kabin;
+            seri.FindProperty("kuyu").objectReferenceValue = kuyu;
+            seri.FindProperty("gosterge").objectReferenceValue = a.Find("Yazi").GetComponent<TextMesh>();
+            seri.FindProperty("dingSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ding.wav");
+            seri.FindProperty("ugultuSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ugultu.wav");
+            seri.ApplyModifiedPropertiesWithoutUndo();
+
+            if (dugme != null)
+            {
+                AsansorDugmesi ad = dugme.gameObject.AddComponent<AsansorDugmesi>();
+                var dSeri = new SerializedObject(ad);
+                dSeri.FindProperty("pano").objectReferenceValue = ap;
+                dSeri.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
+    }
+
+    // Asansörün sigorta panosu (#68): duvara vidalı koyu bir sac kutu, içinde üç sigorta yuvası
+    // ve bir durum lambası. Kök boş bir nesne (ölçeksiz); parçalar onun çocuğu, yalnızca gövdenin
+    // çarpışma kutusu var (nişan panoya bakınca gövdeye çarpar, bileşen kökte).
+    static GameObject PanoKur(Transform a, float yuz)
+    {
+        GameObject pano = new GameObject("Pano");
+        pano.transform.SetParent(a, false);
+        pano.transform.localPosition = new Vector3(AsansorGen / 2f + 0.31f, 1.35f, yuz);
+
+        Material sac = MalzemeBul("Assets/Materials/Asansor_Pano.mat", new Color(0.16f, 0.17f, 0.18f));
+        Material seramik = MalzemeBul("Assets/Materials/Sigorta_Seramik.mat", new Color(0.82f, 0.80f, 0.74f));
+        Boya(Kutu("Govde", pano.transform, new Vector3(0f, 0f, 0.035f), new Vector3(0.30f, 0.40f, 0.07f)), sac);
+        for (int i = 1; i <= 3; i++)
+        {
+            float x = (i - 2) * 0.08f;
+            // Yuva: sigortanın oturduğu koyu çukur. Sigorta: beyaz seramik gövde.
+            GameObject yuva = Kutu($"Yuva_{i}", pano.transform, new Vector3(x, 0.01f, 0.0705f), new Vector3(0.045f, 0.11f, 0.002f));
+            Boya(yuva, KaranlikMalzeme());
+            Object.DestroyImmediate(yuva.GetComponent<Collider>());
+            GameObject sigorta = Kutu($"Sigorta_{i}", pano.transform, new Vector3(x, 0.01f, 0.083f), new Vector3(0.03f, 0.085f, 0.025f));
+            Boya(sigorta, seramik);
+            Object.DestroyImmediate(sigorta.GetComponent<Collider>());
+            // Üçüncü sigorta eksik: yuvası boş görünür. 8. katta takılınca açılır.
+            if (i == 3) sigorta.SetActive(false);
+        }
+        GameObject lamba = Kutu("Lamba", pano.transform, new Vector3(0f, 0.15f, 0.075f), new Vector3(0.03f, 0.03f, 0.012f));
+        Boya(lamba, AsansorLambaMalzeme());
+        Object.DestroyImmediate(lamba.GetComponent<Collider>());
+        return pano;
+    }
+
+    // Asansörün kabini (#68): kapıların ardında, sahanlığın ön duvarının arkasında. Ahşap kaplama
+    // duvarlar, koyu zemin, arka duvarda tutamak, tavanda sıcak bir lamba. Zemin duvarın içinden
+    // sahanlığa kadar uzanır (eşik); üstü sahanlık zemininden 8 mm yukarıda: aynı düzlemde iki
+    // farklı malzeme titreşirdi (daire zeminlerindeki ders).
+    static GameObject KabinKur(Transform a, float yuz)
+    {
+        GameObject kabin = new GameObject("Kabin");
+        kabin.transform.SetParent(a, false);
+        Transform k = kabin.transform;
+        float ic = yuz - DuvarKalin;                 // duvarın arka yüzü: kabin buradan başlar
+        const float Derin = 1.2f, Gen = 1.2f, Yuk = 2.25f;
+        float orta = ic - Derin / 2f;
+
+        // Koyu ceviz kaplama. İlk hâli (0,36 0,29 0,21) kabinin lambasıyla neredeyse beyaz görünüyor,
+        // karşıdan bakınca arka duvar kapalı bir kapı gibi okunuyordu. MalzemeBul var olan dosyayı
+        // olduğu gibi döndürdüğü için renk burada yeniden yazılır.
+        Material kaplama = MalzemeBul("Assets/Materials/Asansor_Kabin.mat", new Color(0.20f, 0.14f, 0.09f));
+        kaplama.SetColor("_BaseColor", new Color(0.20f, 0.14f, 0.09f));
+        // Zemin koyu gri; anahtar üstünde seçilebilsin diye simsiyah değil (0,10 fazla karanlıktı).
+        Material zemin = MalzemeBul("Assets/Materials/Asansor_Kabin_Zemin.mat", new Color(0.22f, 0.21f, 0.20f));
+        zemin.SetColor("_BaseColor", new Color(0.22f, 0.21f, 0.20f));
+        Material metal = MalzemeBul("Assets/Materials/Metal_Gri.mat", new Color(0.42f, 0.44f, 0.45f));
+
+        Boya(Kutu("Zemin", k, new Vector3(0f, 0.008f - 0.025f, (yuz + ic - Derin) / 2f), new Vector3(Gen, 0.05f, Derin + DuvarKalin)), zemin);
+        Boya(Kutu("Duvar_Sol", k, new Vector3(-Gen / 2f, Yuk / 2f, orta), new Vector3(0.05f, Yuk, Derin)), kaplama);
+        Boya(Kutu("Duvar_Sag", k, new Vector3(Gen / 2f, Yuk / 2f, orta), new Vector3(0.05f, Yuk, Derin)), kaplama);
+        Boya(Kutu("Duvar_Arka", k, new Vector3(0f, Yuk / 2f, ic - Derin), new Vector3(Gen + 0.05f, Yuk, 0.05f)), kaplama);
+        Boya(Kutu("Tavan", k, new Vector3(0f, Yuk, orta), new Vector3(Gen + 0.05f, 0.05f, Derin)), kaplama);
+        GameObject tutamak = Kutu("Tutamak", k, new Vector3(0f, 0.95f, ic - Derin + 0.05f), new Vector3(0.8f, 0.03f, 0.03f));
+        Boya(tutamak, metal);
+
+        // Tavan lambası: parlak (Unlit, HDR) bir panel ve altında gölgesiz, sıcak bir nokta ışığı.
+        GameObject panel = Kutu("Lamba_Panel", k, new Vector3(0f, Yuk - 0.03f, orta), new Vector3(0.5f, 0.01f, 0.3f));
+        Boya(panel, KabinIsikMalzeme());
+        Object.DestroyImmediate(panel.GetComponent<Collider>());
+        panel.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        GameObject isikNesnesi = new GameObject("Isik");
+        isikNesnesi.transform.SetParent(k, false);
+        isikNesnesi.transform.localPosition = new Vector3(0f, Yuk - 0.25f, orta);
+        Light isik = isikNesnesi.AddComponent<Light>();
+        isik.type = LightType.Point;
+        // 1,2 açık duvarlarla kabini beyaza boğuyordu, 0,55 koyu duvarlarla anahtarı karanlıkta bıraktı.
+        isik.range = 3.0f;
+        isik.intensity = 1.0f;
+        isik.color = new Color(1f, 0.92f, 0.78f);
+        isik.shadows = LightShadows.None;
+        return kabin;
+    }
+
+    // Panonun durum lambası: ışıktan etkilenmeyen (Unlit) malzeme; rengini AsansorPanosu verir.
+    static Material AsansorLambaMalzeme()
+    {
+        const string Yol = "Assets/Materials/Asansor_Lamba.mat";
+        Material mevcut = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (mevcut != null) return mevcut;
+        Material yeni = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        yeni.SetColor("_BaseColor", new Color(0.22f, 0.02f, 0.02f));
+        AssetDatabase.CreateAsset(yeni, Yol);
+        AssetDatabase.SaveAssets();
+        return yeni;
+    }
+
+    // Kabinin tavan paneli: sıcak beyaz, 1'in üstünde (HDR), bloom hafif bir hale verir.
+    static Material KabinIsikMalzeme()
+    {
+        const string Yol = "Assets/Materials/Asansor_Kabin_Isik.mat";
+        Material mevcut = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (mevcut != null) return mevcut;
+        Material yeni = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        yeni.SetColor("_BaseColor", new Color(1f, 0.9f, 0.72f) * 1.6f);
+        AssetDatabase.CreateAsset(yeni, Yol);
+        AssetDatabase.SaveAssets();
+        return yeni;
     }
 
     // Dünyadaki bir yazıyı metin tablosuna bağlar (#15): YerelYazi bileşenini ekler
@@ -1091,8 +1246,9 @@ public static partial class GrayboxKurucu
              new Vector3(KapiGenC, DuvarYuksek - KapiYukC, DuvarKalin));
 
         // KAPI. Açılması = bu nesnenin kapatılması.
+        // Yeni ilerlemede (#68) kapı çatı anahtarıyla açılır: CatiKapisi "KİLİTLİ / AÇ" der.
         Kutu("CatiKapisi", t, new Vector3(kapiX, KapiYukC / 2f, onZ),
-             new Vector3(KapiGenC, KapiYukC, DuvarKalin * 0.6f));
+             new Vector3(KapiGenC, KapiYukC, DuvarKalin * 0.6f)).AddComponent<CatiKapisi>();
 
         // KORKULUKLAR (parapet): çatının kenarları.
         Kutu("Parapet_Sol", t, new Vector3(-disX + DuvarKalin / 2f, Parapet / 2f, -SahanlikDerin / 2f),
@@ -1293,10 +1449,9 @@ public static partial class GrayboxKurucu
 
             for (int p = 0; p < pencereX.Length; p++)
             {
-                // 9. katın en sağdaki penceresi YANIYOR: finalin sorusu o pencere.
-                bool yanan = kat == CepheKatSayisi && p == 4;
-                Boya(Kutu($"Pencere_{kat}_{p + 1}", f, new Vector3(pencereX[p], y0 + 1.65f, -0.03f), new Vector3(1.3f, 1.5f, 0.06f)),
-                     yanan ? isikliCam : cam);
+                // 9. katın en sağdaki penceresi finalin sorusu. Önce KARANLIK: final sahnesi
+                // asansörün sesinden sonra onu yakar (#68). Işıklı malzeme FinalSahnesi'ne bağlanır.
+                Boya(Kutu($"Pencere_{kat}_{p + 1}", f, new Vector3(pencereX[p], y0 + 1.65f, -0.03f), new Vector3(1.3f, 1.5f, 0.06f)), cam);
                 Boya(Kutu($"Denizlik_{kat}_{p + 1}", f, new Vector3(pencereX[p], y0 + 0.87f, -0.08f), new Vector3(1.5f, 0.06f, 0.16f)), bant);
             }
 
@@ -1371,7 +1526,15 @@ public static partial class GrayboxKurucu
         sokak.volume = 0.7f;
         kam.SetActive(false);
 
-        kok.AddComponent<FinalSahnesi>();
+        FinalSahnesi final = kok.AddComponent<FinalSahnesi>();
+        // Dokuzuncu katın penceresi, ışığı ve asansörün sesi (#68). SerializedObject: bileşenin
+        // özel (private) kayıtlı alanlarını koddan doldurmanın yolu.
+        var seri = new SerializedObject(final);
+        Transform pencere = f.Find($"Pencere_{CepheKatSayisi}_5");
+        seri.FindProperty("dokuzuncuPencere").objectReferenceValue = pencere != null ? pencere.GetComponent<MeshRenderer>() : null;
+        seri.FindProperty("pencereIsigi").objectReferenceValue = isikliCam;
+        seri.FindProperty("asansorSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ding.wav");
+        seri.ApplyModifiedPropertiesWithoutUndo();
     }
 
     static void Boya(GameObject g, Material m)

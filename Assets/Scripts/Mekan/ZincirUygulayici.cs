@@ -41,6 +41,11 @@ public class ZincirUygulayici
     /// </summary>
     public Transform IkinciDaire;
 
+    // Asansör kilidi (#68): sahanlıktaki pano ve kabine eklenen kilitler. Daireyi temizlemek
+    // bunlara ulaşmaz (daire nesnesinin dışındalar); kat değişince ayrıca sökülür.
+    private AsansorPanosu asansorPanosu;
+    private readonly List<Kilit> sahanlikKilitleri = new List<Kilit>();
+
     // Bu uygulayıcının dairelere koyduğu eşyalar; bir sonraki temizlikte kaldırılır.
     private readonly List<GameObject> konanlar = new List<GameObject>();
 
@@ -128,6 +133,21 @@ public class ZincirUygulayici
                     yuva.KilitEkle(kilit);
                 }
                 else Debug.LogWarning("[ZINCIR] Sigorta kutusu bulunamadı: " + SigortaKutusuYolu);
+            }
+            if (veri.Tur == KilitTuru.Asansor)
+            {
+                // Kilit kabindeki yerde durur (kapıyı kapatmaz; kabin asansör gelene kadar gizli).
+                // Pano, kilidin hedefiyle aynı asansörün altında: Asansor/Kabin -> Asansor/Pano.
+                sahanlikKilitleri.Add(kilit);
+                Transform asansor = hedef.parent;
+                while (asansor != null && asansor.name != "Asansor") asansor = asansor.parent;
+                AsansorPanosu pano = asansor != null ? asansor.GetComponentInChildren<AsansorPanosu>(true) : null;
+                if (pano != null)
+                {
+                    if (asansorPanosu != pano) { pano.Hazirla(veri.Gerekli, kat); asansorPanosu = pano; }
+                    pano.KilitEkle(kilit);
+                }
+                else Debug.LogWarning("[ZINCIR] Asansör panosu bulunamadı (graybox yeniden kurulmalı).");
             }
             if (veri.Tur == KilitTuru.Yerlestirme)
             {
@@ -352,7 +372,8 @@ public class ZincirUygulayici
     {
         foreach (ZincirKilidi k in zincir.Kilitler)
             // Aletler (tornavida: menteşe ve kırma) kullanılınca bitmez; yalnızca anahtar ve buşon biter.
-            if (k.Gerekli == e.Kimlik && (k.Tur == KilitTuru.Anahtar || k.Tur == KilitTuru.Sigorta) && Kayit.KilitCozukMu(kat, k.Kimlik))
+            if (k.Gerekli == e.Kimlik && (k.Tur == KilitTuru.Anahtar || k.Tur == KilitTuru.Sigorta || k.Tur == KilitTuru.Asansor)
+                && Kayit.KilitCozukMu(kat, k.Kimlik))
                 return true;
         return false;
     }
@@ -381,6 +402,10 @@ public class ZincirUygulayici
                     SigortaYuvasi yuva = kutu != null ? kutu.GetComponent<SigortaYuvasi>() : null;
                     if (yuva != null && !yuva.Takildi) yuva.TakiliBaslat();
                     break;
+                case KilitTuru.Asansor:
+                    // Asansör daha önce gelmişti: sigorta takılı, kapılar açık (#68).
+                    if (asansorPanosu != null) asansorPanosu.GelmisBaslat();
+                    break;
                 case KilitTuru.Tornavida:
                     MenteseSokucu m = hedef != null ? hedef.GetComponent<MenteseSokucu>() : null;
                     if (m != null) m.DevrikBaslat();
@@ -408,6 +433,11 @@ public class ZincirUygulayici
     // Önceki katın izlerini siler: konan eşyalar, eklenen kilitler, kilitlenen kapılar.
     private void Temizle(Transform daire)
     {
+        // Asansör (#68): pano ölür, kapılar kapanır; kabine eklenen kilitler hemen sökülür
+        // (aynı karede kurulacak yeni zincir eskisini bulmasın, bkz. DestroyImmediate kuralı).
+        if (asansorPanosu != null) { asansorPanosu.Sifirla(); asansorPanosu = null; }
+        foreach (Kilit k in sahanlikKilitleri) if (k != null) Object.DestroyImmediate(k);
+        sahanlikKilitleri.Clear();
         KirikAnahtarlar.Temizle();
         TabakYigini.Temizle();
         foreach (GameObject g in konanlar)

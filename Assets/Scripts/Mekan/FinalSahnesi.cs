@@ -27,6 +27,14 @@ public class FinalSahnesi : MonoBehaviour
     [SerializeField] private float kameraSuresi = 16f;
     [SerializeField] private float jenerikSuresi = 16f;
 
+    // DOKUZUNCU KAT (#68, Şahan'ın seçimi "c"): dış cephede 9. katın penceresi önce karanlıktır.
+    // Kamera bütün binayı gösterince uzaktan asansörün "ding" sesi gelir ve o pencere yanar:
+    // asansör, kapıcıyı çatıya çıkaran anahtarı getirdiği kata geri dönmüştür. Graybox kurucusu bağlar.
+    [Header("Dokuzuncu kat")]
+    [SerializeField] private Renderer dokuzuncuPencere;
+    [SerializeField] private Material pencereIsigi;
+    [SerializeField] private AudioClip asansorSesi;
+
     // Kameranın başlangıç ve bitiş duruşu (bu nesneye göre yerel): önce sokakta,
     // alçakta, giriş kapısına ve tabelaya; sonra geride ve yüksekte, bütün bina.
     private static readonly Vector3 KameraBas = new Vector3(0f, 1.6f, -10f);
@@ -168,6 +176,18 @@ public class FinalSahnesi : MonoBehaviour
             yield return null;
         }
         KamerayiYerlestir(1f);
+
+        // Bina bütünüyle kadrajda: önce asansörün sesi, sonra dokuzuncu katın ışığı.
+        yield return new WaitForSeconds(1.2f);
+        if (asansorSesi != null)
+        {
+            // İki boyutlu, kısık: kamera sokakta, ses binanın içinden, uzaktan gelir.
+            AudioSource kulak = finalKamera.GetComponent<AudioSource>();
+            if (kulak != null) kulak.PlayOneShot(asansorSesi, 0.45f);
+        }
+        yield return new WaitForSeconds(0.9f);
+        if (dokuzuncuPencere != null && pencereIsigi != null) dokuzuncuPencere.sharedMaterial = pencereIsigi;
+        Debug.Log("[FINAL] Dokuzuncu katın penceresi yandı.");
 
         yield return new WaitForSeconds(3f);
 

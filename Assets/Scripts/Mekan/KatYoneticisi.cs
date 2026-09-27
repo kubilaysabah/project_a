@@ -38,6 +38,13 @@ public class KatYoneticisi : MonoBehaviour
              "kalır; #59 kodunu tamamen kaldıracak. Açarsanız eski oyun aynen oynanır.")]
     [SerializeField] private bool eskiKural = false;
 
+    /// <summary>Eski kural (dönüp dolaşma oyunu) açık mı? Çatı kapısı (#68) buna bakar.</summary>
+    public bool EskiKural { get { return eskiKural; } }
+
+    // 8. katta oyuncu çatı odasına çıktı mı (#68)? Yeni ilerlemede çatı odasına çıkmak bir
+    // karar değildir: kapı kilitlidir, oyuncu geri inip dairedeki işi bitirebilir.
+    private bool catiOdasinda;
+
     [Header("Anomali")]
     [Tooltip("Bir katın anomalili olma olasılığı (yalnızca eski kural açıkken).")]
     [Range(0f, 1f)]
@@ -551,8 +558,13 @@ public class KatYoneticisi : MonoBehaviour
         // kapısını açıp çıkarak geçilir (kapı kilitli olduğu için başka yol yok).
         if (!eskiKural)
         {
+            // Çatı odasından 8. kata geri inmek (#68): yalnızca bayrak iner, kat 8 kalır.
+            if (karar == Karar.Geri && catiOdasinda) { catiOdasinda = false; Debug.Log("[KAT] Çatı odasından 8. kata inildi."); return; }
             if (karar == Karar.Geri) { asagiInilen++; Debug.Log($"[KAT] Aşağı inildi ({asagiInilen}); kat {sayac.MevcutKat} kalıyor."); return; }
             if (asagiInilen > 0) { asagiInilen--; Debug.Log($"[KAT] Geri çıkıldı ({asagiInilen}); kat {sayac.MevcutKat}."); return; }
+            // 8. kattan yukarı: çatı odasına çıkıldı. Kapı kendiliğinden AÇILMAZ; çatı anahtarı
+            // gerekir (CatiKapisi -> CatiKapisiAnahtarlaAcildi).
+            if (sayac.MevcutKat >= KatSayaci.CatiKati) { catiOdasinda = true; Debug.Log("[KAT] Çatı odasına çıkıldı; kapı çatı anahtarını bekliyor."); return; }
             // Test kartı açıksa katta anomali olabilir; yeni ilerlemede anomali bir olaydır,
             // yukarı çıkmak yanlış karar değil. Sayaç "yanlış" demesin diye bayrak sıfırlanır.
             if (sayac.AnomaliVar) sayac.KatiHazirla(false);
@@ -947,6 +959,15 @@ public class KatYoneticisi : MonoBehaviour
         if (catiBolumu != null) catiBolumu.SetActive(mod);
 
         if (merdiven != null) merdiven.YukariDonguyuAyarla(!mod);
+    }
+
+    /// <summary>Çatı kapısı çatı anahtarıyla açıldı (#68): döngü kapanır, final başlar.</summary>
+    public void CatiKapisiAnahtarlaAcildi()
+    {
+        Debug.Log("[KAT] ÇATI KAPISI ÇATI ANAHTARIYLA AÇILDI.");
+        if (merdiven != null) merdiven.DonguyuAyarla(false);
+        CatiModunuAyarla(true);
+        CatiKapisiniAc();
     }
 
     private void CatiKapisiniAc()
@@ -1386,5 +1407,6 @@ public class KatYoneticisi : MonoBehaviour
         ilerleme = null;
         oncekiY = float.NaN;
         referansDongu = merdiven.NetDongu;
+        catiOdasinda = false;   // başa alınan oyuncu çatı odasında değil (#68)
     }
 }

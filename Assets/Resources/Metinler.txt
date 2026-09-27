@@ -23,6 +23,7 @@ ipucu.koy	KOY	PLACE
 ipucu.cal	KAPIYI ÇAL	KNOCK
 ipucu.kanirt	KANIRT	PRY OPEN
 ipucu.kir	KIR	BREAK
+ipucu.cagir	ÇAĞIR	CALL
 
 # ---- Yönetici notu (açılış) ----
 not.yonetici	Kapıcı Efendi,\n\nCemal Bey ayrıldı; eşyalarını odada bıraktı, kafa lambası çivide asılı. Al, geceleri lambasız çıkma; ampullerin çoğu yanmıyor.\n\nKatların arasına güvenlik için demir kapılar taktırdık. Her katın anahtarı o katta bir yerdedir. Önce o katın işlerini bitir, anahtarı bul, sonra yukarı çık.\n\nKiracılar rahatsız edilmesin. Kapılar açılmazsa ısrar etme.\n\nSabah çatı kapısını kilitle.\n\n— Yönetim	Janitor,\n\nCemal has left; his things are still in the room, his headlamp hangs on the nail. Take it, and don't go up at night without it — most of the bulbs are out.\n\nWe have had iron doors fitted between the floors, for safety. Each floor's key is somewhere on that floor. Finish the floor's chores first, find the key, then go up.\n\nDo not disturb the tenants. If a door won't open, don't insist.\n\nLock the roof door in the morning.\n\n— The Management
@@ -42,6 +43,14 @@ not.kat7_kimlik	T.C. NÜFUS CÜZDANI\n\nAdı: CEMAL\nSoyadı: YILMAZ\nBaba Adı:
 not.kat7_son	Asansör beni bekliyor.\nDokuzuncu kata çıkıyorum; Rıza Efendi de Hasan da oraya çıktı.\nAnahtarı sandığa koydum, levye olmadan açılmaz.\nArkamdan gelme.\n\n— Cemal	The lift is waiting for me.\nI am going up to the ninth floor; Rıza Efendi and Hasan went up there too.\nI put the key in the chest; it won't open without a crowbar.\nDon't come after me.\n\n— Cemal
 not.kat7_kol	Bu kolu çekince mutfağın sürgüsü açılıyor.\nYatak odasının anahtarını kırdım;\nucu mutfakta bir çekmecede, başı salondaki büfede.\n\n— Cemal	Pulling this lever releases the kitchen bolt.\nI broke the bedroom key;\nits bit is in a kitchen drawer, its bow in the living-room sideboard.\n\n— Cemal
 not.kat7_sifre	Odamın şifresini yatak odasının duvarına yazdım.\nIşık varken göremezsin;\nlambanı söndür ve bekle.\n\n— Cemal	I wrote my room's code on the bedroom wall.\nYou can't see it while there is light;\nswitch off your lamp and wait.\n\n— Cemal
+not.kat8_yonetim	Yeni kapıcıya:\n\nÇatının anahtarı bende değil.\nCemal gittikten sonra asansörden geldi,\nasansöre geri bıraktım.\n\nAsansörün sigortası dosya dolabında,\ndolabın anahtarı arşivde.\nBanyonun kapısı sıkışık; menteşeden sökersin.\n\n— Yönetim	To the new janitor:\n\nI don't have the roof key.\nIt came up with the lift after Cemal left,\nso I left it in the lift.\n\nThe lift's fuse is in the filing cabinet,\nthe cabinet key is in the archive.\nThe bathroom door is stuck; take it off its hinges.\n\n— The Management
+not.kat8_kiler	Bu kol çocuk odasının sürgüsünü açar.\nMutfağın anahtarı alet çantasında.	This lever releases the child's room bolt.\nThe kitchen key is in the toolbox.
+not.kat8_salon	Salonun anahtarı kırıldı.\nBaşı çocuk odasındaki sandıkta,\nucu buzdolabında.	The living-room key broke.\nIts bow is in the chest in the child's room,\nits bit is in the fridge.
+not.kat8_arsiv	ARŞİV\n\nŞifre: binanın yaşı değil,\nyapıldığı yıl.	ARCHIVE\n\nCode: not the building's age,\nthe year it was built.
+not.kat8_ruhsat	İSKÂN RUHSATI\n\nHuzur Apartmanı\nZemin + 8 kat, 32 daire\nYapım yılı: 1974\n\nBelediye Fen İşleri Müdürlüğü	OCCUPANCY PERMIT\n\nHuzur Apartment Building\nGround + 8 floors, 32 flats\nYear built: 1974\n\nMunicipal Works Department
+not.kat8_sigorta	Asansörün sigortasını ben söktüm.\nKimse çağırmasın diye.\n\nTakarsan gelir.\nÇatının anahtarı onda.\n\n— Cemal	I took out the lift's fuse myself.\nSo that nobody calls it.\n\nPut it back and it comes.\nThe roof key is with it.\n\n— Cemal
+not.kat8_dosyalar	PERSONEL DOSYALARI\n\nRıza Efendi, 1987-1991\n9. kata çıktı. İşi bıraktı.\n\nHasan, 1991-1993\n9. kata çıktı. Hastalandı.\n\nCemal, 1993-1994\n9. kata çıktı. Dönmedi.\n\nYeni kapıcı, 1994\n	STAFF FILES\n\nRıza Efendi, 1987-1991\nWent up to the 9th floor. Quit.\n\nHasan, 1991-1993\nWent up to the 9th floor. Fell ill.\n\nCemal, 1993-1994\nWent up to the 9th floor. Never came back.\n\nNew janitor, 1994\n
+not.kat8_plan	9. KAT PLANI\n\nDaireler: 33 - 34 - 35 - 36\n\nRuhsatta yok.\nMerdiven çıkmaz.\nAsansör çıkar.	9TH FLOOR PLAN\n\nFlats: 33 - 34 - 35 - 36\n\nNot on the permit.\nThe stairs don't go up.\nThe lift does.
 not.kapat	{0}: kapat	{0}: close
 
 # ---- Jenerik: ilk satır başlık, boş satırlar aralık ----
