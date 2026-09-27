@@ -58,6 +58,49 @@ public static partial class GrayboxKurucu
         public Vector3 Yon(float du, float dv) { return new Vector3(yon * du, 0f, sv * dv); }
     }
 
+    // ---------- ÖRÜMCEK AĞLARI (#78) ----------
+    // Her odanın dört tavan köşesinden ikisine (daireye göre değişen, sabit tohumlu seçim) köşeye
+    // gerilmiş bir ağ. Ağ, köşenin iki duvarına ve tavanına değen bir üçgen:
+    //   A: birinci duvar boyunca tavanda, B: ikinci duvar boyunca tavanda, C: köşe çizgisinde aşağıda.
+    // Noktalar dairenin kendi eksenlerinden (DaireYonu.Nokta) hesaplanır; aynalı dairelerde de
+    // üçgen doğru köşeye düşer (döndürme kullansaydık aynalı dairede ters yöne bakardı).
+    // Çarpıştırıcı yok: ağ nişanı kapatmasın, oyuncu da takılmasın.
+    static void OrumcekAglariKur(Transform daire, DaireYonu d)
+    {
+        Material m = KirKurucu.OrumcekAgiMalzemesi();
+        GameObject kok = new GameObject("Orumcek_Aglari");
+        kok.transform.SetParent(daire, false);
+        var rastgele = new System.Random(100 + (int)(d.yon * 10f) + (int)(d.sv * 3f));
+        float h = DairePlani.TavanYuk - 0.005f;   // tavanın 5 mm altı: tavanla aynı düzlemde titreşmesin
+        foreach (DairePlani.Oda oda in DairePlani.Odalar)
+        {
+            // Dört köşe ve her birinden odanın içine bakan yönler.
+            float[,] koseler = { { oda.U0, oda.V0, 1, 1 }, { oda.U1, oda.V0, -1, 1 }, { oda.U0, oda.V1, 1, -1 }, { oda.U1, oda.V1, -1, -1 } };
+            int atla = rastgele.Next(4), atla2 = (atla + 1 + rastgele.Next(3)) % 4;   // ağ olmayan iki köşe
+            for (int k = 0; k < 4; k++)
+            {
+                if (k == atla || k == atla2) continue;
+                float cu = koseler[k, 0] + koseler[k, 2] * 0.01f, cv = koseler[k, 1] + koseler[k, 3] * 0.01f;
+                float boy = 0.5f + (float)rastgele.NextDouble() * 0.35f;
+                Vector3 A = d.Nokta(cu + koseler[k, 2] * boy, h, cv);
+                Vector3 B = d.Nokta(cu, h, cv + koseler[k, 3] * boy * (0.8f + (float)rastgele.NextDouble() * 0.4f));
+                Vector3 C = d.Nokta(cu, h - boy * 0.9f, cv);
+                var mesh = new Mesh { name = "Orumcek_Agi" };
+                mesh.vertices = new[] { C, A, B };
+                mesh.uv = new[] { Vector2.zero, Vector2.right, Vector2.up };   // dokunun köşesi C'de
+                mesh.triangles = new[] { 0, 1, 2 };
+                mesh.RecalculateNormals();
+                mesh.RecalculateBounds();
+                GameObject g = new GameObject($"Ag_{oda.Ad}_{k}");
+                g.transform.SetParent(kok.transform, false);
+                g.AddComponent<MeshFilter>().sharedMesh = mesh;
+                MeshRenderer r = g.AddComponent<MeshRenderer>();
+                r.sharedMaterial = m;
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+        }
+    }
+
     static DaireYonu DaireYonuBul(int numara)
     {
         bool sag = numara == 3 || numara == 4;
@@ -107,6 +150,7 @@ public static partial class GrayboxKurucu
     {
         foreach (DairePlani.Oda oda in DairePlani.Odalar)
             OdaKur(daire, d, oda);
+        OrumcekAglariKur(daire, d);
 
         // Tavan: bütün dairenin üstünde tek parça. Üst yüzü 2,95'te; B sahanlığının daire
         // holleri 2,9-3,0 arasında duruyor, üst yüzler aynı düzleme denk gelip titreşmesin.

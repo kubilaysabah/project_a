@@ -137,14 +137,18 @@ public static class MobilyaKurucu
                 m = OrtakMalzeme(ad, x =>
                 {
                     x.SetTexture("_BaseMap", Doku(ad + "_renk"));
-                    x.SetColor("_BaseColor", ampul ? new Color(0.35f, 0.33f, 0.3f) : Color.white);   // sönük ampul
+                    // Toz (#78): renkler hafifçe grileşir; ampul ayrıca sönük (bina elektriksiz).
+                    x.SetColor("_BaseColor", ampul ? new Color(0.35f, 0.33f, 0.3f) : new Color(0.86f, 0.84f, 0.8f));
                     Texture2D n = Doku(ad + "_normal");
                     x.SetTexture("_BumpMap", n);
                     if (n != null) x.EnableKeyword("_NORMALMAP"); else x.DisableKeyword("_NORMALMAP");
                     Texture2D ms = Doku(ad + "_ms");
                     x.SetTexture("_MetallicGlossMap", ms);
                     if (ms != null) x.EnableKeyword("_METALLICSPECGLOSSMAP"); else x.DisableKeyword("_METALLICSPECGLOSSMAP");
-                    x.SetFloat("_Smoothness", 1f);   // ms haritası varken çarpan; haritanın A kanalı asıl değer
+                    // ms haritası varken bu değer çarpandır (haritanın A kanalı asıl değer). 0,55: tozlu
+                    // yüzey matlaşır, cilalı ahşap ve deri eskisi kadar parlamaz (#78).
+                    x.SetFloat("_Smoothness", 0.55f);
+                    KirKurucu.KirEkle(x, 3f, 0.9f);
                 });
             }
             mi.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), ad), m);

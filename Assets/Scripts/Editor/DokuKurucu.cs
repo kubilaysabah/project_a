@@ -157,6 +157,8 @@ public static class DokuKurucu
                 m.EnableKeyword("_NORMALMAP");
                 // UV metre cinsinden; doku "Boy" metrede bir tekrar etsin: 1 / Boy kez.
                 m.SetTextureScale("_BaseMap", Vector2.one / k.Boy);
+                // Terk edilmiş dairenin kiri (#78): 2,5 metrede bir tekrar eden leke ve toz katmanı.
+                KirKurucu.KirEkle(m, 0.4f);
                 EditorUtility.SetDirty(m);
                 liste[(kat - 1) * KatKaplamalari.YuzeySayisi + y] = m;
             }
