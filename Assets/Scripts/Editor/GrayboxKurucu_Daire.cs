@@ -120,6 +120,9 @@ public static partial class GrayboxKurucu
             // Giriş: kanadı sahanlıktaki daire kapısı. Geçit: kapısız. İkisinde de yalnızca
             // duvardaki boşluk var; onu OdaKur açtı.
         }
+
+        // Bulmaca eşyaları (#53): her katta bulunan temel takım.
+        DaireEsyalariniKur(daire, d);
     }
 
     // ---------- ODA: DÖŞEME VE DÖRT DUVAR ----------
@@ -398,5 +401,102 @@ public static partial class GrayboxKurucu
         AssetDatabase.CreateAsset(yeni, Yol);
         AssetDatabase.SaveAssets();
         return yeni;
+    }
+
+    // ---------- BULMACA EŞYALARI (#53) ----------
+    // Her dairede, her katta bulunan temel takım. Kata göre değişenler (hangi eşya var, nerede,
+    // içinde ne saklı) #55'in kat içerik verisi olacak; burada yalnızca eşyanın odadaki yeri var.
+    // Konumlar planın (u, y, v) eksenlerinde: duvar eşyasının pivotu duvarın yüzünde, yerdeki
+    // eşyanın pivotu tabanın ortasında (duvardan yarı derinliği kadar içeride).
+    static void DaireEsyalariniKur(Transform daire, DaireYonu d)
+    {
+        GameObject kok = new GameObject("Esyalar");
+        kok.transform.SetParent(daire, false);
+        Transform e = kok.transform;
+
+        // ANTRE: komşu daire tarafındaki duvarda sigorta kutusu (kapağı açılır; sigortalar ve
+        // ana şalter #54'te "sigorta" ve "kol" kilitlerinin parçası olacak).
+        GameObject sigorta = DaireEsyasi("Sigorta_Kutusu", e, d, 1.6f, 1.45f, -0.8f, 0f, 1f,
+                                         "Kapak", "Sigorta_1", "Sigorta_2", "Sigorta_3", "Sigorta_4", "Salter");
+        Acilir(sigorta, "Kapak", AcilirParca.Hareket.Dondur, Vector3.up, 110f, 0.6f);
+
+        // MUTFAK: dip duvarda, pencerenin altında tezgâh; komşu duvarda buzdolabı.
+        GameObject tezgah = DaireEsyasi("Tezgah", e, d, 10.2f, 0f, 1.0f, -1f, 0f,
+                                        "Cekmece_1", "Cekmece_2", "Cekmece_3", "Kapak_1", "Kapak_2");
+        for (int i = 1; i <= 3; i++)
+            Acilir(tezgah, $"Cekmece_{i}", AcilirParca.Hareket.Kaydir, Vector3.forward, 0.38f, 0.45f);
+        // Kapak 1'in menteşesi modelin +x tarafında, serbest kenarı -x'te: pozitif dönüş onu öne
+        // (+Z) açar. Kapak 2 tersi. (Unity'de y ekseninde pozitif dönüş +X'i -Z'ye çevirir.)
+        Acilir(tezgah, "Kapak_1", AcilirParca.Hareket.Dondur, Vector3.up, 100f, 0.6f);
+        Acilir(tezgah, "Kapak_2", AcilirParca.Hareket.Dondur, Vector3.up, -100f, 0.6f);
+        // Kavanoz tezgâhın üstünde, çekmecelerin tarafında, arkaya yakın (tezgâhın kendi ekseninde).
+        if (tezgah != null)
+        {
+            GameObject kavanoz = Model("Kavanoz", tezgah.transform, "Kavanoz", "Kavanoz", new Vector3(0.6f, 0.90f, -0.15f), 0f, carpisma: true);
+            if (kavanoz != null)
+            {
+                Model("Kapak", kavanoz.transform, "Kavanoz", "Kapak", Vector3.zero, 0f, carpisma: true);
+                // Kapak kalkıp yana alınır.
+                Acilir(kavanoz, "Kapak", AcilirParca.Hareket.Kaydir, new Vector3(0.7f, 1f, 0f), 0.12f, 0.4f);
+            }
+        }
+        GameObject buzdolabi = DaireEsyasi("Buzdolabi", e, d, 7.25f, 0f, -0.5f, 0f, 1f, "Kapi");
+        // Menteşe modelin -x tarafında (önündeki oyuncunun sağı), serbest kenar +x'te: negatif
+        // dönüş onu öne açar.
+        Acilir(buzdolabi, "Kapi", AcilirParca.Hareket.Dondur, Vector3.up, -105f, 0.8f);
+
+        // SALON: Oda B tarafındaki duvarda takvim.
+        DaireEsyasi("Takvim", e, d, 5.0f, 1.35f, 6.0f, -1f, 0f);
+
+        // ODA A: arka duvarda, pencerenin solunda komodin.
+        GameObject komodin = DaireEsyasi("Komodin", e, d, 8.1f, 0f, 7.9f, 0f, -1f, "Cekmece");
+        Acilir(komodin, "Cekmece", AcilirParca.Hareket.Kaydir, Vector3.forward, 0.26f, 0.4f);
+
+        // ODA B: salon tarafındaki duvarda oyuncak kutusu; kapının yanındaki duvarda boy cetveli
+        // (0,6 m yükseğe: cetvelin çizgileri gerçek boyu göstersin).
+        GameObject oyuncak = DaireEsyasi("Oyuncak_Kutusu", e, d, 5.3f, 0f, 7.3f, 1f, 0f, "Kapak");
+        // Sandık kapağının menteşesi arka üst kenarda; ön kenar yukarı kalksın diye x ekseninde
+        // NEGATİF dönüş (Unity'de x ekseninde pozitif dönüş +Z'yi aşağı indirir).
+        Acilir(oyuncak, "Kapak", AcilirParca.Hareket.Dondur, Vector3.right, -100f, 0.7f);
+        DaireEsyasi("Boy_Cetveli", e, d, 7.2f, 0.6f, 4.75f, 0f, 1f);
+
+        // ODA C (kiler): yerde alet çantası, dip duvarda kol.
+        GameObject alet = DaireEsyasi("Alet_Cantasi", e, d, 5.2f, 0f, -0.69f, 0f, 1f, "Kapak");
+        Acilir(alet, "Kapak", AcilirParca.Hareket.Dondur, Vector3.right, -100f, 0.5f);
+        DaireEsyasi("Duvar_Kolu", e, d, 6.7f, 1.1f, 1.2f, -1f, 0f, "Kol");
+    }
+
+    // Bir eşyayı planın (u, y, v) noktasına, ön yüzü planın (onU, onV) yönüne bakacak şekilde
+    // kurar. Gövde, dosyanın kendi adını taşıyan parçadır; öbür parçalar (kapak, çekmece)
+    // gövdenin ÇOCUĞU olur ve sıfır konumla eklenir: Model yardımcısı parçanın FBX içindeki
+    // kendi konumunu (örneğin menteşedeki pivotunu) zaten ekliyor, gövdenin dönüşünü de
+    // çocuk olduğu için miras alıyor.
+    static GameObject DaireEsyasi(string ad, Transform ebeveyn, DaireYonu d, float u, float y, float v,
+                                  float onU, float onV, params string[] parcalar)
+    {
+        // Modellerin ön yüzü Unity'de +Z'ye bakar. Atan2(x, z): +Z'yi istenen yöne çeviren açı.
+        Vector3 on = d.Yon(onU, onV);
+        float yDonus = Mathf.Atan2(on.x, on.z) * Mathf.Rad2Deg;
+        GameObject govde = Model(ad, ebeveyn, ad, ad, d.Nokta(u, y, v), yDonus, carpisma: true);
+        if (govde == null) { Debug.LogWarning($"[DAIRE] {ad}.fbx bulunamadı; eşya kurulmadı."); return null; }
+        foreach (string p in parcalar)
+            Model(p, govde.transform, ad, p, Vector3.zero, 0f, carpisma: true);
+        return govde;
+    }
+
+    // Eşyanın bir parçasını açılabilir yapar (AcilirParca). SerializedObject: bileşenin kayıtlı
+    // alanlarını koddan doldurmanın yolu; alanlar özel (private) olduğu için doğrudan yazılamaz.
+    static void Acilir(GameObject govde, string parca, AcilirParca.Hareket hareket, Vector3 eksen, float miktar, float sure)
+    {
+        if (govde == null) return;
+        Transform t = govde.transform.Find(parca);
+        if (t == null) { Debug.LogWarning($"[DAIRE] {govde.name}/{parca} yok; açılır yapılamadı."); return; }
+        AcilirParca a = t.gameObject.AddComponent<AcilirParca>();
+        var seri = new SerializedObject(a);
+        seri.FindProperty("hareket").enumValueIndex = (int)hareket;
+        seri.FindProperty("eksen").vector3Value = eksen;
+        seri.FindProperty("miktar").floatValue = miktar;
+        seri.FindProperty("sure").floatValue = sure;
+        seri.ApplyModifiedPropertiesWithoutUndo();
     }
 }

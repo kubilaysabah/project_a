@@ -740,6 +740,9 @@ public class KatYoneticisi : MonoBehaviour
                 {
                     foreach (IcKapi k in daireler[n].GetComponentsInChildren<IcKapi>(true))
                         k.Ayarla(false);
+                    // Eşyaların çekmece ve kapakları da kapalı başlar.
+                    foreach (AcilirParca p in daireler[n].GetComponentsInChildren<AcilirParca>(true))
+                        p.Ayarla(false);
                     KaplamayiGiydir(n, aKat);
                 }
             }

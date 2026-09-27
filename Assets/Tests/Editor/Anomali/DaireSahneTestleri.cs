@@ -76,6 +76,35 @@ public class DaireSahneTestleri
     }
 
     [Test]
+    public void Her_dairede_bulmaca_esyalari_ve_acilan_parcalari_var()
+    {
+        // Eşya adı -> açılan parçaları. Bir parça eksikse (FBX'te adı değişti, dosya bulunamadı)
+        // kurucu yalnızca uyarı yazar; bu test onu hata olarak yakalar.
+        var esyalar = new System.Collections.Generic.Dictionary<string, string[]>
+        {
+            { "Sigorta_Kutusu", new[] { "Kapak", "Sigorta_1", "Sigorta_2", "Sigorta_3", "Sigorta_4", "Salter" } },
+            { "Tezgah", new[] { "Cekmece_1", "Cekmece_2", "Cekmece_3", "Kapak_1", "Kapak_2", "Kavanoz/Kapak" } },
+            { "Buzdolabi", new[] { "Kapi" } },
+            { "Takvim", new string[0] },
+            { "Komodin", new[] { "Cekmece" } },
+            { "Oyuncak_Kutusu", new[] { "Kapak" } },
+            { "Boy_Cetveli", new string[0] },
+            { "Alet_Cantasi", new[] { "Kapak" } },
+            { "Duvar_Kolu", new[] { "Kol" } },
+        };
+        Transform a = Kok("Sahanlik_A");
+        for (int n = 1; n <= 4; n++)
+            foreach (var esya in esyalar)
+            {
+                Transform t = a.Find($"Daire_{n}/Esyalar/{esya.Key}");
+                Assert.IsNotNull(t, $"Daire_{n}/Esyalar/{esya.Key} yok");
+                Assert.IsNotNull(t.GetComponent<MeshFilter>(), $"{esya.Key} modelsiz (FBX bulunamamış)");
+                foreach (string p in esya.Value)
+                    Assert.IsNotNull(t.Find(p), $"Daire_{n}/Esyalar/{esya.Key}/{p} yok");
+            }
+    }
+
+    [Test]
     public void B_de_ve_sahte_katlarda_daire_yok()
     {
         // Oyuncu yalnızca A'da yürüyor; B'de ve sahte katlarda dört daire daha kurmak sahneyi
