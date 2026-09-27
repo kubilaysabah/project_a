@@ -14,13 +14,15 @@ public static class Cep
 
     public static EsyaTuru Tasinan { get { return envanter.Tasinan; } }
     public static int Kat { get { return envanter.Kat; } }
+    public static string Kimlik { get { return envanter.Kimlik; } }
     public static bool ElBos { get { return envanter.ElBos; } }
 
     public static bool Tasiyor(EsyaTuru tur, int kat = 0) { return envanter.Tasiyor(tur, kat); }
+    public static bool KimligiTasiyor(string kimlik) { return envanter.KimligiTasiyor(kimlik); }
 
-    public static bool Al(EsyaTuru tur, int kat = 0)
+    public static bool Al(EsyaTuru tur, int kat = 0, string kimlik = "")
     {
-        if (!envanter.Al(tur, kat)) return false;
+        if (!envanter.Al(tur, kat, kimlik)) return false;
         Degisti?.Invoke();
         return true;
     }
@@ -28,6 +30,13 @@ public static class Cep
     public static bool Kullan(EsyaTuru tur, int kat = 0)
     {
         if (!envanter.Kullan(tur, kat)) return false;
+        Degisti?.Invoke();
+        return true;
+    }
+
+    public static bool KimlikleKullan(string kimlik)
+    {
+        if (!envanter.KimlikleKullan(kimlik)) return false;
         Degisti?.Invoke();
         return true;
     }

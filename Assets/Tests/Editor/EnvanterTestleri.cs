@@ -46,4 +46,18 @@ public class EnvanterTestleri
         Assert.IsFalse(e.Al(EsyaTuru.Yok));
         Assert.IsTrue(e.ElBos);
     }
+
+    [Test]
+    public void Oda_anahtari_yalniz_kendi_kimligiyle_kullanilir()
+    {
+        // #54: iki oda anahtarı aynı türdedir; hangi kilidi açtığını kimlik söyler.
+        var e = new Envanter();
+        Assert.IsTrue(e.Al(EsyaTuru.OdaAnahtari, 0, "odaA_anahtari"));
+        Assert.IsTrue(e.KimligiTasiyor("odaA_anahtari"));
+        Assert.IsFalse(e.KimligiTasiyor("odaB_anahtari"));
+        Assert.IsFalse(e.KimlikleKullan("odaB_anahtari"), "başka odanın anahtarıyla açılmamalı");
+        Assert.IsTrue(e.KimlikleKullan("odaA_anahtari"));
+        Assert.IsTrue(e.ElBos);
+        Assert.AreEqual("", e.Kimlik, "el boşalınca kimlik de silinir");
+    }
 }

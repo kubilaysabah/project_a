@@ -14,6 +14,7 @@ public enum EsyaTuru
 {
     Yok,
     KatAnahtari,    // kilitli kat kapısını açar (#52)
+    OdaAnahtari,    // dairedeki tek bir kilidi açar; hangisi olduğu Kimlik'te (#54)
     Sigorta,        // sigorta kutusuna takılır (#54)
     Tornavida,      // menteşe söker (#54)
     Not             // okunur, panoya asılır (#56)
@@ -27,17 +28,22 @@ public class Envanter
     /// <summary>Eşyanın hangi kata ait olduğu (kat anahtarı için); diğerlerinde 0.</summary>
     public int Kat { get; private set; }
 
+    /// <summary>Eşyanın zincirdeki kimliği ("odaA_anahtari"); kimliksiz eşyalarda boş.
+    /// Oda anahtarı yalnızca kimliği kilidin istediği kimlik olan kilidi açar.</summary>
+    public string Kimlik { get; private set; } = "";
+
     public bool ElBos { get { return Tasinan == EsyaTuru.Yok; } }
 
     /// <summary>
     /// Eşyayı almaya çalışır. El doluysa alınmaz ve false döner: oyuncu önce elindekini
     /// kullanmalı. (Tek eşya kuralı burada, tek yerde uygulanır.)
     /// </summary>
-    public bool Al(EsyaTuru tur, int kat = 0)
+    public bool Al(EsyaTuru tur, int kat = 0, string kimlik = "")
     {
         if (tur == EsyaTuru.Yok || !ElBos) return false;
         Tasinan = tur;
         Kat = kat;
+        Kimlik = kimlik ?? "";
         return true;
     }
 
@@ -47,12 +53,25 @@ public class Envanter
         return Tasinan == tur && (kat == 0 || Kat == kat);
     }
 
+    /// <summary>Eldeki eşyanın kimliği bu mu? (Oda anahtarı, sigorta, tornavida zincirde kimlikle aranır.)</summary>
+    public bool KimligiTasiyor(string kimlik)
+    {
+        return !ElBos && !string.IsNullOrEmpty(kimlik) && Kimlik == kimlik;
+    }
+
     /// <summary>Eşya kullanıldı: el boşalır. Kullanılacak eşya elde değilse false döner.</summary>
     public bool Kullan(EsyaTuru tur, int kat = 0)
     {
         if (!Tasiyor(tur, kat)) return false;
-        Tasinan = EsyaTuru.Yok;
-        Kat = 0;
+        Bosalt();
+        return true;
+    }
+
+    /// <summary>Kimliği verilen eşya elde ise kullanır (el boşalır); değilse false.</summary>
+    public bool KimlikleKullan(string kimlik)
+    {
+        if (!KimligiTasiyor(kimlik)) return false;
+        Bosalt();
         return true;
     }
 
@@ -61,5 +80,6 @@ public class Envanter
     {
         Tasinan = EsyaTuru.Yok;
         Kat = 0;
+        Kimlik = "";
     }
 }

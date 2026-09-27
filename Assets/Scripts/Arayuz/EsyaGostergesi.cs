@@ -66,7 +66,10 @@ public class EsyaGostergesi : MonoBehaviour
         GUI.color = new Color(0f, 0f, 0f, 0.45f);
         GUI.DrawTexture(kutu, Texture2D.whiteTexture);
         GUI.color = new Color(0.9f, 0.78f, 0.45f, 1f);        // pirinç sarısı
-        Texture2D t = Cep.Tasinan == EsyaTuru.KatAnahtari ? anahtar : Cep.Tasinan == EsyaTuru.Sigorta ? sigorta
+        // Oda anahtarı da kat anahtarı gibi anahtar simgesiyle çizilir; rengi gümüş (aşağıda).
+        if (Cep.Tasinan == EsyaTuru.OdaAnahtari) GUI.color = new Color(0.78f, 0.80f, 0.82f, 1f);
+        bool anahtarMi = Cep.Tasinan == EsyaTuru.KatAnahtari || Cep.Tasinan == EsyaTuru.OdaAnahtari;
+        Texture2D t = anahtarMi ? anahtar : Cep.Tasinan == EsyaTuru.Sigorta ? sigorta
                     : Cep.Tasinan == EsyaTuru.Tornavida ? tornavida : not;
         GUI.DrawTexture(new Rect(kutu.x + 8f, kutu.y + 8f, 48f, 48f), t);
         GUI.color = Color.white;
