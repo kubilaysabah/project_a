@@ -158,6 +158,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
     - Kimlik: mutfak
@@ -173,6 +174,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
     - Kimlik: salon
@@ -188,6 +190,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler:
       - salon_anahtari_bas
       - salon_anahtari_uc
@@ -205,6 +208,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler:
       - levye
       - kaydirici
@@ -222,6 +226,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
   notlar:
@@ -248,4 +253,10 @@ MonoBehaviour:
   ikinciDaire: 0
   ikinciKaplamaKati: 0
   esyaYazilari: []
+  kapiNumarasi: 
+  girisKapali: 0
+  sahanlikKarti: {fileID: 0}
+  tiklatmaSesi: {fileID: 0}
+  yanlisKapiSesleri: []
+  elektrikYok: 0
   cizimBoyu: 0.3

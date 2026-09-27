@@ -20,6 +20,8 @@ ipucu.it	İT	PUSH
 ipucu.cevir	ÇEVİR	TURN
 ipucu.agir	AĞIR	TOO HEAVY
 ipucu.koy	KOY	PLACE
+ipucu.cal	KAPIYI ÇAL	KNOCK
+ipucu.kanirt	KANIRT	PRY OPEN
 ipucu.kir	KIR	BREAK
 
 # ---- Yönetici notu (açılış) ----
@@ -35,6 +37,9 @@ not.kat5_liste	İŞ LİSTESİ — Daire 18\n1. Banyo lavabosu damlatıyor. Sifon
 not.kat6_davet	Bu akşam sofrayı kuruyoruz.\nDördümüz de geleceğiz: Rıza Efendi, Hasan, Cemal.\nSenin yerin de hazır.\nTabakları yerli yerine koymayı unutma.\n\n— Yönetim	We are setting the table tonight.\nAll four of us will be there: Rıza Efendi, Hasan, Cemal.\nYour seat is ready too.\nDon't forget to put the plates in their places.\n\n— The Management
 not.kat6_kol	Bu kolu çektim, yan dairede bir kapı tık diye açıldı.\nİki daire birbirine bağlı gibi.\nBir daha dokunmayacağım.\n\n— C.	I pulled this lever and a door clicked open in the flat next door.\nIt is as if the two flats are connected.\nI won't touch it again.\n\n— C.
 not.kat6_takvim	Kilerin şifresi mi?\nYandaki dairenin takvimine bak.\nOrada hep aynı yıl yazıyor.\n\n— C.	The pantry code?\nLook at the calendar in the flat next door.\nIt always shows the same year.\n\n— C.
+not.kat7_cemal	Bu katta bütün kapılar 13 oldu. Hangisi benimki, ben bile şaşırıyorum.\nBenim kapımın önünde paspas yok, terliklerimi içeri aldım.\nGözetleme deliğimden hep ışık sızar.\nÖbür kapıları çalma. Ardından cevap veriyorlar.\n\n— Cemal	Every door on this floor turned into 13. Even I mix up which one is mine.\nThere is no doormat in front of my door, I took my slippers inside.\nLight always leaks through my peephole.\nDon't knock on the other doors. Something answers.\n\n— Cemal
+not.kat7_kimlik	T.C. NÜFUS CÜZDANI\n\nAdı: CEMAL\nSoyadı: YILMAZ\nBaba Adı: OSMAN\nDoğum Yeri: SİVAS\nDoğum Tarihi: 11.07.1961	REPUBLIC OF TURKEY IDENTITY CARD\n\nName: CEMAL\nSurname: YILMAZ\nFather's name: OSMAN\nPlace of birth: SİVAS\nDate of birth: 11.07.1961
+not.kat7_son	Asansör beni bekliyor.\nDokuzuncu kata çıkıyorum; Rıza Efendi de Hasan da oraya çıktı.\nAnahtarı sandığa koydum, levye olmadan açılmaz.\nArkamdan gelme.\n\n— Cemal	The lift is waiting for me.\nI am going up to the ninth floor; Rıza Efendi and Hasan went up there too.\nI put the key in the chest; it won't open without a crowbar.\nDon't come after me.\n\n— Cemal
 not.kapat	{0}: kapat	{0}: close
 
 # ---- Jenerik: ilk satır başlık, boş satırlar aralık ----

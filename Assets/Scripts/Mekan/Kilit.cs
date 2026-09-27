@@ -57,6 +57,9 @@ public class Kilit : MonoBehaviour
                     return ParcalarTamam() ? Dil.Getir("ipucu.ac") : Dil.Getir("ipucu.kilitli");
                 case KilitTuru.Ekipman:
                     // Aletler tamamsa "İT", değilse "AĞIR": oyuncu neden kıpırdamadığını anlasın.
+                    // Veride kendi istemi varsa (sandık: "KANIRT") o; yoksa gardırobun "İT / AĞIR"ı.
+                    if (!string.IsNullOrEmpty(Veri.IpucuMetni))
+                        return EkipmanTamam() ? Dil.Getir(Veri.IpucuMetni) : Dil.Getir("ipucu.kilitli");
                     return EkipmanTamam() ? Dil.Getir("ipucu.it") : Dil.Getir("ipucu.agir");
                 default:
                     return Dil.Getir("ipucu.kilitli");

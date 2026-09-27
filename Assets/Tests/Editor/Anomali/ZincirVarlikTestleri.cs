@@ -92,6 +92,29 @@ public class ZincirVarlikTestleri
         finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
     }
 
+    // #67: katın sahanlık kartının hedefleri sahanlıkta var mı (gerçek kapının farkları).
+    [Test]
+    public void Sahanlik_kartlarinin_hedefleri_sahanlikta_var()
+    {
+        Scene sahne = EditorSceneManager.OpenScene(SahneYolu, OpenSceneMode.Additive);
+        try
+        {
+            Transform a = null;
+            foreach (GameObject g in sahne.GetRootGameObjects()) if (g.name == "Sahanlik_A") a = g.transform;
+            foreach (string guid in AssetDatabase.FindAssets("t:ScriptableObject", new[] { "Assets/Zincirler" }))
+            {
+                string yol = AssetDatabase.GUIDToAssetPath(guid);
+                ScriptableObject v = AssetDatabase.LoadAssetAtPath<ScriptableObject>(yol);
+                var alan = v.GetType().GetField("sahanlikKarti");
+                AnomaliKarti kart = alan != null ? alan.GetValue(v) as AnomaliKarti : null;
+                if (kart == null) continue;
+                foreach (AnomaliEtkisi e in kart.Etkiler)
+                    Assert.IsNotNull(a.Find(e.hedefYol), $"{yol}: sahanlık kartının hedefi '{e.hedefYol}' yok");
+            }
+        }
+        finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
+    }
+
     // #62: katın kendiliğinden çalan eşyaları. Kat dosyasının sınıfı oyun derlemesinde
     // (Assembly-CSharp) olduğu için test onu alan adlarıyla, yansımayla (reflection) okur.
     [Test]

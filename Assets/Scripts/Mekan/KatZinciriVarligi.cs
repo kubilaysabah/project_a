@@ -106,6 +106,20 @@ public class KatZinciriVarligi : ScriptableObject
     public int ikinciDaire;
     public int ikinciKaplamaKati;
     public List<EsyaYazisi> esyaYazilari = new List<EsyaYazisi>();
+
+    // ---------- SAHANLIK (#67, 7. kat: gözlem) ----------
+    // Doluysa bu katta sahanlıktaki dört kapının hepsinde bu numara yazar ("13").
+    public string kapiNumarasi = "";
+    // İşaretliyse açık dairenin sahanlık kapısı kapalı başlar; dört kapı da "KAPIYI ÇAL" der:
+    // gerçek olan açılır, öbürlerinde bir olay olur (SahanlikKapisi).
+    public bool girisKapali;
+    // Bu katta sahanlığa uygulanan senaryolu kart (rastgele anomalinin yerine): gerçek kapının
+    // farkları (paspas yok, terlikler yok, gözetleme deliğinden ışık) gibi.
+    public AnomaliKarti sahanlikKarti;
+    public AudioClip tiklatmaSesi;                                     // kapıyı çalma sesi
+    public List<AudioClip> yanlisKapiSesleri = new List<AudioClip>();  // yanlış kapının ardından gelen sesler
+    // İşaretliyse daire bu katta hiç elektrik almaz (sigortasız): fosforlu yazılar görünür.
+    public bool elektrikYok;
     // Parçaların yere serilen kâğıdının gerçek boyu (metre): resmin bütünü bu kadar geniş olurdu.
     public float cizimBoyu = 0.30f;
 }

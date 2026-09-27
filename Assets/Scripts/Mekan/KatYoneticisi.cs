@@ -672,6 +672,9 @@ public class KatYoneticisi : MonoBehaviour
 
         NumaralariYaz(aNumaralar, aKat);
         NumaralariYaz(bNumaralar, bKat);
+        // Kat dosyası bütün kapılara tek bir numara verebilir (#67: 7. katta dördü de "13").
+        OzelNumaraYaz(aNumaralar, aKat);
+        OzelNumaraYaz(bNumaralar, bKat);
 
         // Açık daire (#53): kart uygulanmadan ÖNCE. Kart bir kapıyı döndürüyorsa (aralık kapı
         // gibi) önce bizim verdiğimiz açıyı kaydeder, geri alırken ona döner; sıra ters olsaydı
@@ -679,6 +682,9 @@ public class KatYoneticisi : MonoBehaviour
         DaireleriAyarla(aKat, cati ? 0 : bKat);
 
         IAnomaliKart aKart = KartSec(aKat);
+        // Katın senaryolu sahanlık kartı varsa rastgele kartın yerine o uygulanır (#67).
+        KatZinciriVarligi aVarlik = VarlikBul(aKat);
+        if (aVarlik != null && aVarlik.sahanlikKarti != null) aKart = aVarlik.sahanlikKarti;
         IAnomaliKart bKart = cati ? null : KartSec(bKat);
 
         if (sahanlikA != null) uygulayiciA.Uygula(aKart as AnomaliKarti, sahanlikA);
@@ -822,6 +828,8 @@ public class KatYoneticisi : MonoBehaviour
             SahanlikKapisiniAyarla(sahanlikA, n, acik, gercekDaire: true);
             SahanlikKapisiniAyarla(sahanlikB, n, n == bAcik, gercekDaire: false);
         }
+
+        GirisKapilariniAyarla(aAcik, aKat, varlik);
 
         // O katın kilit zinciri (yoksa daire kilitsiz): iki daire de açıldıktan SONRA kurulur,
         // çünkü zincir iki daireye yayılabilir (#70).
@@ -974,6 +982,44 @@ public class KatYoneticisi : MonoBehaviour
         for (int d = 0; d < numaralar.Length; d++)
         {
             if (numaralar[d] != null) numaralar[d].text = (4 * kat - 3 + d).ToString();
+        }
+    }
+
+    private void OzelNumaraYaz(TextMesh[] numaralar, int kat)
+    {
+        KatZinciriVarligi v = VarlikBul(kat);
+        if (v == null || string.IsNullOrEmpty(v.kapiNumarasi)) return;
+        foreach (TextMesh t in numaralar) if (t != null) t.text = v.kapiNumarasi;
+    }
+
+    // ---------- SAHANLIK KAPILARI (#67) ----------
+    // "Giriş kapalı" katta dört kapıya SahanlikKapisi eklenir: gerçek olan (açık daireninki)
+    // çalınınca açılır, öbürleri bir olay tetikler. Başka katlarda bileşenler sökülür.
+    private void GirisKapilariniAyarla(int acikDaire, int kat, KatZinciriVarligi varlik)
+    {
+        if (sahanlikA == null) return;
+        bool kapali = varlik != null && varlik.girisKapali && acikDaire > 0;
+        for (int n = 1; n <= MekanOlculeri.DaireSayisi; n++)
+        {
+            Transform kapi = sahanlikA.Find($"Kapi_{n}");
+            if (kapi == null) continue;
+            SahanlikKapisi sk = kapi.GetComponent<SahanlikKapisi>();
+            if (!kapali)
+            {
+                if (sk != null) DestroyImmediate(sk);
+                continue;
+            }
+            if (sk == null) sk = kapi.gameObject.AddComponent<SahanlikKapisi>();
+            bool gercek = n == acikDaire;
+            sk.Hazirla(gercek, kat, "giris", varlik.tiklatmaSesi, varlik.yanlisKapiSesleri);
+            if (!gercek) continue;
+            // Gerçek kapı: daha önce açıldıysa (kayıt) açık, değilse kapalı başlar.
+            if (Kayit.KilitCozukMu(kat, "giris")) sk.AcikBaslat();
+            else
+            {
+                Transform mentese = kapi.Find("Mentese");
+                if (mentese != null) mentese.localRotation = Quaternion.identity;
+            }
         }
     }
 

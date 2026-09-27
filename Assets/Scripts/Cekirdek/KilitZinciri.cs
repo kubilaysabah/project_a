@@ -99,6 +99,9 @@ public class ZincirKilidi
     // Yalnızca Şifre (#64): ipucu karanlıkta parlayan boyayla yazılmış; yalnızca kafa lambası
     // kapalıyken ve dairede elektrik yokken görünür (KaranliktaParlayan). Kural için fark etmez.
     public bool IpucuKaranlikta;
+    // Yalnızca Şifre (#67): ipucu bir notta (nüfus cüzdanı gibi) okunuyor; yerine yazı yazılmaz.
+    // Kural yine ipucu yerine (notun durduğu yer) ulaşılmasını ister.
+    public bool IpucuYazma;
     // Yalnızca Ekipman (#65): gereken aletlerin eşya kimlikleri (levye, kaydırıcı...). Hepsi
     // bulununca kilit açılır; aletler bitmez.
     public List<string> Gerekenler = new List<string>();

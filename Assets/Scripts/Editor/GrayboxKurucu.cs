@@ -577,6 +577,18 @@ public static partial class GrayboxKurucu
         // Kapı gözü: kanadın ortasında, göz hizasında. Kanatla birlikte döner.
         Kutu("Kapi_Gozu", m, new Vector3(-yon * 0.035f, 1.60f, kanatZ),
              new Vector3(0.03f, 0.05f, 0.05f));
+        // Gözetleme deliğinden sızan ışık (#67): içeride biri varmış gibi. Kapalı kurulur; 7. katın
+        // kartı yalnızca gerçek kapınınkini açar (gözlem ipucu). Küçük ve sıcak, gölgesiz.
+        GameObject gozIsik = new GameObject("Kapi_Gozu_Isik");
+        gozIsik.transform.SetParent(m, false);
+        gozIsik.transform.localPosition = new Vector3(-yon * 0.09f, 1.60f, kanatZ);
+        Light gl = gozIsik.AddComponent<Light>();
+        gl.type = LightType.Point;
+        gl.color = new Color(1f, 0.78f, 0.45f);
+        gl.intensity = 0.15f;       // 0,35 kapının üst yarısını parlatıp gerçeği bağırıyordu
+        gl.range = 0.6f;
+        gl.shadows = LightShadows.None;
+        gozIsik.SetActive(false);
 
         // ---- KAPI ÇEVRESİ EŞYALARI ----
         // Zil: kapının yanında, duvarda.

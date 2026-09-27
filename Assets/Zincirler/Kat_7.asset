@@ -1,0 +1,315 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
+  m_Name: Kat_7
+  m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
+  aciklama: "7. kat, daire 1, Cemal'in dairesi (g\xF6zlem). Sahanl\u0131kta d\xF6rt
+    '13' kap\u0131s\u0131, ger\xE7e\u011Fi Cemal'in notundaki farklarla bulunur;
+    yanl\u0131\u015F kap\u0131 bir olay tetikler. Elektriksiz daire, yedi kilit:
+    banyo (mente\u015Fe), salon (do\u011Fum g\xFCn\xFC 1107, n\xFCfus c\xFCzdan\u0131
+    banyoda), kiler (anahtar b\xFCfede), mutfak (kiler kolu), Oda A (k\u0131r\u0131k
+    anahtar), Oda B (fosforlu 0913), sand\u0131k (levye) -> kat\u0131n anahtar\u0131."
+  zincir:
+    KapaliOdalar: []
+    Yerler:
+    - Kimlik: antre_yer
+      Yol: 
+      Oda: Antre
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 2
+      Y: 0.004
+      V: -0.4
+      Donus: 70
+      OnU: 0
+      OnV: 0
+    - Kimlik: b_kimlik
+      Yol: Esyalar/Lavabo
+      Oda: Banyo
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: salon_bufe
+      Yol: Esyalar/Bufe
+      Oda: Salon
+      KilitYolu: Esyalar/Bufe/Kapi_2
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: kiler_kolu
+      Yol: Esyalar/Duvar_Kolu/Kol
+      Oda: Oda_C
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: mutfak_cekmece
+      Yol: Esyalar/Tezgah/Cekmece_1
+      Oda: Mutfak
+      KilitYolu: 
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: odaA_duvar
+      Yol: 
+      Oda: Oda_A
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 10.45
+      Y: 1.6
+      V: 6.4
+      Donus: 0
+      OnU: -1
+      OnV: 0
+    - Kimlik: odaA_yer
+      Yol: 
+      Oda: Oda_A
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 8.6
+      Y: 0.004
+      V: 5.6
+      Donus: -30
+      OnU: 0
+      OnV: 0
+    - Kimlik: sandik
+      Yol: Esyalar/Oyuncak_Kutusu
+      Oda: Oda_B
+      KilitYolu: Esyalar/Oyuncak_Kutusu/Kapak
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    Esyalar:
+    - Kimlik: tornavida
+      Tur: 4
+      Yer: antre_yer
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
+    - Kimlik: kiler_anahtari
+      Tur: 2
+      Yer: salon_bufe
+      X: -0.45
+      Y: 0.105
+      Z: 0
+      Donus: 20
+    - Kimlik: odaA_anahtari_bas
+      Tur: 9
+      Yer: salon_bufe
+      X: -0.22
+      Y: 0.105
+      Z: 0
+      Donus: -40
+    - Kimlik: odaA_anahtari_uc
+      Tur: 9
+      Yer: mutfak_cekmece
+      X: 0.59
+      Y: 0.64
+      Z: 0.04
+      Donus: 50
+    - Kimlik: levye
+      Tur: 7
+      Yer: odaA_yer
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
+    - Kimlik: kat_anahtari
+      Tur: 1
+      Yer: sandik
+      X: 0
+      Y: 0.03
+      Z: 0
+      Donus: 20
+    Kilitler:
+    - Kimlik: banyo
+      Tur: 4
+      OdaKapisi: 1
+      Hedef: Banyo
+      Gerekli: tornavida
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: salon
+      Tur: 1
+      OdaKapisi: 1
+      Hedef: Salon
+      Gerekli: b_kimlik
+      Sifre: 1107
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 1
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: kiler
+      Tur: 0
+      OdaKapisi: 1
+      Hedef: Oda_C
+      Gerekli: kiler_anahtari
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: mutfak
+      Tur: 2
+      OdaKapisi: 1
+      Hedef: Mutfak
+      Gerekli: kiler_kolu
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: odaA
+      Tur: 7
+      OdaKapisi: 1
+      Hedef: Oda_A
+      Gerekli: 
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler:
+      - odaA_anahtari_bas
+      - odaA_anahtari_uc
+      Yuvalar: []
+    - Kimlik: odaB
+      Tur: 1
+      OdaKapisi: 1
+      Hedef: Oda_B
+      Gerekli: odaA_duvar
+      Sifre: 0913
+      IpucuMetni: 0913
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 4
+      Parcalar: []
+      IpucuKaranlikta: 1
+      IpucuYazma: 0
+      Gerekenler: []
+      Yuvalar: []
+    - Kimlik: sandik
+      Tur: 6
+      OdaKapisi: 0
+      Hedef: sandik
+      Gerekli: 
+      Sifre: 
+      IpucuMetni: ipucu.kanirt
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+      IpucuYazma: 0
+      Gerekenler:
+      - levye
+      Yuvalar: []
+  notlar:
+  - Yol: Sahanlik:Ilan
+    X: 0.45
+    Y: 0
+    Z: 0.004
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat7_cemal
+  - Yol: Esyalar/Lavabo
+    X: 0
+    Y: 1.25
+    Z: 0.004
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat7_kimlik
+  - Yol: 
+    X: 5.45
+    Y: 1.4
+    Z: 8.098
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Metin: not.kat7_son
+  suslar: []
+  sesler: []
+  parcalar: []
+  yananOdalar: []
+  ikinciDaire: 0
+  ikinciKaplamaKati: 0
+  esyaYazilari: []
+  kapiNumarasi: 13
+  girisKapali: 1
+  sahanlikKarti: {fileID: 11400000, guid: 5973880b13c192a4ab54230721a4cc3e, type: 2}
+  tiklatmaSesi: {fileID: 8300000, guid: 482b44ee12097e34d8f3ffff5677158a, type: 3}
+  yanlisKapiSesleri:
+  - {fileID: 8300000, guid: bff77e25bb9c043429a8aeee2826c1a7, type: 3}
+  - {fileID: 8300000, guid: af9816777413f174ea533e4d2e4eddb5, type: 3}
+  - {fileID: 8300000, guid: d2db20a2738e5e1458ef44b452ce6c8c, type: 3}
+  elektrikYok: 1
+  cizimBoyu: 0.3

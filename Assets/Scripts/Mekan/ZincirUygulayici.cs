@@ -215,6 +215,8 @@ public class ZincirUygulayici
     {
         if (varlik == null) return;
         DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
+        // Elektriksiz kat (#67): sigorta kilidi olmadan da daire karanlık; fosforlu yazı görünür.
+        if (varlik.elektrikYok) Elektrik(daire).Ayarla(false);
         // Yırtık çizim (#63): dairenin köküne çizim ekranı; konan parçalar kendi bölgelerini gösterir.
         if (varlik.parcalar != null && varlik.parcalar.Count > 0)
         {
@@ -494,6 +496,7 @@ public class ZincirUygulayici
     // kata göre biçimlenecek (takvimde işaretli gün gibi); şimdilik verideki metin ya da şifre.
     private void IpucuYaz(Transform daire, KilitZinciri zincir, ZincirKilidi veri)
     {
+        if (veri.IpucuYazma) return;   // ipucu bir notta (#67)
         Transform yer = YerYolu(daire, zincir, veri.Gerekli);
         if (yer == null) return;
         GameObject g = new GameObject("Zincir_Ipucu_" + veri.Kimlik);

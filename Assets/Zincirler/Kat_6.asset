@@ -256,6 +256,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
     - Kimlik: a_mutfak
@@ -271,6 +272,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
     - Kimlik: a_odaA
@@ -286,6 +288,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler:
       - odaA_anahtari_bas
       - odaA_anahtari_uc
@@ -303,6 +306,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
     - Kimlik: b_odaA
@@ -318,6 +322,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
     - Kimlik: bufe
@@ -333,6 +338,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler:
       - tabak_riza
       - tabak_hasan
@@ -434,4 +440,10 @@ MonoBehaviour:
     Metin: bina.isim_kapici
     Yukseklik: 0.02
     Boy: 0.0019
+  kapiNumarasi: 
+  girisKapali: 0
+  sahanlikKarti: {fileID: 0}
+  tiklatmaSesi: {fileID: 0}
+  yanlisKapiSesleri: []
+  elektrikYok: 0
   cizimBoyu: 0.3

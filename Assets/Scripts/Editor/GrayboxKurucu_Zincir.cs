@@ -70,6 +70,7 @@ public static partial class GrayboxKurucu
         KatZinciriVarligi kat4 = Kat4Kur();
         KatZinciriVarligi kat5 = Kat5Kur();
         KatZinciriVarligi kat6 = Kat6Kur(isimKarti);
+        KatZinciriVarligi kat7 = Kat7Kur();
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
@@ -106,11 +107,12 @@ public static partial class GrayboxKurucu
         katlar.GetArrayElementAtIndex(3).objectReferenceValue = kat4;
         katlar.GetArrayElementAtIndex(4).objectReferenceValue = kat5;
         katlar.GetArrayElementAtIndex(5).objectReferenceValue = kat6;
+        katlar.GetArrayElementAtIndex(6).objectReferenceValue = kat7;
         seri.ApplyModifiedPropertiesWithoutUndo();
 
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
-        Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-6. katlar kuruldu ve bağlandı.");
+        Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-7. katlar kuruldu ve bağlandı.");
     }
 
     static void KlasorHazirla(string ust, string ad)
@@ -694,6 +696,133 @@ public static partial class GrayboxKurucu
         else Debug.Log("[ZINCIR] 6. kat zinciri çözülebilir: " + string.Join(" -> ", s6.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
+    }
+
+    // ---------- 7. KAT: GÖZLEM + CEMAL'İN DAİRESİ (#67, #58, Docs/hikaye.md §7) ----------
+    // SAHANLIK: dört kapının hepsinde "13", dördü de kapalı. Cemal'in notu (sahanlıktaki ilan
+    // panosunun yanında): "benim kapımın önünde paspas yok, terliklerimi içeri aldım, gözetleme
+    // deliğimde ışık yanar". Gerçek kapı 1 numaralı dairenin (Kapi_1); kartı bu farkları verir.
+    // Yanlış kapıyı çalmak bir olay tetikler (ses + kafa lambası titrer).
+    // DAİRE (elektriksiz): yedi kilit, iç içe:
+    //   banyo  : menteşe (tornavida; kapıcıda değilse antrede yerde)
+    //   salon  : şifre = Cemal'in doğum günü (1107); nüfus cüzdanı banyoda, lavabonun üstünde
+    //   kiler  : anahtarı salondaki büfenin sağ dolabında
+    //   mutfak : kilerdeki kol
+    //   odaA   : kırık anahtar (başı büfede, ucu mutfak çekmecesinde)
+    //   odaB   : şifre 0913, yatak odasının duvarında fosforlu boyayla (lamba kapalıyken görünür)
+    //   sandik : Cemal'in sandığı (Oda B'deki sandık) levyeyle kanırtılır; içinde katın anahtarı
+    // Cemal'in son notu Oda B'nin duvarında: "Asansör beni bekliyor."
+    static KatZinciriVarligi Kat7Kur()
+    {
+        string yol = $"{ZincirKlasoru}/Kat_7.asset";
+        KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
+        if (v == null)
+        {
+            v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
+            AssetDatabase.CreateAsset(v, yol);
+        }
+        v.aciklama = "7. kat, daire 1, Cemal'in dairesi (gözlem). Sahanlıkta dört '13' kapısı, gerçeği Cemal'in notundaki farklarla " +
+                     "bulunur; yanlış kapı bir olay tetikler. Elektriksiz daire, yedi kilit: banyo (menteşe), salon (doğum günü 1107, " +
+                     "nüfus cüzdanı banyoda), kiler (anahtar büfede), mutfak (kiler kolu), Oda A (kırık anahtar), Oda B (fosforlu 0913), " +
+                     "sandık (levye) -> katın anahtarı.";
+        v.kapiNumarasi = "13";
+        v.girisKapali = true;
+        v.sahanlikKarti = GercekKapiKarti();
+        v.tiklatmaSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
+        v.yanlisKapiSesleri = new List<AudioClip>
+        {
+            AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Carpma.wav"),
+            AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Bebek_Ters.wav"),
+            AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Zil_DingDong.wav"),
+        };
+        v.elektrikYok = true;
+        v.ikinciDaire = 0;
+
+        var z = new KilitZinciri();
+        z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 2.0f, Y = 0.004f, V = -0.4f, Donus = 70f });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_kimlik", Yol = "Esyalar/Lavabo", Oda = "Banyo" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_bufe", Yol = "Esyalar/Bufe", Oda = "Salon", KilitYolu = "Esyalar/Bufe/Kapi_2" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "mutfak_cekmece", Yol = "Esyalar/Tezgah/Cekmece_1", Oda = "Mutfak" });
+        // Yatak odasının dip duvarı (u = 10,5); yazı 5 cm önünde, göz hizasının üstünde, odaya (-u) bakar.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "odaA_duvar", PlandaNokta = true, Oda = "Oda_A", U = 10.45f, Y = 1.60f, V = 6.4f, OnU = -1f, OnV = 0f });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "odaA_yer", PlandaNokta = true, Oda = "Oda_A", U = 8.6f, Y = 0.004f, V = 5.6f, Donus = -30f });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "sandik", Yol = "Esyalar/Oyuncak_Kutusu", Oda = "Oda_B", KilitYolu = "Esyalar/Oyuncak_Kutusu/Kapak" });
+
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "antre_yer" });
+        // Büfenin sağ dolabı Unity'de -x tarafında (Blender +x); taban 0,10 m.
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kiler_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "salon_bufe", X = -0.45f, Y = 0.105f, Donus = 20f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_bas", Tur = EsyaTuru.AnahtarParcasi, Yer = "salon_bufe", X = -0.22f, Y = 0.105f, Donus = -40f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "mutfak_cekmece", X = 0.59f, Y = 0.64f, Z = 0.04f, Donus = 50f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "levye", Tur = EsyaTuru.Levye, Yer = "odaA_yer" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "sandik", Y = 0.03f, Donus = 20f });
+
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "banyo", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "Banyo", Gerekli = "tornavida" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "salon", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Salon", Gerekli = "b_kimlik",
+                                          Sifre = "1107", IpucuYazma = true });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "kiler", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_C", Gerekli = "kiler_anahtari" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "mutfak", Tur = KilitTuru.Kol, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "kiler_kolu" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.KirikAnahtar, OdaKapisi = true, Hedef = "Oda_A",
+                                          Gerekenler = new List<string> { "odaA_anahtari_bas", "odaA_anahtari_uc" } });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaB", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_B", Gerekli = "odaA_duvar",
+                                          Sifre = "0913", IpucuMetni = "0913", IpucuOlcek = 4f, IpucuKaranlikta = true });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "sandik", Tur = KilitTuru.Ekipman, OdaKapisi = false, Hedef = "sandik",
+                                          Gerekenler = new List<string> { "levye" }, IpucuMetni = "ipucu.kanirt" });
+        v.zincir = z;
+
+        v.notlar = new List<KatNotu>
+        {
+            // Cemal'in notu sahanlıkta, ilan panosunun yanında (gözlem ipucu, kapılardan önce okunur).
+            new KatNotu { Metin = "not.kat7_cemal", Yol = "Sahanlik:Ilan", X = 0.45f, Y = 0f, Z = 0.004f },
+            // Nüfus cüzdanı banyoda, lavabonun üstünde duvarda (lavabonun pivotu duvarın dibinde).
+            new KatNotu { Metin = "not.kat7_kimlik", Yol = "Esyalar/Lavabo", X = 0f, Y = 1.25f, Z = 0.004f },
+            // Cemal'in son notu Oda B'nin arka duvarında (v = 8,1), odaya (-v) bakar.
+            new KatNotu { Metin = "not.kat7_son", X = 5.45f, Y = 1.40f, Z = 8.098f, OnU = 0f, OnV = -1f },
+        };
+        v.parcalar = new List<KatParcasi>();
+        v.suslar = new List<KatSusu>();
+        v.sesler = new List<KatSesi>();
+        v.yananOdalar = new List<string>();
+        v.esyaYazilari = new List<EsyaYazisi>();
+
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        KilitZinciri.Sonuc s7 = z.Cozumle(odalar);
+        if (!s7.Cozulebilir) Debug.LogError("[ZINCIR] 7. kat zinciri çözülemiyor: " + string.Join("; ", s7.Hatalar));
+        else Debug.Log("[ZINCIR] 7. kat zinciri çözülebilir: " + string.Join(" -> ", s7.AcilanKilitler));
+        EditorUtility.SetDirty(v);
+        return v;
+    }
+
+    // 7. katın sahanlık kartı (#67): gerçek kapının (Kapi_1) farkları. Rastgele seçilen kartların
+    // klasöründe (Resources/Anomaliler) DEĞİL: yalnızca kat dosyasından uygulanır.
+    static AnomaliKarti GercekKapiKarti()
+    {
+        const string Yol = "Assets/Zincirler/Kart_Kat7_GercekKapi.asset";
+        AnomaliKarti k = AssetDatabase.LoadAssetAtPath<AnomaliKarti>(Yol);
+        if (k == null)
+        {
+            k = ScriptableObject.CreateInstance<AnomaliKarti>();
+            AssetDatabase.CreateAsset(k, Yol);
+        }
+        var s = new SerializedObject(k);
+        s.FindProperty("kimlik").stringValue = "kat7_gercek_kapi";
+        s.FindProperty("aciklama").stringValue = "7. kat: Cemal'in kapısı. Paspası ve terlikleri yok, gözetleme deliğinden ışık sızıyor.";
+        SerializedProperty etkiler = s.FindProperty("etkiler");
+        string[] yollar = { "Kapi_1/Paspas", "Kapi_1/Terlikler", "Kapi_1/Mentese/Kapi_Gozu_Isik" };
+        bool[] gorunur = { false, false, true };
+        etkiler.arraySize = yollar.Length;
+        for (int i = 0; i < yollar.Length; i++)
+        {
+            SerializedProperty e = etkiler.GetArrayElementAtIndex(i);
+            e.FindPropertyRelative("hedefYol").stringValue = yollar[i];
+            e.FindPropertyRelative("tur").enumValueIndex = (int)EtkiTuru.Gorunurluk;
+            e.FindPropertyRelative("gorunur").boolValue = gorunur[i];
+            e.FindPropertyRelative("gecikme").floatValue = 0f;
+        }
+        s.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(k);
+        return k;
     }
 
     // Çizim dokusunun içe aktarma ayarları: saydamlık korunsun, kenardan taşmasın (Clamp),

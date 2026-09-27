@@ -86,6 +86,7 @@ MonoBehaviour:
       IpucuOlcek: 4
       Parcalar: []
       IpucuKaranlikta: 1
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
     - Kimlik: buzdolabi
@@ -101,6 +102,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      IpucuYazma: 0
       Gerekenler: []
       Yuvalar: []
   notlar:
@@ -133,4 +135,10 @@ MonoBehaviour:
   ikinciDaire: 0
   ikinciKaplamaKati: 0
   esyaYazilari: []
+  kapiNumarasi: 
+  girisKapali: 0
+  sahanlikKarti: {fileID: 0}
+  tiklatmaSesi: {fileID: 0}
+  yanlisKapiSesleri: []
+  elektrikYok: 0
   cizimBoyu: 0.3
