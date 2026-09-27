@@ -1,16 +1,18 @@
 // AnomaliButunlukTestleri.cs
-// Projedeki HER anomali kartını gerçek sahanlığa uygulayıp geri alır ve
-// sahanlığın birebir eski hâline döndüğünü doğrular.
+// Kat dosyalarının HER senaryolu sahanlık kartını (Assets/Zincirler, #67) gerçek sahanlığa
+// uygulayıp geri alır ve sahanlığın birebir eski hâline döndüğünü doğrular.
+//
+// #59: rastgele anomali kartları (Resources/Anomaliler) eski kuralla birlikte kalktı; aynı
+// denetim artık kat dosyalarının kullandığı senaryolu kartlara uygulanıyor.
 //
 // ---------- BU TEST NEDEN VAR ----------
 // Sahnede tek bir sahanlık var ve her katta tekrar kullanılıyor. Bir kart
 // yaptığı değişikliği geri alamazsa o anomali KALICI olur: sonraki katta da
-// görünür, oyuncu doğru kararı verdiği hâlde ceza yer ve oyun sessizce bozulur.
+// görünür ve oyun sessizce bozulur.
 //
 // Bu tür bir hata elle test ederken aylarca fark edilmeyebilir, çünkü ancak
-// belirli bir kart geldiğinde ve ondan sonraki katta ortaya çıkar. 60 kart
-// yazılacak; her birini elle sınamak imkânsız. Bu test hepsini saniyeler içinde
-// sınıyor ve yeni eklenen her kart otomatik olarak kapsama giriyor.
+// belirli bir kat geldiğinde ve ondan sonraki katta ortaya çıkar. Bu test her kartı
+// saniyeler içinde sınıyor ve yeni eklenen her kart otomatik olarak kapsama giriyor.
 //
 // Ayrıca kartlardaki YOL HATALARINI da yakalıyor. Bir kartta hedef yolu yanlış
 // yazılırsa anomali hiç görünmez; oyunda bunu fark etmek çok zordur.
@@ -104,9 +106,14 @@ public class AnomaliButunlukTestleri
         return sb.ToString();
     }
 
+    // AssetDatabase.FindAssets: bir klasördeki belirli türden bütün dosyaları bulur (yalnızca
+    // Editor'de çalışır; testler de Editor'de koşuyor). "t:AnomaliKarti" = bu türden olanlar.
     private static AnomaliKarti[] TumKartlar()
     {
-        return Resources.LoadAll<AnomaliKarti>("Anomaliler");
+        var liste = new List<AnomaliKarti>();
+        foreach (string guid in UnityEditor.AssetDatabase.FindAssets("t:AnomaliKarti", new[] { "Assets/Zincirler" }))
+            liste.Add(UnityEditor.AssetDatabase.LoadAssetAtPath<AnomaliKarti>(UnityEditor.AssetDatabase.GUIDToAssetPath(guid)));
+        return liste.ToArray();
     }
 
     // ---------- ASIL TEST ----------
@@ -115,7 +122,7 @@ public class AnomaliButunlukTestleri
     public void Her_kart_uygulanip_geri_alininca_sahanlik_ilk_haline_doner()
     {
         AnomaliKarti[] kartlar = TumKartlar();
-        Assert.Greater(kartlar.Length, 0, "Resources/Anomaliler klasöründe hiç kart yok.");
+        Assert.Greater(kartlar.Length, 0, "Assets/Zincirler klasöründe hiç sahanlık kartı yok.");
 
         string ilkHal = Fotograf();
         var uygulayici = new AnomaliUygulayici();
@@ -130,7 +137,7 @@ public class AnomaliButunlukTestleri
 
             Assert.AreEqual(ilkHal, sonHal,
                 $"'{kart.Kimlik}' kartı geri alındıktan sonra sahanlık eski hâline dönmedi. " +
-                "Bu kart uygulandığı katın ardından KALICI bir anomali bırakır.");
+                "Bu kart uygulandığı katın ardından KALICI bir iz bırakır.");
         }
     }
 
@@ -151,7 +158,7 @@ public class AnomaliButunlukTestleri
             uygulayici.GeriAl();
 
             // Hiçbir şey değişmediyse kart ya boştur ya da hedef yolu yanlıştır.
-            // İkisi de sessiz hatadır: oyuncu anomali arar, ortada anomali yoktur.
+            // İkisi de sessiz hatadır: kat dosyası bir iz bekler, ortada iz yoktur.
             Assert.AreNotEqual(once, uygulanmis,
                 $"'{kart.Kimlik}' kartı sahanlıkta hiçbir şey değiştirmedi. " +
                 "Hedef yolu yanlış yazılmış olabilir.");
@@ -179,10 +186,8 @@ public class AnomaliButunlukTestleri
             "Şu kartların hedef yolları sahanlıkta yok: " + string.Join(", ", hatalar));
     }
 
-    // Poşet sayısı her katta rastgele (0-3). Bir kart poşeti gizlese oyuncu bunu
-    // anomali olarak okuyamaz, çünkü kaç poşet olması gerektiğini bilmiyor; o poşet
-    // zaten plan gereği yoksa kart hiçbir şey değiştirmemiş olur ve anomalili kat
-    // "normal" görünür. Oyuncu doğru kararı veremez. Bu yüzden poşetler yasak hedef.
+    // Poşet sayısı her katta rastgele (0-3). Bir kart poşeti gizlese o poşet zaten plan
+    // gereği yok olabilir; kart hiçbir şey değiştirmemiş olur. Bu yüzden poşetler yasak hedef.
     [Test]
     public void Hicbir_kart_rastgele_poset_sayisina_dokunmaz()
     {
@@ -215,28 +220,6 @@ public class AnomaliButunlukTestleri
         Assert.IsEmpty(hatalar, "Şu kartlar rastgele ayakkabıları hedef alıyor (yasak): " + string.Join(", ", hatalar));
     }
 
-    // Anomali defteri (#45): her kartın defterde bir adı olmalı (anomali.<kimlik>), tablodaki
-    // her anomali.* anahtarı da gerçek bir karta ait olmalı. Yeni kart eklenip adı unutulursa
-    // defterde anahtarın kendisi görünürdü; kart silinip adı kalırsa tablo çöplenirdi.
-    [Test]
-    public void Her_kartin_defterde_adi_var()
-    {
-        string yol = System.IO.Path.Combine(Application.dataPath, "Resources", "Metinler.txt");
-        MetinTablosu tablo = MetinTablosu.Oku(System.IO.File.ReadAllText(yol));
-        var kimlikler = new HashSet<string>();
-        var eksik = new List<string>();
-        foreach (AnomaliKarti kart in TumKartlar())
-        {
-            kimlikler.Add(kart.Kimlik);
-            if (!tablo.Var("anomali." + kart.Kimlik)) eksik.Add(kart.Kimlik);
-        }
-        var sahipsiz = new List<string>();
-        foreach (string a in tablo.Anahtarlar)
-            if (a.StartsWith("anomali.") && !kimlikler.Contains(a.Substring(8))) sahipsiz.Add(a);
-        Assert.IsEmpty(eksik, "Defterde adı olmayan kartlar: " + string.Join(", ", eksik));
-        Assert.IsEmpty(sahipsiz, "Hiçbir karta ait olmayan defter adları: " + string.Join(", ", sahipsiz));
-    }
-
     // Kartın yazdığı metin iki dilli tablodan geçmez (kart sadece bir yazı taşır).
     // Harf içeren bir metin ("GİRME" gibi) İngilizce oynayana Türkçe kalırdı. Bugün
     // kartlar yalnızca kapı numarası yazıyor; kelime yazan bir kart gerekirse önce
@@ -263,34 +246,8 @@ public class AnomaliButunlukTestleri
         Assert.IsEmpty(hatalar, "Şu kartlar çevrilemeyen bir kelime yazıyor: " + string.Join(", ", hatalar));
     }
 
-    // KatYoneticisi.testKarti doluysa 2. kattan itibaren HER kat aynı kartla gelir.
-    // Kart denerken kullanılıyor; boşaltılmadan kaydedilirse build'deki oyuncu her
-    // katta aynı anomaliyi görür ve oyun anlamını yitirir. Build'den önce bu test
-    // yakalasın (#26).
-    [Test]
-    public void Sahnede_test_karti_bos_birakilmis()
-    {
-        Component yonetici = null;
-        foreach (GameObject kok in sahne.GetRootGameObjects())
-        {
-            // KatYoneticisi oyunun varsayılan derlemesinde; test derlemesi ona tipiyle
-            // başvuramaz, bileşeni ADIYLA arıyoruz (OrtamSesi testindeki gibi).
-            if (kok.name == "KatYoneticisi") yonetici = kok.GetComponent("KatYoneticisi");
-        }
-        Assert.IsNotNull(yonetici, "Sahnede KatYoneticisi bulunamadı.");
-
-        // SerializedObject: bir bileşenin kaydedilmiş alanlarını, özel (private)
-        // olsalar bile, Inspector'ın gördüğü gibi okur.
-        var alanlar = new UnityEditor.SerializedObject(yonetici);
-        Object kart = alanlar.FindProperty("testKarti").objectReferenceValue;
-
-        Assert.IsNull(kart, $"Sahnede test kartı dolu kalmış ('{(kart != null ? kart.name : "")}'). " +
-                            "KatYoneticisi → Test Karti alanını boşaltıp sahneyi kaydedin.");
-    }
-
-    // Normal katın ses dokusu (#14). Ses bozulması kartları bu yolları hedefliyor;
-    // biri sahanlığı yeniden düzenlerken bir katmanı silerse ya da döngüsünü bozarsa
-    // anomali kartları sessizce etkisiz kalırdı.
+    // Normal katın ses dokusu (#14). Biri sahanlığı yeniden düzenlerken bir katmanı silerse
+    // ya da döngüsünü bozarsa bina sessizce susardı.
     [Test]
     public void Ortam_ses_katmanlari_sahanlikta_ve_dongude()
     {
@@ -352,7 +309,7 @@ public class AnomaliButunlukTestleri
         Assert.IsNotNull(m.clip, "Arka müziğin ses dosyası bağlanmamış.");
         Assert.IsTrue(m.loop, "Arka müzik döngüde değil.");
         Assert.AreEqual(0f, m.spatialBlend, "Arka müzik 2B olmalı.");
-        Assert.LessOrEqual(m.volume, 0.3f, "Arka müzik anomali seslerini bastıracak kadar yüksek.");
+        Assert.LessOrEqual(m.volume, 0.3f, "Arka müzik binanın seslerini bastıracak kadar yüksek.");
         Assert.IsNotNull(muzik.GetComponent("ArkaMuzik"));
 
         Assert.IsNotNull(dis, "Sahnede Dis_Sesler yok.");
@@ -384,16 +341,6 @@ public class AnomaliButunlukTestleri
             Assert.IsTrue(gorulen.Add(kart.Kimlik),
                 $"'{kart.Kimlik}' kimliği birden fazla kartta kullanılmış. " +
                 "Kimlikler kayıt ve hata ayıklamada karışır.");
-        }
-    }
-
-    [Test]
-    public void Kart_zorluklari_bir_ile_bes_arasindadir()
-    {
-        foreach (AnomaliKarti kart in TumKartlar())
-        {
-            Assert.GreaterOrEqual(kart.Zorluk, 1, $"'{kart.Kimlik}' zorluğu 1'in altında.");
-            Assert.LessOrEqual(kart.Zorluk, 5, $"'{kart.Kimlik}' zorluğu 5'in üstünde.");
         }
     }
 

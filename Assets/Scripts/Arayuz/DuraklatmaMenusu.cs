@@ -50,13 +50,14 @@ public class DuraklatmaMenusu : MonoBehaviour
     private CursorLockMode eskiFareKilidi;
     private bool eskiFareGorunur;
 
-    // Menünün dört sayfası var: ana sayfa, ayarlar (#27), görüntü (#30) ve anomali defteri (#45).
-    private const int SayfaAna = 0, SayfaAyarlar = 1, SayfaGoruntu = 2, SayfaDefter = 3;
+    // Menünün üç sayfası var: ana sayfa, ayarlar (#27) ve görüntü (#30). Anomali defteri (#45)
+    // eski kuralla birlikte kaldırıldı (#59).
+    private const int SayfaAna = 0, SayfaAyarlar = 1, SayfaGoruntu = 2;
     private int sayfa = SayfaAna;
 
     // ---------- KLAVYE / KOL İLE GEZİNME (#29) ----------
     // Öğelerin sırası (yukarıdan aşağı). Numara, gezginin "Secili" değeriyle eşleşir.
-    private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaDefter = 3, AnaDil = 4, AnaCik = 5, AnaOgeSayisi = 6;
+    private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaDil = 3, AnaCik = 4, AnaOgeSayisi = 5;
     private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3,
                       AyarVarsayilan = 4, AyarGeri = 5, AyarOgeSayisi = 6;
     private const int GorCozunurluk = 0, GorEkran = 1, GorVSync = 2, GorKalite = 3,
@@ -186,12 +187,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         bool yatay = Mathf.Abs(yon.x) > 0.5f && Mathf.Abs(yon.x) > Mathf.Abs(yon.y);
 
         // unscaledTime: oyun saati durmuşken de ilerleyen gerçek zaman.
-        // Defter sayfasında yukarı/aşağı listeyi kaydırır (seçilecek öğe yok, yalnızca "Geri").
         if (dikeyTekrar.Guncelle(dikey, Time.unscaledTime))
-        {
-            if (sayfa == SayfaDefter) DefteriKaydir(yon.y > 0f ? -1 : +1);
-            else gezgin.Tasi(yon.y > 0f ? -1 : +1);   // yukarı = listede geri
-        }
+            gezgin.Tasi(yon.y > 0f ? -1 : +1);   // yukarı = listede geri
         if (yatayTekrar.Guncelle(yatay, Time.unscaledTime)) Kaydir(yon.x > 0f ? +1 : -1);
 
         bool onay = (onayEylemi != null && onayEylemi.WasPressedThisFrame())
@@ -361,14 +358,11 @@ public class DuraklatmaMenusu : MonoBehaviour
                 case AnaDevam: if (baslikta) Basla(); else DevamIste(); break;
                 case AnaAyarlar: SayfaAc(SayfaAyarlar); break;
                 case AnaGoruntu: SayfaAc(SayfaGoruntu); break;
-                case AnaDefter: SayfaAc(SayfaDefter); break;
                 case AnaDil: Dil.Sonraki(); break;
                 case AnaCik: OyundanCik(); break;
             }
             return;
         }
-
-        if (sayfa == SayfaDefter) { SayfaAc(SayfaAna); return; }   // defterde tek düğme: Geri
 
         if (sayfa == SayfaAyarlar)
         {
@@ -432,14 +426,12 @@ public class DuraklatmaMenusu : MonoBehaviour
     {
         int onceki = sayfa;
         sayfa = yeni;
-        gezgin.OgeSayisiniAyarla(yeni == SayfaAyarlar ? AyarOgeSayisi : yeni == SayfaGoruntu ? GorOgeSayisi
-                                 : yeni == SayfaDefter ? 1 : AnaOgeSayisi);
+        gezgin.OgeSayisiniAyarla(yeni == SayfaAyarlar ? AyarOgeSayisi : yeni == SayfaGoruntu ? GorOgeSayisi : AnaOgeSayisi);
 
         // Bir sayfaya girince ilk öğe seçili. Ana sayfaya dönünce geldiği sayfanın düğmesi
         // seçili kalsın (oyuncu nereden geldiğini görür, tekrar girmek isterse tek tuş yeter).
-        if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : onceki == SayfaDefter ? AnaDefter : AnaAyarlar);
+        if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : AnaAyarlar);
         else gezgin.Sec(0);
-        if (yeni == SayfaDefter) DefteriHazirla();
 
         if (yeni == SayfaGoruntu) CozunurlukListesiniKur();
     }
@@ -626,7 +618,6 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         if (sayfa == SayfaAyarlar) { AyarlariCiz(); return; }
         if (sayfa == SayfaGoruntu) { GoruntuCiz(); return; }
-        if (sayfa == SayfaDefter) { DefteriCiz(); return; }
 
         float en = 360f, boy = 56f, ara = 16f;
         float x = (ArayuzOlcegi.Genislik - en) / 2f;
@@ -642,7 +633,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         }
         else
         {
-            y = ArayuzOlcegi.Yukseklik / 2f - 260f;   // altı düğme (#45'te Defter eklendi)
+            y = ArayuzOlcegi.Yukseklik / 2f - 224f;   // beş düğme
             GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.baslik"), baslikStili);
             y += 60f + 2f * ara;
         }
@@ -664,11 +655,6 @@ public class DuraklatmaMenusu : MonoBehaviour
         r = new Rect(x, y, en, boy);
         Vurgula(AnaGoruntu, r);
         if (GUI.Button(r, Dil.Getir("menu.goruntu"), dugmeStili)) SayfaAc(SayfaGoruntu);
-        y += boy + ara;
-
-        r = new Rect(x, y, en, boy);
-        Vurgula(AnaDefter, r);
-        if (GUI.Button(r, Dil.Getir("menu.defter"), dugmeStili)) SayfaAc(SayfaDefter);
         y += boy + ara;
 
         // "Dil: Türkçe" / "Language: English". Dilin adı her zaman kendi dilinde
@@ -697,114 +683,6 @@ public class DuraklatmaMenusu : MonoBehaviour
         GUI.DrawTexture(new Rect(d.x, d.y, k, d.height), Texture2D.whiteTexture);                // sol
         GUI.DrawTexture(new Rect(d.xMax - k, d.y, k, d.height), Texture2D.whiteTexture);         // sağ
         GUI.color = Color.white;
-    }
-
-    // ---------- ANOMALİ DEFTERİ (#45) ----------
-    // Bütün anomaliler katmanlarına göre sıralı bir liste. Bulunanların adı yazar;
-    // bulunmamışlar "???" görünür, yalnızca katmanı belli (Şahan'ın seçimi: aramaya
-    // teşvik eder ama ipucu vermez). Liste uzun olduğu için yukarı/aşağı ile ya da fare
-    // tekerleğiyle kaydırılır.
-    private struct DefterSatiri { public string kimlik; public int katman; }
-    private DefterSatiri[] defterSatirlari = new DefterSatiri[0];
-    private int defterBasi;                      // listenin ekrandaki ilk satırı
-    private const int DefterGorunenSatir = 14;
-    private static readonly string[] KatmanAnahtarlari = { "defter.fisilti", "defter.tekinsiz", "defter.kabus" };
-    private static readonly Color[] KatmanRenkleri =
-        { new Color(0.62f, 0.72f, 0.80f), new Color(0.88f, 0.72f, 0.42f), new Color(0.90f, 0.35f, 0.30f) };
-
-    // Kartları yükleyip sıralar: önce katman (fısıltı, tekinsiz, kâbus), sonra kimlik.
-    private void DefteriHazirla()
-    {
-        AnomaliKarti[] kartlar = Resources.LoadAll<AnomaliKarti>("Anomaliler");
-        var liste = new System.Collections.Generic.List<DefterSatiri>();
-        foreach (AnomaliKarti k in kartlar)
-            liste.Add(new DefterSatiri { kimlik = k.Kimlik, katman = (int)k.Katman });
-        liste.Sort((a, b) => a.katman != b.katman ? a.katman.CompareTo(b.katman) : string.CompareOrdinal(a.kimlik, b.kimlik));
-        defterSatirlari = liste.ToArray();
-        defterBasi = 0;
-    }
-
-    private void DefteriKaydir(int yon)
-    {
-        int enSon = Mathf.Max(0, defterSatirlari.Length - DefterGorunenSatir);
-        defterBasi = Mathf.Clamp(defterBasi + yon, 0, enSon);
-    }
-
-    private void DefteriCiz()
-    {
-        float en = 620f, satirBoy = 34f;
-        float x = (ArayuzOlcegi.Genislik - en) / 2f;
-        float y = ArayuzOlcegi.Yukseklik / 2f - 330f;
-
-        // Başlık: "DEFTER  12 / 66" ve katman sayıları.
-        int bulunan = 0;
-        int[] katmanToplam = new int[3], katmanBulunan = new int[3];
-        foreach (DefterSatiri d in defterSatirlari)
-        {
-            int k = Mathf.Clamp(d.katman, 0, 2);
-            katmanToplam[k]++;
-            if (Defter.BulunduMu(d.kimlik)) { bulunan++; katmanBulunan[k]++; }
-        }
-        GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f),
-                  string.Format(Dil.Getir("defter.baslik"), bulunan, defterSatirlari.Length), baslikStili);
-        y += 64f;
-        string ozet = "";
-        for (int k = 0; k < 3; k++)
-            ozet += (k > 0 ? "     " : "") + Dil.Getir(KatmanAnahtarlari[k]) + " " + katmanBulunan[k] + "/" + katmanToplam[k];
-        var ortali = new GUIStyle(yaziStili) { alignment = TextAnchor.MiddleCenter };
-        GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 30f), ozet, ortali);
-        y += 44f;
-
-        // Fare tekerleği: listeyi kaydırır.
-        Event olay = Event.current;
-        if (olay.type == EventType.ScrollWheel) { DefteriKaydir(olay.delta.y > 0f ? 1 : -1); olay.Use(); }
-
-        // Satırlar: solda katman rengiyle küçük bir şerit, katman adı, sonra ad ya da ???.
-        var katmanStili = new GUIStyle(yaziStili) { fontSize = 16 };
-        var adStili = new GUIStyle(yaziStili) { fontSize = 20 };
-        var soluk = new GUIStyle(adStili);
-        soluk.normal.textColor = new Color(0.5f, 0.48f, 0.45f);
-        // Etiket stilleri fare üstüne gelince kendi "hover" rengini kullanır (beyaz);
-        // bir satırın fareyle parlaması seçilebilir bir şeymiş gibi yanıltıyordu.
-        adStili.hover.textColor = adStili.normal.textColor;
-        soluk.hover.textColor = soluk.normal.textColor;
-        int son = Mathf.Min(defterSatirlari.Length, defterBasi + DefterGorunenSatir);
-        for (int i = defterBasi; i < son; i++)
-        {
-            DefterSatiri d = defterSatirlari[i];
-            int k = Mathf.Clamp(d.katman, 0, 2);
-            bool var_ = Defter.BulunduMu(d.kimlik);
-            Rect satir = new Rect(x, y, en, satirBoy - 4f);
-            GUI.color = new Color(1f, 1f, 1f, 0.06f);
-            GUI.DrawTexture(satir, Texture2D.whiteTexture);
-            GUI.color = KatmanRenkleri[k];
-            GUI.DrawTexture(new Rect(x, y, 5f, satirBoy - 4f), Texture2D.whiteTexture);
-            katmanStili.normal.textColor = KatmanRenkleri[k];
-            katmanStili.hover.textColor = KatmanRenkleri[k];
-            GUI.color = Color.white;
-            GUI.Label(new Rect(x + 16f, y, 140f, satirBoy - 4f), Dil.Getir(KatmanAnahtarlari[k]), katmanStili);
-            GUI.Label(new Rect(x + 160f, y, en - 170f, satirBoy - 4f),
-                      var_ ? Dil.Getir("anomali." + d.kimlik) : Dil.Getir("defter.bilinmiyor"), var_ ? adStili : soluk);
-            y += satirBoy;
-        }
-
-        // Kaydırma göstergesi: listenin neresinde olunduğu (sağda ince bir çubuk).
-        if (defterSatirlari.Length > DefterGorunenSatir)
-        {
-            float alanUst = ArayuzOlcegi.Yukseklik / 2f - 330f + 108f, alanBoy = DefterGorunenSatir * satirBoy;
-            float oran = (float)DefterGorunenSatir / defterSatirlari.Length;
-            float bas = (float)defterBasi / defterSatirlari.Length;
-            GUI.color = new Color(1f, 1f, 1f, 0.12f);
-            GUI.DrawTexture(new Rect(x + en + 10f, alanUst, 4f, alanBoy), Texture2D.whiteTexture);
-            GUI.color = new Color(0.95f, 0.72f, 0.35f, 0.9f);
-            GUI.DrawTexture(new Rect(x + en + 10f, alanUst + bas * alanBoy, 4f, oran * alanBoy), Texture2D.whiteTexture);
-            GUI.color = Color.white;
-        }
-
-        y = ArayuzOlcegi.Yukseklik / 2f - 330f + 108f + DefterGorunenSatir * satirBoy + 18f;
-        Rect r = new Rect((ArayuzOlcegi.Genislik - 240f) / 2f, y, 240f, 50f);
-        Vurgula(0, r);
-        if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAna);
     }
 
     // ---------- AYARLAR SAYFASI (#27) ----------

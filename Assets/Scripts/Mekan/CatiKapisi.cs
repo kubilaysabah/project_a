@@ -33,7 +33,7 @@ public class CatiKapisi : MonoBehaviour, IEtkilesimli
         get { return Cep.Tasiyor(EsyaTuru.KatAnahtari, KatSayaci.CatiKati) ? Dil.Getir("ipucu.ac") : Dil.Getir("ipucu.kilitli"); }
     }
 
-    public bool EtkilesimeAcik { get { return Yonetici != null && !Yonetici.EskiKural; } }
+    public bool EtkilesimeAcik { get { return Yonetici != null; } }
 
     public void Etkilesim(GameObject oyuncu)
     {

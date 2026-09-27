@@ -2,11 +2,14 @@
 // KatSayaci (saf mantık) ile sahne (Unity) arasındaki KÖPRÜ.
 //
 // İş bölümü şöyle:
-//   KatSayaci      -> kuralı bilir, Unity'yi bilmez. Test edilebilir.
-//   AnomaliSecici  -> hangi katta hangi anomalinin olacağını bilir. Test edilebilir.
+//   KatSayaci      -> bulunulan katı bilir, Unity'yi bilmez. Test edilebilir.
 //   CopPlani       -> hangi katta kaç poşet olacağını bilir. Test edilebilir.
-//   KatYoneticisi  -> sahneyi bilir, kuralı bilmez. Oyuncunun ne yaptığını
-//                     izler, ötekilere sorar, gelen cevabı sahnede uygular.
+//   KatYoneticisi  -> sahneyi bilir. Oyuncunun merdivende ne yaptığını izler,
+//                     sahanlıkları ve daireyi bulunulan kata göre kurar.
+//
+// #59 (Şahan, 2026-09-27): eski oyunun "anomali varsa geri dön; yanlış karar 1. kata ceza"
+// kuralı, rastgele anomali seçimi, gecikmeli ceza ve anomali defteri tamamen kaldırıldı.
+// Bir üst kata yalnızca kat kapısı açılıp merdivenden çıkılarak geçilir.
 
 using System.Collections;          // IEnumerator (coroutine) için
 using UnityEngine;
@@ -32,15 +35,6 @@ public class KatYoneticisi : MonoBehaviour
     [Tooltip("Oyuncunun kendisi. Boş bırakılırsa döngü scriptinin sahibi kullanılır.")]
     [SerializeField] private Transform oyuncu;
 
-    [Header("Eski kural (#59'a kadar)")]
-    [Tooltip("Eski oyunun kuralı: anomalili katta geri dön, normal katta devam et; yanlış karar ya da " +
-             "toplanmamış çöp 1. kata ceza. Yeni ilerlemede (kilitli kapılar, anahtarlar, #50) KAPALI " +
-             "kalır; #59 kodunu tamamen kaldıracak. Açarsanız eski oyun aynen oynanır.")]
-    [SerializeField] private bool eskiKural = false;
-
-    /// <summary>Eski kural (dönüp dolaşma oyunu) açık mı? Çatı kapısı (#68) buna bakar.</summary>
-    public bool EskiKural { get { return eskiKural; } }
-
     /// <summary>Oyuncunun bulunduğu kat (sayaç henüz kurulmadıysa 0).</summary>
     public int MevcutKat { get { return sayac != null ? sayac.MevcutKat : 0; } }
 
@@ -61,51 +55,27 @@ public class KatYoneticisi : MonoBehaviour
     // karar değildir: kapı kilitlidir, oyuncu geri inip dairedeki işi bitirebilir.
     private bool catiOdasinda;
 
-    [Header("Anomali")]
-    [Tooltip("Bir katın anomalili olma olasılığı (yalnızca eski kural açıkken).")]
-    [Range(0f, 1f)]
-    [SerializeField] private float anomaliOlasiligi = 0.5f;
-
-    [Tooltip("1. kat her zaman normal olsun mu? Oyuncunun önce NORMALİN neye " +
-             "benzediğini görmesi gerekir; kapatmanız önerilmez.")]
-    [SerializeField] private bool ilkKatHepNormal = true;
-
-    [Tooltip("Rastgelelik tohumu. 0 = her oyunda farklı tur. Sıfırdan farklı bir " +
-             "sayı verirseniz aynı tur birebir tekrar oynanır — hata ayıklarken işe yarar.")]
+    [Header("Rastgelelik")]
+    [Tooltip("Rastgelelik tohumu (çöp, ayakkabı ve kat olayı planları). 0 = her oyunda farklı. " +
+             "Sıfırdan farklı bir sayı verirseniz aynı tur birebir tekrar oynanır — hata ayıklarken işe yarar.")]
     [SerializeField] private int tohum = 0;
 
     [Header("Açılış (#16)")]
     [Tooltip("Oyun zemin kattaki kapıcı dairesinde, yönetici notuyla başlasın mı? " +
-             "Kapatırsanız doğrudan 1. katta başlar; anomali test ederken işe yarar.")]
+             "Kapatırsanız doğrudan 1. katta başlar.")]
     [SerializeField] private bool acilisIleBasla = true;
 
     [Header("Test")]
-    [Tooltip("Belirli bir kartı denemek için: buraya bir kart sürüklenirse 2. kattan " +
-             "itibaren HER kat bu kartla gelir (42 kart arasından rastgele denk gelmesini " +
-             "beklemeye gerek kalmaz). Boş bırakıldığında oyun normal çalışır. " +
-             "Test bitince boşaltmayı unutmayın.")]
-    [SerializeField] private AnomaliKarti testKarti;
-
-    [Tooltip("Ekranın köşesinde kat numarasını ve anomali durumunu gösterir. " +
+    [Tooltip("Ekranın köşesinde kat numarasını gösterir. " +
              "Sadece test içindir; gerçek oyunda kapalı olacak.")]
     [SerializeField] private bool testGostergesi = true;
-
-    [Header("Gecikmeli ceza")]
-    [Tooltip("Bütün ampullerin sönmesinin toplam süresi (saniye). Ampul sayısından " +
-             "bağımsız: sahnede kaç ampul olursa olsun karanlık bu sürede gelir.")]
-    [SerializeField] private float sonmeSuresi = 1.75f;
-
-    [Tooltip("Tam karanlıkta geçen süre. Oyunun en korkunç anı burasıdır.")]
-    [SerializeField] private float karanlikSuresi = 1.4f;
 
     // ---------- İÇ DURUM ----------
 
     private KatSayaci sayac = new KatSayaci();
 
-    private Vector3 baslangicKonumu;      // ceza sonrası dönülecek yer
+    private Vector3 baslangicKonumu;      // kaçışta yakalanınca dönülecek yer (katın sahanlığı)
     private Quaternion baslangicDonusu;   // ve bakılacak yön
-    private bool cezaBekliyor;            // yanlış karar verildi, ışıklar sönmeyi bekliyor
-    private bool cezaCalisiyor;           // ceza gösterisi şu an oynuyor
 
     private CharacterController govde;
 
@@ -123,16 +93,6 @@ public class KatYoneticisi : MonoBehaviour
     // noktasına göre kaç kat yukarıda/aşağıda durduğunu bununla hesaplıyoruz.
     private int referansDongu;
 
-    private Light[] ampuller;             // sahnedeki bütün lamba ışıkları (spot + dolgu)
-    private Color[] ozgunRenkler;
-
-    // Ceza sesleri (#25): lamba sönerken "tık", son lamba titrerken cızırtı.
-    private AudioClip lambaSonme;
-
-    // Lambaların ANA ışıkları (aşağı bakan spotlar). Her lambanın dolgu ışığı
-    // ve parlayan camı bu ışığın çocuğu; ceza sırasında lamba bütünüyle söner.
-    private Light[] lambalar;
-
     // ---- SAHNE PARÇALARI ----
     private Transform sahanlikA, sahanlikB;
     private GameObject ustKatlar;         // B'nin üstündeki sahte katlar
@@ -144,14 +104,11 @@ public class KatYoneticisi : MonoBehaviour
     private TextMesh[] aNumaralar, bNumaralar;
     private CopPoseti[,] aPosetler, bPosetler;
 
-    // ---- ANOMALİ ----
-    private AnomaliSecici secici;
-    private AnomaliKarti[] kartlar;
-
-    // İki sahanlık ayrı ayrı bozuluyor, o yüzden HER BİRİNİN kendi uygulayıcısı
-    // ve kendi geri alma defteri var.
+    // ---- SENARYOLU SAHANLIK KARTI (#67) ----
+    // Rastgele anomali kalmadı; yalnızca kat dosyası isterse (7. kat: gerçek kapının
+    // izleri) alt sahanlığa senaryolu bir kart uygulanır. Uygulayıcı her değişikliği
+    // kaydeder ve kat değişince geri alır.
     private AnomaliUygulayici uygulayiciA = new AnomaliUygulayici();
-    private AnomaliUygulayici uygulayiciB = new AnomaliUygulayici();
 
     // ---- ÇÖP ----
     private CopPlani copPlani;
@@ -249,23 +206,6 @@ public class KatYoneticisi : MonoBehaviour
             govde = oyuncu.GetComponent<CharacterController>();
         }
 
-        // Sahnedeki lamba ışıklarını bir kez topla; her karede aramak pahalı olurdu.
-        // Spot ve nokta ışıklar lambalara ait; yönlü ışık (ay) dahil değil.
-        var liste = new System.Collections.Generic.List<Light>();
-        var anaIsiklar = new System.Collections.Generic.List<Light>();
-        foreach (var l in FindObjectsByType<Light>())
-        {
-            // Kafa lambası (#51) oyuncunun; ceza onu söndürmez, kartlar hedeflemez.
-            if (l.GetComponentInParent<KafaLambasi>() != null) continue;
-            if (l.type == LightType.Point || l.type == LightType.Spot) liste.Add(l);
-            if (l.type == LightType.Spot) anaIsiklar.Add(l);
-        }
-        ampuller = liste.ToArray();
-        lambalar = anaIsiklar.ToArray();
-
-        ozgunRenkler = new Color[ampuller.Length];
-        for (int i = 0; i < ampuller.Length; i++) ozgunRenkler[i] = ampuller[i].color;
-
         // ---- SAHNE PARÇALARI ----
         sahanlikA = KokBul("Sahanlik_A")?.transform;
         sahanlikB = KokBul("Sahanlik_B")?.transform;
@@ -307,18 +247,6 @@ public class KatYoneticisi : MonoBehaviour
         bKatSesleri = KatSesleriniBul(sahanlikB);
 
         toplayici = FindAnyObjectByType<CopToplayici>();
-
-        // Resources.LoadAll: "Resources" klasörlerindeki bütün kartları yükler.
-        // Yeni kart eklemek için hiçbir listeye kaydetmek gerekmiyor.
-        kartlar = Resources.LoadAll<AnomaliKarti>("Anomaliler");
-
-        lambaSonme = Resources.Load<AudioClip>("Sesler/Lamba_Sonme");
-
-        if (kartlar.Length == 0)
-        {
-            Debug.LogWarning("[ANOMALİ] Assets/Resources/Anomaliler klasöründe hiç kart yok. " +
-                             "Bütün katlar normal geçecek.");
-        }
     }
 
     // Sahnenin kök nesneleri arasında isimle arar. GameObject.Find'dan farkı,
@@ -393,24 +321,9 @@ public class KatYoneticisi : MonoBehaviour
         // Tohum 0 ise her oyun farklı olsun diye saatin o anki değerini kullanıyoruz.
         int gercekTohum = tohum != 0 ? tohum : System.Environment.TickCount;
 
-        // Test kartı verildiyse seçici yalnızca onu tanır ve her katta onu seçer
-        // (olasılık 1). 1. ve 8. kat kuralları yine geçerli.
-        if (testKarti != null)
-        {
-            Debug.LogWarning($"[ANOMALİ] TEST KARTI AÇIK: her kat '{testKarti.Kimlik}' ile gelecek. " +
-                             "Normal oyun için KatYoneticisi → Test Kartı alanını boşaltın.");
-            secici = new AnomaliSecici(new IAnomaliKart[] { testKarti }, gercekTohum, 1f, ilkKatHepNormal);
-        }
-        else
-        {
-            // Eski kural kapalıyken (yeni ilerleme) olasılık 0: hiçbir kat anomalili gelmez.
-            // Kartlar ileride senaryolu olay kütüphanesi olacak (#60); rastgele seçim yok.
-            secici = new AnomaliSecici(kartlar, gercekTohum, eskiKural ? anomaliOlasiligi : 0f, ilkKatHepNormal);
-        }
-
-        // Çöp planı AYRI bir tohumla kuruluyor. Aynı tohumu verseydik iki üretici
-        // aynı sayı dizisini üretir ve poşet sayıları anomalilerle gizlice
-        // bağlantılı olurdu (örneğin "3 poşetli kat hep anomalili" gibi).
+        // Her plan tohuma farklı bir sayı ekleyerek kuruluyor. Aynı tohumu verseydik
+        // üreticiler aynı sayı dizisini üretir ve planlar birbirine gizlice bağlanırdı
+        // (örneğin "3 poşetli katta hep bebek sesi" gibi).
         copPlani = new CopPlani(MekanOlculeri.DaireSayisi, gercekTohum + 7919);
 
         // Ayakkabılar da kendi tohumuyla.
@@ -424,7 +337,7 @@ public class KatYoneticisi : MonoBehaviour
         if (KayitYuvasi.Ek != "")
             Debug.LogWarning($"[KAYIT] TEST YUVASI AÇIK ('{KayitYuvasi.Ek}'): oyun gerçek kayda değil test kaydına yazıyor. " +
                              $"Normal oyun için EditorPrefs '{KayitYuvasi.EditorAnahtari}' silinmeli.");
-        bool kayittanDevam = Kayit.Var && testKarti == null;
+        bool kayittanDevam = Kayit.Var;
         if (kayittanDevam)
         {
             sayac.Yukle(Kayit.Kat);
@@ -452,8 +365,8 @@ public class KatYoneticisi : MonoBehaviour
         // Zemin kattan aşağı ışınlanma olmasın: zemin kat binanın dibi.
         merdiven.AsagiDonguyuAyarla(false);
 
-        // Oyuncuyu kapıcı odasına al, yüzü kapıya dönük (+x). Cezada dönülecek yer
-        // (baslangicKonumu) Awake'te kaydedildi ve 1. kat olarak kalıyor.
+        // Oyuncuyu kapıcı odasına al, yüzü kapıya dönük (+x). Kaçışta yakalanınca dönülecek
+        // yer (baslangicKonumu) Awake'te kaydedildi ve katın sahanlığı olarak kalıyor.
         if (govde != null) govde.enabled = false;
         oyuncu.position = new Vector3(MekanOlculeri.OdaBaslangicX, MekanOlculeri.ZeminKot + 0.2f,
                                       MekanOlculeri.OdaBaslangicZ);
@@ -494,13 +407,13 @@ public class KatYoneticisi : MonoBehaviour
 
         if (merdiven == null || oyuncu == null) return;
 
-        // Ceza gösterisi oynarken ve tur bittikten sonra karar dinlemeyiz.
-        if (cezaCalisiyor || sayac.TurBitti) return;
+        // Çatı kapısı açıldıktan (final) sonra kat dinlemeyiz.
+        if (catiAcildi) return;
 
         // Takipçiyi oyuncu yere OTURDUĞU anda kur.
         //
         // "Yerde mi?" (isGrounded) tek başına yetmiyor. Bu bilgi SON hareketten
-        // kalmadır: ceza bitince oyuncuyu başlangıç noktasına 20 cm havada
+        // kalmadır: kaçışta yakalanınca oyuncuyu başlangıç noktasına 20 cm havada
         // koyuyoruz ve isGrounded bir kare boyunca hâlâ "evet" diyor. Takipçi o
         // anda kurulursa ölçüme 18 cm yukarıdan başlar ve bütün kararlar bir
         // basamak geç gelir: ışınlanma olur ama karar o karede verilmez.
@@ -528,129 +441,66 @@ public class KatYoneticisi : MonoBehaviour
 
         float kot = SanalKot();
 
-        // Ceza bekliyorsa, oyuncunun yarım kat yol almasını bekle. Yön bakmıyoruz.
-        if (cezaBekliyor)
+        // Oyuncu merdivende bir tam kat yüksekliği kadar yol aldıysa bir "kat geçişi" oluşur.
+        if (ilerleme.KararOlustuMu(kot, out Karar yon))
         {
-            if (ilerleme.SonKarardanBeriMesafe(kot) >= MekanOlculeri.DikeyOfset / 2f)
-            {
-                cezaBekliyor = false;
-                StartCoroutine(CezaGosterisi());
-            }
-            return;
+            referansDongu = merdiven.NetDongu;   // yeni ölçüm noktası burası
+            KatGecisiniIsle(yon);
         }
 
-        // Oyuncu bir tam kat yüksekliği kadar yol aldıysa karar oluşur.
-        if (ilerleme.KararOlustuMu(kot, out Karar karar))
-        {
-            referansDongu = merdiven.NetDongu;   // yeni karar noktası burası
-            KarariIsle(karar);
-        }
+        SahanliklariGuncelle(zorla: false);
 
-        // Ceza bekliyorsa sahanlıklara dokunmuyoruz: ışıklar zaten sönmek üzere.
-        if (!cezaBekliyor && !sayac.TurBitti) SahanliklariGuncelle(zorla: false);
+        // Senaryolu sahanlık kartının (#67) zamanlı etkileri, yalnızca oyuncunun BULUNDUĞU
+        // sahanlıkta işler: A mevcut katı gösteriyorsa oyuncu oradadır.
+        if (gosterilenA == sayac.MevcutKat) uygulayiciA.Ilerlet(Time.deltaTime);
 
-        // Senaryolu anomali anları (#13): kartın zamanlı etkileri yalnızca oyuncunun
-        // BULUNDUĞU sahanlıkta işler. A mevcut katı gösteriyorsa oyuncu oradadır;
-        // aşağı inerken A bir sonraki katı gösterir ve saat durur. Üst sahanlığın (B)
-        // saati hiç işlemez: merdivenden bakarken bir şey kendiliğinden olmamalı.
-        // Olaylı bir anomali anı gerçekleştiyse (kapı çarptı, zil çaldı, ışık göz kırptı)
-        // arka müzik kısa süre kabarır (#40). Sessiz anomalilerde zamanlı etki olmadığı için
-        // müzik değişmez; yani müzik cevabı vermez, yalnızca olmuş bir korkuyu vurgular.
-        if (gosterilenA == sayac.MevcutKat && uygulayiciA.Ilerlet(Time.deltaTime) > 0)
-            ArkaMuzik.Ornek?.Kabar();
-
-        // Kat olayının saati de aynı kuralla işler (#35). Ceza yoldayken işlemez:
-        // lambaların sönme sesine başka bir ses karışmasın.
-        if (gosterilenA == sayac.MevcutKat && !cezaBekliyor) olayCaliciA.Ilerlet(Time.deltaTime);
+        // Kat olayının saati de aynı kuralla işler (#35).
+        if (gosterilenA == sayac.MevcutKat) olayCaliciA.Ilerlet(Time.deltaTime);
     }
 
-    // ---------- KARARIN SONUCU ----------
-
-    private void KarariIsle(Karar karar)
+    // ---------- KAT GEÇİŞİ ----------
+    // Ceza yok. Aşağı inmek sayılır ama katı değiştirmez; aşağıdan geri çıkmak da yalnızca
+    // sayacı azaltır. Bir üst kata ancak bulunduğu kattan, kat kapısını açıp çıkarak geçilir
+    // (kapı kilitli olduğu için başka yol yok).
+    private void KatGecisiniIsle(Karar yon)
     {
-        // YENİ İLERLEME (#50): ceza yok. Aşağı inmek sayılır ama katı değiştirmez; aşağıdan
-        // geri çıkmak da yalnızca sayacı azaltır. Bir üst kata ancak bulunduğu kattan, kat
-        // kapısını açıp çıkarak geçilir (kapı kilitli olduğu için başka yol yok).
-        if (!eskiKural)
-        {
-            // Çatı odasından 8. kata geri inmek (#68): yalnızca bayrak iner, kat 8 kalır.
-            if (karar == Karar.Geri && catiOdasinda) { catiOdasinda = false; Debug.Log("[KAT] Çatı odasından 8. kata inildi."); return; }
-            if (karar == Karar.Geri) { asagiInilen++; Debug.Log($"[KAT] Aşağı inildi ({asagiInilen}); kat {sayac.MevcutKat} kalıyor."); return; }
-            if (asagiInilen > 0) { asagiInilen--; Debug.Log($"[KAT] Geri çıkıldı ({asagiInilen}); kat {sayac.MevcutKat}."); return; }
-            // 8. kattan yukarı: çatı odasına çıkıldı. Kapı kendiliğinden AÇILMAZ; çatı anahtarı
-            // gerekir (CatiKapisi -> CatiKapisiAnahtarlaAcildi).
-            if (sayac.MevcutKat >= KatSayaci.CatiKati) { catiOdasinda = true; Debug.Log("[KAT] Çatı odasına çıkıldı; kapı çatı anahtarını bekliyor."); return; }
-            // Test kartı açıksa katta anomali olabilir; yeni ilerlemede anomali bir olaydır,
-            // yukarı çıkmak yanlış karar değil. Sayaç "yanlış" demesin diye bayrak sıfırlanır.
-            if (sayac.AnomaliVar) sayac.KatiHazirla(false);
-        }
+        // Çatı odasından 8. kata geri inmek (#68): yalnızca bayrak iner, kat 8 kalır.
+        if (yon == Karar.Geri && catiOdasinda) { catiOdasinda = false; Debug.Log("[KAT] Çatı odasından 8. kata inildi."); return; }
+        if (yon == Karar.Geri) { asagiInilen++; Debug.Log($"[KAT] Aşağı inildi ({asagiInilen}); kat {sayac.MevcutKat} kalıyor."); return; }
+        if (asagiInilen > 0) { asagiInilen--; Debug.Log($"[KAT] Geri çıkıldı ({asagiInilen}); kat {sayac.MevcutKat}."); return; }
 
-        // Katta anomali varsa görev aranmaz: anomaliyi görüp geri dönmek zaten
-        // doğru davranıştır.
-        // Toplanmamış çöp cezası yalnızca eski kuralda (yeni ilerlemede sahanlık işleri #59'da yeniden bağlanacak).
-        bool gorevEksik = eskiKural && !sayac.AnomaliVar && ToplanmamisGorevVar(sayac.MevcutKat);
+        // 8. kattan yukarı: çatı odasına çıkıldı. Kapı kendiliğinden AÇILMAZ; çatı anahtarı
+        // gerekir (CatiKapisi -> CatiKapisiAnahtarlaAcildi).
+        if (sayac.MevcutKat >= KatSayaci.CatiKati) { catiOdasinda = true; Debug.Log("[KAT] Çatı odasına çıkıldı; kapı çatı anahtarını bekliyor."); return; }
 
         int eskiKat = sayac.MevcutKat;
-        // Anomali defteri (#45) için: karardan ÖNCE bu katın anomalisini hatırla; KararVer
-        // mevcut katı ilerletiyor.
-        bool anomaliliKat = sayac.AnomaliVar;
-        IAnomaliKart katinKarti = KartSec(eskiKat);
-        KararSonucu sonuc = sayac.KararVer(karar, gorevEksik);
+        if (!sayac.Ilerle()) return;
 
-        // Anomalili katta doğru biçimde geri döndü: anomaliyi fark ettiğini kanıtladı,
-        // deftere işlenir (Şahan'ın kuralı). Test kartıyla oynarken işlenmez.
-        if (sonuc == KararSonucu.Ilerle && karar == Karar.Geri && anomaliliKat && katinKarti != null && testKarti == null)
-            Defter.Isle(katinKarti.Kimlik);
-
-        switch (sonuc)
-        {
-            case KararSonucu.Ilerle:
-                // Sahanlık burada yenilenmiyor; hemen ardından SahanliklariGuncelle
-                // karar noktasının değiştiğini görüp yeniliyor.
-                Debug.Log($"[KAT] Doğru karar ({karar}). {eskiKat} -> {sayac.MevcutKat}");
-                // Otomatik kayıt (#52): yeni bir kata ulaşıldı.
-                if (sayac.MevcutKat > Kayit.Kat) Kayit.Kat = sayac.MevcutKat;
-                break;
-
-            case KararSonucu.Sifirla:
-                // Ceza ANINDA gelmez. Oyuncu yürümeye devam eder; korku o beklemede birikir.
-                string sebep = gorevEksik ? "çöp alınmadı" : $"yanlış karar ({karar})";
-                Debug.Log($"[KAT] CEZA: {sebep}. Toplam hata: {sayac.ToplamHata}");
-                cezaBekliyor = true;
-                break;
-
-            case KararSonucu.CatiyaUlasildi:
-                Debug.Log("[KAT] ÇATIYA ULAŞILDI. Döngü kapatıldı, çatı kapısı açıldı.");
-                merdiven.DonguyuAyarla(false);
-                CatiModunuAyarla(true);
-                CatiKapisiniAc();
-                break;
-        }
+        // Sahanlık burada yenilenmiyor; hemen ardından SahanliklariGuncelle ölçüm noktasının
+        // değiştiğini görüp yeniliyor.
+        Debug.Log($"[KAT] Yukarı çıkıldı: {eskiKat} -> {sayac.MevcutKat}");
+        // Otomatik kayıt (#52): yeni bir kata ulaşıldı.
+        if (sayac.MevcutKat > Kayit.Kat) Kayit.Kat = sayac.MevcutKat;
     }
 
     // ---------- SAHANLIKLARIN GÖSTERDİĞİ KAT ----------
     // Sahnede iki gerçek sahanlık var ve her biri bir KATI temsil ediyor.
-    // Hangi katı temsil ettiği, karar noktasına göre nerede durduğuna bağlı:
+    // Hangi katı temsil ettiği, ölçüm noktasına göre nerede durduğuna bağlı:
     //
-    //   Karar noktasındaki sahanlık       -> mevcut kat (N).
-    //   Bir üstündeki VEYA bir altındaki  -> bir sonraki kat (N+1).
+    //   Ölçüm noktasındaki sahanlık   -> mevcut kat (N).
+    //   Bir üstündeki                 -> bir sonraki kat (N+1).
+    //   Bir altındaki                 -> yine N.
     //
-    // Neden ikisi de N+1? Çünkü bu oyunda doğru kararla yukarı çıkmak da aşağı
-    // inmek de İLERLEMEK sayılıyor. Oyuncu hangi yöne giderse gitsin, vardığı
-    // sahanlık bir sonraki kattır.
+    // Neden alttaki de N? Aşağı inmek katı değiştirmez; tek sahanlık döngüsünde aşağıdaki
+    // katlar da bu katın görüntüsünü gösterir (oyuncu bir şey almak için inebilir). Oyuncu
+    // aşağıdayken üstündeki sahanlık da N'dir: geri çıkınca yine kendi katına varır.
     //
-    // Bunu her karede hesaplamamızın sebebi şu: oyuncu aşağı inip ışınlanınca
-    // A sahanlığı artık "altındaki kat" olur ve N+1'i göstermelidir. Oyuncu o anda
-    // merdivenin içinde, sahanlığa sırtı dönük; değişim görünmez. Vazgeçip geri
-    // çıkarsa A yine N'yi gösterir. Böylece hiçbir ışınlanma ekranda bir
-    // sahanlığın aniden değişmesine yol açmaz.
+    // Bunu her karede hesaplamamızın sebebi şu: ışınlanma sahanlıkların yerini değiştirir,
+    // ama hesap ışınlanmadan değil kat edilen yoldan yapılır; böylece hiçbir ışınlanma
+    // ekranda bir sahanlığın aniden değişmesine yol açmaz.
     private int GosterilecekKat(int karardanUzaklik)
     {
-        // Yeni ilerleme: karar noktasının altındaki sahanlık (aşağı inen oyuncunun vardığı) ve
-        // oyuncu aşağıdayken üstündeki sahanlık da bu katı gösterir; yalnızca bulunduğu katın
-        // üstü bir sonraki kattır. Böylece inerken ya da geri çıkarken hiçbir sahanlık gözün
-        // önünde değişmez.
-        if (!eskiKural && (karardanUzaklik < 0 || asagiInilen > 0)) return sayac.MevcutKat;
+        if (karardanUzaklik < 0 || asagiInilen > 0) return sayac.MevcutKat;
         return karardanUzaklik == 0 ? sayac.MevcutKat : sayac.MevcutKat + 1;
     }
 
@@ -673,9 +523,9 @@ public class KatYoneticisi : MonoBehaviour
     {
         // SIRA ÖNEMLİ:
         // 1) Sahanlıktan ayrılan katın toplanan poşetleri kaydedilir.
-        // 2) Eski anomaliler geri alınır. Sahanlık tertemiz olur.
+        // 2) Eski katın senaryolu kartı geri alınır. Sahanlık tertemiz olur.
         // 3) Poşetler ve kapı numaraları yeni kata göre yazılır.
-        // 4) En son kart uygulanır.
+        // 4) En son kart (varsa) uygulanır.
         // Kart numaralardan önce uygulansaydı, numara yazılırken kartın
         // değiştirdiği numara ezilirdi. Geri alma numaralardan sonra yapılsaydı
         // uygulayıcı eski katın numarasını geri yazardı.
@@ -685,7 +535,6 @@ public class KatYoneticisi : MonoBehaviour
         AyakkabiDurumunuKaydet(bDaginik, gosterilenB);
 
         uygulayiciA.GeriAl();
-        uygulayiciB.GeriAl();
 
         // Üst sahanlık çatı katını gösteriyorsa (8. kattayız), o bir sahanlık değil
         // çatı kapısıdır.
@@ -708,22 +557,17 @@ public class KatYoneticisi : MonoBehaviour
         // kartın açtığı kapıyı biz ezerdik.
         DaireleriAyarla(aKat, cati ? 0 : bKat);
 
-        IAnomaliKart aKart = KartSec(aKat);
-        // Katın senaryolu sahanlık kartı varsa rastgele kartın yerine o uygulanır (#67).
+        // Katın senaryolu sahanlık kartı (#67) yalnızca alt sahanlığa uygulanır: oyuncu hep
+        // A'da durur, B yalnızca merdivenden görülür.
         KatZinciriVarligi aVarlik = VarlikBul(aKat);
-        if (aVarlik != null && aVarlik.sahanlikKarti != null) aKart = aVarlik.sahanlikKarti;
-        IAnomaliKart bKart = cati ? null : KartSec(bKat);
-
-        if (sahanlikA != null) uygulayiciA.Uygula(aKart as AnomaliKarti, sahanlikA);
-        if (sahanlikB != null && !cati) uygulayiciB.Uygula(bKart as AnomaliKarti, sahanlikB);
+        AnomaliKarti aKart = aVarlik != null ? aVarlik.sahanlikKarti : null;
+        if (sahanlikA != null) uygulayiciA.Uygula(aKart, sahanlikA);
 
         // Kat kapıları ve anahtarlar (#52).
         KapilariAyarla(aKat, bKat, cati);
 
-        // A'nın kat olayı (#35). Kartın kendi sesi varsa (kapı çarpması, zil, tersten
-        // ağlama...) o katta olay çalmaz: Şahan'ın kuralı "her katta bunlardan biri",
-        // o katın sesi zaten anomalinin sesi. Olay ile anomali sesi üst üste binmez.
-        bool olayVar = aKat >= KatSayaci.BaslangicKati && aKat <= KatSayaci.CatiKati && !SesliKart(aKart);
+        // A'nın kat olayı (#35).
+        bool olayVar = aKat >= KatSayaci.BaslangicKati && aKat <= KatSayaci.CatiKati;
         olayCaliciA.Hazirla(olayVar, olayPlani.KatIcin(aKat), olayPlani.ZamanlarKatIcin(aKat));
 
         // TV ve boru o katın kendi anını çalsın (#39).
@@ -733,26 +577,18 @@ public class KatYoneticisi : MonoBehaviour
         gosterilenA = aKat;
         gosterilenB = bKat;
 
-        // Karar kuralı, sahanlığın ne gösterdiğine değil MEVCUT KATA bakar.
-        sayac.KatiHazirla(KartSec(sayac.MevcutKat) != null);
-
-        string durum = aKart != null ? $"VAR ({aKart.Kimlik})" : "yok";
-        Debug.Log($"[KAT] A = {aKat}. kat (anomali: {durum}), B = {(cati ? "çatı" : bKat + ". kat")}");
+        string kart = aKart != null ? $" (sahanlık kartı: {aKart.Kimlik})" : "";
+        Debug.Log($"[KAT] A = {aKat}. kat{kart}, B = {(cati ? "çatı" : bKat + ". kat")}");
     }
 
     // ---------- BAŞKA BİR SES ÇALIYOR MU? (#37) ----------
-    // Dış sesler (DisSesleri) çalmadan önce bunu sorar: kat olayı, anomali sesi ya da
-    // ceza sürüyorsa araya girmez. Sesli bir kartın geldiği katta ilk 10 saniye de meşgul
-    // sayılır: kartın zamanlı sesleri (zil, kapı tıklatma...) 2,5-8 sn'de çalıyor; dış ses
-    // tam o sırada başlarsa üst üste binerdi.
+    // Dış sesler (DisSesleri) çalmadan önce bunu sorar: kat olayı ya da senaryolu kartın
+    // sesi çalıyorsa araya girmez.
     public bool SesMesgul
     {
         get
         {
-            if (cezaBekliyor || cezaCalisiyor) return true;
             if (olayCaliciA != null && olayCaliciA.CaliyorMu) return true;
-            if (gosterilenA == sayac.MevcutKat && SesliKart(KartSec(sayac.MevcutKat)) &&
-                olayCaliciA != null && olayCaliciA.Saat < 10f) return true;
             if (sahanlikA != null)
                 foreach (AudioSource k in sahanlikA.GetComponentsInChildren<AudioSource>())
                     if (k.name == "Anomali_Sesi" && k.isPlaying) return true;
@@ -760,8 +596,8 @@ public class KatYoneticisi : MonoBehaviour
         }
     }
 
-    /// <summary>Tur bitti mi (çatıya ulaşıldı)? Dış sesler ve müzik buna bakar.</summary>
-    public bool TurBitti { get { return sayac != null && sayac.TurBitti; } }
+    /// <summary>Tur bitti mi (çatı kapısı açıldı, final başladı)? Dış sesler buna bakar.</summary>
+    public bool TurBitti { get { return catiAcildi; } }
 
     // ---------- KAT KAPISI VE ANAHTAR (#52) ----------
     private void KapilariBul()
@@ -942,23 +778,6 @@ public class KatYoneticisi : MonoBehaviour
         // Karanlık hol yalnızca gerçek dairenin önünden kalkar; kapalı kapılarda ve B'de durur.
         Transform hol = kapi.Find("Daire_Ici");
         if (hol != null) hol.gameObject.SetActive(!(acik && gercekDaire));
-    }
-
-    // Kartın etkilerinden biri ses çalıyor mu? (Yalnızca susturan ya da taşıyan kartlar,
-    // örneğin susan_tv, "sesli" sayılmaz: onlar yeni bir ses çıkarmıyor.)
-    private static bool SesliKart(IAnomaliKart kart)
-    {
-        var k = kart as AnomaliKarti;
-        if (k == null || k.Etkiler == null) return false;
-        foreach (AnomaliEtkisi e in k.Etkiler)
-            if (e != null && e.tur == EtkiTuru.Ses) return true;
-        return false;
-    }
-
-    // Çatının üstünde kat yoktur; seçiciye 9. katı sormuyoruz.
-    private IAnomaliKart KartSec(int kat)
-    {
-        return kat > KatSayaci.CatiKati ? null : secici.KatIcinSec(kat);
     }
 
     // ---------- ÇATI MODU ----------
@@ -1146,31 +965,8 @@ public class KatYoneticisi : MonoBehaviour
         }
     }
 
-    // ---------- EKSİK GÖREV ----------
-    // Verilen katta yapılmamış bir iş kaldı mı? Şu an tek iş çöp toplamak.
-    //
-    // Sahneye değil PLANA bakıyoruz: sahanlık o anda hangi katı gösteriyor olursa
-    // olsun, soru "o katın bütün poşetleri toplandı mı" sorusudur. Plan kaç poşet
-    // çektiyse o kadar poşet aranır; olmayan poşet eksik sayılmaz.
-    private bool ToplanmamisGorevVar(int kat)
-    {
-        DurumuKaydet(aPosetler, gosterilenA);   // son toplananları plana işle
-        DurumuKaydet(bPosetler, gosterilenB);
-
-        int[] adetler = copPlani.KatIcin(kat);
-
-        for (int d = 0; d < adetler.Length; d++)
-        {
-            for (int s = 0; s < adetler[d]; s++)
-            {
-                if (!copPlani.ToplandiMi(kat, d, s)) return true;
-            }
-        }
-        return false;
-    }
-
     // ---------- TEST GÖSTERGESİ ----------
-    // Ekranın köşesine kat numarasını ve anomali durumunu yazar. Oyunun arayüzü
+    // Ekranın köşesine kat numarasını yazar. Oyunun arayüzü
     // DEĞİLDİR; sadece elle test yapabilmek içindir.
     //
     // Yalnızca Editor'de ve geliştirme build'inde çizilir (#26). Debug.isDebugBuild
@@ -1198,12 +994,13 @@ public class KatYoneticisi : MonoBehaviour
         var stil = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold };
         stil.normal.textColor = Color.white;
 
-        string durum = sayac.TurBitti
+        string durum = catiAcildi
             // Test göstergesi metin tablosuna girmez (#15): yalnızca geliştirici görüyor,
             // satılan oyunda gösterge yok. Bu yüzden yazıları burada Türkçe duruyor.
             ? "ÇATI — tur bitti"
-            : $"Kat {sayac.MevcutKat} / {KatSayaci.CatiKati}   ·   " +
-              (sayac.AnomaliVar ? "ANOMALİ VAR (geri dön)" : "normal (yukarı devam)");
+            : $"Kat {sayac.MevcutKat} / {KatSayaci.CatiKati}" +
+              (asagiInilen > 0 ? $"   ·   {asagiInilen} kat aşağıda" : "") +
+              (acilanKatlar.Contains(sayac.MevcutKat) ? "   ·   kat kapısı açık" : "");
 
         string kartAdi = uygulayiciA.UygulananKart != null
             ? "   ·   kart: " + uygulayiciA.UygulananKart.Kimlik
@@ -1218,17 +1015,14 @@ public class KatYoneticisi : MonoBehaviour
         // değer geliştirme build'inde okunur.
         string fps = $"   ·   FPS {1f / ortalamaKareSuresi:0} ({ortalamaKareSuresi * 1000f:0.0} ms)";
 
-        // Bu katın olay sesi; kartın kendi sesi varsa olay çalmıyor (#35).
-        string olay = olayPlani == null || sayac.TurBitti ? ""
-            : SesliKart(KartSec(sayac.MevcutKat)) ? "   ·   olay: yok (kartın sesi var)"
+        // Bu katın olay sesi (#35).
+        string olay = olayPlani == null || catiAcildi ? ""
             : "   ·   olay: " + olayPlani.KatIcin(sayac.MevcutKat);
 
-        string alt = $"hata: {sayac.ToplamHata}" + poset + kartAdi + olay + fps +
+        string alt = $"kayıt: {Kayit.Kat}. kat" + poset + kartAdi + olay + fps +
                      (catiModu ? "   ·   üstte çatı" : "") +
-                     (acilisModu ? "   ·   AÇILIŞ (zemin kat)" : "") +
-                     (testKarti != null ? "   ·   TEST KARTI AÇIK" : "") +
-                     (cezaBekliyor ? "   ·   ceza yolda…" : "") +
-                     (cezaCalisiyor ? "   ·   CEZA" : "");
+                     (catiOdasinda ? "   ·   çatı odasında" : "") +
+                     (acilisModu ? "   ·   AÇILIŞ (zemin kat)" : "");
 
         GUI.color = new Color(0f, 0f, 0f, 0.55f);
         GUI.DrawTexture(new Rect(14, 12, 720, 62), Texture2D.whiteTexture);
@@ -1239,117 +1033,6 @@ public class KatYoneticisi : MonoBehaviour
         stil.fontSize = 14;
         stil.fontStyle = FontStyle.Normal;
         GUI.Label(new Rect(24, 44, 710, 24), alt, stil);
-    }
-
-    // ---------- GECİKMELİ CEZA ----------
-    // Bir "coroutine": "yield return" satırında DURUR, süre geçince kaldığı
-    // yerden devam eder. Zamana yayılan sahneler için Unity'nin yoludur.
-    private IEnumerator CezaGosterisi()
-    {
-        cezaCalisiyor = true;
-
-        // Döngüyü durdur: karanlıkta ışınlanma olmasın.
-        merdiven.DonguyuAyarla(false);
-
-        // Yalnızca şu an AÇIK olan lambalar söner; kapalı katlardakiler zaten görünmüyor.
-        var sirali = new System.Collections.Generic.List<Light>();
-        foreach (var l in lambalar) if (l.isActiveAndEnabled) sirali.Add(l);
-
-        // Oyuncudan UZAKTAKİNDEN başlayarak söndür. Karanlığın uzaktan
-        // yaklaşması, yakından başlamasından daha ürkütücüdür.
-        sirali.Sort((a, b) =>
-            Vector3.Distance(b.transform.position, oyuncu.position)
-            .CompareTo(Vector3.Distance(a.transform.position, oyuncu.position)));
-
-        // İki sönme arasındaki bekleme, toplam süre sabit kalacak şekilde hesaplanıyor.
-        float aralik = sirali.Count > 0 ? sonmeSuresi / sirali.Count : 0f;
-
-        for (int i = 0; i < sirali.Count; i++)
-        {
-            // En son sönen lamba oyuncuya en yakın olanı. O hemen sönmez: önce
-            // birkaç kez titrer. Oyuncu artık neyin geldiğini anlar ama durduramaz.
-            if (i == sirali.Count - 1) yield return StartCoroutine(Titret(sirali[i]));
-
-            LambayiAyarla(sirali[i], false);
-
-            // Lamba kendi yerinden "tık" diye söner: karanlık uzaktan yaklaşırken
-            // ses de uzaktan yaklaşır, son tık oyuncunun tepesinde.
-            if (lambaSonme != null) AudioSource.PlayClipAtPoint(lambaSonme, sirali[i].transform.position, 0.9f);
-
-            yield return new WaitForSeconds(aralik);
-        }
-
-        // Tam karanlık ve TAM SESSİZLİK (#14). Binanın uğultusu, TV'ler, borular...
-        // hepsi aynı anda susar. AudioListener.pause oyundaki bütün sesleri
-        // duraklatır; oyuncu sesin yokluğunu, ışığın yokluğundan bile önce duyar.
-        // Hiçbir şey olmaz; oyunun en korkunç anı burasıdır.
-        AudioListener.pause = true;
-        yield return new WaitForSeconds(karanlikSuresi);
-
-        OyuncuyuBasaAl();
-
-        foreach (var lamba in lambalar) LambayiAyarla(lamba, true);
-
-        // Işıkla birlikte ses de geri gelir. Duraklatılan sesler kaldıkları yerden
-        // devam eder; hepsi birlikte durduğu için saat kilitleri bozulmaz.
-        AudioListener.pause = false;
-        for (int i = 0; i < ampuller.Length; i++) ampuller[i].color = ozgunRenkler[i];
-
-        merdiven.DonguyuAyarla(true);
-
-        // Yeni tur: anomali kararları ve poşet sayıları yeniden belirlenir,
-        // oyuncu bir önceki denemeyi ezberleyerek ilerleyemez.
-        secici.Sifirla();
-        copPlani.Sifirla();
-        ayakkabiPlani.Sifirla();
-        // #52: ceza 1. kata döndürüyor (bu kural #59 ile kalkacak); kayıt ve kapılar da başa.
-        acilanKatlar.Clear();
-        Cep.Bosalt();
-        Kayit.Sil();
-        olayPlani.Sifirla();
-        if (toplayici != null) toplayici.Sifirla();
-
-        // Sahanlıkların "gösterdiği kat" bilgisi de silinir. Silinmeseydi,
-        // bir sonraki kurulumda eski turun toplanmış poşetleri YENİ turun
-        // planına kaydedilirdi.
-        gosterilenA = gosterilenB = -1;
-
-        cezaCalisiyor = false;
-        Debug.Log("[KAT] 1. kata dönüldü.");
-        SahanliklariGuncelle(zorla: true);
-    }
-
-    // Bir lambayı bütün parçalarıyla açar ya da kapatır: ana spot ışık, dolgu
-    // ışığı ve parlayan cam. Yalnızca ışığı kapatsaydık cam karanlıkta parlamaya
-    // devam eder, "söndü" hissi hiç oluşmazdı.
-    private void LambayiAyarla(Light lamba, bool acik)
-    {
-        foreach (Light l in lamba.GetComponentsInChildren<Light>(true)) l.enabled = acik;
-        foreach (Renderer r in lamba.GetComponentsInChildren<Renderer>(true))
-        {
-            if (r.name == "Cam") r.enabled = acik;   // kablo zaten koyu, dokunmuyoruz
-        }
-    }
-
-    // Arızalı bir ampul gibi titreme: kısa sönme, kısa yanma, düzensiz aralıklarla.
-    // Aralıklar rastgele; düzenli bir yanıp sönme makine gibi durur, düzensizi arıza gibi.
-    private IEnumerator Titret(Light lamba)
-    {
-        // Titreme boyunca ampulden elektrik cızırtısı.
-
-        for (int i = 0; i < 3; i++)
-        {
-            LambayiAyarla(lamba, false);
-            yield return new WaitForSeconds(Random.Range(0.04f, 0.10f));
-            LambayiAyarla(lamba, true);
-            yield return new WaitForSeconds(Random.Range(0.06f, 0.22f));
-        }
-    }
-
-    // Oyun ceza sırasında durdurulursa ses duraklatılmış kalmasın.
-    private void OnDisable()
-    {
-        AudioListener.pause = false;
     }
 
     private void OnDestroy()
@@ -1416,12 +1099,13 @@ public class KatYoneticisi : MonoBehaviour
         Physics.SyncTransforms();
 
         // Takipçi, oyuncu yere yeniden oturduğunda baştan kurulacak.
-        // Karar noktası da burası: ceza sırasında kat edilen yol sayılmaz.
+        // Ölçüm noktası da burası: karartma sırasında kat edilen yol sayılmaz.
         // NaN ("sayı değil") hiçbir sayıya eşit değildir; böylece bir sonraki
         // kare kesinlikle "oturdu" sayılmaz ve oyuncunun düşmesi beklenir.
         ilerleme = null;
         oncekiY = float.NaN;
         referansDongu = merdiven.NetDongu;
         catiOdasinda = false;   // başa alınan oyuncu çatı odasında değil (#68)
+        asagiInilen = 0;        // ve kendi katının sahanlığında duruyor
     }
 }
