@@ -174,6 +174,13 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-27 (Lesson 49): **#63 CLOSED** after Şahan tested floor 3.
+  - **Old rule switched off** (`91f6d58`, #59 step 1): the old turn-back rule still reset Şahan to floor 1 (uncollected trash, anomalies). `KatYoneticisi.eskiKural` now defaults to off. While off: no anomalies are drawn and there is no trash penalty. Walking down is neither progress nor a mistake (`asagiInilen`): lower landings show the current floor, and climbing back only cancels the descent, so the next floor is reached only through the floor door. The old code stays until #59 removes it.
+  - **Floor 4 built** (`99c46d7`, #64 light and dark), flat 4 without power. The cupboard code (4816) is written in glow paint on the living-room wall (`KaranliktaParlayan`: visible only while the headlamp is off and the flat has no power, 2 s fade-in). The fuse is behind `Tezgah/Kapak_1`. Once it is in the box, the ceiling lamps flicker on and the fridge opens, with Hasan's note and the floor key inside.
+  - **Ceiling lamps:** every room of every flat now has a dim lamp (`Lambalar/Lamba_<Oda>`, built with `AmpulKur`). `DaireLambalari` lights the rooms named in `KatZinciriVarligi.yananOdalar` while the flat has power.
+  - **Pickup bug fixed:** an item in a container with several lids (the kitchen counter) could not be taken until every drawer and door was open. `Esya.KapAyarla` now binds the place's `KilitYolu` part as the one lid that counts.
+  - 211/211 tests.
+
 - 2026-09-27 (Lesson 48): **#62 CLOSED** after Şahan tested floor 2. **Floor 3 built** (`fc1b9d6`, #63 torn-drawing assembly), flat 1 (Kerem's family):
   - **Pieces and path:** four pieces of Kerem's drawing lie on the landing shoe rack, on the living-room floor, in the fridge and in the toy chest. Room B opens with a key from the top kitchen drawer. The assembled corners read 0 3 0 9, the code for the bedroom padlock; the floor key is in the nightstand.
   - **Pickup:** `EsyaTuru.Parca` (appended) never enters the hand. `Esya` hands it to the flat's `CizimEkrani`: parent first, else any screen that knows the id, because the landing rack is not inside the flat. The screen saves it (`kayit_parcalar`) and shows the drawing so far. `SifreEkrani` draws the drawing beside the dials when the lock has `Parcalar`.
