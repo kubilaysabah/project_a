@@ -46,7 +46,12 @@ public static class KirKurucu
         m.SetTexture("_DetailAlbedoMap", kir);
         m.SetTextureScale("_DetailAlbedoMap", Vector2.one * tekrar);
         m.SetFloat("_DetailAlbedoMapScale", guc);
-        m.EnableKeyword("_DETAIL_MULX2");   // URP Lit'e "detay haritası var" demenin yolu
+        // URP Lit'e "detay haritası var" demenin yolu. URP'nin kuralı: güç tam 1 ise _DETAIL_MULX2,
+        // değilse _DETAIL_SCALED. Yanlışını yazarsak Unity malzemeyi sonradan kendisi düzeltir ve
+        // dosya her kurulumda boşuna değişir.
+        bool olcekli = !Mathf.Approximately(guc, 1f);
+        if (olcekli) { m.DisableKeyword("_DETAIL_MULX2"); m.EnableKeyword("_DETAIL_SCALED"); }
+        else { m.EnableKeyword("_DETAIL_MULX2"); m.DisableKeyword("_DETAIL_SCALED"); }
         EditorUtility.SetDirty(m);
     }
 

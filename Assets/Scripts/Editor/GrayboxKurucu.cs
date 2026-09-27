@@ -456,11 +456,14 @@ public static partial class GrayboxKurucu
         }
 
         // Göstergedeki yazı: modelde koyu kırmızı ekranın önünde kırmızı rakam.
-        YaziKur("Yazi", a, new Vector3(0f, AsansorYuk + 0.22f, yuz + 0.04f), "-", 0.012f,
+        // 90'lar modelinde (#77) ekranın ön yüzü duvardan 4,3 cm önde; yazı onun 3 mm önünde.
+        YaziKur("Yazi", a, new Vector3(0f, AsansorYuk + 0.22f, yuz + (model ? 0.046f : 0.04f)), "-", 0.012f,
                 model ? new Color(0.9f, 0.15f, 0.1f) : new Color(0.03f, 0.03f, 0.035f));
 
-        // Kanadın ön yüzü: modelde yüzeyden 1 cm, kutu sürümünde 2,5 cm içeride.
-        float kanatOnu = model ? yuz - 0.01f : yuz - 0.05f + 0.025f;
+        // Kanadın ön yüzü: kutu sürümünde 2,5 cm içeride. 90'lar modelinde (#77) camın çevresindeki
+        // kasnak kanattan öne çıkıyor (ön yüzü duvardan 3 mm içeride); "ARIZALI" kâğıdı kasnağın
+        // önünde dursun, içine gömülmesin.
+        float kanatOnu = model ? yuz - 0.0025f : yuz - 0.05f + 0.025f;
 
         if (tam)
         {
