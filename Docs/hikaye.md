@@ -95,6 +95,11 @@ dışındaki kapalı odalar bu sayıya girmez).
 
 ## 7. Kat kat taslak
 
+**Kat çıktıkça bulmak zorlaşır (Şahan, 2026-09-27).** Parçalar ve anahtarlar yapboz gibi birbirini
+tamamlar: bir kapının anahtarı kırık olup parçaları farklı odalarda olabilir, bir odanın kilidi başka
+bir odadaki kolla açılabilir, önemli oda (5. katta gardıroplu salon) hemen açılmaz. Her kat bir öncekinden
+daha uzun ve dolambaçlı olur: 5. kat beş kilit; 6-8. katlar en az bu kadar, daha çok saklı yer ve boş kapla.
+
 **Her katın geçişi farklıdır (Şahan, 2026-09-27).** Kilit türleri her katta karışık kullanılır ama her
 katın bir **imza mekaniği** vardır; oyuncu hiçbir katı "yine aynısı" diye geçmez:
 
@@ -118,7 +123,7 @@ Aşağıdaki tablonun zincir sütunu bu mekaniklere göre #55'te yeniden yazıl�
 | 2 | 3, hastanedeki yaşlı (Nuri) | **1 (kuruldu, #62):** Oda A'daki radyo oyuncu daireye girince kendiliğinden çalar, kapalı kapının ardından boğuk duyulur; kadranındaki istasyon (102.7) kilerin (Oda C) asma kilidi; Nuri'nin notu kilerin yanında; kat anahtarı kilerde alet çantasında. Banyo ve Oda B kapalı | Sayaç oku, ilan bırak | Radyo kendi açılır, terlik yürür | Rıza Efendi'nin fotoğrafı; **telefon 1** |
 | 3 | 1, çocuklu aile (gece yoklar) | **2 (kuruldu, #63):** Kerem'in yırtık çiziminin dört parçası: sahanlıktaki ayakkabılıkta, salonda yerde, buzdolabında, Oda B'deki oyuncak sandığında (Oda B'nin anahtarı mutfak çekmecesinde); birleşen resmin köşelerinde 0 3 0 9 → Oda A'nın (yatak odası) asma kilidi; komodinde kat anahtarı. Annenin notu koridorda. Banyo ve kiler kapalı | Ayakkabıları rafa koy | İçeriden bebek, tavandaki terlik | Çocuğun çizimi: "dokuzuncu kattaki adam" |
 | 4 | 4, boş ve elektriksiz | **2 (kuruldu, #64):** mutfak dolabının şifresi salon duvarında fosforlu boyayla, yalnızca kafa lambası kapalıyken görünür → dolapta sigorta → takılınca antre, koridor, salon ve mutfağın lambaları titreyerek yanar, buzdolabı açılır → iç ışığında Hasan'ın ikinci notu ve kat anahtarı. Yalnızca salon ve mutfak açık | Çöp | Karanlık kat, göz kırpan ışık, kafa lambası titrer | Hasan'ın notu |
-| 5 | 2, Cemal'in son çalıştığı daire | **2 (kuruldu, #65):** antrede Cemal'in iş listesi → banyo içeriden kilitli, menteşeler tornavidayla sökülür (tornavida kapıcıda değilse kilerde, Cemal'in alet çantasında) → gardırop ağır: kilerde levye ve banyoda mobilya kaydırıcısı bulununca itilir, arkasında ana vana → çark çevrilince su kesilir, damla susar → lavabonun sifonu sökülür, yere iner, ağzında kat anahtarı. Mutfak, Oda A, Oda B kapalı | İlan bırak | Sessizlik, düzenli damla, kendi açılan sayaç | Alet çantası; **telefon 2:** "7. katı atla" |
+| 5 | 2, Cemal'in son çalıştığı daire | **5 (kuruldu ve zorlaştırıldı, #65):** banyo içeriden kilitli (menteşe, tornavida) → kilerdeki kol mutfağın sürgüsünü açar → salonun anahtarı kırık: başı buzdolabında, ucu Cemal'in alet çantasında, ikisi birleşince salon açılır (köşede "1/2") → gardırop ağır: levye (kilerde) + kaydırıcı (banyoda) → arkasında ana vana, çark çevrilince damla susar → lavabonun sifonu sökülür, ağzında kat anahtarı. Oda A ve Oda B kapalı | İlan bırak | Sessizlik, düzenli damla, kendi açılan sayaç | Alet çantası; **telefon 2:** "7. katı atla" |
 | 6 | 3, "kimse oturmuyor" ama sofra kurulu | **3:** Anahtar + şifre + sigorta; **kaçış anı 1** (koridordaki şey, salona sığın) | Zil çal | KÂBUS: sofra, açılan asansör | Sofrada dört tabak: dört kapıcı |
 | 7 | 1, Cemal'in eşyaları; bütün kapılar 13 | **3:** Tornavida + anahtar + şifre (Cemal'in doğum günü); **kaçış anı 2** (kat kapısına koş) | Yok: "atla" | En yoğun kat: aynı numara, aralık kapılar, tersten ağlama | Cemal'in son notu: "asansör beni bekliyor" |
 | 8 | 4, Yönetim dairesi (dosyalar) | **3:** Dosya dolabı anahtarı → şifre: binanın yapım yılı → sigorta: asansör panosu → **çatı anahtarı** | Çatı kapısını kilitle | Sessizlik; asansör "9" der ve gelir | Kapıcıların dosyaları, dokuzuncu katın planı; **final:** oyuncu çatıya çıkar, şafak; dış cephe planında dokuzuncu katın penceresi yanar ve asansörün geldiği duyulur (Şahan'ın seçimi: c) |
