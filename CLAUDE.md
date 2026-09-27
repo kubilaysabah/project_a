@@ -174,6 +174,13 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-27 (Lesson 50): **#64 CLOSED** after Şahan tested floor 4. **Floor 5 built** (`ba5bb57`, #65 mechanisms), flat 2, Cemal's job list by the fuse box:
+  - **Chain:** bathroom hinges come off with the screwdriver; the living-room wardrobe is pushed; the valve wheel turns (the drip stops); the sink trap is unscrewed and comes down onto the floor with the floor key in its mouth.
+  - **New props in every flat:** `Lavabo/Sifon`, `Vana/Cark`, `Gardirop`.
+  - **Code:** `KolAyari` gives a lever part its axis, angle, duration and prompt (the wheel turns 540° about its own +Z, prompt ÇEVİR). `AcilirParca` has prompt keys (İT, SÖK/TAK), and the wardrobe's slide axis is computed per mirrored flat from plan +v. `KatSesi.Kapatilabilir`/`SusturanKilit`: the drip is not interactable and stops for good when lock `sifon` is solved (also from the save). `IcKapi.Devrik` doors no longer muffle.
+  - **Blender trap:** `ortak.kutu` bakes its position into the mesh and leaves the origin at the world origin, so rotating a kutu swings it about the world origin (the wheel's spoke was flung 60 cm and the collider became 0.7 m). Give a kutu its final dimensions instead of rotating it.
+  - **Tested in the `_test` save slot;** Şahan's own save (floor 5, floor 4 solved) was untouched. 211/211 tests.
+
 - 2026-09-27 (Lesson 49, later): **Şahan kept replaying floors 1-3.** He plays in the **Editor** (the build's Player.log was last written on 2026-09-26), and every Claude play-mode test ended by deleting the `kayit_*` keys, which wiped his save; the old penalty had also called `Kayit.Sil()`. Fixed (`9867877`, #59): all save keys go through `KayitYuvasi.Anahtar`. **Claude's play-mode tests must run in the test slot:**
   - Before the test: `EditorPrefs.SetString("huzur_kayit_yuvasi", "_test")`, and write test progress to `kayit_kat_test` etc.
   - After the test: delete the `*_test` keys and the EditorPrefs key.
