@@ -63,6 +63,10 @@ public class SifreEkrani : MonoBehaviour
     private void Update()
     {
         if (!acik || Time.frameCount <= acilisKaresi) return;
+        // Ekran açıkken daire yeniden kurulursa (kat değişirken olabiliyor) bağlı olduğu kilit
+        // silinir; ekran silinmiş kilide bakıp hiçbir şifreyi kabul etmezdi (7. kat testinde
+        // görüldü). O zaman kapanır: oyuncu kilide yeniden bakınca yeni kilide bağlanır.
+        if (kilit == null) { Kapat(); return; }
 
         var k = Keyboard.current;
         var g = Gamepad.current;
