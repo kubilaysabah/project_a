@@ -32,6 +32,10 @@ public class KatKapisi : MonoBehaviour, IEtkilesimli
     /// <summary>Kapı açıldı (kat numarasıyla). KatYoneticisi kaydeder ve katı ilerletir.</summary>
     public event System.Action<int> Acildi;
 
+    /// <summary>Anahtar kapıya takıldı, kapı açılmaya başladı (kat numarasıyla). Kaçış anı (#58)
+    /// bunu dinler: kapıya ulaşıp anahtarı takan oyuncu kaçmış sayılır, kanadın açılmasını beklemez.</summary>
+    public event System.Action<int> AcilisBasladi;
+
     private void Awake()
     {
         if (kanat == null) kanat = transform.Find("Kanat");
@@ -55,6 +59,7 @@ public class KatKapisi : MonoBehaviour, IEtkilesimli
             if (kilitli != null) AudioSource.PlayClipAtPoint(kilitli, transform.position, 0.8f);
             return;
         }
+        AcilisBasladi?.Invoke(kat);
         hareket = StartCoroutine(Ac());
     }
 

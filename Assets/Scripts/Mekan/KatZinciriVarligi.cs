@@ -120,6 +120,15 @@ public class KatZinciriVarligi : ScriptableObject
     public List<AudioClip> yanlisKapiSesleri = new List<AudioClip>();  // yanlış kapının ardından gelen sesler
     // İşaretliyse daire bu katta hiç elektrik almaz (sigortasız): fosforlu yazılar görünür.
     public bool elektrikYok;
+
+    // ---------- KAÇIŞ ANI (#58) ----------
+    // İşaretliyse katın anahtarı alınınca siluet belirir ve oyuncuyu kovalar (KacisAni).
+    public bool kacisVar;
+    public GameObject kacisSablonu;          // siluetin şablonu (prefab)
+    public float kacisGecikme = 3f;          // anahtardan kaç saniye sonra belirir
+    public float kacisHizi = 2.2f;           // m/sn (oyuncu 1,8 yürür)
+    public AudioClip kacisBaslangicSesi;     // asansör "ding"
+    public AudioClip kacisDonguSesi;         // siluetin çevresindeki uğultu
     // Parçaların yere serilen kâğıdının gerçek boyu (metre): resmin bütünü bu kadar geniş olurdu.
     public float cizimBoyu = 0.30f;
 }

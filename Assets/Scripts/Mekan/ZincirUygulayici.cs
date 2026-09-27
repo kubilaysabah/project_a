@@ -217,6 +217,13 @@ public class ZincirUygulayici
         DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
         // Elektriksiz kat (#67): sigorta kilidi olmadan da daire karanlık; fosforlu yazı görünür.
         if (varlik.elektrikYok) Elektrik(daire).Ayarla(false);
+        // Kaçış anı (#58): daha önce yaşanmadıysa dairenin köküne eklenir; anahtar alınınca başlar.
+        if (varlik.kacisVar && varlik.kacisSablonu != null)
+        {
+            KacisAni ka = daire.gameObject.AddComponent<KacisAni>();
+            ka.Hazirla(kat, varlik.kacisSablonu, varlik.kacisGecikme, varlik.kacisHizi, varlik.kacisBaslangicSesi, varlik.kacisDonguSesi);
+            if (Kayit.KilitCozukMu(kat, "kacis")) ka.BittiBaslat();
+        }
         // Yırtık çizim (#63): dairenin köküne çizim ekranı; konan parçalar kendi bölgelerini gösterir.
         if (varlik.parcalar != null && varlik.parcalar.Count > 0)
         {
@@ -480,6 +487,8 @@ public class ZincirUygulayici
         foreach (CizimEkrani c in daire.GetComponentsInChildren<CizimEkrani>(true)) Object.DestroyImmediate(c);
         // Sofranın yerleri (#66).
         foreach (Yuva y in daire.GetComponentsInChildren<Yuva>(true)) Object.DestroyImmediate(y);
+        // Kaçış anı (#58): bileşen sökülürken siluetini de yok eder.
+        foreach (KacisAni k in daire.GetComponentsInChildren<KacisAni>(true)) Object.DestroyImmediate(k);
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);

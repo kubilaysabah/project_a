@@ -1,0 +1,200 @@
+// KacisAni.cs
+// Senaryolu kaçış anı (#58, 7. kat; Docs/hikaye.md §9).
+//
+// Katın anahtarı alındığı an kafa lambası titrer, asansörün sesi gelir. Birkaç saniye sonra
+// karanlık bir siluet anahtarın alındığı yerden çıkar ve oyuncunun o andan beri YÜRÜDÜĞÜ YOLU
+// izler (oyuncunun konumları kısa aralıklarla "iz" olarak kaydedilir; siluet izleri sırayla
+// takip eder). Böylece duvarların içinden geçmez, kapılardan ve merdivenden oyuncunun geçtiği
+// yerden geçer. Siluet oyuncudan biraz hızlıdır: duraksamadan kat kapısına giden yetişir,
+// oyalanan yakalanır.
+//
+//   Kaçtı    : oyuncu anahtarı katın kapısına takar (KatKapisi.AcilisBasladi) -> siluet kaybolur.
+//   Yakalandı: siluet oyuncuya 0,8 m'den yaklaşır -> ekran kararır, oyuncu katın başında uyanır.
+//              Ölüm yok (Şahan'ın seçimi): çözülen kilitler çözük, anahtar elde kalır.
+// Kaçış anı her kat için bir kez olur (kayıtta "kacis" olarak işaretlenir).
+//
+// Bu bileşeni zincir uygulayıcısı "kaçışı olan" katın dairesine ekler; kat değişince söker.
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class KacisAni : MonoBehaviour
+{
+    private const float IzAraligi = 0.25f;       // iz kaydı: saniyede dört konum
+    private const float YakalamaMesafesi = 0.8f;
+    private const float AdimAraligi = 0.55f;
+
+    private int kat;
+    private GameObject sablon;
+    private float gecikme, hiz;
+    private AudioClip baslangicSesi, donguSesi;
+
+    private enum Durum { Bekliyor, Basladi, Bitti }
+    private Durum durum = Durum.Bekliyor;
+    private readonly List<Vector3> izler = new List<Vector3>();
+    private float izSayaci, adimSayaci, baslangicZamani;
+    private int hedefIz;
+    private GameObject golge;
+    private Transform oyuncu;
+    private float karartma;                      // 0-1 ekranın karalığı (yakalanınca)
+    private static AudioClip[] adimlar;
+
+    public void Hazirla(int katNo, GameObject golgeSablonu, float bekleme, float hizi, AudioClip ilkSes, AudioClip dongu)
+    {
+        kat = katNo;
+        sablon = golgeSablonu;
+        gecikme = bekleme;
+        hiz = hizi;
+        baslangicSesi = ilkSes;
+        donguSesi = dongu;
+        BirinciSahisKontrolcu k = FindAnyObjectByType<BirinciSahisKontrolcu>();
+        oyuncu = k != null ? k.transform : null;
+        // Kat kapısı açılınca kaçış biter. Olay (event): kapı açıldığında haber veren liste.
+        foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi += KapiAcildi;
+        if (adimlar == null)
+        {
+            adimlar = new AudioClip[4];
+            for (int i = 0; i < 4; i++) adimlar[i] = Resources.Load<AudioClip>($"Sesler/Adim_{i + 1}");
+        }
+    }
+
+    private void OnDestroy()
+    {
+        foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi -= KapiAcildi;
+        if (golge != null) Destroy(golge);
+    }
+
+    private void Update()
+    {
+        if (oyuncu == null || durum == Durum.Bitti) return;
+
+        if (durum == Durum.Bekliyor)
+        {
+            // Tetik: katın anahtarı ele geçti.
+            if (Cep.Tasiyor(EsyaTuru.KatAnahtari, kat)) Baslat();
+            return;
+        }
+
+        // İz kaydı: oyuncunun yürüdüğü yol.
+        izSayaci += Time.deltaTime;
+        if (izSayaci >= IzAraligi) { izSayaci = 0f; izler.Add(oyuncu.position); }
+
+        // Bekleme bitince siluet anahtarın alındığı yerde (ilk iz) belirir ve izleri takip eder.
+        if (golge == null)
+        {
+            if (Time.time - baslangicZamani < gecikme) return;
+            golge = Instantiate(sablon, izler[0], Quaternion.identity);
+            golge.name = "Kacis_Golgesi";
+            if (donguSesi != null)
+            {
+                AudioSource a = golge.AddComponent<AudioSource>();
+                a.clip = donguSesi; a.loop = true; a.spatialBlend = 1f; a.minDistance = 1.5f; a.maxDistance = 14f; a.volume = 0.8f;
+                a.Play();
+            }
+            hedefIz = 1;
+            Debug.Log("[KACIS] Siluet belirdi.");
+        }
+        Ilerle();
+    }
+
+    private void Baslat()
+    {
+        durum = Durum.Basladi;
+        baslangicZamani = Time.time;
+        izler.Clear();
+        izler.Add(oyuncu.position);
+        KafaLambasi lamba = FindAnyObjectByType<KafaLambasi>();
+        if (lamba != null) lamba.Titret(2.2f);
+        if (baslangicSesi != null) AudioSource.PlayClipAtPoint(baslangicSesi, oyuncu.position + Vector3.up, 0.9f);
+        ArkaMuzik.Ornek?.Kabar();
+        Debug.Log($"[KACIS] {kat}. kat: kaçış başladı ({gecikme:0.0} sn sonra siluet, {hiz:0.0} m/sn).");
+    }
+
+    // Siluet izleri sırayla takip eder; oyuncuya yaklaşınca yakalar.
+    private void Ilerle()
+    {
+        float kalan = hiz * Time.deltaTime;
+        while (kalan > 0f && hedefIz < izler.Count)
+        {
+            Vector3 hedef = izler[hedefIz];
+            Vector3 fark = hedef - golge.transform.position;
+            float mesafe = fark.magnitude;
+            if (mesafe <= kalan) { golge.transform.position = hedef; kalan -= mesafe; hedefIz++; }
+            else { golge.transform.position += fark / mesafe * kalan; kalan = 0f; }
+            Vector3 yatay = new Vector3(fark.x, 0f, fark.z);
+            if (yatay.sqrMagnitude > 0.0001f) golge.transform.rotation = Quaternion.LookRotation(yatay);
+        }
+        // Son ize ulaştıysa doğrudan oyuncuya yürür (oyuncu durduysa).
+        if (hedefIz >= izler.Count)
+        {
+            Vector3 fark = oyuncu.position - golge.transform.position;
+            if (fark.magnitude > 0.01f) golge.transform.position += fark.normalized * Mathf.Min(fark.magnitude, kalan);
+        }
+        // Ağır adımlar: oyuncunun adım sesleri, kalın (perdesi düşük).
+        adimSayaci += Time.deltaTime;
+        if (adimSayaci >= AdimAraligi && adimlar != null)
+        {
+            adimSayaci = 0f;
+            AudioClip ad = adimlar[Random.Range(0, adimlar.Length)];
+            if (ad != null) AdimCal(ad);
+        }
+        Vector3 aradaki = oyuncu.position - golge.transform.position;
+        aradaki.y = 0f;
+        if (aradaki.magnitude < YakalamaMesafesi && Mathf.Abs(oyuncu.position.y - golge.transform.position.y) < 1.2f)
+            StartCoroutine(Yakalandi());
+    }
+
+    private void AdimCal(AudioClip klip)
+    {
+        GameObject g = new GameObject("Kacis_Adim");
+        g.transform.position = golge.transform.position;
+        AudioSource a = g.AddComponent<AudioSource>();
+        a.clip = klip; a.spatialBlend = 1f; a.pitch = 0.62f; a.volume = 1f; a.maxDistance = 16f;
+        a.Play();
+        Destroy(g, klip.length / a.pitch + 0.1f);
+    }
+
+    // Yakalandı: ekran kararır, oyuncu katın başında uyanır, siluet kaybolur.
+    private IEnumerator Yakalandi()
+    {
+        durum = Durum.Bitti;
+        Kayit.KilitCozuldu(kat, "kacis");
+        Debug.Log($"[KACIS] {kat}. kat: yakalandı; katın başında uyanıyor.");
+        BirinciSahisKontrolcu k = oyuncu.GetComponent<BirinciSahisKontrolcu>();
+        if (k != null) k.enabled = false;
+        for (float t = 0f; t < 0.35f; t += Time.deltaTime) { karartma = t / 0.35f; yield return null; }
+        karartma = 1f;
+        if (golge != null) Destroy(golge);
+        KatYoneticisi y = FindAnyObjectByType<KatYoneticisi>();
+        if (y != null) y.OyuncuyuKatBasinaAl();
+        yield return new WaitForSeconds(1.4f);
+        if (k != null) k.enabled = true;
+        for (float t = 1f; t > 0f; t -= Time.deltaTime / 1.2f) { karartma = t; yield return null; }
+        karartma = 0f;
+    }
+
+    // Kaçtı: anahtar katın kapısına takıldı (kanadın açılması beklenmez).
+    private void KapiAcildi(int acilanKat)
+    {
+        if (acilanKat != kat || durum != Durum.Basladi) return;
+        durum = Durum.Bitti;
+        Kayit.KilitCozuldu(kat, "kacis");
+        if (golge != null) Destroy(golge);
+        Debug.Log($"[KACIS] {kat}. kat: kaçtı (kat kapısı açıldı).");
+    }
+
+    /// <summary>Kaçış daha önce yaşandı (kayıt): bileşen hiçbir şey yapmaz.</summary>
+    public void BittiBaslat() { durum = Durum.Bitti; }
+
+    public bool Basladi { get { return durum == Durum.Basladi; } }
+
+    private void OnGUI()
+    {
+        if (karartma <= 0f) return;
+        ArayuzOlcegi.Uygula();
+        GUI.color = new Color(0f, 0f, 0f, karartma);
+        GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
+        GUI.color = Color.white;
+    }
+}

@@ -214,4 +214,10 @@ MonoBehaviour:
   tiklatmaSesi: {fileID: 0}
   yanlisKapiSesleri: []
   elektrikYok: 0
+  kacisVar: 0
+  kacisSablonu: {fileID: 0}
+  kacisGecikme: 3
+  kacisHizi: 2.2
+  kacisBaslangicSesi: {fileID: 0}
+  kacisDonguSesi: {fileID: 0}
   cizimBoyu: 0.3

@@ -1313,6 +1313,9 @@ public class KatYoneticisi : MonoBehaviour
         Kilit.Cozuldu -= Kayit.KilitCozuldu;
     }
 
+    /// <summary>Kaçış anında yakalanan oyuncu katın başında (sahanlığın başında) uyanır (#58).</summary>
+    public void OyuncuyuKatBasinaAl() { OyuncuyuBasaAl(); }
+
     private void OyuncuyuBasaAl()
     {
         // CharacterController açıkken konum elle değiştirilemez; kapat-taşı-aç.

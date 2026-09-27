@@ -70,7 +70,8 @@ public static partial class GrayboxKurucu
         KatZinciriVarligi kat4 = Kat4Kur();
         KatZinciriVarligi kat5 = Kat5Kur();
         KatZinciriVarligi kat6 = Kat6Kur(isimKarti);
-        KatZinciriVarligi kat7 = Kat7Kur();
+        GameObject golge = GolgeSablonuKur();
+        KatZinciriVarligi kat7 = Kat7Kur(golge);
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
@@ -712,7 +713,7 @@ public static partial class GrayboxKurucu
     //   odaB   : şifre 0913, yatak odasının duvarında fosforlu boyayla (lamba kapalıyken görünür)
     //   sandik : Cemal'in sandığı (Oda B'deki sandık) levyeyle kanırtılır; içinde katın anahtarı
     // Cemal'in son notu Oda B'nin duvarında: "Asansör beni bekliyor."
-    static KatZinciriVarligi Kat7Kur()
+    static KatZinciriVarligi Kat7Kur(GameObject golge)
     {
         string yol = $"{ZincirKlasoru}/Kat_7.asset";
         KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
@@ -737,6 +738,15 @@ public static partial class GrayboxKurucu
         };
         v.elektrikYok = true;
         v.ikinciDaire = 0;
+        // KAÇIŞ ANI (#58): sandıktaki anahtar alınınca asansör "ding" der; 3 sn sonra siluet anahtarın
+        // alındığı yerden çıkar ve oyuncunun yolunu 2,2 m/sn izler (oyuncu 1,8). Oda B'den kat
+        // kapısına duraksamadan ~10 sn; siluetin açığı kapatması ~13 sn: yetişilir, oyalanan yakalanır.
+        v.kacisVar = true;
+        v.kacisSablonu = golge;
+        v.kacisGecikme = 3f;
+        v.kacisHizi = 2.2f;
+        v.kacisBaslangicSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ding.wav");
+        v.kacisDonguSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ugultu.wav");
 
         var z = new KilitZinciri();
         z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 2.0f, Y = 0.004f, V = -0.4f, Donus = 70f });
@@ -792,6 +802,17 @@ public static partial class GrayboxKurucu
         else Debug.Log("[ZINCIR] 7. kat zinciri çözülebilir: " + string.Join(" -> ", s7.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
+    }
+
+    // Kovalayan siluetin şablonu (#58): yalnızca model; çarpışma yok (oyuncuyu itmesin, nişanı engellemesin).
+    static GameObject GolgeSablonuKur()
+    {
+        GameObject gecici = new GameObject("Kacis_Golgesi");
+        if (Model("Model", gecici.transform, "Golge", null, Vector3.zero, 0f, carpisma: false) == null)
+        { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Golge.fbx yok."); return null; }
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Kacis_Golgesi.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
     }
 
     // 7. katın sahanlık kartı (#67): gerçek kapının (Kapi_1) farkları. Rastgele seçilen kartların
