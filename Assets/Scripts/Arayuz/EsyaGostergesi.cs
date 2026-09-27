@@ -9,7 +9,8 @@ using UnityEngine;
 
 public class EsyaGostergesi : MonoBehaviour
 {
-    private Texture2D anahtar, sigorta, tornavida, not, levye, kaydirici;
+    private Texture2D anahtar, sigorta, tornavida, not, levye, kaydirici, kirikAnahtar;
+    private GUIStyle sayacStili;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Olustur()
@@ -48,6 +49,17 @@ public class EsyaGostergesi : MonoBehaviour
             bool uc = a >= -0.1f && a < 0.8f && Mathf.Abs(b) < 0.05f;
             bool agiz = a >= 0.8f && a < 0.9f && Mathf.Abs(b) < 0.1f;
             return sap || uc || agiz;
+        });
+        kirikAnahtar = Ciz((u, v) =>
+        {
+            // Kırık anahtar (#65): anahtar simgesi, gövdesinin ortasında eğik bir boşluk.
+            float halka = ((u + 0.55f) * (u + 0.55f)) / 0.09f + (v * v) / 0.09f;
+            bool halkaCizgi = halka < 1f && halka > 0.35f;
+            bool govde = u > -0.28f && u < 0.85f && Mathf.Abs(v) < 0.09f;
+            bool bosluk = Mathf.Abs(u - 0.18f + v * 0.5f) < 0.07f;
+            bool dis1 = u > 0.55f && u < 0.68f && v < 0f && v > -0.34f;
+            bool dis2 = u > 0.75f && u < 0.86f && v < 0f && v > -0.28f;
+            return halkaCizgi || (govde && !bosluk) || dis1 || dis2;
         });
         levye = Ciz((u, v) =>
         {
@@ -88,6 +100,19 @@ public class EsyaGostergesi : MonoBehaviour
             // Aletin simgesi kimliğinden (her alet kendi kimliğiyle kaydedilir).
             Texture2D simge = aletler[i] == "levye" ? levye : aletler[i] == "kaydirici" ? kaydirici : tornavida;
             GUI.DrawTexture(new Rect(k.x + 6f, k.y + 6f, 36f, 36f), simge);
+        }
+        // KIRIK ANAHTARLAR (#65): aletlerin solunda; kaç parçanın bulunduğu altında ("1/2").
+        var kiriklar = KirikAnahtarlar.Gosterilecekler();
+        if (sayacStili == null)
+            sayacStili = new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
+        for (int i = 0; i < kiriklar.Count; i++)
+        {
+            Rect k = new Rect(w - 270f - 58f * (aletler.Count + i + 1), h - 98f, 48f, 48f);
+            GUI.color = new Color(0f, 0f, 0f, 0.35f);
+            GUI.DrawTexture(k, Texture2D.whiteTexture);
+            GUI.color = new Color(0.78f, 0.80f, 0.82f, 1f);
+            GUI.DrawTexture(new Rect(k.x + 6f, k.y + 2f, 36f, 36f), kirikAnahtar);
+            GUI.Label(new Rect(k.x, k.y + 30f, 48f, 18f), $"{kiriklar[i][0]}/{kiriklar[i][1]}", sayacStili);
         }
         GUI.color = Color.white;
 

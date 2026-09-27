@@ -52,6 +52,9 @@ public class Kilit : MonoBehaviour
                     return Aletler.Var(Veri.Gerekli) ? Dil.Getir("ipucu.sok") : Dil.Getir("ipucu.kilitli");
                 case KilitTuru.Kirma:
                     return Aletler.Var(Veri.Gerekli) ? Dil.Getir("ipucu.kir") : Dil.Getir("ipucu.kilitli");
+                case KilitTuru.KirikAnahtar:
+                    // Parçalar tamamsa "AÇ"; değilse "KİLİTLİ" (kaç parça bulunduğu köşede yazar).
+                    return ParcalarTamam() ? Dil.Getir("ipucu.ac") : Dil.Getir("ipucu.kilitli");
                 case KilitTuru.Ekipman:
                     // Aletler tamamsa "İT", değilse "AĞIR": oyuncu neden kıpırdamadığını anlasın.
                     return EkipmanTamam() ? Dil.Getir("ipucu.it") : Dil.Getir("ipucu.agir");
@@ -85,6 +88,12 @@ public class Kilit : MonoBehaviour
             Kirilan kirilan = GetComponentInParent<Kirilan>();
             if (kirilan != null) kirilan.Kir(sesli: true);
             Coz(acilsin: false);
+            return true;
+        }
+        if (Veri.Tur == KilitTuru.KirikAnahtar && ParcalarTamam())
+        {
+            // Anahtar tamamlandı: kapı açılır; parçalar kullanılmış olur (kayıtta çözük kilit).
+            Coz(acilsin: true);
             return true;
         }
         if (Veri.Tur == KilitTuru.Ekipman && EkipmanTamam())
@@ -170,6 +179,14 @@ public class Kilit : MonoBehaviour
         if (kapi != null) kapi.Kilitle(k);
         AcilirParca parca = GetComponent<AcilirParca>();
         if (parca != null) parca.Kilitle(k);
+    }
+
+    // Kırık anahtarın bütün parçaları bulundu mu (#65)? Parçalar kat kaydında tutulur.
+    private bool ParcalarTamam()
+    {
+        if (Veri.Gerekenler == null || Veri.Gerekenler.Count == 0) return false;
+        foreach (string g in Veri.Gerekenler) if (!Kayit.ParcaBulunduMu(Kat, g)) return false;
+        return true;
     }
 
     // Ekipman kilidinin bütün aletleri kapıcının çantasında mı (#65)?

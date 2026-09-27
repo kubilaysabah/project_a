@@ -72,6 +72,17 @@ public class Esya : MonoBehaviour, IEtkilesimli
 
     public void Etkilesim(GameObject oyuncu)
     {
+        // KIRIK ANAHTAR PARÇASI (#65): ele girmez; kat kaydına yazılır, köşedeki sayaç artar.
+        // Parçaların hepsi bulununca kilidi (KirikAnahtar) kendiliğinden "AÇ" der.
+        if (tur == EsyaTuru.AnahtarParcasi)
+        {
+            Kayit.ParcaBulundu(kat, kimlik);
+            UcanKopya.ElineUcur(transform);
+            SikirtiCal();
+            gameObject.SetActive(false);
+            return;
+        }
+
         // ÇİZİM PARÇASI (#63): ele de çantaya da girmez; katın çizim ekranı onu kaydeder ve
         // o ana kadar birleşen resmi yakından gösterir. Ekran dairenin kökündedir.
         if (tur == EsyaTuru.Parca)

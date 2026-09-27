@@ -21,7 +21,9 @@ public enum EsyaTuru
     Parca,          // yırtık çizimin bir parçası (#63): ele girmez, kapıcı biriktirir; hepsi
                     // bulununca çizim birleşir. SONA eklendi: dosyalar türü sayı olarak saklar.
     Levye,          // alet (#65): ağır bir mobilyayı yerinden kaldırır
-    Kaydirici       // alet (#65): mobilya kaydırıcısı (keçe pabuçlar); ağır mobilya ancak bununla kayar
+    Kaydirici,      // alet (#65): mobilya kaydırıcısı (keçe pabuçlar); ağır mobilya ancak bununla kayar
+    AnahtarParcasi  // (#65) kırık bir anahtarın parçası: ele girmez, biriktirilir; parçaların hepsi
+                    // bulununca anahtar tamamlanır. Kimliği "_bas" ile biterse baş, değilse uç modeli.
 }
 
 public class Envanter

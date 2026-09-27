@@ -163,6 +163,7 @@ public class KatYoneticisi : MonoBehaviour
     [SerializeField] private GameObject odaAnahtariSablonu, katAnahtariSablonu, sigortaSablonu, tornavidaSablonu;
     [SerializeField] private GameObject cizimParcasiSablonu;   // yırtık çizimin yere serilen parçası (#63)
     [SerializeField] private GameObject levyeSablonu, kaydiriciSablonu;   // aletler (#65)
+    [SerializeField] private GameObject anahtarParcasiSablonu;              // kırık anahtar parçası (#65)
     [SerializeField] private GameObject asmaKilitSablonu, mentesePlakasiSablonu, camKirikSablonu, notSablonu;
     private ZincirUygulayici zincirUygulayici;
 
@@ -269,6 +270,7 @@ public class KatYoneticisi : MonoBehaviour
         zincirUygulayici.SablonEkle(EsyaTuru.Parca, cizimParcasiSablonu);
         zincirUygulayici.SablonEkle(EsyaTuru.Levye, levyeSablonu);
         zincirUygulayici.SablonEkle(EsyaTuru.Kaydirici, kaydiriciSablonu);
+        zincirUygulayici.SablonEkle(EsyaTuru.AnahtarParcasi, anahtarParcasiSablonu);
         zincirUygulayici.AsmaKilitSablonu = asmaKilitSablonu;
         zincirUygulayici.MentesePlakasiSablonu = mentesePlakasiSablonu;
         zincirUygulayici.CamKirikSablonu = camKirikSablonu;

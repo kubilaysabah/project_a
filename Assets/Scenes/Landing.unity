@@ -444895,6 +444895,7 @@ MonoBehaviour:
   cizimParcasiSablonu: {fileID: 8278841798799705781, guid: a30052e30eb81ea4b98c68d352930d76, type: 3}
   levyeSablonu: {fileID: 8490443896255300145, guid: 8f3d2a11b95927e44b135d9f2decb0a3, type: 3}
   kaydiriciSablonu: {fileID: 7108218467021907531, guid: 6ccdd9f1481ea5d49ab31037e98b12aa, type: 3}
+  anahtarParcasiSablonu: {fileID: 8990119839824786842, guid: b36b210fe5be9504f88ca76d6b0262b7, type: 3}
   asmaKilitSablonu: {fileID: 2573454495964990403, guid: 69734c060a65f194db8c157b691eac47, type: 3}
   mentesePlakasiSablonu: {fileID: 3848375645311245744, guid: 53b8d292df36c9345b832e5c09ef2beb, type: 3}
   camKirikSablonu: {fileID: 7083046149260219638, guid: 8cebf6e6e03c2494780e00cd30fdb52c, type: 3}

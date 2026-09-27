@@ -299,4 +299,40 @@ public class KilitZinciriTestleri
         KilitZinciri.Sonuc s = z.Cozumle(Odalar());
         Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("bir alet değil")), string.Join("; ", s.Hatalar));
     }
+
+    // ---------- #65: kırık anahtar (parçaları birbirini tamamlar) ----------
+
+    [Test]
+    public void Kirik_anahtar_butun_parcalar_bulununca_kapiyi_acar()
+    {
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Oda_A", "Oda_B", "Banyo", "Oda_C" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "mutfak_yeri", Yol = "x", Oda = "Mutfak" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yeri", Yol = "y", Oda = "Antre" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_yeri", Yol = "z", Oda = "Salon" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "bas", Tur = EsyaTuru.AnahtarParcasi, Yer = "mutfak_yeri" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "antre_yeri" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "salon_yeri" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "salon", Tur = KilitTuru.KirikAnahtar, OdaKapisi = true, Hedef = "Salon",
+                                          Gerekenler = new List<string> { "bas", "uc" } });
+        Assert.IsTrue(z.Cozumle(Odalar()).Cozulebilir);
+        z.KapaliOdalar.Add("Mutfak");                        // başı artık bulunamaz
+        Assert.IsFalse(z.Cozumle(Odalar()).Cozulebilir);
+    }
+
+    [Test]
+    public void Kirik_anahtarin_tek_parcasi_ya_da_yanlis_turu_hata()
+    {
+        var z = new KilitZinciri();
+        z.Yerler.Add(new ZincirYeri { Kimlik = "yer", Yol = "x", Oda = "Antre" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "bas", Tur = EsyaTuru.OdaAnahtari, Yer = "yer" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "yer" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "salon", Tur = KilitTuru.KirikAnahtar, OdaKapisi = true, Hedef = "Salon",
+                                          Gerekenler = new List<string> { "bas" } });
+        KilitZinciri.Sonuc s = z.Cozumle(Odalar());
+        Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("en az iki parçası")), string.Join("; ", s.Hatalar));
+        z.Kilitler[0].Gerekenler.Add("bas");
+        s = z.Cozumle(Odalar());
+        Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("anahtar parçası değil")), string.Join("; ", s.Hatalar));
+    }
 }

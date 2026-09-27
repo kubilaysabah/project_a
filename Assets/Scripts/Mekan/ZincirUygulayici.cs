@@ -138,7 +138,7 @@ public class ZincirUygulayici
             // Kapıcının çantasında zaten olan alet (önceki bir katta bulunan tornavida) yeniden konmaz.
             if (AletCantasi.AletMi(e.Tur) && Aletler.Var(e.Kimlik)) continue;
             // Bulunmuş bir çizim parçası (kayıtta) yeniden konmaz (#63).
-            if (e.Tur == EsyaTuru.Parca && Kayit.ParcaBulunduMu(kat, e.Kimlik)) continue;
+            if ((e.Tur == EsyaTuru.Parca || e.Tur == EsyaTuru.AnahtarParcasi) && Kayit.ParcaBulunduMu(kat, e.Kimlik)) continue;
             Transform yer = YerYolu(daire, zincir, e.Yer);
             if (yer == null) { Debug.LogWarning($"[ZINCIR] '{e.Kimlik}' eşyasının yeri bulunamadı."); continue; }
             if (!sablonlar.TryGetValue(e.Tur, out GameObject sablon)) { Debug.LogWarning($"[ZINCIR] {e.Tur} şablonu yok."); continue; }
@@ -148,7 +148,15 @@ public class ZincirUygulayici
             nesne.transform.localPosition = new Vector3(e.X, e.Y, e.Z);
             nesne.transform.localRotation = Quaternion.Euler(0f, e.Donus, 0f);
             Esya bilesen = nesne.GetComponent<Esya>();
-            if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari || e.Tur == EsyaTuru.Parca ? kat : 0);
+            if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari || e.Tur == EsyaTuru.Parca || e.Tur == EsyaTuru.AnahtarParcasi ? kat : 0);
+            // Kırık anahtar parçası: şablonda iki model var; kimliği "_bas" ile bitiyorsa baş görünür.
+            if (e.Tur == EsyaTuru.AnahtarParcasi)
+            {
+                bool bas = e.Kimlik.EndsWith("_bas");
+                Transform mb = nesne.transform.Find("Model_Bas"), mu = nesne.transform.Find("Model_Uc");
+                if (mb != null) mb.gameObject.SetActive(bas);
+                if (mu != null) mu.gameObject.SetActive(!bas);
+            }
             // Yerin kilitlenen parçası (dolabın kapağı, buzdolabının kapısı) eşyanın kabının kapağıdır (#64).
             ZincirYeri yerVerisi = zincir.YerBul(e.Yer);
             if (bilesen != null && yerVerisi != null && !yerVerisi.PlandaNokta && !string.IsNullOrEmpty(yerVerisi.KilitYolu))
@@ -159,6 +167,13 @@ public class ZincirUygulayici
             }
             konanlar.Add(nesne);
         }
+
+        // Köşedeki kırık anahtar sayacı için bu katın kırık anahtarları (#65).
+        var kiriklar = new List<KirikAnahtarlar.Takim>();
+        foreach (ZincirKilidi k in zincir.Kilitler)
+            if (k.Tur == KilitTuru.KirikAnahtar)
+                kiriklar.Add(new KirikAnahtarlar.Takim { Kilit = k.Kimlik, Parcalar = new List<string>(k.Gerekenler) });
+        KirikAnahtarlar.Ayarla(kat, kiriklar);
 
         // 4. Kayıt (#54): bu katta daha önce çözülmüş kilitler çözük başlar.
         KayittanYukle(daire, zincir, kat);
@@ -309,6 +324,7 @@ public class ZincirUygulayici
     // Önceki katın izlerini siler: konan eşyalar, eklenen kilitler, kilitlenen kapılar.
     private void Temizle(Transform daire)
     {
+        KirikAnahtarlar.Temizle();
         foreach (GameObject g in konanlar)
         {
             if (g == null) continue;

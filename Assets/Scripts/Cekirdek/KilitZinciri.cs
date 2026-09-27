@@ -40,8 +40,10 @@ public enum KilitTuru
     Kirma,       // bir yer (cam kavanoz) doğru aletle kırılarak açılır; alet bitmez (#61).
                  // SONA eklendi: kayıtlı zincir dosyaları türü sayı olarak saklar, araya
                  // eklemek eski dosyalardaki türleri kaydırırdı.
-    Ekipman      // (#65) ağır bir şey (gardırop) ancak BİRKAÇ alet birlikte bulununca yerinden
+    Ekipman,     // (#65) ağır bir şey (gardırop) ancak BİRKAÇ alet birlikte bulununca yerinden
                  // oynar: Gerekenler listesindeki aletlerin hepsi kapıcının çantasında olmalı.
+    KirikAnahtar // (#65) kapının anahtarı kırık: Gerekenler listesindeki anahtar parçalarının
+                 // hepsi bulununca anahtar tamamlanır ve kapı açılır.
 }
 
 [System.Serializable]
@@ -218,7 +220,8 @@ public class KilitZinciri
                 // Kolu çekmek için o yere ulaşmak yeter.
                 return YereUlasilir(k.Gerekli, acilan);
             case KilitTuru.Ekipman:
-                // Gereken aletlerin hepsine ulaşılmalı.
+            case KilitTuru.KirikAnahtar:
+                // Gereken aletlerin (ya da anahtar parçalarının) hepsine ulaşılmalı.
                 if (k.Gerekenler == null || k.Gerekenler.Count == 0) return false;
                 foreach (string g in k.Gerekenler)
                 {
@@ -277,6 +280,16 @@ public class KilitZinciri
                     break;
                 case KilitTuru.Kol:
                     if (YerBul(k.Gerekli) == null) sonuc.Hatalar.Add($"'{k.Kimlik}': kol yeri '{k.Gerekli}' yok");
+                    break;
+                case KilitTuru.KirikAnahtar:
+                    if (k.Gerekenler == null || k.Gerekenler.Count < 2) sonuc.Hatalar.Add($"'{k.Kimlik}': kırık anahtarın en az iki parçası olmalı");
+                    else
+                        foreach (string g in k.Gerekenler)
+                        {
+                            ZincirEsyasi p = EsyaBul(g);
+                            if (p == null) sonuc.Hatalar.Add($"'{k.Kimlik}': anahtar parçası '{g}' zincirde yok");
+                            else if (p.Tur != EsyaTuru.AnahtarParcasi) sonuc.Hatalar.Add($"'{k.Kimlik}': '{g}' bir anahtar parçası değil, {p.Tur}");
+                        }
                     break;
                 case KilitTuru.Ekipman:
                     if (k.Gerekenler == null || k.Gerekenler.Count == 0) sonuc.Hatalar.Add($"'{k.Kimlik}': gereken alet yazılmamış");
