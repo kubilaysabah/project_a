@@ -575,6 +575,14 @@ public static partial class GrayboxKurucu
         Acilir(bufe, "Kapi_1", AcilirParca.Hareket.Dondur, Vector3.up, 100f, 0.6f);
         Acilir(bufe, "Kapi_2", AcilirParca.Hareket.Dondur, Vector3.up, -100f, 0.6f);
         Yonlendir(bufe, "Kapi_1", "Kapi_2");
+
+        // Dosya dolabı (#68): salonun koridor duvarında (v = 4,75), takvimin olduğu duvara yakın,
+        // önü salona (+v) bakar. 8. katta Yönetim'in dolabı; öbür katlarda sıradan bir mobilya.
+        // Derinliği 0,61: arkası duvara 1 cm kala. Çekmeceler 40 cm öne kayar.
+        GameObject dosya = DaireEsyasi("Dosya_Dolabi", e, d, 4.4f, 0f, 4.75f + 0.315f, 0f, 1f,
+                                       "Cekmece_1", "Cekmece_2", "Cekmece_3", "Cekmece_4");
+        for (int i = 1; i <= 4; i++)
+            Acilir(dosya, $"Cekmece_{i}", AcilirParca.Hareket.Kaydir, Vector3.forward, 0.40f, 0.45f);
     }
 
     // Açılır parçanın ekrandaki eylem adları (#65): "SÖK / TAK" gibi.
