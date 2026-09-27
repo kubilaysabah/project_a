@@ -317,24 +317,30 @@ public class ZincirUygulayici
             Object.Destroy(g);
         }
         konanlar.Clear();
-        foreach (Kilit k in daire.GetComponentsInChildren<Kilit>(true)) Object.Destroy(k);
+        // BİLEŞENLER HEMEN SİLİNİR (DestroyImmediate), kare sonunda değil (#64 hatası): Destroy
+        // bileşeni ancak karenin sonunda kaldırır; o zamana kadar GetComponent onu bulmaya devam
+        // eder. Daire aynı karede ikinci kez kurulunca (kat değişirken olabiliyor) Uygula eski
+        // sigorta yuvasını "zaten var" sanıyor, elektriği kesmiyordu: 4. katta lambalar baştan
+        // yanıyor, fosforlu yazı görünmüyor, buzdolabı hiç açılmıyordu. Kol, kırılan kavanoz ve
+        // menteşe kilitleri de aynı "varsa yeniden ekleme" kalıbını kullanıyor.
+        foreach (Kilit k in daire.GetComponentsInChildren<Kilit>(true)) Object.DestroyImmediate(k);
         // Kırılan nesneler bütünleşir. Sahanlıktaki yerler de temizlenir (dairenin ebeveyni).
-        foreach (Kirilan k in daire.GetComponentsInChildren<Kirilan>(true)) { k.Sifirla(); Object.Destroy(k); }
+        foreach (Kirilan k in daire.GetComponentsInChildren<Kirilan>(true)) { k.Sifirla(); Object.DestroyImmediate(k); }
         // Devrilen kapılar yerine konur, vidalar geri takılır.
-        foreach (MenteseSokucu m in daire.GetComponentsInChildren<MenteseSokucu>(true)) { m.Sifirla(); Object.Destroy(m); }
+        foreach (MenteseSokucu m in daire.GetComponentsInChildren<MenteseSokucu>(true)) { m.Sifirla(); Object.DestroyImmediate(m); }
         // Sigorta yuvası: eksik sigorta geri görünür, elektrik gelir.
-        foreach (SigortaYuvasi y in daire.GetComponentsInChildren<SigortaYuvasi>(true)) { y.Sifirla(); Object.Destroy(y); }
+        foreach (SigortaYuvasi y in daire.GetComponentsInChildren<SigortaYuvasi>(true)) { y.Sifirla(); Object.DestroyImmediate(y); }
         // Tavan lambaları: önce "hiçbiri yanamaz" (#64); yoksa hemen aşağıda elektrik gelince önceki
         // katın listesiyle yanarlardı.
         DaireLambalari lambalar = daire.GetComponent<DaireLambalari>();
         if (lambalar != null) lambalar.Ayarla(null);
         Elektrik(daire).Ayarla(true);
         // Çekilmiş kollar eski duruşuna döner, bileşenleri sökülür.
-        foreach (CekilenKol kol in daire.GetComponentsInChildren<CekilenKol>(true)) { kol.Sifirla(); Object.Destroy(kol); }
+        foreach (CekilenKol kol in daire.GetComponentsInChildren<CekilenKol>(true)) { kol.Sifirla(); Object.DestroyImmediate(kol); }
         // Çalan eşyalar susar, sesleri ve ışıkları sökülür (#62).
-        foreach (CalanEsya c in daire.GetComponentsInChildren<CalanEsya>(true)) { c.Sifirla(); Object.Destroy(c); }
+        foreach (CalanEsya c in daire.GetComponentsInChildren<CalanEsya>(true)) { c.Sifirla(); Object.DestroyImmediate(c); }
         // Çizim ekranı ve planda nokta olan yerlerin çapaları (#63).
-        foreach (CizimEkrani c in daire.GetComponentsInChildren<CizimEkrani>(true)) Object.Destroy(c);
+        foreach (CizimEkrani c in daire.GetComponentsInChildren<CizimEkrani>(true)) Object.DestroyImmediate(c);
         foreach (Transform t in capalar.Values) if (t != null) Object.Destroy(t.gameObject);
         capalar.Clear();
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
