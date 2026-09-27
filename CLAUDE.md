@@ -174,6 +174,8 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-27 (Lesson 45): Şahan chose **tools kept separately** (`27c14d0`: `AletCantasi`/`Aletler`, saved in `kayit_aletler`, never in the hand, never consumed, not placed again once owned) and **all eight mechanic families**, one signature mechanic per floor (`a5b115c`, `Docs/hikaye.md` §7); issues #62-#68 opened, timed/chase added to #58. 203/203 tests; builds rebuilt; #54 and #61 wait for his build test.
+
 - 2026-09-27 (Lesson 44): Şahan tested #54 in the Editor (not the build) and could not find the calendar: the salon it hangs in was never unlocked (the jar key was missed). He asked for tool interactions and easier aiming → **#61 built** (`9b1dabb`): `Kirma` lock (break with a tool, tool kept; screwdriver no longer consumed by hinges), landing chain places (`Sahanlik:Kapi_{n}/...`), range 2.8 m + 6 cm sphere sweep + 16×8×16 cm pick-up colliders, `Yonlendirici` on furniture bodies, "look inside a collider without an interaction" rule. Test chain now starts with the screwdriver on the open flat's landing shoe rack. His Editor test save was deleted at his request. 200/200 tests; builds rebuilt.
 
 - 2026-09-27 (Lesson 43): **#54 built** (`4797e82` chain data + rule, `0643774` items + key lock, `1f8e0f8` code padlock, `eece3e2` lever, `02d9bd5` fuse + screwdriver, `3838666` save). Floor 1 carries `Zincir_Test` (all five types) until #55 writes the real floors; verified end to end in play mode incl. save/restart; 198/198 tests; builds rebuilt; waiting for Şahan's build test. Next: #55 (floor chains) or the big furniture (#53 still open).
