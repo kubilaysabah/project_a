@@ -155,7 +155,7 @@ public class KatYoneticisi : MonoBehaviour
     [SerializeField] private KatZinciriVarligi[] katZincirleri;
     // Eşya şablonları (prefab): zincir eşyaları bunlardan kopyalanır. ZincirKurucu bağlar.
     [SerializeField] private GameObject odaAnahtariSablonu, katAnahtariSablonu, sigortaSablonu, tornavidaSablonu;
-    [SerializeField] private GameObject asmaKilitSablonu;
+    [SerializeField] private GameObject asmaKilitSablonu, mentesePlakasiSablonu;
     private ZincirUygulayici zincirUygulayici;
 
     // Her katın kaplama malzemeleri: [(kat - 1) * 4 + yüzey]. DokuKurucu üretir ve buraya bağlar.
@@ -252,6 +252,7 @@ public class KatYoneticisi : MonoBehaviour
         zincirUygulayici.SablonEkle(EsyaTuru.Sigorta, sigortaSablonu);
         zincirUygulayici.SablonEkle(EsyaTuru.Tornavida, tornavidaSablonu);
         zincirUygulayici.AsmaKilitSablonu = asmaKilitSablonu;
+        zincirUygulayici.MentesePlakasiSablonu = mentesePlakasiSablonu;
         zincirUygulayici.YaziOrnegi = aNumaralar != null && aNumaralar.Length > 0 ? aNumaralar[0] : null;
         AyakkabilariBul(sahanlikA, out aRaflar, out aDaginik);
         AyakkabilariBul(sahanlikB, out bRaflar, out bDaginik);

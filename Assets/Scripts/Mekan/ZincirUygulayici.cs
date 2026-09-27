@@ -20,8 +20,14 @@ public class ZincirUygulayici
     // Şablonlar: eşya türü -> prefab. KatYoneticisi bağlı referanslardan verir (build'e girsinler diye).
     private readonly Dictionary<EsyaTuru, GameObject> sablonlar = new Dictionary<EsyaTuru, GameObject>();
 
+    // Sigorta kutusunun dairedeki yolu ve sigorta kilidi olan katta eksik bırakılan sigorta.
+    private const string SigortaKutusuYolu = "Esyalar/Sigorta_Kutusu";
+    private const string EksikSigorta = "Sigorta_2";
+
     /// <summary>Şifreli kilitlerin kapıya takılan asma kilidi (prefab).</summary>
     public GameObject AsmaKilitSablonu;
+    /// <summary>Tornavida kilitli kapılara takılan menteşe plakası (iki vidalı prefab).</summary>
+    public GameObject MentesePlakasiSablonu;
     /// <summary>İpucu yazıları bu yazının yazı tipini ve malzemesini kullanır (kapı numarası).</summary>
     public TextMesh YaziOrnegi;
 
@@ -38,6 +44,7 @@ public class ZincirUygulayici
     {
         Temizle(daire);
         if (zincir == null) return;
+        DaireElektrigi elektrik = Elektrik(daire);
 
         // 1. Kapalı odalar: kilitli ve kilidi hiçbir şeyle açılmaz (üstünde Kilit bileşeni yok).
         foreach (string oda in zincir.KapaliOdalar)
@@ -65,6 +72,36 @@ public class ZincirUygulayici
                     // Sigorta kutusunun ana şalteri kısa bir kol: daha az döner.
                     kol.KilitEkle(kilit, kolYeri.name == "Salter" ? 100f : 120f);
                 }
+            }
+            if (veri.Tur == KilitTuru.Tornavida)
+            {
+                // Kapının koridor tarafına iki menteşe plakası; vidaları tornavidayla sökülür.
+                IcKapi ic = hedef.GetComponent<IcKapi>();
+                if (ic != null)
+                {
+                    MenteseSokucu sokucu = hedef.gameObject.AddComponent<MenteseSokucu>();
+                    konanlar.AddRange(sokucu.Hazirla(ic, MentesePlakasiSablonu));
+                }
+            }
+            if (veri.Tur == KilitTuru.Sigorta)
+            {
+                // Sigorta kutusundan bir sigorta eksik, daire elektriksiz; doğru buşon takılınca
+                // elektrik gelir ve bu kilit açılır.
+                Transform kutu = daire.Find(SigortaKutusuYolu);
+                if (kutu != null)
+                {
+                    SigortaYuvasi yuva = kutu.GetComponent<SigortaYuvasi>();
+                    if (yuva == null)
+                    {
+                        yuva = kutu.gameObject.AddComponent<SigortaYuvasi>();
+                        Transform eksik = kutu.Find(EksikSigorta);
+                        Transform kapak = kutu.Find("Kapak");
+                        yuva.Hazirla(veri.Gerekli, eksik != null ? eksik.gameObject : null,
+                                     kapak != null ? kapak.GetComponent<AcilirParca>() : null, elektrik);
+                    }
+                    yuva.KilitEkle(kilit);
+                }
+                else Debug.LogWarning("[ZINCIR] Sigorta kutusu bulunamadı: " + SigortaKutusuYolu);
             }
             if (veri.Tur == KilitTuru.Sifre)
             {
@@ -103,11 +140,23 @@ public class ZincirUygulayici
         }
         konanlar.Clear();
         foreach (Kilit k in daire.GetComponentsInChildren<Kilit>(true)) Object.Destroy(k);
+        // Devrilen kapılar yerine konur, vidalar geri takılır.
+        foreach (MenteseSokucu m in daire.GetComponentsInChildren<MenteseSokucu>(true)) { m.Sifirla(); Object.Destroy(m); }
+        // Sigorta yuvası: eksik sigorta geri görünür, elektrik gelir.
+        foreach (SigortaYuvasi y in daire.GetComponentsInChildren<SigortaYuvasi>(true)) { y.Sifirla(); Object.Destroy(y); }
+        Elektrik(daire).Ayarla(true);
         // Çekilmiş kollar eski duruşuna döner, bileşenleri sökülür.
         foreach (CekilenKol kol in daire.GetComponentsInChildren<CekilenKol>(true)) { kol.Sifirla(); Object.Destroy(kol); }
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);
+    }
+
+    // Dairenin elektrik bileşeni (kurucu ekler; yoksa burada eklenir).
+    private static DaireElektrigi Elektrik(Transform daire)
+    {
+        DaireElektrigi e = daire.GetComponent<DaireElektrigi>();
+        return e != null ? e : daire.gameObject.AddComponent<DaireElektrigi>();
     }
 
     // Şifrenin ipucu: ipucu yerine (takvim, boy cetveli...) yazılan metin. #55'te ipuçları

@@ -47,6 +47,8 @@ public class Kilit : MonoBehaviour
                     return Cep.KimligiTasiyor(Veri.Gerekli) ? Dil.Getir("ipucu.ac") : Dil.Getir("ipucu.kilitli");
                 case KilitTuru.Sifre:
                     return Dil.Getir("ipucu.sifre");
+                case KilitTuru.Tornavida:
+                    return Cep.KimligiTasiyor(Veri.Gerekli) ? Dil.Getir("ipucu.sok") : Dil.Getir("ipucu.kilitli");
                 default:
                     return Dil.Getir("ipucu.kilitli");
             }
@@ -60,6 +62,17 @@ public class Kilit : MonoBehaviour
         if (Veri.Tur == KilitTuru.Anahtar && Cep.KimlikleKullan(Veri.Gerekli))
         {
             Coz(acilsin: true);
+            return true;
+        }
+        if (Veri.Tur == KilitTuru.Tornavida && Cep.KimligiTasiyor(Veri.Gerekli))
+        {
+            // Her basış bir vida; son vida çıkınca kapı devrilir, tornavida kullanılmış olur.
+            MenteseSokucu sokucu = GetComponent<MenteseSokucu>();
+            if (sokucu == null || sokucu.VidaSok())
+            {
+                Cep.KimlikleKullan(Veri.Gerekli);
+                Coz(acilsin: false);
+            }
             return true;
         }
         if (Veri.Tur == KilitTuru.Sifre)
@@ -114,7 +127,7 @@ public class Kilit : MonoBehaviour
         Vector3 konum, disaYon;
         Transform ebeveyn;
         IcKapi kapi = GetComponent<IcKapi>();
-        if (kapi == null || !kapi.OnNoktasi(1.15f, out konum, out disaYon, out ebeveyn))
+        if (kapi == null || !kapi.OnNoktasi(0.82f, 1.15f, out konum, out disaYon, out ebeveyn))
         {
             // Kapı değilse (dolap kapağı, çekmece): parçanın ön yüzünün ortası. Modellerin ön
             // yüzü +Z'ye baktığı için meshin sınırlarının en ön (max z) yüzü kullanılır.

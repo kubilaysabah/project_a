@@ -88,6 +88,8 @@ public static partial class GrayboxKurucu
             GameObject daire = new GameObject($"Daire_{n}");
             daire.transform.SetParent(sahanlik, false);
             DaireKur(daire.transform, DaireYonuBul(n));
+            // Dairede elektrik var mı (#54): sigorta kilidi olan katta zincir kapatır.
+            daire.AddComponent<DaireElektrigi>();
             // Kapalı kurulur: kayıtlı sahnede dört daire de gizli, kapılar kapalı.
             daire.SetActive(false);
         }
@@ -444,6 +446,7 @@ public static partial class GrayboxKurucu
         // Menteşe modelin -x tarafında (önündeki oyuncunun sağı), serbest kenar +x'te: negatif
         // dönüş onu öne açar.
         Acilir(buzdolabi, "Kapi", AcilirParca.Hareket.Dondur, Vector3.up, -105f, 0.8f);
+        BuzdolabiIsigiKur(buzdolabi);
 
         // SALON: Oda B tarafındaki duvarda takvim.
         DaireEsyasi("Takvim", e, d, 5.0f, 1.35f, 6.0f, -1f, 0f);
@@ -464,6 +467,30 @@ public static partial class GrayboxKurucu
         GameObject alet = DaireEsyasi("Alet_Cantasi", e, d, 5.2f, 0f, -0.69f, 0f, 1f, "Kapak");
         Acilir(alet, "Kapak", AcilirParca.Hareket.Dondur, Vector3.right, -100f, 0.5f);
         DaireEsyasi("Duvar_Kolu", e, d, 6.7f, 1.1f, 1.2f, -1f, 0f, "Kol");
+    }
+
+    // Buzdolabının iç ışığı (#54): lamba yuvasının hizasında soğuk beyaz, kısa menzilli bir
+    // nokta ışığı; kapı açıkken ve elektrik varken yanar (BuzdolabiIsigi). Konum buzdolabının
+    // kendi ekseninde: lamba yuvası sağ iç duvarda, 1,05 m yükseklikte (buzdolabi.py).
+    static void BuzdolabiIsigiKur(GameObject buzdolabi)
+    {
+        if (buzdolabi == null) return;
+        GameObject g = new GameObject("Elektrik_Isigi");
+        g.transform.SetParent(buzdolabi.transform, false);
+        g.transform.localPosition = new Vector3(-0.20f, 1.02f, 0.05f);
+        Light isik = g.AddComponent<Light>();
+        isik.type = LightType.Point;
+        isik.range = 0.9f;
+        isik.intensity = 0.5f;   // 1,6 içini beyaza patlatıyordu (oynatma modu görüntüsü)
+        isik.color = new Color(0.86f, 0.93f, 1f);
+        isik.shadows = LightShadows.None;
+        isik.enabled = false;
+        BuzdolabiIsigi b = buzdolabi.AddComponent<BuzdolabiIsigi>();
+        var seri = new SerializedObject(b);
+        seri.FindProperty("isik").objectReferenceValue = isik;
+        Transform kapi = buzdolabi.transform.Find("Kapi");
+        seri.FindProperty("kapi").objectReferenceValue = kapi != null ? kapi.GetComponent<AcilirParca>() : null;
+        seri.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // Bir eşyayı planın (u, y, v) noktasına, ön yüzü planın (onU, onV) yönüne bakacak şekilde

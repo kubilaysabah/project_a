@@ -59,7 +59,7 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
     }
 
     // Kapı dönerken ikinci bir basış yok sayılır; dönüş bitince yeniden etkileşilebilir.
-    public bool EtkilesimeAcik { get { return hareket == null; } }
+    public bool EtkilesimeAcik { get { return hareket == null && !devrik; } }
 
     public void Etkilesim(GameObject oyuncu)
     {
@@ -116,7 +116,8 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
     /// verilen yükseklikteki nokta ve dışarı bakan yön. Asma kilit buraya takılır.
     /// ebeveyn: noktanın bağlanacağı nesne (menteşe; kapı dönerse onunla döner).
     /// </summary>
-    public bool OnNoktasi(float yukseklik, out Vector3 konum, out Vector3 disaYon, out Transform ebeveyn)
+    /// kenarOrani: menteşeden serbest kenara doğru ne kadar (0 menteşe, 1 serbest kenar).
+    public bool OnNoktasi(float kenarOrani, float yukseklik, out Vector3 konum, out Vector3 disaYon, out Transform ebeveyn)
     {
         konum = Vector3.zero; disaYon = Vector3.forward; ebeveyn = mentese;
         if (mentese == null || kanat == null) return false;
@@ -125,10 +126,35 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
         // Kanat açılırken serbest kenarın gittiği yön = odanın tarafı. Küçük bir açıyla bakıyoruz
         // ki yön kanada dik çıksın; dışarısı bunun tersi.
         Vector3 odaYonu = (Quaternion.Euler(0f, Mathf.Sign(acikAci) * 10f, 0f) * kenar - kenar).normalized;
-        Vector3 yerel = kenar * 0.82f + Vector3.up * yukseklik - odaYonu * 0.022f;
+        Vector3 yerel = kenar * kenarOrani + Vector3.up * yukseklik - odaYonu * 0.022f;
         konum = mentese.TransformPoint(yerel);
         disaYon = mentese.TransformDirection(-odaYonu);
         return true;
+    }
+
+    // ---------- DEVRİLME (tornavida kilidi, MenteseSokucu) ----------
+    private bool devrik;
+
+    /// <summary>Menteşeleri sökülen kapı devrildi: artık açılıp kapanmaz.</summary>
+    public void Devir()
+    {
+        if (hareket != null) { StopCoroutine(hareket); hareket = null; }
+        devrik = true;
+    }
+
+    /// <summary>Kat değişince devrik kapı yerine konur.</summary>
+    public void Kaldir() { devrik = false; }
+
+    /// <summary>Kapının devrileceği eksen: alt kenarının oda tarafı; isaret tepenin odaya gitmesi için.</summary>
+    public void DevrilmeEkseni(out Vector3 nokta, out Vector3 eksen, out float isaret)
+    {
+        Vector3 kenar = new Vector3(kanat.localPosition.x, 0f, kanat.localPosition.z) * 2f;
+        Vector3 odaYonu = (Quaternion.Euler(0f, Mathf.Sign(acikAci) * 10f, 0f) * kenar - kenar).normalized;
+        nokta = mentese.TransformPoint(kenar * 0.5f + odaYonu * 0.022f);
+        eksen = mentese.TransformDirection(kenar.normalized);
+        // Unity'de bir eksen etrafında pozitif dönüş, v vektörünü (eksen x v) yönüne iter.
+        // Yukarı vektörün odaya gitmesi isteniyor: yön tutmuyorsa açı eksi olmalı.
+        isaret = Vector3.Dot(Vector3.Cross(eksen, Vector3.up), mentese.TransformDirection(odaYonu)) > 0f ? 1f : -1f;
     }
 
     private void AciyiUygula(float a)

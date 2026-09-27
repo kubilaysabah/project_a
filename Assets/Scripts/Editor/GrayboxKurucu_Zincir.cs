@@ -41,6 +41,7 @@ public static partial class GrayboxKurucu
         GameObject sigorta = SablonKur("Esya_Sigorta", "Buson", EsyaTuru.Sigorta, null);
         GameObject tornavida = SablonKur("Esya_Tornavida", "Tornavida", EsyaTuru.Tornavida, null);
         GameObject asmaKilit = ParcaSablonuKur("Asma_Kilit", "Asma_Kilit");
+        GameObject plaka = MentesePlakasiSablonuKur();
         KatZinciriVarligi test = TestZinciriKur();
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
@@ -52,6 +53,7 @@ public static partial class GrayboxKurucu
         seri.FindProperty("sigortaSablonu").objectReferenceValue = sigorta;
         seri.FindProperty("tornavidaSablonu").objectReferenceValue = tornavida;
         seri.FindProperty("asmaKilitSablonu").objectReferenceValue = asmaKilit;
+        seri.FindProperty("mentesePlakasiSablonu").objectReferenceValue = plaka;
         SerializedProperty katlar = seri.FindProperty("katZincirleri");
         katlar.arraySize = KatSayaci.CatiKati;
         // Şimdilik yalnızca 1. katta test zinciri; öbür katlar #55'e kadar kilitsiz.
@@ -106,6 +108,20 @@ public static partial class GrayboxKurucu
         c.center = b.center;
         c.size = b.size;
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/{ad}.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // Menteşe plakası şablonu: plaka ve iki vida, vidalar kökün çocukları (MenteseSokucu
+    // onları adlarıyla bulup tek tek söker).
+    static GameObject MentesePlakasiSablonuKur()
+    {
+        GameObject gecici = new GameObject("Mentese_Plakasi");
+        if (Model("Plaka", gecici.transform, "Mentese_Plakasi", "Mentese_Plakasi", Vector3.zero, 0f, carpisma: false) == null)
+        { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Mentese_Plakasi.fbx yok."); return null; }
+        Model("Vida_1", gecici.transform, "Mentese_Plakasi", "Vida_1", Vector3.zero, 0f, carpisma: false);
+        Model("Vida_2", gecici.transform, "Mentese_Plakasi", "Vida_2", Vector3.zero, 0f, carpisma: false);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Mentese_Plakasi.prefab");
         Object.DestroyImmediate(gecici);
         return sablon;
     }

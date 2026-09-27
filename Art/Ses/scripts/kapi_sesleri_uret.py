@@ -164,7 +164,56 @@ def kol_cekme():
     kaydet(os.path.join(SESLER, "Kol_Cekme.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.75)
 
 
-URETICILER = {"kol_cekme": kol_cekme, "sifre_cark": sifre_cark, "sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
+# ---------- SİGORTA (#54) ----------
+def sigorta_takma():
+    """Buşon yuvasına vidalanır (porselen sürtünmesi, iki tık), sonra elektrik gelir: kısa bir
+    cızırtı ve 50 Hz'lik alçak bir vınlama."""
+    random.seed(43)
+    n = int(1.4 * HIZ)
+    s = [0.0] * n
+    surt = bant(gurultu(n), 2600, HIZ, 1.0)
+    for i in range(int(0.35 * HIZ)):
+        s[i] += 0.10 * surt[i] * (0.6 + 0.4 * math.sin(2 * math.pi * 14 * i / HIZ))
+    for t, guc in ((0.36, 0.8), (0.46, 1.0)):
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.1 * HIZ), HIZ, 0.0005), HIZ, KILIT)), int(t * HIZ), guc)
+    # Elektrik: kısa cızırtı + sönerek süren şebeke vınlaması (50 Hz ve harmonikleri).
+    ciz = yuksek(gurultu(int(0.08 * HIZ)), 3000, HIZ)
+    ekle(s, tepeyi_esitle(ciz), int(0.58 * HIZ), 0.35)
+    for i in range(int(0.60 * HIZ), n):
+        t = (i - int(0.60 * HIZ)) / HIZ
+        zarf = min(1.0, t / 0.05) * math.exp(-t * 2.2)
+        s[i] += 0.22 * zarf * (math.sin(2 * math.pi * 50 * t) + 0.5 * math.sin(2 * math.pi * 100 * t) + 0.25 * math.sin(2 * math.pi * 150 * t))
+    kaydet(os.path.join(SESLER, "Sigorta_Takma.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.7)
+
+
+# ---------- TORNAVİDA (#54) ----------
+def vida_sokme():
+    """Vidanın gevşeyişi: tornavidanın vida yuvasında kısa gıcırtısı ve cızırtılı dönüşü."""
+    random.seed(44)
+    n = int(0.55 * HIZ)
+    s = [0.0] * n
+    surt = bant(gurultu(n), 4200, HIZ, 1.5)
+    for i in range(int(0.45 * HIZ)):
+        t = i / HIZ
+        s[i] += 0.16 * surt[i] * (0.5 + 0.5 * math.sin(2 * math.pi * 18 * t) ** 2) * min(1.0, t / 0.03)
+    ekle(s, tepeyi_esitle(modlar(darbe(int(0.1 * HIZ), HIZ, 0.0005), HIZ, KILIT)), int(0.02 * HIZ), 0.6)
+    kaydet(os.path.join(SESLER, "Vida_Sokme.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.55)
+
+
+def kapi_devrilme():
+    """Menteşesiz kapının devrilişi: tahta kanat yere çarpar, bir kez seker, oda yankılanır."""
+    random.seed(45)
+    n = int(1.6 * HIZ)
+    s = [0.0] * n
+    buyuk = [(70, 3, 1.0), (140, 4, 0.8), (260, 5, 0.5), (480, 6, 0.3)]
+    ekle(s, tepeyi_esitle(modlar(darbe(int(0.8 * HIZ), HIZ, 0.01), HIZ, buyuk)), 0, 1.0)
+    ekle(s, tepeyi_esitle(modlar(darbe(int(0.5 * HIZ), HIZ, 0.006), HIZ, buyuk)), int(0.16 * HIZ), 0.35)
+    ekle(s, tepeyi_esitle(alcak(gurultu(int(0.3 * HIZ)), 500, HIZ)), 0, 0.25)
+    s = yanki(s, HIZ, boyut=0.6, sonum=0.45, islak=0.3, oda=0.9)
+    kaydet(os.path.join(SESLER, "Kapi_Devrilme.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.85)
+
+
+URETICILER = {"vida_sokme": vida_sokme, "kapi_devrilme": kapi_devrilme, "sigorta_takma": sigorta_takma, "kol_cekme": kol_cekme, "sifre_cark": sifre_cark, "sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
               "ic_acilma": ic_acilma, "ic_kapanma": ic_kapanma, "ic_kilitli": ic_kilitli}
 
 if __name__ == "__main__":
