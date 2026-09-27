@@ -121,7 +121,7 @@ public class Esya : MonoBehaviour, IEtkilesimli
     {
         CizimEkrani ekran = GetComponentInParent<CizimEkrani>();
         if (ekran != null) return ekran;
-        foreach (CizimEkrani c in FindObjectsByType<CizimEkrani>(FindObjectsSortMode.None))
+        foreach (CizimEkrani c in FindObjectsByType<CizimEkrani>())
             if (c.ParcasiMi(kimlik)) return c;
         return null;
     }
