@@ -97,6 +97,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
+      IpucuOlcek: 1
     - Kimlik: salon
       Tur: 0
       OdaKapisi: 1
@@ -107,6 +108,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
+      IpucuOlcek: 1
     - Kimlik: kiler
       Tur: 1
       OdaKapisi: 1
@@ -117,6 +119,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0.24
       IpucuZ: 0.011
+      IpucuOlcek: 1
     - Kimlik: odaA
       Tur: 2
       OdaKapisi: 1
@@ -127,6 +130,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
+      IpucuOlcek: 1
     - Kimlik: buzdolabi
       Tur: 3
       OdaKapisi: 0
@@ -137,6 +141,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
+      IpucuOlcek: 1
     - Kimlik: odaB
       Tur: 0
       OdaKapisi: 1
@@ -147,6 +152,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
+      IpucuOlcek: 1
     - Kimlik: banyo
       Tur: 4
       OdaKapisi: 1
@@ -157,5 +163,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
+      IpucuOlcek: 1
   notlar: []
   suslar: []
+  sesler: []

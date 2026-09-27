@@ -128,4 +128,22 @@ public class DairePlaniTestleri
         }
         Assert.AreEqual(1, giris, "tek giriş olmalı");
     }
+
+    [Test]
+    public void Nokta_bulundugu_odayi_verir()
+    {
+        Assert.AreEqual("Antre", DairePlani.NoktaninOdasi(1.0f, 1.0f));
+        Assert.AreEqual("Hol", DairePlani.NoktaninOdasi(6.0f, 3.8f));
+        Assert.AreEqual("Oda_A", DairePlani.NoktaninOdasi(9.0f, 6.0f));
+        Assert.AreEqual("Oda_C", DairePlani.NoktaninOdasi(5.5f, 0.0f));
+    }
+
+    [Test]
+    public void Kapi_esigi_bir_odaya_sayilir_dairenin_disi_sayilmaz()
+    {
+        // Oda A'nın kapısının eşiği: hol (v <= 4,65) ile oda (v >= 4,75) arasındaki duvarın içi.
+        Assert.IsNotNull(DairePlani.NoktaninOdasi(9.1f, 4.70f), "eşik");
+        Assert.IsNull(DairePlani.NoktaninOdasi(-1.0f, 1.0f), "sahanlık");
+        Assert.IsNull(DairePlani.NoktaninOdasi(5.0f, 9.0f), "arka cephenin dışı");
+    }
 }

@@ -1,5 +1,5 @@
 // KatZinciriVarligi.cs
-// Bir katın içerik dosyası (#54, #55): kilit zinciri, notlar ve dekor.
+// Bir katın içerik dosyası (#54, #55, #62): kilit zinciri, notlar, dekor ve kendiliğinden çalan eşyalar.
 //
 // ScriptableObject: sahnedeki bir nesneye değil, projedeki bir DOSYAYA ait veri kabı
 // (anomali kartları da böyle). Zincirin kendisi (KilitZinciri) Unity'siz, düz C# ve testli;
@@ -43,6 +43,21 @@ public class KatSusu : KatYerlesimi
     public GameObject Sablon;     // koyulacak modelin şablonu (koli...)
 }
 
+/// <summary>
+/// Katta kendiliğinden çalan bir eşya (#62): dairedeki bir mobilyayı (radyo) "çalan eşya" yapar.
+/// Yol: eşyanın dairenin kökünden yolu; Oda: bulunduğu oda (kapısı kapalıyken ses boğulur);
+/// Gecikme: oyuncu daireye girdikten kaç saniye sonra çalmaya başlar.
+/// </summary>
+[System.Serializable]
+public class KatSesi
+{
+    public string Yol;
+    public string Oda;
+    public AudioClip Klip;
+    public float Gecikme = 5f;
+    [Range(0f, 1f)] public float Ses = 0.8f;
+}
+
 // CreateAssetMenu: Project penceresinde sağ tık → Create menüsüne "Huzur/Kat Zinciri" ekler.
 [CreateAssetMenu(fileName = "Zincir_Yeni", menuName = "Huzur/Kat Zinciri")]
 public class KatZinciriVarligi : ScriptableObject
@@ -51,4 +66,5 @@ public class KatZinciriVarligi : ScriptableObject
     public KilitZinciri zincir = new KilitZinciri();
     public List<KatNotu> notlar = new List<KatNotu>();
     public List<KatSusu> suslar = new List<KatSusu>();
+    public List<KatSesi> sesler = new List<KatSesi>();
 }

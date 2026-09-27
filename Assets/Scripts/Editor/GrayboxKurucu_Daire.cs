@@ -466,6 +466,9 @@ public static partial class GrayboxKurucu
         GameObject komodin = DaireEsyasi("Komodin", e, d, 8.1f, 0f, 7.9f, 0f, -1f, "Cekmece");
         Acilir(komodin, "Cekmece", AcilirParca.Hareket.Kaydir, Vector3.forward, 0.26f, 0.4f);
         Yonlendir(komodin, "Cekmece");
+        // Komodinin üstünde radyo (#62): 2. katta kendiliğinden çalar (CalanEsya'yı kat dosyası
+        // ekler); öbür katlarda sessiz bir mobilya. Arkası duvara 1 cm kala.
+        DaireEsyasi("Radyo", e, d, 8.1f, 0.55f, 7.94f, 0f, -1f, "Kadran");
 
         // ODA B: salon tarafındaki duvarda oyuncak kutusu; kapının yanındaki duvarda boy cetveli
         // (0,6 m yükseğe: cetvelin çizgileri gerçek boyu göstersin).

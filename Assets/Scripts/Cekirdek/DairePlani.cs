@@ -133,6 +133,24 @@ public static class DairePlani
         new Aciklik("Pencere_Mutfak", AciklikTuru.Pencere, "Mutfak", true, 10.60f, 1.00f, 1.20f, 1.05f, 2.20f),
     };
 
+    /// <summary>
+    /// Plandaki (u, v) noktasının bulunduğu odanın adı; hiçbir odada değilse (duvarın içi,
+    /// dairenin dışı) null (#62). Ses, oyuncunun radyoyla aynı odada olup olmadığını buna
+    /// sorar: aynı odadaysa kapalı kapı sesi boğmaz. Odaların duvarları arasında 10 cm boşluk
+    /// var; kapı eşiğinde duran oyuncu "hiçbir odada" sayılmasın diye 6 cm pay bırakılır.
+    /// </summary>
+    public static string NoktaninOdasi(float u, float v)
+    {
+        const float Pay = 0.06f;
+        // Önce tam içinde olan oda aranır; eşikteki bir nokta iki odanın payına birden
+        // girebilir, o zaman tam içinde olan kazanır.
+        foreach (Oda o in Odalar)
+            if (u >= o.U0 && u <= o.U1 && v >= o.V0 && v <= o.V1) return o.Ad;
+        foreach (Oda o in Odalar)
+            if (u >= o.U0 - Pay && u <= o.U1 + Pay && v >= o.V0 - Pay && v <= o.V1 + Pay) return o.Ad;
+        return null;
+    }
+
     /// <summary>Adı verilen odayı bulur; yoksa false.</summary>
     public static bool OdaBul(string ad, out Oda oda)
     {

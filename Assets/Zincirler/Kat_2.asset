@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
+  m_Name: Kat_2
+  m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
+  aciklama: "2. kat, daire 3, ya\u015Fl\u0131 Nuri (sesle bulma). Radyo Oda A'da
+    kendili\u011Finden \xE7alar, kapal\u0131 kap\u0131n\u0131n arkas\u0131ndan bo\u011Fuk
+    duyulur; kadran\u0131ndaki istasyon (102.7) kilerin \u015Fifresi; kilerde alet
+    \xE7antas\u0131nda kat\u0131n anahtar\u0131. Banyo ve Oda B kapal\u0131. Notlar:
+    Y\xF6netim'in hastane notu, Nuri'nin \u015Fifre notu."
+  zincir:
+    KapaliOdalar:
+    - Banyo
+    - Oda_B
+    Yerler:
+    - Kimlik: radyo
+      Yol: Esyalar/Radyo
+      Oda: Oda_A
+      KilitYolu: 
+    - Kimlik: alet_cantasi
+      Yol: Esyalar/Alet_Cantasi
+      Oda: Oda_C
+      KilitYolu: 
+    Esyalar:
+    - Kimlik: kat_anahtari
+      Tur: 1
+      Yer: alet_cantasi
+      X: 0
+      Y: 0.03
+      Z: 0
+      Donus: 20
+    Kilitler:
+    - Kimlik: kiler
+      Tur: 1
+      OdaKapisi: 1
+      Hedef: Oda_C
+      Gerekli: radyo
+      Sifre: 1027
+      IpucuMetni: 102.7
+      IpucuX: -0.085
+      IpucuY: 0.137
+      IpucuZ: 0.0705
+      IpucuOlcek: 0.7
+  notlar:
+  - Yol: Esyalar/Sigorta_Kutusu
+    X: 0.3
+    Y: -0.1
+    Z: 0.002
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat2_hastane
+  - Yol: 
+    X: 4.95
+    Y: 1.4
+    Z: 2.952
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat2_kiler
+  suslar: []
+  sesler:
+  - Yol: Esyalar/Radyo
+    Oda: Oda_A
+    Klip: {fileID: 8300000, guid: 6f840b9879cafa641948e3e2fa41b79b, type: 3}
+    Gecikme: 4
+    Ses: 0.8

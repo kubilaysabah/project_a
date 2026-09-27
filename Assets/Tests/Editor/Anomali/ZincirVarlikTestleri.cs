@@ -87,4 +87,38 @@ public class ZincirVarlikTestleri
         }
         finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
     }
+
+    // #62: katın kendiliğinden çalan eşyaları. Kat dosyasının sınıfı oyun derlemesinde
+    // (Assembly-CSharp) olduğu için test onu alan adlarıyla, yansımayla (reflection) okur.
+    [Test]
+    public void Her_calan_esyanin_yolu_odasi_ve_sesi_var()
+    {
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        Scene sahne = EditorSceneManager.OpenScene(SahneYolu, OpenSceneMode.Additive);
+        try
+        {
+            Transform a = null;
+            foreach (GameObject g in sahne.GetRootGameObjects()) if (g.name == "Sahanlik_A") a = g.transform;
+            foreach (string guid in AssetDatabase.FindAssets("t:ScriptableObject", new[] { "Assets/Zincirler" }))
+            {
+                string yol = AssetDatabase.GUIDToAssetPath(guid);
+                ScriptableObject v = AssetDatabase.LoadAssetAtPath<ScriptableObject>(yol);
+                var alan = v.GetType().GetField("sesler");
+                if (alan == null) continue;
+                foreach (object ses in (System.Collections.IEnumerable)alan.GetValue(v))
+                {
+                    var tur = ses.GetType();
+                    string sesYolu = (string)tur.GetField("Yol").GetValue(ses);
+                    string oda = (string)tur.GetField("Oda").GetValue(ses);
+                    Object klip = (Object)tur.GetField("Klip").GetValue(ses);
+                    Assert.IsTrue(klip != null, $"{yol}: '{sesYolu}' için ses dosyası bağlı değil");
+                    Assert.Contains(oda, odalar, $"{yol}: '{sesYolu}' için oda '{oda}' planda yok");
+                    for (int n = 1; n <= 4; n++)
+                        Assert.IsNotNull(Bul(a, a.Find($"Daire_{n}"), n, sesYolu), $"{yol}: Daire_{n} için '{sesYolu}' yok");
+                }
+            }
+        }
+        finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
+    }
 }

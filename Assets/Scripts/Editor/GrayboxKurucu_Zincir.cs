@@ -59,6 +59,7 @@ public static partial class GrayboxKurucu
         GameObject koliKucuk = ParcaSablonuKur("Koli_Kucuk", "Koli_Kucuk");
         GameObject koliAcik = ParcaSablonuKur("Koli_Acik", "Koli_Acik");
         KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
+        KatZinciriVarligi kat2 = Kat2Kur();
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
@@ -85,11 +86,12 @@ public static partial class GrayboxKurucu
         // 1. kat öğretici zincirini taşır (#55); öbür katlar yazıldıkça bağlanır. Test zinciri
         // (beş türün hepsi) dosya olarak duruyor ve testlerde denetleniyor ama bir kata bağlı değil.
         katlar.GetArrayElementAtIndex(0).objectReferenceValue = kat1;
+        katlar.GetArrayElementAtIndex(1).objectReferenceValue = kat2;
         seri.ApplyModifiedPropertiesWithoutUndo();
 
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
-        Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1. kat kuruldu; 1. kata öğretici zincir bağlandı.");
+        Debug.Log("[ZINCIR] Şablonlar, test zinciri, 1. ve 2. kat kuruldu ve bağlandı.");
     }
 
     static void KlasorHazirla(string ust, string ad)
@@ -232,6 +234,66 @@ public static partial class GrayboxKurucu
         KilitZinciri.Sonuc s2 = z.Cozumle(odalar);
         if (!s2.Cozulebilir) Debug.LogError("[ZINCIR] 1. kat zinciri çözülemiyor: " + string.Join("; ", s2.Hatalar));
         else Debug.Log("[ZINCIR] 1. kat zinciri çözülebilir: " + string.Join(" -> ", s2.AcilanKilitler));
+        EditorUtility.SetDirty(v);
+        return v;
+    }
+
+    // ---------- 2. KAT: SESLE BULMA (#62, Docs/hikaye.md §7) ----------
+    // Daire 3, yaşlı Nuri'nin dairesi; Nuri hastanede. Banyo ve Oda B kapalı; salon, mutfak ve
+    // Oda A'nın kapıları kapalı ama kilitsiz; kiler (Oda C) şifreli asma kilitli.
+    //   1. Antrede Yönetim'in notu: Nuri Bey hastaneye kaldırıldı (hikâye).
+    //   2. Koridorda kilerin kapısının yanında Nuri'nin notu: kilidin numarası radyonun istasyonu.
+    //   3. Oyuncu daireye girdikten 4 sn sonra radyo kendiliğinden çalar. Oda A'nın kapısı kapalı:
+    //      ses boğuk gelir, oyuncu hangi kapı olduğunu kulağıyla bulur (CalanEsya).
+    //   4. Oda A'da komodinin üstünde radyo; kadranında "102.7" -> kilerin şifresi 1027.
+    //   5. Kilerde alet çantasının içinde katın anahtarı.
+    static KatZinciriVarligi Kat2Kur()
+    {
+        string yol = $"{ZincirKlasoru}/Kat_2.asset";
+        KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
+        if (v == null)
+        {
+            v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
+            AssetDatabase.CreateAsset(v, yol);
+        }
+        v.aciklama = "2. kat, daire 3, yaşlı Nuri (sesle bulma). Radyo Oda A'da kendiliğinden çalar, kapalı kapının " +
+                     "arkasından boğuk duyulur; kadranındaki istasyon (102.7) kilerin şifresi; kilerde alet çantasında " +
+                     "katın anahtarı. Banyo ve Oda B kapalı. Notlar: Yönetim'in hastane notu, Nuri'nin şifre notu.";
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_B" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "radyo", Yol = "Esyalar/Radyo", Oda = "Oda_A" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "alet_cantasi", Yol = "Esyalar/Alet_Cantasi", Oda = "Oda_C" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "alet_cantasi", Y = 0.03f, Donus = 20f });
+        // İpucu radyonun kadran camına yazılır: camın ortası radyonun ekseninde x = -0,085,
+        // y = 0,137; ön yüzü z = 0,069 (radyo.py'nin yazdırdığı KADRAN_MERKEZ, Unity eksenine
+        // çevrilmiş). Yazı takvimdekinin %70'i: %40'ı ("FM 102.7") 1,3 m'den okunmuyordu.
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "kiler", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_C", Gerekli = "radyo",
+                                          Sifre = "1027", IpucuMetni = "102.7", IpucuX = -0.085f, IpucuY = 0.137f, IpucuZ = 0.0705f,
+                                          IpucuOlcek = 0.7f });
+        v.zincir = z;
+
+        v.notlar = new List<KatNotu>
+        {
+            // Yönetim'in notu antrede, sigorta kutusunun yanında (1. kattaki tahliye yazısının yeri).
+            new KatNotu { Metin = "not.kat2_hastane", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
+            // Nuri'nin notu koridor duvarında, kilerin kapısının solunda (kapı u = 5,25-6,05).
+            // Koridorun duvar yüzü v = 2,95; not ön yüzüyle koridora (+v) bakar.
+            new KatNotu { Metin = "not.kat2_kiler", X = 4.95f, Y = 1.40f, Z = 2.952f, OnU = 0f, OnV = 1f },
+        };
+        v.suslar = new List<KatSusu>();
+
+        v.sesler = new List<KatSesi>
+        {
+            new KatSesi { Yol = "Esyalar/Radyo", Oda = "Oda_A", Gecikme = 4f, Ses = 0.8f,
+                          Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Daire/Radyo_Istasyon.wav") },
+        };
+        if (v.sesler[0].Klip == null) Debug.LogError("[ZINCIR] Radyo_Istasyon.wav bulunamadı (Art/Ses/scripts/kayit_isle.py radyo).");
+
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        KilitZinciri.Sonuc s2 = z.Cozumle(odalar);
+        if (!s2.Cozulebilir) Debug.LogError("[ZINCIR] 2. kat zinciri çözülemiyor: " + string.Join("; ", s2.Hatalar));
+        else Debug.Log("[ZINCIR] 2. kat zinciri çözülebilir: " + string.Join(" -> ", s2.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
     }

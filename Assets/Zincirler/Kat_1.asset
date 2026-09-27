@@ -69,6 +69,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
+      IpucuOlcek: 1
     - Kimlik: odaA
       Tur: 0
       OdaKapisi: 1
@@ -79,6 +80,7 @@ MonoBehaviour:
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
+      IpucuOlcek: 1
   notlar:
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3
@@ -162,3 +164,4 @@ MonoBehaviour:
     OnV: 0.2
     Yatik: 0
     Sablon: {fileID: 6813529233286673208, guid: e3298e1273de64c47bf5913f1ca46af6, type: 3}
+  sesler: []

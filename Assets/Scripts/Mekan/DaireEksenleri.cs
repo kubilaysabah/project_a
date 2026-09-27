@@ -22,4 +22,17 @@ public class DaireEksenleri : MonoBehaviour
 
     /// <summary>Plandaki bir yön (du, dv), dairenin yerel uzayında.</summary>
     public Vector3 Yon(float du, float dv) { return new Vector3(yon * du, 0f, sv * dv); }
+
+    /// <summary>
+    /// Tersi (#62): dünyadaki bir noktanın plandaki (u, v)'si. Oyuncunun hangi odada
+    /// durduğunu bulmak için. yon ve sv yalnızca +1 ya da -1 olduğundan, bölmek yerine
+    /// yine onlarla çarpmak yeter (-1 ile çarpıp tekrar -1 ile çarpmak eski hâline döndürür).
+    /// </summary>
+    public void PlanNoktasi(Vector3 dunya, out float u, out float v)
+    {
+        // InverseTransformPoint: dünya noktasını bu nesnenin (dairenin) yerel uzayına çevirir.
+        Vector3 yerel = transform.InverseTransformPoint(dunya);
+        u = yon * yerel.x - disX;
+        v = sv * (yerel.z - kapiZ);
+    }
 }

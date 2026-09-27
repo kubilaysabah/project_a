@@ -87,6 +87,7 @@ public class DaireSahneTestleri
             { "Buzdolabi", new[] { "Kapi" } },
             { "Takvim", new string[0] },
             { "Komodin", new[] { "Cekmece" } },
+            { "Radyo", new[] { "Kadran" } },
             { "Oyuncak_Kutusu", new[] { "Kapak" } },
             { "Boy_Cetveli", new string[0] },
             { "Alet_Cantasi", new[] { "Kapak" } },

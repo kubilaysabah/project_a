@@ -75,6 +75,7 @@ public class ZincirKilidi
     public string Sifre;        // yalnızca Şifre: dört hane ("1987")
     public string IpucuMetni;   // yalnızca Şifre: ipucu yerine yazılacak metin; boşsa şifrenin kendisi
     public float IpucuX, IpucuY, IpucuZ;   // yazının ipucu yerindeki konumu (yerin kendi eksenlerinde)
+    public float IpucuOlcek = 1f;          // yazının boy çarpanı (radyonun küçük kadranı için < 1)
 }
 
 [System.Serializable]

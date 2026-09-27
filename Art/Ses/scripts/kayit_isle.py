@@ -300,9 +300,62 @@ def dis_kopek():
         parca = ortak.yuksek(kes(kayit, bas, son, giris=0.3, cikis=0.6), 120, HIZ)
         ortak.kaydet(os.path.join(DIS, f"Dis_Kopek_{i}.wav"), uzaklastir(parca, HIZ, 2600, 0.3, 1.5), HIZ, 0.8)
 
+# ---------- RADYO (#62, 2. kat) ----------
+# Yaşlı Nuri'nin radyosu, oyuncu daireye girdikten birkaç saniye sonra kendiliğinden açılır.
+# İstasyon tam tutmuyor: parazitin (hışırtı ve çıtırtı) içinde uzak bir yayın bir belirir
+# bir kaybolur. Yayın olarak gerilim müziğinin bir parçası kullanılıyor (Joth, CC0; zaten
+# oyunda ve lisansı kayıtlı): radyonun küçük hoparlörü gibi yalnızca orta frekanslar bırakılır
+# (350-2800 Hz), böylece "odada çalan müzik" değil "eski bir radyodan gelen ses" duyulur.
+# Çıktı 24 sn'lik dikişsiz bir döngü (Radyo_Istasyon.wav) ve radyonun düğme tıkı (Radyo_Dugme.wav).
+def radyo():
+    import math, random
+    random.seed(62)                                  # her çalıştırmada aynı ses (onaylanınca değişmesin)
+    sure = 24.0
+    n = int(sure * HIZ)
+
+    # 1. Yayın: müziğin ortasından 24 sn; küçük hoparlör süzgeci (iki kez, dik kenarlı).
+    sol, sag = oku("joth_The_Surreal_Truth.mp3", HIZ, kanal=2)
+    mono = [(a + b) / 2 for a, b in zip(sol, sag)]
+    bas = max(0, (len(mono) - n) // 2)              # parça kısa olabilir: ortadan kes
+    yayin = mono[bas:bas + n]
+    yayin += [0.0] * (n - len(yayin))               # parça 24 sn'den kısaysa sonu sessiz
+    for _ in range(2):
+        yayin = ortak.alcak(ortak.yuksek(yayin, 350, HIZ), 2800, HIZ)
+    yayin = ortak.tepeyi_esitle(yayin)
+
+    # 2. Parazit: bant geçiren gürültü (radyonun "şşşş"si) ve seyrek çıtırtılar.
+    parazit = ortak.bant(ortak.gurultu(n), 1800, HIZ, 0.6)
+    parazit = ortak.tepeyi_esitle(parazit)
+    for _ in range(int(sure * 5)):                   # saniyede ortalama beş çıtırtı
+        cit = ortak.darbe(int(0.02 * HIZ), HIZ, 0.004)
+        ortak.ekle(parazit, cit, random.randrange(n), random.uniform(0.3, 1.0))
+
+    # 3. Sinyal gücü: yayın ile parazit birbirinin tersine kabarıp söner (istasyon kayıyor).
+    # İki yavaş sinüsün toplamı; periyotları döngü süresine tam bölünür, yani baş ve son aynı
+    # değerde buluşur: döngüde sıçrama olmaz.
+    sonuc = []
+    for i in range(n):
+        t = i / HIZ
+        g = 0.5 + 0.3 * math.sin(2 * math.pi * t / 12.0) + 0.2 * math.sin(2 * math.pi * t / 8.0 + 1.0)
+        g = min(1.0, max(0.0, g))                    # 0: yalnız parazit, 1: temiz yayın
+        sonuc.append(yayin[i] * g * 0.9 + parazit[i] * (0.15 + 0.55 * (1 - g)))
+
+    # 4. Dikiş: son 1 saniye başın üstüne karışır (müzik parçası döngüye göre kesildiği için).
+    gecis = int(1.0 * HIZ)
+    for i in range(gecis):
+        a = i / gecis
+        sonuc[i] = sonuc[n - gecis + i] * (1 - a) + sonuc[i] * a
+    sonuc = sonuc[:n - gecis]
+    ortak.kaydet(os.path.join(KOK, "Assets", "Audio", "Daire", "Radyo_Istasyon.wav"), sonuc, HIZ, 0.8)
+
+    # Düğme: kısa bir plastik tık (gürültü darbesi + iki tiz mod), yankısız (odanın içinde, yakın).
+    tik = ortak.modlar(ortak.darbe(int(0.12 * HIZ), HIZ, 0.003), HIZ, [(2400, 8, 1.0), (4100, 10, 0.6), (900, 3, 0.4)])
+    ortak.kaydet(os.path.join(KOK, "Assets", "Resources", "Sesler", "Radyo_Dugme.wav"), ortak.yumusak_sinirla(tik, 2.0), HIZ, 0.8)
+
 
 URETICILER = {"bebek": bebek, "tv": tv, "guvercin": guvercin, "kapi_carpma": kapi_carpma, "kapi_tiklatma": kapi_tiklatma,
-              "muzik": muzik, "dis_silah": dis_silah, "dis_ruzgar": dis_ruzgar, "dis_kopek": dis_kopek}
+              "muzik": muzik, "dis_silah": dis_silah, "dis_ruzgar": dis_ruzgar, "dis_kopek": dis_kopek,
+              "radyo": radyo}
 
 if __name__ == "__main__":
     for ad in (sys.argv[1:] or list(URETICILER)):

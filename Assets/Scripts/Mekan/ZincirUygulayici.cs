@@ -166,6 +166,15 @@ public class ZincirUygulayici
         }
         foreach (KatSusu s in varlik.suslar)
             Yerlestir(daire, eksen, s.Sablon, s, "Sus_" + (s.Sablon != null ? s.Sablon.name : "?"));
+        // Kendiliğinden çalan eşyalar (#62): mobilyanın kendisine CalanEsya eklenir; kapısı
+        // kapalıyken sesini boğabilsin diye odasının kapısı da verilir.
+        foreach (KatSesi ks in varlik.sesler)
+        {
+            Transform t = YolBul(daire, ks.Yol);
+            if (t == null) { Debug.LogWarning($"[ZINCIR] Çalan eşya '{ks.Yol}' bulunamadı."); continue; }
+            CalanEsya c = t.gameObject.AddComponent<CalanEsya>();
+            c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, ks.Oda, KapiBul(daire, ks.Oda), eksen);
+        }
     }
 
     // Bir şablonu yerleşim bilgisine göre koyar (bkz. KatYerlesimi: çapaya göre ya da plana göre).
@@ -270,6 +279,8 @@ public class ZincirUygulayici
         Elektrik(daire).Ayarla(true);
         // Çekilmiş kollar eski duruşuna döner, bileşenleri sökülür.
         foreach (CekilenKol kol in daire.GetComponentsInChildren<CekilenKol>(true)) { kol.Sifirla(); Object.Destroy(kol); }
+        // Çalan eşyalar susar, sesleri ve ışıkları sökülür (#62).
+        foreach (CalanEsya c in daire.GetComponentsInChildren<CalanEsya>(true)) { c.Sifirla(); Object.Destroy(c); }
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);
@@ -298,7 +309,8 @@ public class ZincirUygulayici
         yazi.anchor = TextAnchor.MiddleCenter;
         yazi.alignment = TextAlignment.Center;
         yazi.fontSize = 96;
-        yazi.characterSize = 0.006f;
+        // Boy çarpanı 0 ya da boşsa 1 sayılır (eski dosyalarda alan yoktu).
+        yazi.characterSize = 0.006f * (veri.IpucuOlcek > 0f ? veri.IpucuOlcek : 1f);
         yazi.color = new Color(0.03f, 0.03f, 0.03f);
         if (YaziOrnegi != null)
         {
