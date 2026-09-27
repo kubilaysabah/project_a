@@ -165,12 +165,12 @@ inen konuşmayı dinler, inmeyen mesajı sonra panoda not olarak bulur), **radyo
 | Sistem | Durum |
 |---|---|
 | Sahanlık, döngü ışınlanması, katlar üst üste | **Kalır**; kat kapısı ve açık daire eklenir |
-| Anomali kartları, uygulayıcı, zamanlı etkiler, sesler | **Kalır** (olay kütüphanesi) |
-| Anomali seçici (rastgele, zorluk) | **Değişir:** kat senaryosu + dolgu |
-| Karar kuralı (KatSayaci.KararVer), ceza, görev-eksik cezası | **Gider** |
-| Çöp, ayakkabı, kat olayları, TV kaydırması, defter | **Kalır** (defterin koşulu değişir) |
+| Anomali kartları, uygulayıcı, zamanlı etkiler, sesler | Uygulayıcı **kalır** (kat dosyasının senaryolu sahanlık kartı, 7. kat); 65 rastgele kart **gitti** (#59) |
+| Anomali seçici (rastgele, zorluk) | **Gitti** (#59) |
+| Karar kuralı (KatSayaci.KararVer), ceza, görev-eksik cezası | **Gitti** (#59, 2026-09-27) |
+| Çöp, ayakkabı, kat olayları, TV kaydırması | **Kalır**; anomali defteri (#45) Şahan'ın kararıyla **rafa kalktı** (#59) |
 | Gece aydınlatması | **Değişir:** karanlık bina + kafa lambası |
-| Görünürlük denetimi | Araç kalır, ölçüt olmaktan çıkar |
+| Görünürlük denetimi | **Gitti** (#59): ölçeceği rastgele kart kalmadı |
 | Kapıcı odası, final, dış cephe | **Kalır**, oda merkez olur |
 | Test göstergesi | Kat, daire, zincir durumu ve olay listesi |
 | **Yeni** | Kafa lambası, kat kapısı ve anahtar, daire üretici (3+1), kilit/eşya sistemi (4 tür), kat içerik verisi (8 kat), yeni görev türleri (sayaç, ilan, zil, ampul), kaçış anı, pano/telefon/sigorta, kayıt |
