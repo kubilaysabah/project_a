@@ -4,7 +4,6 @@
 # Anahtarı değiştirmeyin: kod metni bu adla arıyor. Değiştirilecek olan sadece metin.
 
 # ---- Etkileşim ipuçları: hedefin üstünde yüzen "TOPLA (E)" paneli ----
-ipucu.bicim	{0} ({1})	{0} ({1})
 ipucu.topla	TOPLA	PICK UP
 ipucu.oku	OKU	READ
 ipucu.rafa_koy	RAFA KOY	PUT AWAY
@@ -105,8 +104,6 @@ bina.takvim	EKİM\n1994	<size=66>OCTOBER</size>\n1994
 bina.asansor_notu	ARIZALI\n<size=48>Yönetim</size>	<size=78>OUT OF\nORDER</size>\n<size=44>Management</size>
 
 # ---- Tuş adları (#29): ipuçları son kullanılan cihaza göre (klavye / oyun kolu) ----
-tus.etkilesim_klavye	E	E
-tus.etkilesim_kol	A	A
 tus.kapat_klavye	E / Esc	E / Esc
 tus.kapat_kol	A / B	A / B
 # Anomali defteri (#45): arayüz ve her anomalinin defterdeki adı. anomali.<kimlik> anahtarları

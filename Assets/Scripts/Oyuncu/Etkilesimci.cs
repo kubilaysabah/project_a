@@ -3,7 +3,9 @@
 //
 // Üç iş yapar:
 //   1. Her karede oyuncunun neye baktığını bulur.
-//   2. Baktığı şey etkileşime açıksa üstünde "TOPLA (E)" gibi bir ipucu gösterir.
+//   2. Ekranın ortasına yuvarlak beyaz bir nişangâh çizer; baktığı şey etkileşime açıksa
+//      nişangâhın içi kırmızıyla dolar (#72, Şahan: No70'teki gibi). Eskiden hedefin üstünde
+//      "TOPLA (E)" gibi bir yazı paneli çıkıyordu; Şahan yazıları kaldırttı, eylem aynen duruyor.
 //   3. Tuşa basılınca o nesnenin Etkilesim fonksiyonunu çağırır.
 //
 // Hangi nesneyle ne yapıldığını BİLMEZ. Poşeti de, ileride gelecek zili de,
@@ -26,31 +28,13 @@ public class Etkilesimci : MonoBehaviour
     [Tooltip("Nişan alınan kamera. Boş bırakılırsa çocuklardan bulunur.")]
     [SerializeField] private Transform kamera;
 
-    [Header("İpucu yazısı")]
-    [Tooltip("Yazının nesnenin üstünde ne kadar yükseklikte duracağı (metre).")]
-    [SerializeField] private float ipucuYuksekligi = 0.18f;
-
-    [Tooltip("Harf boyu. Yazı dünya içinde durduğu için metre cinsindendir.")]
-    [SerializeField] private float ipucuBoyu = 0.012f;
-
-    // Panelin koyu malzemesi (#26). OyuncuKurucu bağlar: Assets/Materials/Ipucu_Panel.mat.
-    // Neden dosya: build, yalnızca sahnede bir yere BAĞLANMIŞ dosyaları pakete koyar.
-    // Shader'ı oyun sırasında adıyla aramak (Shader.Find) ancak o shader başka bir
-    // yüzden pakete girmişse çalışır; girmemişse panel pembe ya da görünmez çıkar.
-    [Tooltip("İpucu panelinin malzemesi. Boşsa shader adıyla aranır (build'de riskli).")]
-    [SerializeField] private Material panelMalzemesi;
-
     // Şu anda nişan alınan nesne. Başka scriptler (test göstergesi) okuyabilir.
     public IEtkilesimli Hedef { get; private set; }
 
     private InputAction etkilesimEylemi;
 
-    // İpucu yazısı TEK bir nesnedir ve hedeften hedefe taşınır.
-    // Her etkileşimli nesneye ayrı yazı koymak yerine böyle yapmak,
-    // hem sahneyi temiz tutar hem de yazının görünümünü tek yerden değiştirtir.
-    private GameObject ipucuNesnesi;
-    private GameObject ipucuPaneli;
-    private TextMesh ipucuYazisi;
+    // Nişangâhı çizmeden önce bakılır: oyuncu yürüyemiyorsa (duraklatma, kararma) çizilmez.
+    private BirinciSahisKontrolcu kontrolcu;
 
     // ---------- KURULUM ----------
 
@@ -69,83 +53,11 @@ public class Etkilesimci : MonoBehaviour
             etkilesimEylemi = varlik.FindAction("Player/Interact");
         }
 
-        IpucunuKur();
+        kontrolcu = GetComponent<BirinciSahisKontrolcu>();
     }
 
     private void OnEnable() { etkilesimEylemi?.Enable(); }
     private void OnDisable() { etkilesimEylemi?.Disable(); }
-
-    // İpucu yazısını kodla üretiyoruz, sahneye elle koymuyoruz.
-    // Sebebi: bu bir sahne nesnesi değil, oyuncunun kendi aleti. Sahneye
-    // konsaydı graybox her yeniden kurulduğunda kaybolur ya da çoğalırdı.
-    private void IpucunuKur()
-    {
-        ipucuNesnesi = new GameObject("EtkilesimIpucu");
-
-        // ---- ARKA PANEL ----
-        // Yazı tek başına yetmiyor: açık duvarda koyu yazı, karanlıkta açık yazı
-        // kayboluyor. Oyun karardıkça bu daha da kötüleşecek. Koyu bir panelin
-        // üstüne açık yazı, arka plan ne olursa olsun okunur. Oyunların
-        // neredeyse hepsinin bu işi böyle yapmasının sebebi bu.
-        ipucuPaneli = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        ipucuPaneli.name = "Panel";
-        ipucuPaneli.transform.SetParent(ipucuNesnesi.transform, false);
-
-        // Panelin çarpışma kutusu MUTLAKA silinmeli. Kalırsa oyuncunun
-        // nişan ışını kendi ipucuna çarpar ve hedefi kaybeder.
-        Destroy(ipucuPaneli.GetComponent<Collider>());
-
-        Material panelMalzeme = panelMalzemesi;
-        if (panelMalzeme == null)
-        {
-            // Yedek yol: bağlanmamışsa eskisi gibi adıyla ara ve uyar.
-            Debug.LogWarning("[İPUCU] Panel malzemesi bağlanmamış; Huzur → Oyuncuyu Yeniden Kur.");
-            panelMalzeme = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-            panelMalzeme.SetColor("_BaseColor", new Color(0.04f, 0.04f, 0.05f));
-        }
-        ipucuPaneli.GetComponent<MeshRenderer>().sharedMaterial = panelMalzeme;
-
-        // ---- YAZI ----
-        GameObject yaziNesnesi = new GameObject("Yazi");
-        yaziNesnesi.transform.SetParent(ipucuNesnesi.transform, false);
-
-        ipucuYazisi = yaziNesnesi.AddComponent<TextMesh>();
-        ipucuYazisi.text = "";
-        ipucuYazisi.anchor = TextAnchor.MiddleCenter;
-        ipucuYazisi.alignment = TextAlignment.Center;
-        ipucuYazisi.fontSize = 96;                 // büyük üret, küçült: kenarlar keskin olur
-        ipucuYazisi.characterSize = ipucuBoyu;
-        ipucuYazisi.fontStyle = FontStyle.Bold;
-        ipucuYazisi.color = new Color(0.95f, 0.94f, 0.90f);
-        ipucuYazisi.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-
-        yaziNesnesi.GetComponent<MeshRenderer>().sharedMaterial = ipucuYazisi.font.material;
-
-        // Yazı panelin ÖNÜNDE dursun, yoksa panelin içinde kalıp görünmez olur.
-        yaziNesnesi.transform.localPosition = new Vector3(0f, 0f, -0.01f);
-
-        ipucuNesnesi.SetActive(false);
-    }
-
-    // Paneli yazının boyutuna göre büyütür. Yazı uzunluğu eyleme göre
-    // değişiyor ("TOPLA" ile "ÇAL" aynı genişlikte değil), o yüzden
-    // sabit bir boyut veremiyoruz.
-    private void PaneliYazidanOlcekle()
-    {
-        Renderer yaziCizici = ipucuYazisi.GetComponent<Renderer>();
-        if (yaziCizici == null) return;
-
-        // localBounds kullanıyoruz, bounds DEĞİL.
-        //
-        // "bounds" nesnenin DÜNYA eksenlerine hizalı kutusudur. İpucu her karede
-        // kameraya döndüğü için bu kutu da dönüyor: yazının 0,58 metrelik genişliği
-        // dünya X'inde değil Z'sinde çıkıyordu ve panel minicik kalıyordu.
-        // "localBounds" nesnenin kendi eksenlerindeki ölçüsüdür, dönüşten etkilenmez.
-        Vector3 boyut = yaziCizici.localBounds.size;
-
-        ipucuPaneli.transform.localScale =
-            new Vector3(boyut.x + 0.06f, boyut.y + 0.04f, 1f);
-    }
 
     // ---------- HER KARE ----------
 
@@ -155,8 +67,6 @@ public class Etkilesimci : MonoBehaviour
 
         Hedef = HedefBul(out Transform hedefGovdesi);
 
-        IpucunuGuncelle(hedefGovdesi);
-
         if (etkilesimEylemi == null) return;
         if (!etkilesimEylemi.WasPressedThisFrame()) return;
 
@@ -164,10 +74,8 @@ public class Etkilesimci : MonoBehaviour
         {
             Hedef.Etkilesim(gameObject);
 
-            // Etkileşimden sonra hedef genelde kaybolur; ipucunu hemen gizliyoruz
-            // ki bir kare boyunca havada asılı kalmasın.
+            // Etkileşimden sonra hedef genelde kaybolur; nişangâh bu karede boşalsın.
             Hedef = null;
-            ipucuNesnesi.SetActive(false);
         }
     }
 
@@ -253,11 +161,12 @@ public class Etkilesimci : MonoBehaviour
 
         if (bulunan == null) return null;
 
-        // Sözleşmeyi imzalayan her nesne aslında bir MonoBehaviour; gövdesini
-        // ipucunu yerleştirmek için alıyoruz.
+        // Sözleşmeyi imzalayan her nesne aslında bir MonoBehaviour; gövdesini de döndürüyoruz.
+        // (Eskiden "TOPLA (E)" yazısı onun üstüne konuyordu; #72'den beri nişangâh ekranın
+        // ortasında. Gövde, ileride hedefi vurgulamak isteyen bir özellik için duruyor.)
         MonoBehaviour bilesen = bulunan as MonoBehaviour;
         if (bilesen != null) govde = bilesen.transform;
-        // Yönlendirici ise istem yönlendirilen parçanın (kapağın) üstünde görünsün.
+        // Yönlendirici ise gövde, yönlendirilen parça (kapak) olsun.
         if (bulunan is Yonlendirici y) govde = y.HedefGovdesi;
 
         return bulunan;
@@ -277,44 +186,67 @@ public class Etkilesimci : MonoBehaviour
 
     // ---------- İPUCU ----------
 
-    private void IpucunuGuncelle(Transform hedefGovdesi)
+    // ---------- NİŞANGÂH (#72) ----------
+    // Ekranın tam ortasında küçük, yuvarlak, beyaz bir halka. Baktığın şeyle etkileşime
+    // girebiliyorsan (eşya, kapı, çekmece, not...) halkanın içi kırmızıyla dolar ve biraz büyür.
+    // Hangi eylemin yapılacağı yazmaz (AÇ, AL, KİLİTLİ); oyuncu dener ve görür.
+    //
+    // OnGUI: Unity'nin ekrana düz (iki boyutlu) çizim yaptığı fonksiyon; her karede çağrılır.
+    // Bütün arayüz gibi sanal 1080 piksel yüksekliğindeki ekrana çizilir (ArayuzOlcegi, #34):
+    // halka her çözünürlükte ekranın aynı oranını kaplar.
+    private const float NisanBoyu = 14f;          // halkanın çapı (sanal piksel)
+    private const float DoluBoyu = 20f;           // hedef varken
+    private static readonly Color HalkaRengi = new Color(1f, 1f, 1f, 0.85f);
+    private static readonly Color DolguRengi = new Color(0.86f, 0.08f, 0.06f, 0.95f);
+    private static Texture2D halkaDokusu, diskDokusu;
+
+    private void OnGUI()
     {
-        if (Hedef == null || hedefGovdesi == null)
+        // Başlık ekranında, duraklatmada (zaman durur) ve oyuncu yürüyemezken (not, şifre ekranı,
+        // yakalanınca kararma) nişangâh çizilmez. Not ve şifre ekranı bu bileşeni zaten kapatır.
+        if (DuraklatmaMenusu.BaslikEkraninda || Time.timeScale == 0f) return;
+        if (kontrolcu != null && !kontrolcu.enabled) return;
+        if (Event.current.type != EventType.Repaint) return;   // yalnızca çizim olayında çiz
+        ArayuzOlcegi.Uygula();
+        if (halkaDokusu == null) DokulariUret();
+
+        bool hedefVar = Hedef != null && Hedef.EtkilesimeAcik;
+        float boy = hedefVar ? DoluBoyu : NisanBoyu;
+        Rect alan = new Rect(ArayuzOlcegi.Genislik / 2f - boy / 2f, ArayuzOlcegi.Yukseklik / 2f - boy / 2f, boy, boy);
+        if (hedefVar)
         {
-            if (ipucuNesnesi.activeSelf) ipucuNesnesi.SetActive(false);
-            return;
+            GUI.color = DolguRengi;
+            GUI.DrawTexture(alan, diskDokusu);
         }
-
-        // Biçim tablodan gelir (#15): "{0} ({1})". string.Format, {0} yazan yere
-        // eylemin adını, {1} yazan yere tuşun adını koyar: "TOPLA (E)". Tuş işaretinin
-        // yeri de böylece dile göre değişebilir (bazı dillerde tuş önce yazılır).
-        // Tuş, oyuncunun en son kullandığı cihaza göre (#29): klavyede E, oyun kolunda A.
-        string tus = GirisCihazi.Kol ? Dil.Getir("tus.etkilesim_kol") : Dil.Getir("tus.etkilesim_klavye");
-        ipucuYazisi.text = string.Format(Dil.Getir("ipucu.bicim"), Hedef.Ipucu, tus);
-
-        // Nesnenin ÜSTÜNE yerleştir. Görsel sınırlarını kullanıyoruz ki
-        // büyük bir nesnede yazı içinde kalmasın, küçüğünde de çok yükseğe kaçmasın.
-        Vector3 tepe = hedefGovdesi.position;
-
-        Renderer cizici = hedefGovdesi.GetComponentInChildren<Renderer>();
-        if (cizici != null) tepe.y = cizici.bounds.max.y;
-
-        ipucuNesnesi.transform.position = tepe + Vector3.up * ipucuYuksekligi;
-
-        // Yazı her zaman kameraya baksın. LookAt kameraya DOĞRU çevirir;
-        // yazının okunabilmesi için ters çevirmemiz gerekiyor, bu yüzden
-        // kameranın arkasındaki bir noktaya bakıyoruz.
-        ipucuNesnesi.transform.rotation = Quaternion.LookRotation(
-            ipucuNesnesi.transform.position - kamera.position);
-
-        if (!ipucuNesnesi.activeSelf) ipucuNesnesi.SetActive(true);
-
-        // Panel yazıya göre boyutlanır. Yazı değişmiş olabileceği için her karede.
-        PaneliYazidanOlcekle();
+        GUI.color = HalkaRengi;
+        GUI.DrawTexture(alan, halkaDokusu);
+        GUI.color = Color.white;
     }
 
-    private void OnDestroy()
+    // Halka ve disk dokuları kodla üretilir (dosya gerekmez, build'e girmesi dert olmaz).
+    // 64 × 64 piksel; her pikselin saydamlığı merkeze uzaklığına göre hesaplanır. Kenarlarda
+    // bir piksellik yumuşak geçiş (Clamp01) halkanın küçültülünce tırtıklı görünmesini önler.
+    private static void DokulariUret()
     {
-        if (ipucuNesnesi != null) Destroy(ipucuNesnesi);
+        const int N = 64;
+        const float Dis = 30f, Ic = 24f;              // halkanın dış ve iç yarıçapı (piksel)
+        halkaDokusu = new Texture2D(N, N, TextureFormat.RGBA32, false);
+        diskDokusu = new Texture2D(N, N, TextureFormat.RGBA32, false);
+        float merkez = (N - 1) / 2f;
+        for (int y = 0; y < N; y++)
+            for (int x = 0; x < N; x++)
+            {
+                float d = Mathf.Sqrt((x - merkez) * (x - merkez) + (y - merkez) * (y - merkez));
+                // Halka: dış kenarın içinde VE iç kenarın dışında.
+                float halka = Mathf.Clamp01(Dis + 0.5f - d) * Mathf.Clamp01(d - (Ic - 0.5f));
+                // Disk: iç kenarın içi (halkanın boşluğunu doldurur).
+                float disk = Mathf.Clamp01(Ic + 0.5f - d);
+                halkaDokusu.SetPixel(x, y, new Color(1f, 1f, 1f, halka));
+                diskDokusu.SetPixel(x, y, new Color(1f, 1f, 1f, disk));
+            }
+        halkaDokusu.filterMode = FilterMode.Bilinear;
+        diskDokusu.filterMode = FilterMode.Bilinear;
+        halkaDokusu.Apply();
+        diskDokusu.Apply();
     }
 }
