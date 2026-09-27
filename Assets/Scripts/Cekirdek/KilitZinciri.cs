@@ -58,6 +58,9 @@ public class ZincirYeri
     // yolsuz yerlerle yazılıyor, yol orada önemsiz.)
     public bool PlandaNokta;
     public float U, Y, V, Donus;
+    // Planda noktanın ön yüzünün baktığı plan yönü (#64: duvara yazılan ipucu odaya baksın).
+    // İkisi de 0 ise yalnızca Donus kullanılır. Plan yönü dört aynalı dairede de doğru çevrilir.
+    public float OnU, OnV;
 }
 
 [System.Serializable]
@@ -87,6 +90,9 @@ public class ZincirKilidi
     // kimlikleri. Şifre ancak bu parçaların HEPSİNE ulaşılınca okunabilir. Liste doluysa
     // Gerekli (ipucu yeri) boş bırakılabilir: ipucu yere yazılmaz, birleşen çizimdedir.
     public List<string> Parcalar = new List<string>();
+    // Yalnızca Şifre (#64): ipucu karanlıkta parlayan boyayla yazılmış; yalnızca kafa lambası
+    // kapalıyken ve dairede elektrik yokken görünür (KaranliktaParlayan). Kural için fark etmez.
+    public bool IpucuKaranlikta;
 }
 
 [System.Serializable]

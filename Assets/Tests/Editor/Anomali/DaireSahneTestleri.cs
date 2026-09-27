@@ -106,6 +106,25 @@ public class DaireSahneTestleri
     }
 
     [Test]
+    public void Her_odanin_tavaninda_sonuk_bir_lamba_var()
+    {
+        // #64: her odanın tavan lambası kurulmuş ve sönük (yalnızca kat dosyası yakar). Bileşen
+        // oyun derlemesinde; test derlemesi onu göremediği için adıyla aranır.
+        Transform a = Kok("Sahanlik_A");
+        for (int n = 1; n <= 4; n++)
+        {
+            Transform d = a.Find($"Daire_{n}");
+            Assert.IsNotNull(d.GetComponent("DaireLambalari"), $"Daire_{n}'de DaireLambalari yok");
+            foreach (DairePlani.Oda o in DairePlani.Odalar)
+            {
+                Transform l = d.Find("Lambalar/Lamba_" + o.Ad);
+                Assert.IsNotNull(l, $"Daire_{n}/Lambalar/Lamba_{o.Ad} yok");
+                Assert.AreEqual(0f, l.GetComponent<Light>().intensity, $"Daire_{n}/Lamba_{o.Ad} yanık kaydedilmiş");
+            }
+        }
+    }
+
+    [Test]
     public void B_de_ve_sahte_katlarda_daire_yok()
     {
         // Oyuncu yalnızca A'da yürüyor; B'de ve sahte katlarda dört daire daha kurmak sahneyi

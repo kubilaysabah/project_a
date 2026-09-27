@@ -133,6 +133,7 @@ public static partial class GrayboxKurucu
 
         // Bulmaca eşyaları (#53): her katta bulunan temel takım.
         DaireEsyalariniKur(daire, d);
+        DaireLambalariniKur(daire, d);
     }
 
     // ---------- ODA: DÖŞEME VE DÖRT DUVAR ----------
@@ -418,6 +419,30 @@ public static partial class GrayboxKurucu
     // içinde ne saklı) #55'in kat içerik verisi olacak; burada yalnızca eşyanın odadaki yeri var.
     // Konumlar planın (u, y, v) eksenlerinde: duvar eşyasının pivotu duvarın yüzünde, yerdeki
     // eşyanın pivotu tabanın ortasında (duvardan yarı derinliği kadar içeride).
+    // Her odanın tavanının ortasında sönük bir ampul (#64). Sahanlık ampulleriyle aynı yapı
+    // (AmpulKur: gölgeli spot, dolgu, cam, titreme). Sönük kurulur; hangi katta hangi odanın
+    // yanacağını kat dosyası söyler, DaireLambalari elektrik varken yakar.
+    static void DaireLambalariniKur(Transform daire, DaireYonu d)
+    {
+        GameObject kok = new GameObject("Lambalar");
+        kok.transform.SetParent(daire, false);
+        var liste = new List<Transform>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar)
+        {
+            Vector3 orta = d.Nokta((o.U0 + o.U1) / 2f, DairePlani.TavanYuk - 0.30f, (o.V0 + o.V1) / 2f);
+            AmpulKur("Lamba_" + o.Ad, kok.transform, orta, 5f, 0f, yanik: false);
+            liste.Add(kok.transform.Find("Lamba_" + o.Ad));
+        }
+        DaireLambalari bilesen = daire.gameObject.AddComponent<DaireLambalari>();
+        var seri = new SerializedObject(bilesen);
+        SerializedProperty dizi = seri.FindProperty("lambalar");
+        dizi.arraySize = liste.Count;
+        for (int i = 0; i < liste.Count; i++) dizi.GetArrayElementAtIndex(i).objectReferenceValue = liste[i];
+        seri.FindProperty("camYanik").objectReferenceValue = CamMalzeme();
+        seri.FindProperty("camSonuk").objectReferenceValue = CamSonukMalzeme();
+        seri.ApplyModifiedPropertiesWithoutUndo();
+    }
+
     static void DaireEsyalariniKur(Transform daire, DaireYonu d)
     {
         GameObject kok = new GameObject("Esyalar");

@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
+  m_Name: Kat_4
+  m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
+  aciklama: "4. kat, daire 4, bo\u015F ve elektriksiz (\u0131\u015F\u0131k ve karanl\u0131k).
+    Dolab\u0131n \u015Fifresi salon duvar\u0131nda fosforlu boyayla: yaln\u0131zca
+    kafa lambas\u0131 kapal\u0131yken g\xF6r\xFCn\xFCr. Dolapta sigorta; tak\u0131l\u0131nca
+    lambalar yanar ve buzdolab\u0131 a\xE7\u0131l\u0131r, i\xE7inde Hasan'\u0131n
+    notu ve kat\u0131n anahtar\u0131. Yaln\u0131zca salon ve mutfak a\xE7\u0131k."
+  zincir:
+    KapaliOdalar:
+    - Banyo
+    - Oda_A
+    - Oda_B
+    - Oda_C
+    Yerler:
+    - Kimlik: duvar
+      Yol: 
+      Oda: Salon
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 0.045
+      Y: 1.6
+      V: 6.4
+      Donus: 0
+      OnU: 1
+      OnV: 0
+    - Kimlik: dolap
+      Yol: Esyalar/Tezgah
+      Oda: Mutfak
+      KilitYolu: Esyalar/Tezgah/Kapak_1
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: buzdolabi
+      Yol: Esyalar/Buzdolabi
+      Oda: Mutfak
+      KilitYolu: Esyalar/Buzdolabi/Kapi
+      PlandaNokta: 0
+      U: 0
+      Y: 0
+      V: 0
+      Donus: 0
+      OnU: 0
+      OnV: 0
+    Esyalar:
+    - Kimlik: sigorta
+      Tur: 3
+      Yer: dolap
+      X: 0
+      Y: 0.475
+      Z: 0.02
+      Donus: 20
+    - Kimlik: kat_anahtari
+      Tur: 1
+      Yer: buzdolabi
+      X: 0
+      Y: 0.47
+      Z: 0
+      Donus: 20
+    Kilitler:
+    - Kimlik: dolap
+      Tur: 1
+      OdaKapisi: 0
+      Hedef: dolap
+      Gerekli: duvar
+      Sifre: 4816
+      IpucuMetni: 4816
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 4
+      Parcalar: []
+      IpucuKaranlikta: 1
+    - Kimlik: buzdolabi
+      Tur: 3
+      OdaKapisi: 0
+      Hedef: buzdolabi
+      Gerekli: sigorta
+      Sifre: 
+      IpucuMetni: 
+      IpucuX: 0
+      IpucuY: 0
+      IpucuZ: 0
+      IpucuOlcek: 1
+      Parcalar: []
+      IpucuKaranlikta: 0
+  notlar:
+  - Yol: Esyalar/Sigorta_Kutusu
+    X: 0.3
+    Y: -0.1
+    Z: 0.002
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat4_giris
+  - Yol: Esyalar/Buzdolabi
+    X: 0.05
+    Y: 0.805
+    Z: -0.255
+    Donus: -6
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat4_buzdolabi
+  suslar: []
+  sesler: []
+  parcalar: []
+  yananOdalar:
+  - Antre
+  - Hol
+  - Salon
+  - Mutfak
+  cizimBoyu: 0.3

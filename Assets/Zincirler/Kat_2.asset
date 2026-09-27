@@ -31,6 +31,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: alet_cantasi
       Yol: Esyalar/Alet_Cantasi
       Oda: Oda_C
@@ -40,6 +42,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     Esyalar:
     - Kimlik: kat_anahtari
       Tur: 1
@@ -61,6 +65,7 @@ MonoBehaviour:
       IpucuZ: 0.0705
       IpucuOlcek: 0.7
       Parcalar: []
+      IpucuKaranlikta: 0
   notlar:
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3
@@ -88,4 +93,5 @@ MonoBehaviour:
     Gecikme: 4
     Ses: 0.8
   parcalar: []
+  yananOdalar: []
   cizimBoyu: 0.3

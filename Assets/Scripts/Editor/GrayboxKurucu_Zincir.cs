@@ -62,6 +62,7 @@ public static partial class GrayboxKurucu
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         KatZinciriVarligi kat3 = Kat3Kur();
+        KatZinciriVarligi kat4 = Kat4Kur();
 
         // Sahnedeki KatYoneticisi'ne bağla: şablonlar ve 1. katın zinciri.
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
@@ -91,11 +92,12 @@ public static partial class GrayboxKurucu
         katlar.GetArrayElementAtIndex(0).objectReferenceValue = kat1;
         katlar.GetArrayElementAtIndex(1).objectReferenceValue = kat2;
         katlar.GetArrayElementAtIndex(2).objectReferenceValue = kat3;
+        katlar.GetArrayElementAtIndex(3).objectReferenceValue = kat4;
         seri.ApplyModifiedPropertiesWithoutUndo();
 
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
-        Debug.Log("[ZINCIR] Şablonlar, test zinciri, 1., 2. ve 3. kat kuruldu ve bağlandı.");
+        Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-4. katlar kuruldu ve bağlandı.");
     }
 
     static void KlasorHazirla(string ust, string ad)
@@ -371,6 +373,64 @@ public static partial class GrayboxKurucu
         KilitZinciri.Sonuc s3 = z.Cozumle(odalar);
         if (!s3.Cozulebilir) Debug.LogError("[ZINCIR] 3. kat zinciri çözülemiyor: " + string.Join("; ", s3.Hatalar));
         else Debug.Log("[ZINCIR] 3. kat zinciri çözülebilir: " + string.Join(" -> ", s3.AcilanKilitler));
+        EditorUtility.SetDirty(v);
+        return v;
+    }
+
+    // ---------- 4. KAT: IŞIK VE KARANLIK (#64, Docs/hikaye.md §7) ----------
+    // Daire 4, boş ve elektriksiz. Elektriği önceki kapıcı Hasan kesmiş, sigortayı mutfak
+    // dolabına kilitlemiş (antredeki notu). Yalnızca salon ve mutfak açık.
+    //   1. KARANLIK: dolabın şifresi salonun duvarına fosforlu boyayla yazılı. Kafa lambası
+    //      açıkken görünmez; oyuncu lambayı söndürüp beklerse rakamlar belirir (KaranliktaParlayan).
+    //   2. Dolapta sigorta; antredeki sigorta kutusuna takılınca elektrik gelir.
+    //   3. IŞIK: antre, koridor, salon ve mutfağın tavan lambaları titreyerek yanar; buzdolabı
+    //      açılır, iç ışığında Hasan'ın ikinci notu ve katın anahtarı.
+    // İki kilit (dolap şifreli, buzdolabı sigortalı): büyüme çizelgesinin 4. katı.
+    static KatZinciriVarligi Kat4Kur()
+    {
+        string yol = $"{ZincirKlasoru}/Kat_4.asset";
+        KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
+        if (v == null)
+        {
+            v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
+            AssetDatabase.CreateAsset(v, yol);
+        }
+        v.aciklama = "4. kat, daire 4, boş ve elektriksiz (ışık ve karanlık). Dolabın şifresi salon duvarında fosforlu boyayla: " +
+                     "yalnızca kafa lambası kapalıyken görünür. Dolapta sigorta; takılınca lambalar yanar ve buzdolabı açılır, " +
+                     "içinde Hasan'ın notu ve katın anahtarı. Yalnızca salon ve mutfak açık.";
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_A", "Oda_B", "Oda_C" });
+        // Salonun landing tarafındaki duvarı (u = 0; iç yüzü astarla ~3 cm içeride). Yazı duvarın
+        // 4,5 cm önünde, göz hizasının biraz üstünde; ön yüzü odaya (+u) bakar.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "duvar", PlandaNokta = true, Oda = "Salon", U = 0.045f, Y = 1.60f, V = 6.4f, OnU = 1f, OnV = 0f });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "dolap", Yol = "Esyalar/Tezgah", Oda = "Mutfak", KilitYolu = "Esyalar/Tezgah/Kapak_1" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "buzdolabi", Yol = "Esyalar/Buzdolabi", Oda = "Mutfak", KilitYolu = "Esyalar/Buzdolabi/Kapi" });
+        // Sigorta dolabın iç rafında (tezgah.py: raf üstü 0,47 m; birinci kapağın arkası x 0).
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "sigorta", Tur = EsyaTuru.Sigorta, Yer = "dolap", X = 0f, Y = 0.475f, Z = 0.02f, Donus = 20f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "buzdolabi", Y = 0.47f, Donus = 20f });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "dolap", Tur = KilitTuru.Sifre, OdaKapisi = false, Hedef = "dolap", Gerekli = "duvar",
+                                          Sifre = "4816", IpucuMetni = "4816", IpucuOlcek = 4f, IpucuKaranlikta = true });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "buzdolabi", Tur = KilitTuru.Sigorta, OdaKapisi = false, Hedef = "buzdolabi", Gerekli = "sigorta" });
+        v.zincir = z;
+
+        v.notlar = new List<KatNotu>
+        {
+            // Hasan'ın ilk notu antrede, sigorta kutusunun yanında (önceki katların notlarının yeri).
+            new KatNotu { Metin = "not.kat4_giris", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
+            // İkinci notu buzdolabının üst rafında, arka duvara dayalı (buzdolabi.py: raf 0,80 m,
+            // arka iç duvar z = -0,265). Buzdolabının iç ışığı tam bu rafı aydınlatır.
+            new KatNotu { Metin = "not.kat4_buzdolabi", Yol = "Esyalar/Buzdolabi", X = 0.05f, Y = 0.805f, Z = -0.255f, Donus = -6f },
+        };
+        v.parcalar = new List<KatParcasi>();
+        v.suslar = new List<KatSusu>();
+        v.sesler = new List<KatSesi>();
+        v.yananOdalar = new List<string> { "Antre", "Hol", "Salon", "Mutfak" };
+
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        KilitZinciri.Sonuc s4 = z.Cozumle(odalar);
+        if (!s4.Cozulebilir) Debug.LogError("[ZINCIR] 4. kat zinciri çözülemiyor: " + string.Join("; ", s4.Hatalar));
+        else Debug.Log("[ZINCIR] 4. kat zinciri çözülebilir: " + string.Join(" -> ", s4.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
     }

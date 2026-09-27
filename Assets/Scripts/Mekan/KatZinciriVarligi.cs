@@ -83,6 +83,8 @@ public class KatZinciriVarligi : ScriptableObject
     public List<KatSusu> suslar = new List<KatSusu>();
     public List<KatSesi> sesler = new List<KatSesi>();
     public List<KatParcasi> parcalar = new List<KatParcasi>();
+    // Bu katta tavan lambası yanabilen odalar (#64): dairede elektrik varken yanarlar. Boş: hiçbiri.
+    public List<string> yananOdalar = new List<string>();
     // Parçaların yere serilen kâğıdının gerçek boyu (metre): resmin bütünü bu kadar geniş olurdu.
     public float cizimBoyu = 0.30f;
 }

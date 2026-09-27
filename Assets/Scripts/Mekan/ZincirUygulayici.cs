@@ -149,6 +149,14 @@ public class ZincirUygulayici
             nesne.transform.localRotation = Quaternion.Euler(0f, e.Donus, 0f);
             Esya bilesen = nesne.GetComponent<Esya>();
             if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari || e.Tur == EsyaTuru.Parca ? kat : 0);
+            // Yerin kilitlenen parçası (dolabın kapağı, buzdolabının kapısı) eşyanın kabının kapağıdır (#64).
+            ZincirYeri yerVerisi = zincir.YerBul(e.Yer);
+            if (bilesen != null && yerVerisi != null && !yerVerisi.PlandaNokta && !string.IsNullOrEmpty(yerVerisi.KilitYolu))
+            {
+                Transform kapak = YolBul(daire, yerVerisi.KilitYolu);
+                AcilirParca ap = kapak != null ? kapak.GetComponent<AcilirParca>() : null;
+                if (ap != null) bilesen.KapAyarla(ap);
+            }
             konanlar.Add(nesne);
         }
 
@@ -185,6 +193,9 @@ public class ZincirUygulayici
         }
         foreach (KatSusu s in varlik.suslar)
             Yerlestir(daire, eksen, s.Sablon, s, "Sus_" + (s.Sablon != null ? s.Sablon.name : "?"));
+        // Tavan lambaları (#64): bu katta lambası yanabilen odalar (elektrik varken yanarlar).
+        DaireLambalari lambalar = daire.GetComponent<DaireLambalari>();
+        if (lambalar != null) lambalar.Ayarla(varlik.yananOdalar);
         // Kendiliğinden çalan eşyalar (#62): mobilyanın kendisine CalanEsya eklenir; kapısı
         // kapalıyken sesini boğabilsin diye odasının kapısı da verilir.
         foreach (KatSesi ks in varlik.sesler)
@@ -313,6 +324,10 @@ public class ZincirUygulayici
         foreach (MenteseSokucu m in daire.GetComponentsInChildren<MenteseSokucu>(true)) { m.Sifirla(); Object.Destroy(m); }
         // Sigorta yuvası: eksik sigorta geri görünür, elektrik gelir.
         foreach (SigortaYuvasi y in daire.GetComponentsInChildren<SigortaYuvasi>(true)) { y.Sifirla(); Object.Destroy(y); }
+        // Tavan lambaları: önce "hiçbiri yanamaz" (#64); yoksa hemen aşağıda elektrik gelince önceki
+        // katın listesiyle yanarlardı.
+        DaireLambalari lambalar = daire.GetComponent<DaireLambalari>();
+        if (lambalar != null) lambalar.Ayarla(null);
         Elektrik(daire).Ayarla(true);
         // Çekilmiş kollar eski duruşuna döner, bileşenleri sökülür.
         foreach (CekilenKol kol in daire.GetComponentsInChildren<CekilenKol>(true)) { kol.Sifirla(); Object.Destroy(kol); }
@@ -358,6 +373,12 @@ public class ZincirUygulayici
             yazi.font = YaziOrnegi.font;
             g.GetComponent<MeshRenderer>().sharedMaterial = YaziOrnegi.GetComponent<MeshRenderer>().sharedMaterial;
         }
+        // Karanlıkta parlayan boya (#64): fosfor yeşili; görünürlüğü bileşen yönetir.
+        if (veri.IpucuKaranlikta)
+        {
+            yazi.color = new Color(0.55f, 1f, 0.6f, 1f);
+            g.AddComponent<KaranliktaParlayan>();
+        }
         konanlar.Add(g);
     }
 
@@ -389,7 +410,10 @@ public class ZincirUygulayici
         GameObject g = new GameObject("Yer_" + y.Kimlik);
         g.transform.SetParent(daire, false);
         g.transform.localPosition = eksen.Nokta(y.U, y.Y, y.V);
-        g.transform.localRotation = Quaternion.Euler(0f, y.Donus, 0f);
+        // Ön yön planda verildiyse (duvardaki yazı), dairenin eksenine çevrilir; üstüne Donus.
+        Vector3 on = eksen.Yon(y.OnU, y.OnV);
+        Quaternion taban = on.sqrMagnitude > 0.001f ? Quaternion.LookRotation(on, Vector3.up) : Quaternion.identity;
+        g.transform.localRotation = taban * Quaternion.Euler(0f, y.Donus, 0f);
         capalar[y.Kimlik] = g.transform;
         return g.transform;
     }

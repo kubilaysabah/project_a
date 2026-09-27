@@ -32,6 +32,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: salon_yeri
       Yol: 
       Oda: Salon
@@ -41,6 +43,8 @@ MonoBehaviour:
       Y: 0.004
       V: 6.9
       Donus: 25
+      OnU: 0
+      OnV: 0
     - Kimlik: cekmece
       Yol: Esyalar/Tezgah/Cekmece_1
       Oda: Mutfak
@@ -50,6 +54,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: buzdolabi
       Yol: Esyalar/Buzdolabi
       Oda: Mutfak
@@ -59,6 +65,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: oyuncak
       Yol: Esyalar/Oyuncak_Kutusu
       Oda: Oda_B
@@ -68,6 +76,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: komodin
       Yol: Esyalar/Komodin/Cekmece
       Oda: Oda_A
@@ -77,6 +87,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     Esyalar:
     - Kimlik: p1
       Tur: 6
@@ -133,6 +145,7 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
     - Kimlik: odaA
       Tur: 1
       OdaKapisi: 1
@@ -149,6 +162,7 @@ MonoBehaviour:
       - p2
       - p3
       - p4
+      IpucuKaranlikta: 0
   notlar:
   - Yol: 
     X: 5.45
@@ -194,4 +208,5 @@ MonoBehaviour:
       y: 0
       width: 0.515625
       height: 0.5449219
+  yananOdalar: []
   cizimBoyu: 0.3

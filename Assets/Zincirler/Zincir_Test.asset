@@ -31,6 +31,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: kavanoz
       Yol: Esyalar/Tezgah/Kavanoz
       Oda: Mutfak
@@ -40,6 +42,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: takvim
       Yol: Esyalar/Takvim
       Oda: Salon
@@ -49,6 +53,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: kol
       Yol: Esyalar/Duvar_Kolu/Kol
       Oda: Oda_C
@@ -58,6 +64,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: komodin
       Yol: Esyalar/Komodin/Cekmece
       Oda: Oda_A
@@ -67,6 +75,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: buzdolabi
       Yol: Esyalar/Buzdolabi
       Oda: Mutfak
@@ -76,6 +86,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: oyuncak
       Yol: Esyalar/Oyuncak_Kutusu
       Oda: Oda_B
@@ -85,6 +97,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     Esyalar:
     - Kimlik: salon_anahtari
       Tur: 2
@@ -134,6 +148,7 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
     - Kimlik: salon
       Tur: 0
       OdaKapisi: 1
@@ -146,6 +161,7 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
     - Kimlik: kiler
       Tur: 1
       OdaKapisi: 1
@@ -158,6 +174,7 @@ MonoBehaviour:
       IpucuZ: 0.011
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
     - Kimlik: odaA
       Tur: 2
       OdaKapisi: 1
@@ -170,6 +187,7 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
     - Kimlik: buzdolabi
       Tur: 3
       OdaKapisi: 0
@@ -182,6 +200,7 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
     - Kimlik: odaB
       Tur: 0
       OdaKapisi: 1
@@ -194,6 +213,7 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
     - Kimlik: banyo
       Tur: 4
       OdaKapisi: 1
@@ -206,8 +226,10 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
   notlar: []
   suslar: []
   sesler: []
   parcalar: []
+  yananOdalar: []
   cizimBoyu: 0.3

@@ -21,6 +21,13 @@ public class Esya : MonoBehaviour, IEtkilesimli
     [SerializeField] private int kat;
 
     private static AudioClip sikirti;
+    // Eşyanın durduğu kabın kapağı (#64), zincir biliyorsa: tezgâhın dolabındaki sigorta için
+    // "Kapak_1". Verilmişse kardeş kapaklardan yalnızca bu sayılır; tezgâhın öbür kapağı ve
+    // çekmeceleri kapalı diye dolaptaki eşya alınamaz olmasın.
+    private AcilirParca kap;
+
+    /// <summary>Zincir uygulayıcısı: eşyanın kabının kapağı (yerin kilitlenen parçası).</summary>
+    public void KapAyarla(AcilirParca kapak) { kap = kapak; }
 
     public EsyaTuru Tur { get { return tur; } }
     public string Kimlik { get { return kimlik; } }
@@ -50,6 +57,8 @@ public class Esya : MonoBehaviour, IEtkilesimli
             // sandığın kapağı, buzdolabının kapısı) kapalıysa da alınamaz. Kapak eşyanın
             // ebeveyni değil kardeşidir; yukarıdaki döngü onu görmez. Bu kural olmasa oyuncu
             // kapak kapalıyken kabın yan duvarının içinden eşyayı alabilirdi.
+            if (kap != null)
+                return !kap.gameObject.activeSelf || kap.Acik;
             if (transform.parent != null)
                 foreach (Transform kardes in transform.parent)
                 {

@@ -33,6 +33,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: kavanoz
       Yol: Esyalar/Tezgah/Kavanoz
       Oda: Mutfak
@@ -42,6 +44,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     - Kimlik: komodin
       Yol: Esyalar/Komodin/Cekmece
       Oda: Oda_A
@@ -51,6 +55,8 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
     Esyalar:
     - Kimlik: tornavida
       Tur: 4
@@ -86,6 +92,7 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
     - Kimlik: odaA
       Tur: 0
       OdaKapisi: 1
@@ -98,6 +105,7 @@ MonoBehaviour:
       IpucuZ: 0
       IpucuOlcek: 1
       Parcalar: []
+      IpucuKaranlikta: 0
   notlar:
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3
@@ -183,4 +191,5 @@ MonoBehaviour:
     Sablon: {fileID: 6813529233286673208, guid: e3298e1273de64c47bf5913f1ca46af6, type: 3}
   sesler: []
   parcalar: []
+  yananOdalar: []
   cizimBoyu: 0.3
