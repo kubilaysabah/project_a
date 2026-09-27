@@ -70,16 +70,23 @@ Cemal'in son çalıştığı daire, sofrası kurulu boş daire, Yönetim dairesi
 
 ## 6. Kilit türleri
 
-Dört tür, her karışımı taşır; oyuncu kuralları ilk katlarda öğrenir:
+**Temel kural (Şahan, 2026-09-27, ilerleme bunun üzerine kurulur):** dairenin içinde de odalar kilitlidir.
+Oyuncu bir odadan ötekine ancak bir **anahtar**, bir **şifre** ya da bir **kol çekerek** geçer. Dairenin
+bütün odaları açılmaz: zincirin dışında kalan odalar o katta hep kapalı kalır (arkalarından ses gelebilir).
+Açık olan yalnızca antre, koridor ve zincirin başladığı oda; gerisini oyuncu açarak kazanır.
+
+Beş tür, her karışımı taşır; oyuncu kuralları ilk katlarda öğrenir:
 
 | Tür | Nasıl çözülür | İlk görüldüğü kat |
 |---|---|---|
 | **Anahtar** | Dairede bir yerde bulunur, tek kapıyı açar | 1 |
 | **Şifreli asma kilit** | 4 haneli şifre odadaki bir şeyde: takvim, boy cetveli, fatura, doğum günü | 2 |
+| **Kol** | Bir yerde bir kol/manivela çekilir, başka yerdeki bir kapının kilidi "tak" diye açılır: kilerde duvar kolu, sigorta kutusunun ana şalteri, sifon zinciri, tablonun arkasındaki gizli kol | #55'te belirlenecek (öneri 3) |
 | **Sigorta / elektrik** | Sigorta atık; sigorta teli bulunup takılınca ışık ve elektrikli şeyler çalışır | 4 |
 | **Tornavida ile menteşe** | Kilidi açılmayan kapının menteşeleri sökülür; tornavida dairede | 5 |
 
-Zincir yükselişi: **1-1-2-2-2-3-3-3** (kat başına kilitli oda sayısı).
+Zincir yükselişi: **1-1-2-2-2-3-3-3** (kat başına geçilmesi gereken kilitli oda sayısı; zincirin
+dışındaki kapalı odalar bu sayıya girmez).
 
 ## 7. Kat kat taslak
 
