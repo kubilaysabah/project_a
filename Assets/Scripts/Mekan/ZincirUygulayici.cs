@@ -54,6 +54,18 @@ public class ZincirUygulayici
             if (hedef == null) { Debug.LogWarning($"[ZINCIR] '{veri.Kimlik}' kilidinin hedefi bulunamadı."); continue; }
             Kilit kilit = hedef.gameObject.AddComponent<Kilit>();
             kilit.Ayarla(veri, kat);
+            if (veri.Tur == KilitTuru.Kol)
+            {
+                // Kolun kendisine CekilenKol eklenir; kol çekilince bu kilidi açar.
+                Transform kolYeri = YerYolu(daire, zincir, veri.Gerekli);
+                if (kolYeri != null)
+                {
+                    CekilenKol kol = kolYeri.GetComponent<CekilenKol>();
+                    if (kol == null) kol = kolYeri.gameObject.AddComponent<CekilenKol>();
+                    // Sigorta kutusunun ana şalteri kısa bir kol: daha az döner.
+                    kol.KilitEkle(kilit, kolYeri.name == "Salter" ? 100f : 120f);
+                }
+            }
             if (veri.Tur == KilitTuru.Sifre)
             {
                 GameObject asma = kilit.AsmaKilitTak(AsmaKilitSablonu);
@@ -91,6 +103,8 @@ public class ZincirUygulayici
         }
         konanlar.Clear();
         foreach (Kilit k in daire.GetComponentsInChildren<Kilit>(true)) Object.Destroy(k);
+        // Çekilmiş kollar eski duruşuna döner, bileşenleri sökülür.
+        foreach (CekilenKol kol in daire.GetComponentsInChildren<CekilenKol>(true)) { kol.Sifirla(); Object.Destroy(kol); }
         // Kilidi sökülen kapılar serbest; balkon kapısı kendi kuralıyla (hep kilitli) kalır.
         foreach (IcKapi k in daire.GetComponentsInChildren<IcKapi>(true)) k.Kilitle(false);
         foreach (AcilirParca p in daire.GetComponentsInChildren<AcilirParca>(true)) p.Kilitle(false);

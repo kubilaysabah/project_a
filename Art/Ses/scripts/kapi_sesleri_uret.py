@@ -147,7 +147,24 @@ def sifre_cark():
     kaydet(os.path.join(SESLER, "Sifre_Cark.wav"), s, HIZ, 0.5)
 
 
-URETICILER = {"sifre_cark": sifre_cark, "sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
+# ---------- KOL (#54) ----------
+def kol_cekme():
+    """Paslı demir kolun çekilişi: kısa bir sürtünme, cırcır tıkırtıları, sonda tok bir vuruş."""
+    random.seed(42)
+    n = int(0.9 * HIZ)
+    s = [0.0] * n
+    surt = bant(gurultu(n), 1800, HIZ, 0.8)
+    for i in range(int(0.30 * HIZ)):
+        s[i] += 0.18 * surt[i] * math.sin(math.pi * i / (0.30 * HIZ))
+    for j, t in enumerate((0.06, 0.13, 0.19, 0.24, 0.28)):
+        ekle(s, tepeyi_esitle(modlar(darbe(int(0.08 * HIZ), HIZ, 0.0006), HIZ, KILIT)), int(t * HIZ), 0.35 + j * 0.05)
+    vurus = tepeyi_esitle(modlar(darbe(int(0.5 * HIZ), HIZ, 0.004), HIZ, [(180, 6, 1.0), (420, 12, 0.6), (980, 20, 0.3)]))
+    ekle(s, vurus, int(0.40 * HIZ), 1.0)
+    s = yanki(s, HIZ, boyut=0.4, sonum=0.5, islak=0.2, oda=0.6)
+    kaydet(os.path.join(SESLER, "Kol_Cekme.wav"), yumusak_sinirla(s, 2.0), HIZ, 0.75)
+
+
+URETICILER = {"kol_cekme": kol_cekme, "sifre_cark": sifre_cark, "sarsma": sarsma, "kilit_acilma": kilit_acilma, "gicirti": gicirti, "anahtar_al": anahtar_al,
               "ic_acilma": ic_acilma, "ic_kapanma": ic_kapanma, "ic_kilitli": ic_kilitli}
 
 if __name__ == "__main__":
