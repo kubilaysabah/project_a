@@ -127,7 +127,7 @@ public class KatYoneticisi : MonoBehaviour
     private Color[] ozgunRenkler;
 
     // Ceza sesleri (#25): lamba sönerken "tık", son lamba titrerken cızırtı.
-    private AudioClip lambaSonme, lambaCizirti;
+    private AudioClip lambaSonme;
 
     // Lambaların ANA ışıkları (aşağı bakan spotlar). Her lambanın dolgu ışığı
     // ve parlayan camı bu ışığın çocuğu; ceza sırasında lamba bütünüyle söner.
@@ -313,7 +313,6 @@ public class KatYoneticisi : MonoBehaviour
         kartlar = Resources.LoadAll<AnomaliKarti>("Anomaliler");
 
         lambaSonme = Resources.Load<AudioClip>("Sesler/Lamba_Sonme");
-        lambaCizirti = Resources.Load<AudioClip>("Sesler/Lamba_Cizirti");
 
         if (kartlar.Length == 0)
         {
@@ -1337,7 +1336,6 @@ public class KatYoneticisi : MonoBehaviour
     private IEnumerator Titret(Light lamba)
     {
         // Titreme boyunca ampulden elektrik cızırtısı.
-        if (lambaCizirti != null) AudioSource.PlayClipAtPoint(lambaCizirti, lamba.transform.position, 0.8f);
 
         for (int i = 0; i < 3; i++)
         {

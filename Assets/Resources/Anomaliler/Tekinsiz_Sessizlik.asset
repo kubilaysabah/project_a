@@ -47,13 +47,3 @@ MonoBehaviour:
     ses: {fileID: 0}
     dongu: 0
     gecikme: 0
-  - hedefYol: Ses_Boru
-    tur: 0
-    gorunur: 0
-    vektor: {x: 0, y: 0, z: 0}
-    renk: {r: 1, g: 1, b: 1, a: 1}
-    sayi: 1
-    metin: 
-    ses: {fileID: 0}
-    dongu: 0
-    gecikme: 0

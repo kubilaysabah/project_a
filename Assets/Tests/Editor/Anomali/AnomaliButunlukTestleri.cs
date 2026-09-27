@@ -295,7 +295,8 @@ public class AnomaliButunlukTestleri
     public void Ortam_ses_katmanlari_sahanlikta_ve_dongude()
     {
         // Bebek artık döngü değil, bir kat olayı (#35); aşağıdaki testte.
-        foreach (string yol in new[] { "Ses_Ugultu", "Kapi_2/Ses_TV", "Ses_Boru" })
+        // Boru katmanı #74'te kalktı (Şahan'ın ses kararları).
+        foreach (string yol in new[] { "Ses_Ugultu", "Kapi_2/Ses_TV" })
         {
             Transform t = sahanlik.Find(yol);
             Assert.IsNotNull(t, $"'{yol}' ses katmanı sahanlıkta yok.");
@@ -318,9 +319,9 @@ public class AnomaliButunlukTestleri
     [Test]
     public void Kat_olayi_kaynaklari_sahanlikta_ve_tek_seferlik()
     {
-        string[] yollar = { "Kapi_4/Ses_Bebek", "Ses_Ugultu/Olay_UzakKapi", "Ses_Ugultu/Olay_UstKatAdimlari",
-                            "Ses_Ugultu/Olay_Kalorifer", "Ses_Ugultu/Olay_Araba" };
-        Assert.AreEqual(KatOlayPlani.OlaySayisi, yollar.Length, "Her olay çeşidi için bir kaynak olmalı.");
+        // #74: yalnızca bebek kaldı; "Sessiz" olayın kaynağı yok.
+        string[] yollar = { "Kapi_4/Ses_Bebek" };
+        Assert.AreEqual(KatOlayPlani.OlaySayisi - 1, yollar.Length, "Sessiz dışındaki her olay çeşidi için bir kaynak olmalı.");
 
         foreach (string yol in yollar)
         {
@@ -358,7 +359,7 @@ public class AnomaliButunlukTestleri
         Component bilesen = dis.GetComponent("DisSesleri");
         Assert.IsNotNull(bilesen);
         var seri = new UnityEditor.SerializedObject(bilesen);
-        Assert.Greater(seri.FindProperty("silah").arraySize + seri.FindProperty("ruzgar").arraySize + seri.FindProperty("kopek").arraySize, 0,
+        Assert.Greater(seri.FindProperty("silah").arraySize + seri.FindProperty("kopek").arraySize, 0,
                        "Dış seslere hiç ses dosyası bağlanmamış.");
         Assert.IsFalse(dis.GetComponent<AudioSource>().loop, "Dış ses kaynağı döngüde; sürekli çalar.");
     }

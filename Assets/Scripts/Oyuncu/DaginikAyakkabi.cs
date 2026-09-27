@@ -36,7 +36,7 @@ public class DaginikAyakkabi : MonoBehaviour, IEtkilesimli
             UcanKopya.YerineUcur(transform, hedef, () =>
             {
                 raftaki.SetActive(true);
-                if (tik == null) tik = Resources.Load<AudioClip>("Sesler/Adim_2");
+                if (tik == null) tik = Resources.Load<AudioClip>("Sesler/Adim_1");
                 if (tik != null) AudioSource.PlayClipAtPoint(tik, hedef.position, 0.5f);
             });
         }

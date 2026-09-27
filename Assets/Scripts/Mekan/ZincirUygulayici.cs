@@ -241,7 +241,7 @@ public class ZincirUygulayici
         if (varlik.kacisVar && varlik.kacisSablonu != null)
         {
             KacisAni ka = daire.gameObject.AddComponent<KacisAni>();
-            ka.Hazirla(kat, varlik.kacisSablonu, varlik.kacisGecikme, varlik.kacisHizi, varlik.kacisBaslangicSesi, varlik.kacisDonguSesi);
+            ka.Hazirla(kat, varlik.kacisSablonu, varlik.kacisGecikme, varlik.kacisHizi, varlik.kacisBaslangicSesi, varlik.kacisHaberciSesi);
             if (Kayit.KilitCozukMu(kat, "kacis")) ka.BittiBaslat();
         }
         // Yırtık çizim (#63): dairenin köküne çizim ekranı; konan parçalar kendi bölgelerini gösterir.

@@ -114,12 +114,12 @@ public static partial class GrayboxKurucu
         seri.ApplyModifiedPropertiesWithoutUndo();
 
         // Gezen Gölge (#71): bütün katlarda 1-2 dakikada bir beliren Gölge, kat yöneticisinin
-        // nesnesinde. 7. kattaki kaçışla aynı şablon ve aynı uğultu.
+        // nesnesinde. 7. kattaki kaçışla aynı şablon; habercisi üst kattan adımlar (#74).
         GezenGolge gezen = yonetici.GetComponent<GezenGolge>();
         if (gezen == null) gezen = yonetici.gameObject.AddComponent<GezenGolge>();
         var gSeri = new SerializedObject(gezen);
         gSeri.FindProperty("sablon").objectReferenceValue = golge;
-        gSeri.FindProperty("ugultu").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ugultu.wav");
+        gSeri.FindProperty("haberci").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Olay/Olay_UstKatAdimlari.wav");
         gSeri.ApplyModifiedPropertiesWithoutUndo();
 
         AssetDatabase.SaveAssets();
@@ -759,7 +759,8 @@ public static partial class GrayboxKurucu
         v.kacisGecikme = 3f;
         v.kacisHizi = 2.0f;
         v.kacisBaslangicSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ding.wav");
-        v.kacisDonguSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ugultu.wav");
+        // Siluetin habercisi üst kattan adımlar (#74; eskiden çevresinde asansör uğultusu).
+        v.kacisHaberciSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Olay/Olay_UstKatAdimlari.wav");
 
         var z = new KilitZinciri();
         z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 2.0f, Y = 0.004f, V = -0.4f, Donus = 70f });

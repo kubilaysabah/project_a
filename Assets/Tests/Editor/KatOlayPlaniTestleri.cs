@@ -3,8 +3,9 @@
 //
 // Korunan sözler:
 //   1. Bir tur içinde aynı kat hep aynı olayı ve aynı zamanları verir.
-//   2. Komşu iki kata aynı olay düşmez; katlar hangi sırayla sorulursa sorulsun.
-//   3. Beş olayın hepsi gerçekten çıkabiliyor.
+//   2. Komşu iki katta bebek ağlamaz; katlar hangi sırayla sorulursa sorulsun (#74: olaylar
+//      bebek ve sessiz; sessiz komşu olabilir).
+//   3. İki olayın ikisi de gerçekten çıkabiliyor.
 //   4. Zamanlar sınırların içinde: iki çalış asla üst üste binmez.
 //   5. Cezadan sonra (Sifirla) plan yeniden çekilir.
 
@@ -36,32 +37,32 @@ public class KatOlayPlaniTestleri
     }
 
     [Test]
-    public void Komsu_katlara_ayni_olay_dusmez_katlar_sirayla_sorulunca()
+    public void Komsu_katlarda_bebek_aglamaz_katlar_sirayla_sorulunca()
     {
         for (int tohum = 0; tohum < 200; tohum++)
         {
             var plan = new KatOlayPlani(tohum);
             for (int kat = 1; kat < 8; kat++)
-                Assert.AreNotEqual(plan.KatIcin(kat), plan.KatIcin(kat + 1), $"tohum {tohum}, kat {kat}");
+                Assert.IsFalse(plan.KatIcin(kat) == KatOlayi.Bebek && plan.KatIcin(kat + 1) == KatOlayi.Bebek, $"tohum {tohum}, kat {kat}");
         }
     }
 
     // Oyuncu aşağı da inebiliyor: katlar karışık sırayla sorulabilir. Örneğin önce 3,
-    // sonra 5, en son ikisinin arasındaki 4. O zaman 4 iki komşusundan da farklı olmalı.
+    // sonra 5, en son ikisinin arasındaki 4. İki komşudan birinde bebek varsa 4'te olmamalı.
     [Test]
-    public void Komsu_katlara_ayni_olay_dusmez_katlar_karisik_sorulunca()
+    public void Komsu_katlarda_bebek_aglamaz_katlar_karisik_sorulunca()
     {
         for (int tohum = 0; tohum < 200; tohum++)
         {
             var plan = new KatOlayPlani(tohum);
             foreach (int kat in new[] { 3, 5, 4, 1, 8, 7, 2, 6 }) plan.KatIcin(kat);
             for (int kat = 1; kat < 8; kat++)
-                Assert.AreNotEqual(plan.KatIcin(kat), plan.KatIcin(kat + 1), $"tohum {tohum}, kat {kat}");
+                Assert.IsFalse(plan.KatIcin(kat) == KatOlayi.Bebek && plan.KatIcin(kat + 1) == KatOlayi.Bebek, $"tohum {tohum}, kat {kat}");
         }
     }
 
     [Test]
-    public void Bes_olayin_hepsi_cikabilir()
+    public void Olaylarin_hepsi_cikabilir()
     {
         var gorulen = new System.Collections.Generic.HashSet<KatOlayi>();
         for (int tohum = 0; tohum < 50; tohum++)
@@ -106,7 +107,7 @@ public class KatOlayPlaniTestleri
         Assert.IsTrue(farkVar, "Sifirla sonrası plan birebir aynı kaldı.");
     }
 
-    // Komşu kuralı en kötü durumda iki olayı yasaklar; geriye hep seçenek kalmalı.
+    // Komşu kuralı en kötü durumda bebeği yasaklar; sessiz hep seçenek olarak kalmalı.
     // Kalmasaydı liste boş olur ve oyun ilk katta çökerdi.
     [Test]
     public void Iki_komsu_da_doluyken_bile_secenek_kalir()

@@ -146,5 +146,5 @@ MonoBehaviour:
   kacisGecikme: 3
   kacisHizi: 2.2
   kacisBaslangicSesi: {fileID: 0}
-  kacisDonguSesi: {fileID: 0}
+  kacisHaberciSesi: {fileID: 0}
   cizimBoyu: 0.3

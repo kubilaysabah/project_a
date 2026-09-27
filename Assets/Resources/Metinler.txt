@@ -121,7 +121,6 @@ anomali.acilan_sayac	Kendi açılan sayaç	Meter box opening itself
 anomali.aralik_asansor	Aralık asansör	Elevator ajar
 anomali.aralik_kapi	Aralık kapı	Door ajar
 anomali.aralik_kapilar	Aralık kapılar	All doors ajar
-anomali.asansorde_aglama	Asansörde ağlama	Crying in the elevator
 anomali.ayni_numara	On üç, on üç, on üç	Thirteen, thirteen, thirteen
 anomali.besinci_kapi	Beşinci kapı	The fifth door
 anomali.bos_plaka	Numarasız plaka	Blank door plate

@@ -20,7 +20,6 @@ public class DisSesleri : MonoBehaviour
     // Bir türün dizisi boşsa (ör. kaydı henüz eklenmediyse) o tür hiç çalmaz.
     [SerializeField] private AudioClip[] kopek;
     [SerializeField] private AudioClip[] silah;
-    [SerializeField] private AudioClip[] ruzgar;
     [SerializeField] private int tohum = 0;       // 0 = her oyun farklı
 
     private AudioSource kaynak;
@@ -37,7 +36,8 @@ public class DisSesleri : MonoBehaviour
         kaynak = GetComponent<AudioSource>();
         ornek = this;
         yonetici = FindAnyObjectByType<KatYoneticisi>();
-        plan = new DisSesPlani(3, tohum != 0 ? tohum : System.Environment.TickCount + 31337);
+        // Türler: köpek, silah. Rüzgâr #74'te kalktı (Şahan'ın ses kararları).
+        plan = new DisSesPlani(2, tohum != 0 ? tohum : System.Environment.TickCount + 31337);
         kalan = plan.SonrakiBekleme();
     }
 
@@ -57,7 +57,7 @@ public class DisSesleri : MonoBehaviour
             return;
         }
 
-        AudioClip[][] turler = { kopek, silah, ruzgar };
+        AudioClip[][] turler = { kopek, silah };
         var sesiVar = new bool[turler.Length];
         for (int i = 0; i < turler.Length; i++) sesiVar[i] = turler[i] != null && turler[i].Length > 0;
 

@@ -214,7 +214,6 @@ public static class AtmosferKurucu
         SerializedObject seri = new SerializedObject(bilesen);
         KlipleriBagla(seri.FindProperty("kopek"), "Dis_Kopek_");
         KlipleriBagla(seri.FindProperty("silah"), "Dis_Silah_");
-        KlipleriBagla(seri.FindProperty("ruzgar"), "Dis_Ruzgar_");
         seri.ApplyModifiedPropertiesWithoutUndo();
     }
 

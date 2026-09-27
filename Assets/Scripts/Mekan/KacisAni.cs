@@ -30,7 +30,7 @@ public class KacisAni : MonoBehaviour
     private int kat;
     private GameObject sablon;
     private float gecikme, hiz;
-    private AudioClip baslangicSesi, donguSesi;
+    private AudioClip baslangicSesi, haberciSesi;
 
     private enum Durum { Bekliyor, Basladi, Bitti }
     private Durum durum = Durum.Bekliyor;
@@ -41,22 +41,22 @@ public class KacisAni : MonoBehaviour
     private Transform oyuncu;
     private static AudioClip[] adimlar;
 
-    public void Hazirla(int katNo, GameObject golgeSablonu, float bekleme, float hizi, AudioClip ilkSes, AudioClip dongu)
+    public void Hazirla(int katNo, GameObject golgeSablonu, float bekleme, float hizi, AudioClip ilkSes, AudioClip haberci)
     {
         kat = katNo;
         sablon = golgeSablonu;
         gecikme = bekleme;
         hiz = hizi;
         baslangicSesi = ilkSes;
-        donguSesi = dongu;
+        haberciSesi = haberci;
         BirinciSahisKontrolcu k = FindAnyObjectByType<BirinciSahisKontrolcu>();
         oyuncu = k != null ? k.transform : null;
         // Kat kapısı açılınca kaçış biter. Olay (event): kapı açıldığında haber veren liste.
         foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi += KapiAcildi;
         if (adimlar == null)
         {
-            adimlar = new AudioClip[4];
-            for (int i = 0; i < 4; i++) adimlar[i] = Resources.Load<AudioClip>($"Sesler/Adim_{i + 1}");
+            // Tek adım sesi (#74: Adim_2-4 kalktı; S20 gerçek kayıtla değişecek).
+            adimlar = new[] { Resources.Load<AudioClip>("Sesler/Adim_1") };
         }
     }
 
@@ -87,12 +87,7 @@ public class KacisAni : MonoBehaviour
             if (Time.time - baslangicZamani < gecikme) return;
             golge = Instantiate(sablon, izler[0], Quaternion.identity);
             golge.name = "Kacis_Golgesi";
-            if (donguSesi != null)
-            {
-                AudioSource a = golge.AddComponent<AudioSource>();
-                a.clip = donguSesi; a.loop = true; a.spatialBlend = 1f; a.minDistance = 1.5f; a.maxDistance = 14f; a.volume = 0.8f;
-                a.Play();
-            }
+            // Siluetin çevresindeki uğultu #74'te kalktı; gelişini üst kattan adımlar haber verir.
             hedefIz = 1;
             Debug.Log("[KACIS] Siluet belirdi.");
         }
@@ -108,6 +103,9 @@ public class KacisAni : MonoBehaviour
         KafaLambasi lamba = FindAnyObjectByType<KafaLambasi>();
         if (lamba != null) lamba.Titret(2.2f);
         if (baslangicSesi != null) AudioSource.PlayClipAtPoint(baslangicSesi, oyuncu.position + Vector3.up, 0.9f);
+        // Üst kattan ağır adımlar (#74, Şahan: "canavar gelmeden önce çalalım, sesin ortasında
+        // canavar belirsin"): ses ~5,4 sn, siluet 3 sn sonra, yani sesin ortasında belirir.
+        if (haberciSesi != null) AudioSource.PlayClipAtPoint(haberciSesi, oyuncu.position + Vector3.up * 3f, 0.8f);
         ArkaMuzik.Ornek?.Kabar();
         Debug.Log($"[KACIS] {kat}. kat: kaçış başladı ({gecikme:0.0} sn sonra siluet, {hiz:0.0} m/sn).");
     }

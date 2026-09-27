@@ -6,10 +6,11 @@
 //    bebek ağlaması, kapı çarpması olmasın ama her katta bunlardan biri olsun."
 //
 // Kurallar:
-//   - Her kata BEŞ olaydan YALNIZCA BİRİ düşer (bebek, uzak kapı, üst kat adımları,
-//     kalorifer, dışarıdan geçen araba).
-//   - Komşu iki kata aynı olay düşmez: art arda iki katta aynı bebek ağlarsa
-//     "yine mi" hissi çeşitliliği öldürür.
+//   - Her kata bir olay düşer: BEBEK ya da SESSİZ (#74, Şahan'ın ses kararları, 2026-09-27:
+//     uzak kapı, kalorifer ve araba kalktı; üst kat adımları Gezen Gölge'nin habercisi oldu).
+//     Yeni olay sesleri gelince enum'a eklenir.
+//   - Komşu iki katta bebek ağlamaz: art arda iki katta aynı bebek "yine mi" dedirtir.
+//     Sessiz her yere düşebilir.
 //   - Olay, oyuncu kata vardıktan birkaç saniye sonra bir kez, bir süre sonra bir kez
 //     daha çalar. İki çalış arası, en uzun olayın (bebek, ~10 sn) süresinden uzundur:
 //     olay kendi kendisinin içine girmez.
@@ -26,10 +27,7 @@ using System.Collections.Generic;   // Dictionary için
 public enum KatOlayi
 {
     Bebek,            // 4 numaranın içinde bebek bir nöbet ağlar
-    UzakKapi,         // binanın başka bir katında bir kapı kapanır
-    UstKatAdimlari,   // üst katta birileri yürür
-    Kalorifer,        // duvarın içinde kalorifer borusu tıkırdar
-    Araba             // dışarıdan bir araba geçer
+    Sessiz            // bu katta olay sesi yok
 }
 
 public class KatOlayPlani
@@ -37,7 +35,7 @@ public class KatOlayPlani
     // ---------- SABİTLER ----------
 
     /// <summary>Kaç çeşit olay var (enum'daki seçenek sayısı).</summary>
-    public const int OlaySayisi = 5;
+    public const int OlaySayisi = 2;
 
     /// <summary>İlk çalış, kata varıştan en erken ve en geç bu kadar saniye sonra.</summary>
     public const float IlkEnErken = 4f, IlkEnGec = 9f;
@@ -93,14 +91,13 @@ public class KatOlayPlani
     {
         if (katlar.TryGetValue(kat, out KatKaydi kayitli)) return kayitli;
 
-        // Komşu katlardan biri daha önce çekildiyse onun olayı bu kata yasak.
-        // İki komşu da çekilmiş olabilir (oyuncu 3'ten 5'e, sonra geri 4'e gelirse):
-        // o zaman ikisinin olayı da yasak. 5 olay olduğu için en az 3 seçenek hep kalır.
+        // Komşu katlardan birinde bebek ağlıyorsa bu katta ağlamaz. İki komşu da çekilmiş
+        // olabilir (oyuncu 3'ten 5'e, sonra geri 4'e gelirse). Sessiz hep aday: seçenek bitmez.
         var adaylar = new List<KatOlayi>();
         for (int i = 0; i < OlaySayisi; i++)
         {
-            var aday = (KatOlayi)i;   // sayıyı enum'a çevir: 0 -> Bebek, 1 -> UzakKapi, ...
-            if (KomsuBunuAldi(kat - 1, aday) || KomsuBunuAldi(kat + 1, aday)) continue;
+            var aday = (KatOlayi)i;   // sayıyı enum'a çevir: 0 -> Bebek, 1 -> Sessiz
+            if (aday != KatOlayi.Sessiz && (KomsuBunuAldi(kat - 1, aday) || KomsuBunuAldi(kat + 1, aday))) continue;
             adaylar.Add(aday);
         }
 

@@ -1039,9 +1039,7 @@ public static partial class GrayboxKurucu
         // (60 cm) arasından geçemez.
         KorkuluklariKur(t);
 
-        // Rüzgâr (#14): pencerenin dışından hafif bir uğultu.
-        OrtamKaynagi("Ses_Ruzgar", t, new Vector3(0f, AraKot + 1.45f, CekirdekDerin + 0.3f),
-                     "Ortam_Ruzgar", 0.30f, 1f, 6f);
+        // Pencere rüzgârı #74'te kalktı (Şahan'ın ses kararları).
 
         // Merdiven ampulü: ara sahanlığın üstünde. #51: neredeyse sönük (0,25); merdiven
         // karanlık, oyuncu kafa lambasıyla çıkar.
@@ -1585,19 +1583,8 @@ public static partial class GrayboxKurucu
         OlayKaynagi("Ses_Bebek", sahanlik.Find("Kapi_4"), new Vector3(sag + 0.8f, 1.0f, 0f),
                     "Ortam/Ortam_Bebek", 0.55f, 1.5f, 10f);
 
-        // Uzak olaylar uğultunun ÇOCUKLARI: sessizlik ve karanlik_kat kartları uğultuyu
-        // gizleyince bunlar da susar. Konumlar uğultuya göre (uğultu tavanın ortasında).
-        // Seviyeler, onaylanan uğultu kaydının içindeki hâllerine denk (kapı en güçlü,
-        // kalorifer en kısık).
-        Transform ugultu = sahanlik.Find("Ses_Ugultu");
-        OlayKaynagi("Olay_UzakKapi", ugultu, new Vector3(0f, 3.0f, 0f), "Olay/Olay_UzakKapi", 0.2f, 2f, 14f);          // bir üst kat
-        OlayKaynagi("Olay_UstKatAdimlari", ugultu, new Vector3(1.2f, 1.0f, 1.0f), "Olay/Olay_UstKatAdimlari", 0.2f, 1.5f, 10f);   // tavanın üstü
-        OlayKaynagi("Olay_Kalorifer", ugultu, new Vector3(-SahanlikGen / 2f, -1.6f, 1.0f), "Olay/Olay_Kalorifer", 0.12f, 1f, 8f); // sol duvarın dibi
-        OlayKaynagi("Olay_Araba", ugultu, new Vector3(0f, -1.0f, -8f), "Olay/Olay_Araba", 0.15f, 4f, 18f);                 // dışarıda, sokak
-
-        // Boru: arka duvarın sol parçasının içinden (elektrik sayacının arkası).
-        OrtamKaynagi("Ses_Boru", sahanlik, new Vector3(-(CekirdekGen / 2f + DuvarKalin + 0.85f), 1.0f, DuvarKalin / 2f),
-                     "Ortam_Boru", 0.5f, 1f, 8f);
+        // Uzak kapı, kalorifer ve araba olayları ile boru katmanı #74'te kalktı (Şahan'ın ses
+        // kararları). Üst kat adımları artık Gezen Gölge'nin ve 7. kattaki kaçışın habercisi.
     }
 
     // Tek seferlik bir olay sesi kaynağı (#35): üç boyutlu, döngüsüz, kendiliğinden çalmaz.

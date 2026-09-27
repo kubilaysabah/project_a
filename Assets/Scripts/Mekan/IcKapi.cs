@@ -30,7 +30,7 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
     private bool acik;
     private float aci;                             // şu anki açı (0 kapalı)
     private Coroutine hareket;
-    private static AudioClip acilmaSesi, kapanmaSesi, kilitliSesi;
+    private static AudioClip acilmaSesi, kilitliSesi;
 
     public bool Acik { get { return acik; } }
     public bool Kilitli { get { return kilitli; } }
@@ -42,7 +42,6 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
         // Sesler Resources/Sesler'den bir kez yüklenir; bütün kapılar aynı klipleri paylaşır
         // ("static": sınıfa ait tek bir kopya, her kapıya ayrı değil).
         if (acilmaSesi == null) acilmaSesi = Resources.Load<AudioClip>("Sesler/IcKapi_Acilma");
-        if (kapanmaSesi == null) kapanmaSesi = Resources.Load<AudioClip>("Sesler/IcKapi_Kapanma");
         if (kilitliSesi == null) kilitliSesi = Resources.Load<AudioClip>("Sesler/IcKapi_Kilitli");
         if (hepKilitli) kilitli = true;
     }
@@ -83,7 +82,8 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
     private IEnumerator Dondur(float hedef)
     {
         bool aciliyor = hedef != 0f;
-        Cal(aciliyor ? acilmaSesi : kapanmaSesi, 0.6f);
+        // Kapanırken ses yok (#74, Şahan: kapanma sesi kalksın).
+        if (aciliyor) Cal(acilmaSesi, 0.6f);
         float bas = aci;
         for (float t = 0f; t < HareketSuresi; t += Time.deltaTime)
         {

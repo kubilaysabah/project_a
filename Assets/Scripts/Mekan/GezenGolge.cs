@@ -2,7 +2,9 @@
 // Bütün katlarda gezen Gölge (#71).
 //
 // Oyuncu bir katta, katın kapısını açıp çıkamadığı sürece her 1-2 dakikada bir (GolgeZamanlayici)
-// 7. kattaki kaçış Gölgesi'nin aynısı ANİDEN belirir: oyuncunun önünde, görebileceği bir yerde.
+// önce ÜST KATTAN AĞIR ADIMLAR duyulur; sesin ortasında 7. kattaki kaçış Gölgesi'nin aynısı
+// ANİDEN belirir: oyuncunun önünde, görebileceği bir yerde (#74, Şahan: "canavar gelmeden önce
+// çalalım, sesin ortasında canavar belirsin"). Adımlar bitince yer yoksa Gölge çıkmaz, ses kalır.
 // 2 saniye oyuncuya doğru koşar; oyuncuya 1,2 m'den fazla yaklaşmaz, dokunmaz. Sonra kafa lambası
 // titrer ve Gölge kaybolur. Hasar yok, ölüm yok, kat sıfırlanmaz (Şahan'ın isteği): yalnızca korku.
 //
@@ -27,7 +29,7 @@ using UnityEngine;
 public class GezenGolge : MonoBehaviour
 {
     [SerializeField] private GameObject sablon;          // Kacis_Golgesi şablonu (7. katla aynı)
-    [SerializeField] private AudioClip ugultu;           // Gölge'nin çevresindeki uğultu (asansör uğultusu)
+    [SerializeField] private AudioClip haberci;          // üst kattan ağır adımlar (Olay_UstKatAdimlari)
 
     private const float KosuSuresi = 2f;                 // kaç saniye kovalar
     private const float Hiz = 2.6f;                      // m/sn (oyuncu 1,8 yürür)
@@ -40,7 +42,7 @@ public class GezenGolge : MonoBehaviour
     private Transform oyuncu;
     private GameObject golge;                            // şu an sahnedeki Gölge (yoksa null)
     private static AudioClip[] adimlar;
-    private static AudioClip belirmeSesi;
+    private bool haberciCaliyor;                         // adımlar duyuluyor, Gölge henüz yok
 
     private void Start()
     {
@@ -51,23 +53,56 @@ public class GezenGolge : MonoBehaviour
         oyuncu = kontrol != null ? kontrol.transform : null;
         if (adimlar == null)
         {
-            adimlar = new AudioClip[4];
-            for (int i = 0; i < 4; i++) adimlar[i] = Resources.Load<AudioClip>($"Sesler/Adim_{i + 1}");
+            // Tek adım sesi (#74: Adim_2-4 kalktı; S20 gerçek kayıtla değişecek).
+            adimlar = new[] { Resources.Load<AudioClip>("Sesler/Adim_1") };
         }
-        if (belirmeSesi == null) belirmeSesi = Resources.Load<AudioClip>("Sesler/Lamba_Cizirti");
     }
 
     private void Update()
     {
         if (zamanlayici == null || yonetici == null || oyuncu == null) return;
         if (!zamanlayici.Ilerlet(Time.deltaTime, yonetici.MevcutKat, SayabilirMi())) return;
-        if (!Belir()) zamanlayici.Ertele(8f);
+        // Önce yer aranır: oyuncu duvara dönükse adımlar da çalmaz, 8 sn sonra yeniden denenir.
+        if (!YerVarMi()) { zamanlayici.Ertele(8f); return; }
+        StartCoroutine(HaberciVeBelir());
+    }
+
+    // Üst kattan adımlar başlar; sesin ortasında Gölge belirir.
+    private IEnumerator HaberciVeBelir()
+    {
+        haberciCaliyor = true;
+        float yari = 1.5f;
+        if (haberci != null)
+        {
+            // Ses oyuncunun tam üstünden, üst kattan (3 m yukarıdan) gelir.
+            AudioSource.PlayClipAtPoint(haberci, oyuncu.position + Vector3.up * 3f, 0.8f);
+            yari = haberci.length / 2f;
+            Debug.Log($"[GOLGE] {yonetici.MevcutKat}. kat: üst kattan adımlar.");
+        }
+        yield return new WaitForSeconds(yari);
+        haberciCaliyor = false;
+        // Oyuncu bu arada döndü ya da menü açtıysa Gölge çıkmaz; adımlar yalnız kalır.
+        if (SayabilirMi()) Belir();
+    }
+
+    // Şu an oyuncunun önünde Gölge'ye uygun bir yer var mı (yer tutulmaz, yalnızca bakılır)?
+    private bool YerVarMi()
+    {
+        Camera kamera = kontrol != null ? kontrol.GetComponentInChildren<Camera>() : null;
+        return kamera != null && YerBul(kamera.transform, out Vector3 yer) && EkrandaMi(kamera, yer);
+    }
+
+    // Gölge'nin göğsü ekranın ortadaki %70'lik alanında mı?
+    private static bool EkrandaMi(Camera kamera, Vector3 yer)
+    {
+        Vector3 ekran = kamera.WorldToViewportPoint(yer + Vector3.up * 1.2f);
+        return ekran.z > 0f && ekran.x >= 0.15f && ekran.x <= 0.85f && ekran.y >= 0.15f && ekran.y <= 0.85f;
     }
 
     // Saat bu karede işlesin mi?
     private bool SayabilirMi()
     {
-        if (golge != null || sablon == null) return false;
+        if (golge != null || haberciCaliyor || sablon == null) return false;
         if (!yonetici.enabled || !yonetici.GolgeSayabilir) return false;   // açılış, kapı açık, çatı, final
         if (DuraklatmaMenusu.BaslikEkraninda) return false;
         if (kontrol == null || !kontrol.enabled) return false;              // menü, not, şifre ekranı
@@ -83,11 +118,10 @@ public class GezenGolge : MonoBehaviour
         Camera kamera = kontrol != null ? kontrol.GetComponentInChildren<Camera>() : null;
         if (kamera == null) return false;
         if (!YerBul(kamera.transform, out Vector3 yer)) return false;
-        // Oyuncu yere ya da tavana bakıyorsa Gölge görüş alanının dışında kalır: belirmez, biraz
-        // sonra yeniden denenir. WorldToViewportPoint: dünyadaki bir noktanın ekrandaki yeri
-        // (0-1 arası; z kameranın önündeki uzaklık). Göğüs ekranın ortadaki %70'lik alanında olmalı.
-        Vector3 ekran = kamera.WorldToViewportPoint(yer + Vector3.up * 1.2f);
-        if (ekran.z <= 0f || ekran.x < 0.15f || ekran.x > 0.85f || ekran.y < 0.15f || ekran.y > 0.85f) return false;
+        // Oyuncu yere ya da tavana bakıyorsa Gölge görüş alanının dışında kalır: belirmez.
+        // WorldToViewportPoint: dünyadaki bir noktanın ekrandaki yeri (0-1 arası; z kameranın
+        // önündeki uzaklık). Göğüs ekranın ortadaki %70'lik alanında olmalı (EkrandaMi).
+        if (!EkrandaMi(kamera, yer)) return false;
 
         Vector3 bakis = oyuncu.position - yer;
         bakis.y = 0f;
@@ -133,13 +167,7 @@ public class GezenGolge : MonoBehaviour
     // 2 saniye oyuncuya doğru koşar, sonra kaybolur.
     private IEnumerator Kovala()
     {
-        if (belirmeSesi != null) AudioSource.PlayClipAtPoint(belirmeSesi, golge.transform.position + Vector3.up * 1.2f, 0.7f);
-        if (ugultu != null)
-        {
-            AudioSource a = golge.AddComponent<AudioSource>();
-            a.clip = ugultu; a.loop = true; a.spatialBlend = 1f; a.minDistance = 1.5f; a.maxDistance = 14f; a.volume = 0.8f;
-            a.Play();
-        }
+        // Belirirken cızırtı ve çevresindeki uğultu #74'te kalktı; gelişini adımlar haber verdi.
         ArkaMuzik.Ornek?.Kabar();
         float adimSayaci = AdimAraligi;
         for (float t = 0f; t < KosuSuresi && golge != null; t += Time.deltaTime)

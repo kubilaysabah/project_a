@@ -33,7 +33,7 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
     private float oran;                  // 0 kapalı, 1 açık
     private bool acik;
     private Coroutine hareketEden;
-    private static AudioClip acilmaSesi, kapanmaSesi, kilitliSesi;
+    private static AudioClip acilmaSesi, kilitliSesi;
 
     public bool Acik { get { return acik; } }
     public bool Kilitli { get { return kilitli; } }
@@ -45,7 +45,6 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
         kapaliDonus = transform.localRotation;
         // Şimdilik oda kapısının seslerini kullanıyoruz (tahta ve dil tıkırtısı).
         if (acilmaSesi == null) acilmaSesi = Resources.Load<AudioClip>("Sesler/IcKapi_Acilma");
-        if (kapanmaSesi == null) kapanmaSesi = Resources.Load<AudioClip>("Sesler/IcKapi_Kapanma");
         if (kilitliSesi == null) kilitliSesi = Resources.Load<AudioClip>("Sesler/IcKapi_Kilitli");
     }
 
@@ -72,7 +71,8 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
 
     private IEnumerator Git(float hedef)
     {
-        Cal(hedef > 0f ? acilmaSesi : kapanmaSesi, 0.45f);
+        // Kapanırken ses yok (#74, Şahan: kapanma sesi kalksın).
+        if (hedef > 0f) Cal(acilmaSesi, 0.45f);
         float bas = oran;
         for (float t = 0f; t < sure; t += Time.deltaTime)
         {

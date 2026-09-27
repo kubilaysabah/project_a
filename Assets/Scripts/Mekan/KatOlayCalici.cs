@@ -8,26 +8,20 @@
 // olay yalnızca oyuncunun BULUNDUĞU katta çalar; merdivenden bakarken üst sahanlıkta
 // kendiliğinden bir ses çıkmaz.
 //
-// Kaynakların yerleri (sahanlığa göre yol):
+// Kaynağın yeri (sahanlığa göre yol):
 //   Bebek            Kapi_4/Ses_Bebek              (4 numaranın içi; bebek kartları da bunu hedefliyor)
-//   UzakKapi ...     Ses_Ugultu/Olay_...           (uğultunun çocukları)
-// Uzak olayların uğultunun ÇOCUĞU olmasının sebebi: "sessizlik" ve "karanlik_kat"
-// kartları Ses_Ugultu'yu gizliyor. Çocukları da onunla birlikte gizlenir; ölü bir katta
-// uzaktan bir kapı sesi gelmez. Kartlara dokunmak gerekmedi.
+// Uzak kapı, kalorifer ve araba kaynakları #74'te kalktı (Şahan'ın ses kararları); üst kat
+// adımları artık Gezen Gölge'nin habercisi. "Sessiz" olayın kaynağı yok.
 
 using UnityEngine;
 
 public class KatOlayCalici
 {
-    // Enum sırasıyla aynı sırada: KatOlayi.Bebek = 0, UzakKapi = 1, ...
-    // Yeni bir olay eklenirse hem enum'a hem buraya eklenir (test ikisini de kontrol ediyor).
+    // Enum sırasıyla aynı sırada: KatOlayi.Bebek = 0. "Sessiz" (son seçenek) kaynaksızdır.
+    // Yeni bir sesli olay eklenirse hem enum'a (Sessiz'den önce) hem buraya eklenir.
     public static readonly string[] KaynakYollari =
     {
         "Kapi_4/Ses_Bebek",
-        "Ses_Ugultu/Olay_UzakKapi",
-        "Ses_Ugultu/Olay_UstKatAdimlari",
-        "Ses_Ugultu/Olay_Kalorifer",
-        "Ses_Ugultu/Olay_Araba",
     };
 
     private readonly AudioSource[] kaynaklar = new AudioSource[KaynakYollari.Length];
@@ -58,7 +52,7 @@ public class KatOlayCalici
         // Eski katın sesi yarıda kalsın: oyuncu artık başka bir kattadır.
         foreach (AudioSource k in kaynaklar) if (k != null) k.Stop();
 
-        secili = olayVar ? kaynaklar[(int)olay] : null;
+        secili = olayVar && (int)olay < kaynaklar.Length ? kaynaklar[(int)olay] : null;
         zamanlar = yeniZamanlar;
         sonraki = 0;
         saat = 0f;
