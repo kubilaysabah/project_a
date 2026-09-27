@@ -174,6 +174,12 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-27 (Lesson 49, later): **Şahan kept replaying floors 1-3.** He plays in the **Editor** (the build's Player.log was last written on 2026-09-26), and every Claude play-mode test ended by deleting the `kayit_*` keys, which wiped his save; the old penalty had also called `Kayit.Sil()`. Fixed (`9867877`, #59): all save keys go through `KayitYuvasi.Anahtar`. **Claude's play-mode tests must run in the test slot:**
+  - Before the test: `EditorPrefs.SetString("huzur_kayit_yuvasi", "_test")`, and write test progress to `kayit_kat_test` etc.
+  - After the test: delete the `*_test` keys and the EditorPrefs key.
+  - **Never delete or overwrite the unsuffixed keys (Şahan's save).** A Console warning ("TEST YUVASI AÇIK") shows while the slot is active.
+  - His Editor save was restored to floor 4 plus the screwdriver.
+
 - 2026-09-27 (Lesson 49): **#63 CLOSED** after Şahan tested floor 3.
   - **Old rule switched off** (`91f6d58`, #59 step 1): the old turn-back rule still reset Şahan to floor 1 (uncollected trash, anomalies). `KatYoneticisi.eskiKural` now defaults to off. While off: no anomalies are drawn and there is no trash penalty. Walking down is neither progress nor a mistake (`asagiInilen`): lower landings show the current floor, and climbing back only cancels the descent, so the next floor is reached only through the floor door. The old code stays until #59 removes it.
   - **Floor 4 built** (`99c46d7`, #64 light and dark), flat 4 without power. The cupboard code (4816) is written in glow paint on the living-room wall (`KaranliktaParlayan`: visible only while the headlamp is off and the flat has no power, 2 s fade-in). The fuse is behind `Tezgah/Kapak_1`. Once it is in the box, the ceiling lamps flicker on and the fridge opens, with Hasan's note and the floor key inside.
