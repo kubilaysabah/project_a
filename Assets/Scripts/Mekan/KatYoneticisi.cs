@@ -341,6 +341,9 @@ public class KatYoneticisi : MonoBehaviour
 
     private void Start()
     {
+        // Çözülen her kilit kaydedilsin (#54). Kilit.Cozuldu "static" bir olay: bütün kilitler
+        // aynı olayı tetikler, burada bir kez abone oluyoruz (OnDestroy'da bırakıyoruz).
+        Kilit.Cozuldu += Kayit.KilitCozuldu;
         // Tohum 0 ise her oyun farklı olsun diye saatin o anki değerini kullanıyoruz.
         int gercekTohum = tohum != 0 ? tohum : System.Environment.TickCount;
 
@@ -1189,6 +1192,13 @@ public class KatYoneticisi : MonoBehaviour
     private void OnDisable()
     {
         AudioListener.pause = false;
+    }
+
+    private void OnDestroy()
+    {
+        // Static bir olaya abone olan yok olurken aboneliği bırakmalı; yoksa olay yok olmuş
+        // bir nesneye ulaşmaya çalışır (sahne yeniden yüklenince ikinci kez abone de olurduk).
+        Kilit.Cozuldu -= Kayit.KilitCozuldu;
     }
 
     private void OyuncuyuBasaAl()

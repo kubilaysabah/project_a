@@ -201,6 +201,9 @@ public class KilitZinciri
         if (katAnahtari != 1) sonuc.Hatalar.Add($"zincirde tam bir kat anahtarı olmalı ({katAnahtari} var)");
 
         foreach (ZincirKilidi k in Kilitler)
+            if (!KilitKaydi.KimlikGecerli(k.Kimlik)) sonuc.Hatalar.Add($"kilit kimliği '{k.Kimlik}' kayda uygun değil (boş ya da ; : içeriyor)");
+
+        foreach (ZincirKilidi k in Kilitler)
         {
             if (k.OdaKapisi && !butunOdalar.Contains(k.Hedef)) sonuc.Hatalar.Add($"'{k.Kimlik}': oda '{k.Hedef}' planda yok");
             if (!k.OdaKapisi && YerBul(k.Hedef) == null) sonuc.Hatalar.Add($"'{k.Kimlik}': yer '{k.Hedef}' tanımlı değil");

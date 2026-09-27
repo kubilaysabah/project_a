@@ -13,6 +13,30 @@ using UnityEngine;
 public static class Kayit
 {
     private const string KatAnahtari = "kayit_kat";
+    private const string KilitAnahtari = "kayit_kilitler";   // çözülen kilitler (#54)
+
+    // Kilit kaydı ilk sorulduğunda PlayerPrefs'ten bir kez okunur, sonra bellekte tutulur.
+    private static KilitKaydi kilitler;
+    private static KilitKaydi Kilitler
+    {
+        get
+        {
+            if (kilitler == null) kilitler = KilitKaydi.Oku(PlayerPrefs.GetString(KilitAnahtari, ""));
+            return kilitler;
+        }
+    }
+
+    /// <summary>Bir kilit çözüldü: kaydedilir (#54). Oyun açılınca o kilit çözük başlar.</summary>
+    public static void KilitCozuldu(int kat, string kimlik)
+    {
+        if (!Kilitler.Ekle(kat, kimlik)) return;
+        PlayerPrefs.SetString(KilitAnahtari, Kilitler.Metin());
+        PlayerPrefs.Save();
+        Debug.Log($"[KAYIT] {kat}. kat: '{kimlik}' kilidi kaydedildi.");
+    }
+
+    /// <summary>Bu katın bu kilidi daha önce çözülmüş mü?</summary>
+    public static bool KilitCozukMu(int kat, string kimlik) { return Kilitler.Iceriyor(kat, kimlik); }
 
     /// <summary>Oyuncunun ulaştığı kat; 1 = başlangıç (kayıt yok).</summary>
     public static int Kat
@@ -33,6 +57,8 @@ public static class Kayit
     public static void Sil()
     {
         PlayerPrefs.DeleteKey(KatAnahtari);
+        PlayerPrefs.DeleteKey(KilitAnahtari);
+        kilitler = null;
         PlayerPrefs.Save();
     }
 }

@@ -111,9 +111,11 @@ public class ZincirUygulayici
             }
         }
 
-        // 3. Eşyalar.
+        // 3. Eşyalar. Kaydedilmiş, çözülmüş bir kilidi açmak için KULLANILAN eşya (anahtar,
+        // buşon, tornavida) artık yoktur: konmaz.
         foreach (ZincirEsyasi e in zincir.Esyalar)
         {
+            if (KullanilmisMi(zincir, e, kat)) continue;
             Transform yer = YerYolu(daire, zincir, e.Yer);
             if (yer == null) { Debug.LogWarning($"[ZINCIR] '{e.Kimlik}' eşyasının yeri bulunamadı."); continue; }
             if (!sablonlar.TryGetValue(e.Tur, out GameObject sablon)) { Debug.LogWarning($"[ZINCIR] {e.Tur} şablonu yok."); continue; }
@@ -125,6 +127,51 @@ public class ZincirUygulayici
             Esya bilesen = nesne.GetComponent<Esya>();
             if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari ? kat : 0);
             konanlar.Add(nesne);
+        }
+
+        // 4. Kayıt (#54): bu katta daha önce çözülmüş kilitler çözük başlar.
+        KayittanYukle(daire, zincir, kat);
+    }
+
+    // Bu eşya, kayıtta çözülmüş görünen bir kilidi açmak için mi kullanıldı?
+    private static bool KullanilmisMi(KilitZinciri zincir, ZincirEsyasi e, int kat)
+    {
+        foreach (ZincirKilidi k in zincir.Kilitler)
+            if (k.Gerekli == e.Kimlik && k.Tur != KilitTuru.Sifre && k.Tur != KilitTuru.Kol && Kayit.KilitCozukMu(kat, k.Kimlik))
+                return true;
+        return false;
+    }
+
+    // Kaydedilmiş çözük kilitleri sessizce çözük başlatır: kapı serbest, asma kilit düşmüş,
+    // kol aşağıda, sigorta takılı, devrik kapı yerde.
+    private void KayittanYukle(Transform daire, KilitZinciri zincir, int kat)
+    {
+        foreach (ZincirKilidi veri in zincir.Kilitler)
+        {
+            if (!Kayit.KilitCozukMu(kat, veri.Kimlik)) continue;
+            Transform hedef = veri.OdaKapisi ? KapiYolu(daire, veri.Hedef) : YerinKilitYolu(daire, zincir, veri.Hedef);
+            Kilit kilit = null;
+            if (hedef != null)
+                foreach (Kilit k in hedef.GetComponents<Kilit>())
+                    if (k.Veri == veri) kilit = k;
+            switch (veri.Tur)
+            {
+                case KilitTuru.Kol:
+                    Transform kol = YerYolu(daire, zincir, veri.Gerekli);
+                    CekilenKol ck = kol != null ? kol.GetComponent<CekilenKol>() : null;
+                    if (ck != null) ck.CekilmisBaslat();
+                    break;
+                case KilitTuru.Sigorta:
+                    Transform kutu = daire.Find(SigortaKutusuYolu);
+                    SigortaYuvasi yuva = kutu != null ? kutu.GetComponent<SigortaYuvasi>() : null;
+                    if (yuva != null && !yuva.Takildi) yuva.TakiliBaslat();
+                    break;
+                case KilitTuru.Tornavida:
+                    MenteseSokucu m = hedef != null ? hedef.GetComponent<MenteseSokucu>() : null;
+                    if (m != null) m.DevrikBaslat();
+                    break;
+            }
+            if (kilit != null && !kilit.Cozuk) kilit.CozukBaslat();
         }
     }
 
