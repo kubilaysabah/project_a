@@ -10,6 +10,8 @@ public class AletCantasiTestleri
     public void Tornavida_alettir_anahtar_degildir()
     {
         Assert.IsTrue(AletCantasi.AletMi(EsyaTuru.Tornavida));
+        Assert.IsTrue(AletCantasi.AletMi(EsyaTuru.Levye));       // #65
+        Assert.IsTrue(AletCantasi.AletMi(EsyaTuru.Kaydirici));   // #65
         Assert.IsFalse(AletCantasi.AletMi(EsyaTuru.OdaAnahtari));
         Assert.IsFalse(AletCantasi.AletMi(EsyaTuru.Sigorta));
         Assert.IsFalse(AletCantasi.AletMi(EsyaTuru.KatAnahtari));

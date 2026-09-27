@@ -14,7 +14,7 @@ public class AletCantasi
     private readonly HashSet<string> aletler = new HashSet<string>();
 
     /// <summary>Bu eşya türü bir alet mi? (Aletler çantaya gider, ele değil.)</summary>
-    public static bool AletMi(EsyaTuru tur) { return tur == EsyaTuru.Tornavida; }
+    public static bool AletMi(EsyaTuru tur) { return tur == EsyaTuru.Tornavida || tur == EsyaTuru.Levye || tur == EsyaTuru.Kaydirici; }
 
     /// <summary>Aleti ekler; yeniyse true.</summary>
     public bool Ekle(string kimlik)

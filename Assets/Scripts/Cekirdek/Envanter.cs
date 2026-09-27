@@ -18,8 +18,10 @@ public enum EsyaTuru
     Sigorta,        // sigorta kutusuna takılır (#54)
     Tornavida,      // menteşe söker (#54)
     Not,            // okunur, panoya asılır (#56)
-    Parca           // yırtık çizimin bir parçası (#63): ele girmez, kapıcı biriktirir; hepsi
+    Parca,          // yırtık çizimin bir parçası (#63): ele girmez, kapıcı biriktirir; hepsi
                     // bulununca çizim birleşir. SONA eklendi: dosyalar türü sayı olarak saklar.
+    Levye,          // alet (#65): ağır bir mobilyayı yerinden kaldırır
+    Kaydirici       // alet (#65): mobilya kaydırıcısı (keçe pabuçlar); ağır mobilya ancak bununla kayar
 }
 
 public class Envanter

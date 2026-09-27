@@ -61,6 +61,8 @@ public static partial class GrayboxKurucu
         KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
+        GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
+        GameObject kaydirici = SablonKur("Esya_Kaydirici", "Kaydirici", EsyaTuru.Kaydirici, null);
         KatZinciriVarligi kat3 = Kat3Kur();
         KatZinciriVarligi kat4 = Kat4Kur();
         KatZinciriVarligi kat5 = Kat5Kur();
@@ -78,6 +80,8 @@ public static partial class GrayboxKurucu
         seri.FindProperty("camKirikSablonu").objectReferenceValue = camKirik;
         seri.FindProperty("notSablonu").objectReferenceValue = notSablonu;
         seri.FindProperty("cizimParcasiSablonu").objectReferenceValue = cizimParcasi;
+        seri.FindProperty("levyeSablonu").objectReferenceValue = levye;
+        seri.FindProperty("kaydiriciSablonu").objectReferenceValue = kaydirici;
         // #61: nişan menzili 2,8 m (sahnedeki oyuncunun kayıtlı değeri de güncellensin).
         Etkilesimci etk = Object.FindAnyObjectByType<Etkilesimci>(FindObjectsInactive.Include);
         if (etk != null)
@@ -443,10 +447,12 @@ public static partial class GrayboxKurucu
     // içeriden kilitli, menteşeleri sök. Mutfak, Oda A ve Oda B kapalı.
     //   1. Banyo: menteşeler tornavidayla sökülür (tornavida kapıcıda yoksa kilerde, Cemal'in
     //      alet çantasında). İçeride lavabo; sifon kilitli ("vana açık, su basar").
-    //   2. MEKANİZMA: salondaki gardırop yana itilir, arkasında ana su vanası.
+    //   2. MEKANİZMA: salondaki gardırop yana itilir, arkasında ana su vanası. Gardırop ağır: ancak
+    //      levye (kilerde) ve mobilya kaydırıcısı (banyoda, lavabonun teknesinde) bulununca kıpırdar
+    //      (Şahan, 2026-09-27: "dolabı ittirmek için birkaç ekipman bulunabilir"). Ekipman kilidi.
     //   3. MEKANİZMA: vananın çarkı çevrilir: su kesilir, lavabonun damlası susar, sifon sökülebilir.
     //   4. Sifonun içinde katın anahtarı.
-    // İki kilit (banyo menteşeli, sifon vanaya bağlı "kol"): büyüme çizelgesinin 5. katı.
+    // Üç kilit (banyo menteşeli, gardırop ekipmanlı, sifon vanaya bağlı "kol").
     static KatZinciriVarligi Kat5Kur()
     {
         string yol = $"{ZincirKlasoru}/Kat_5.asset";
@@ -457,18 +463,29 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(v, yol);
         }
         v.aciklama = "5. kat, daire 2, Cemal'in son çalıştığı daire (mekanizma). Banyo içeriden kilitli: menteşeler tornavidayla " +
-                     "sökülür. Salondaki gardırop itilince arkasında ana vana; çark çevrilince su kesilir, damla susar, lavabonun " +
+                     "sökülür. Salondaki gardırop (levye kilerde, kaydırıcı banyoda bulununca) itilince arkasında ana vana; çark çevrilince su kesilir, damla susar, lavabonun " +
                      "sifonu sökülür, içinde katın anahtarı. Mutfak, Oda A, Oda B kapalı.";
         var z = new KilitZinciri();
         z.KapaliOdalar.AddRange(new[] { "Mutfak", "Oda_A", "Oda_B" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "alet_cantasi", Yol = "Esyalar/Alet_Cantasi", Oda = "Oda_C" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "vana", Yol = "Esyalar/Vana/Cark", Oda = "Salon" });
+        // Vananın kilidi gardırobun kendisinde (KilitYolu): gardırop itilmeden vanaya ulaşılmaz.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "vana", Yol = "Esyalar/Vana/Cark", Oda = "Salon", KilitYolu = "Esyalar/Gardirop" });
+        // Levye kilerin yerinde, duvar kolunun önünde yatıyor.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "levye_yeri", PlandaNokta = true, Oda = "Oda_C", U = 6.1f, Y = 0.004f, V = 0.3f, Donus = 70f });
+        // Kaydırıcı banyoda, lavabonun sağındaki köşede yerde. (Teknenin içindeyken lavabonun
+        // çarpışma kutusu onu da kapsıyordu: nişan lavaboya, oradan sifona gidiyor, "KİLİTLİ"
+        // çıkıyor ve kaydırıcı alınamıyordu.)
+        z.Yerler.Add(new ZincirYeri { Kimlik = "tekne", PlandaNokta = true, Oda = "Banyo", U = 4.2f, Y = 0.004f, V = -0.5f, Donus = 15f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "sifon", Yol = "Esyalar/Lavabo/Sifon", Oda = "Banyo" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "alet_cantasi", Y = 0.03f, Donus = 20f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "levye", Tur = EsyaTuru.Levye, Yer = "levye_yeri" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kaydirici", Tur = EsyaTuru.Kaydirici, Yer = "tekne" });
         // Anahtar sifonun ağzında, kenarın hemen altında (sifonun pivotu kendi üst ortası; kap 17 cm
         // derin). 9 cm aşağıdayken yere inen sifonun içinde görünmüyordu (oynatma modu görüntüsü).
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "sifon", Y = -0.02f, Donus = 30f });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "banyo", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "Banyo", Gerekli = "tornavida" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "gardirop", Tur = KilitTuru.Ekipman, OdaKapisi = false, Hedef = "vana",
+                                          Gerekenler = new List<string> { "levye", "kaydirici" } });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "sifon", Tur = KilitTuru.Kol, OdaKapisi = false, Hedef = "sifon", Gerekli = "vana" });
         v.zincir = z;
 

@@ -253,4 +253,50 @@ public class KilitZinciriTestleri
         KilitZinciri.Sonuc s = z.Cozumle(Odalar());
         Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("salon_yeri")), string.Join("; ", s.Hatalar));
     }
+
+    // ---------- #65: birkaç aletle açılan kilit (ağır gardırop) ----------
+
+    private static KilitZinciri EkipmanliZincir()
+    {
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Mutfak", "Oda_A", "Oda_B", "Banyo" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_yeri", Yol = "x", Oda = "Oda_C" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_yeri", Yol = "y", Oda = "Salon" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "vana", Yol = "Esyalar/Vana/Cark", Oda = "Salon", KilitYolu = "Esyalar/Gardirop" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "sifon", Yol = "z", Oda = "Salon" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "levye", Tur = EsyaTuru.Levye, Yer = "kiler_yeri" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kaydirici", Tur = EsyaTuru.Kaydirici, Yer = "salon_yeri" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "sifon" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "gardirop", Tur = KilitTuru.Ekipman, OdaKapisi = false, Hedef = "vana",
+                                          Gerekenler = new List<string> { "levye", "kaydirici" } });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "sifon", Tur = KilitTuru.Kol, OdaKapisi = false, Hedef = "sifon", Gerekli = "vana" });
+        return z;
+    }
+
+    [Test]
+    public void Ekipman_kilidi_butun_aletler_bulununca_acilir_ve_arkasindaki_kola_ulasilir()
+    {
+        KilitZinciri.Sonuc s = EkipmanliZincir().Cozumle(Odalar());
+        Assert.IsTrue(s.Cozulebilir, string.Join("; ", s.Hatalar));
+        Assert.AreEqual(new List<string> { "gardirop", "sifon" }, s.AcilanKilitler);
+    }
+
+    [Test]
+    public void Aletlerden_biri_kapali_odadaysa_gardirop_ve_vana_acilmaz()
+    {
+        KilitZinciri z = EkipmanliZincir();
+        z.KapaliOdalar.Add("Oda_C");                         // levye artık ulaşılamaz
+        KilitZinciri.Sonuc s = z.Cozumle(Odalar());
+        Assert.IsFalse(s.Cozulebilir);
+        Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("gardirop")) && s.Hatalar.Exists(h => h.Contains("sifon")), string.Join("; ", s.Hatalar));
+    }
+
+    [Test]
+    public void Ekipman_listesinde_alet_olmayan_esya_hata()
+    {
+        KilitZinciri z = EkipmanliZincir();
+        z.Esyalar[1].Tur = EsyaTuru.OdaAnahtari;
+        KilitZinciri.Sonuc s = z.Cozumle(Odalar());
+        Assert.IsTrue(s.Hatalar.Exists(h => h.Contains("bir alet değil")), string.Join("; ", s.Hatalar));
+    }
 }

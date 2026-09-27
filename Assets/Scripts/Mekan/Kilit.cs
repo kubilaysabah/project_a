@@ -52,6 +52,9 @@ public class Kilit : MonoBehaviour
                     return Aletler.Var(Veri.Gerekli) ? Dil.Getir("ipucu.sok") : Dil.Getir("ipucu.kilitli");
                 case KilitTuru.Kirma:
                     return Aletler.Var(Veri.Gerekli) ? Dil.Getir("ipucu.kir") : Dil.Getir("ipucu.kilitli");
+                case KilitTuru.Ekipman:
+                    // Aletler tamamsa "İT", değilse "AĞIR": oyuncu neden kıpırdamadığını anlasın.
+                    return EkipmanTamam() ? Dil.Getir("ipucu.it") : Dil.Getir("ipucu.agir");
                 default:
                     return Dil.Getir("ipucu.kilitli");
             }
@@ -82,6 +85,12 @@ public class Kilit : MonoBehaviour
             Kirilan kirilan = GetComponentInParent<Kirilan>();
             if (kirilan != null) kirilan.Kir(sesli: true);
             Coz(acilsin: false);
+            return true;
+        }
+        if (Veri.Tur == KilitTuru.Ekipman && EkipmanTamam())
+        {
+            // Aletler çantada: kilit çözülür ve parça (gardırop) hemen hareket eder.
+            Coz(acilsin: true);
             return true;
         }
         if (Veri.Tur == KilitTuru.Sifre)
@@ -161,5 +170,13 @@ public class Kilit : MonoBehaviour
         if (kapi != null) kapi.Kilitle(k);
         AcilirParca parca = GetComponent<AcilirParca>();
         if (parca != null) parca.Kilitle(k);
+    }
+
+    // Ekipman kilidinin bütün aletleri kapıcının çantasında mı (#65)?
+    private bool EkipmanTamam()
+    {
+        if (Veri.Gerekenler == null || Veri.Gerekenler.Count == 0) return false;
+        foreach (string g in Veri.Gerekenler) if (!Aletler.Var(g)) return false;
+        return true;
     }
 }

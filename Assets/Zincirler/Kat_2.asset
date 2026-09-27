@@ -66,6 +66,7 @@ MonoBehaviour:
       IpucuOlcek: 0.7
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
   notlar:
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3

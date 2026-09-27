@@ -149,6 +149,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
     - Kimlik: salon
       Tur: 0
       OdaKapisi: 1
@@ -162,6 +163,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
     - Kimlik: kiler
       Tur: 1
       OdaKapisi: 1
@@ -175,6 +177,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
     - Kimlik: odaA
       Tur: 2
       OdaKapisi: 1
@@ -188,6 +191,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
     - Kimlik: buzdolabi
       Tur: 3
       OdaKapisi: 0
@@ -201,6 +205,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
     - Kimlik: odaB
       Tur: 0
       OdaKapisi: 1
@@ -214,6 +219,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
     - Kimlik: banyo
       Tur: 4
       OdaKapisi: 1
@@ -227,6 +233,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
   notlar: []
   suslar: []
   sesler: []

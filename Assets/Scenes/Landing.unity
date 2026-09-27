@@ -444893,6 +444893,8 @@ MonoBehaviour:
   sigortaSablonu: {fileID: 310231408212479061, guid: c944289e3a50a7f4c80f1141cf53fc87, type: 3}
   tornavidaSablonu: {fileID: 7631636315084247614, guid: 7817f5c67d453374a838eaaaa4990cb8, type: 3}
   cizimParcasiSablonu: {fileID: 8278841798799705781, guid: a30052e30eb81ea4b98c68d352930d76, type: 3}
+  levyeSablonu: {fileID: 8490443896255300145, guid: 8f3d2a11b95927e44b135d9f2decb0a3, type: 3}
+  kaydiriciSablonu: {fileID: 7108218467021907531, guid: 6ccdd9f1481ea5d49ab31037e98b12aa, type: 3}
   asmaKilitSablonu: {fileID: 2573454495964990403, guid: 69734c060a65f194db8c157b691eac47, type: 3}
   mentesePlakasiSablonu: {fileID: 3848375645311245744, guid: 53b8d292df36c9345b832e5c09ef2beb, type: 3}
   camKirikSablonu: {fileID: 7083046149260219638, guid: 8cebf6e6e03c2494780e00cd30fdb52c, type: 3}

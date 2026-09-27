@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class EsyaGostergesi : MonoBehaviour
 {
-    private Texture2D anahtar, sigorta, tornavida, not;
+    private Texture2D anahtar, sigorta, tornavida, not, levye, kaydirici;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Olustur()
@@ -49,6 +49,20 @@ public class EsyaGostergesi : MonoBehaviour
             bool agiz = a >= 0.8f && a < 0.9f && Mathf.Abs(b) < 0.1f;
             return sap || uc || agiz;
         });
+        levye = Ciz((u, v) =>
+        {
+            // Levye: çapraz uzun çubuk, üst uçta kısa bir dirsek (#65).
+            float a = (u + v) / 1.414f, b = (u - v) / 1.414f;
+            bool cubuk = a > -0.85f && a < 0.6f && Mathf.Abs(b) < 0.07f;
+            bool dirsek = a >= 0.5f && a < 0.68f && b > -0.07f && b < 0.3f;
+            return cubuk || dirsek;
+        });
+        kaydirici = Ciz((u, v) =>
+        {
+            // Kaydırıcı: 2x2 dizili dört yuvarlak pabuç (#65).
+            float x = Mathf.Abs(u) - 0.4f, y = Mathf.Abs(v) - 0.4f;
+            return x * x + y * y < 0.09f;
+        });
         not = Ciz((u, v) =>
         {
             bool kagit = Mathf.Abs(u) < 0.55f && Mathf.Abs(v) < 0.72f;
@@ -71,7 +85,9 @@ public class EsyaGostergesi : MonoBehaviour
             GUI.color = new Color(0f, 0f, 0f, 0.35f);
             GUI.DrawTexture(k, Texture2D.whiteTexture);
             GUI.color = new Color(0.75f, 0.78f, 0.80f, 1f);   // çelik grisi
-            GUI.DrawTexture(new Rect(k.x + 6f, k.y + 6f, 36f, 36f), tornavida);
+            // Aletin simgesi kimliğinden (her alet kendi kimliğiyle kaydedilir).
+            Texture2D simge = aletler[i] == "levye" ? levye : aletler[i] == "kaydirici" ? kaydirici : tornavida;
+            GUI.DrawTexture(new Rect(k.x + 6f, k.y + 6f, 36f, 36f), simge);
         }
         GUI.color = Color.white;
 

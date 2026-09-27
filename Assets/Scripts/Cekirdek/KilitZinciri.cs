@@ -37,9 +37,11 @@ public enum KilitTuru
     Kol,         // bir yerde kol çekilir, başka yerdeki bu kilit "tak" diye açılır
     Sigorta,     // sigorta teli bulunup kutuya takılınca elektrik gelir, kilit açılır
     Tornavida,   // kilidi açılmayan kapının menteşeleri tornavidayla sökülür (alet bitmez)
-    Kirma        // bir yer (cam kavanoz) doğru aletle kırılarak açılır; alet bitmez (#61).
+    Kirma,       // bir yer (cam kavanoz) doğru aletle kırılarak açılır; alet bitmez (#61).
                  // SONA eklendi: kayıtlı zincir dosyaları türü sayı olarak saklar, araya
                  // eklemek eski dosyalardaki türleri kaydırırdı.
+    Ekipman      // (#65) ağır bir şey (gardırop) ancak BİRKAÇ alet birlikte bulununca yerinden
+                 // oynar: Gerekenler listesindeki aletlerin hepsi kapıcının çantasında olmalı.
 }
 
 [System.Serializable]
@@ -93,6 +95,9 @@ public class ZincirKilidi
     // Yalnızca Şifre (#64): ipucu karanlıkta parlayan boyayla yazılmış; yalnızca kafa lambası
     // kapalıyken ve dairede elektrik yokken görünür (KaranliktaParlayan). Kural için fark etmez.
     public bool IpucuKaranlikta;
+    // Yalnızca Ekipman (#65): gereken aletlerin eşya kimlikleri (levye, kaydırıcı...). Hepsi
+    // bulununca kilit açılır; aletler bitmez.
+    public List<string> Gerekenler = new List<string>();
 }
 
 [System.Serializable]
@@ -212,6 +217,15 @@ public class KilitZinciri
             case KilitTuru.Kol:
                 // Kolu çekmek için o yere ulaşmak yeter.
                 return YereUlasilir(k.Gerekli, acilan);
+            case KilitTuru.Ekipman:
+                // Gereken aletlerin hepsine ulaşılmalı.
+                if (k.Gerekenler == null || k.Gerekenler.Count == 0) return false;
+                foreach (string g in k.Gerekenler)
+                {
+                    ZincirEsyasi alet = EsyaBul(g);
+                    if (alet == null || !EsyayaUlasilir(alet, acilan)) return false;
+                }
+                return true;
             default:
                 ZincirEsyasi e = EsyaBul(k.Gerekli);
                 return e != null && EsyayaUlasilir(e, acilan);
@@ -263,6 +277,16 @@ public class KilitZinciri
                     break;
                 case KilitTuru.Kol:
                     if (YerBul(k.Gerekli) == null) sonuc.Hatalar.Add($"'{k.Kimlik}': kol yeri '{k.Gerekli}' yok");
+                    break;
+                case KilitTuru.Ekipman:
+                    if (k.Gerekenler == null || k.Gerekenler.Count == 0) sonuc.Hatalar.Add($"'{k.Kimlik}': gereken alet yazılmamış");
+                    else
+                        foreach (string g in k.Gerekenler)
+                        {
+                            ZincirEsyasi alet = EsyaBul(g);
+                            if (alet == null) sonuc.Hatalar.Add($"'{k.Kimlik}': gereken alet '{g}' zincirde yok");
+                            else if (!AletCantasi.AletMi(alet.Tur)) sonuc.Hatalar.Add($"'{k.Kimlik}': '{g}' bir alet değil, {alet.Tur}");
+                        }
                     break;
                 default:
                     ZincirEsyasi e = EsyaBul(k.Gerekli);

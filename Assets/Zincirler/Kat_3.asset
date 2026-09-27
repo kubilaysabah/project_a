@@ -146,6 +146,7 @@ MonoBehaviour:
       IpucuOlcek: 1
       Parcalar: []
       IpucuKaranlikta: 0
+      Gerekenler: []
     - Kimlik: odaA
       Tur: 1
       OdaKapisi: 1
@@ -163,6 +164,7 @@ MonoBehaviour:
       - p3
       - p4
       IpucuKaranlikta: 0
+      Gerekenler: []
   notlar:
   - Yol: 
     X: 5.45
