@@ -70,7 +70,9 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
         odaKapisi = kapi;
         eksen = eksenler;
 
-        kaynak = gameObject.AddComponent<AudioSource>();
+        // Önceki bir kurulumdan kalan bileşen varsa o kullanılır (bir nesnede tek süzgeç olabilir).
+        kaynak = GetComponent<AudioSource>();
+        if (kaynak == null) kaynak = gameObject.AddComponent<AudioSource>();
         kaynak.clip = klip;
         kaynak.loop = true;
         kaynak.playOnAwake = false;
@@ -82,7 +84,8 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
         kaynak.volume = ses * BogukSes;
 
         // AudioLowPassFilter aynı nesnedeki AudioSource'un sesini süzer; sırası önemli değil.
-        suzgec = gameObject.AddComponent<AudioLowPassFilter>();
+        suzgec = GetComponent<AudioLowPassFilter>();
+        if (suzgec == null) suzgec = gameObject.AddComponent<AudioLowPassFilter>();
         suzgec.cutoffFrequency = BogukKesim;
 
         // Kadran ışığı: küçük ve sıcak, yalnızca çalarken yanar. Radyonun 35 cm önünde ve biraz
@@ -119,9 +122,12 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
     public void Sifirla()
     {
         Kilit.Cozuldu -= KilitCozuldu;
-        if (kaynak != null) Destroy(kaynak);
-        if (suzgec != null) Destroy(suzgec);
-        if (isik != null) Destroy(isik.gameObject);
+        // HEMEN silinir (DestroyImmediate): kat açılırken daire aynı karede iki kez kurulabiliyor.
+        // Destroy kare sonunda silerdi; ikinci kurulum eski süzgeci yerinde bulur, Unity ikinci bir
+        // AudioLowPassFilter eklemez (null döner) ve radyo yarım kurulurdu (gece oynanış testi).
+        if (kaynak != null) DestroyImmediate(kaynak);
+        if (suzgec != null) DestroyImmediate(suzgec);
+        if (isik != null) DestroyImmediate(isik.gameObject);
     }
 
     private void Update()
