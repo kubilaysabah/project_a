@@ -47,10 +47,11 @@ public class Kilit : MonoBehaviour
                     return Cep.KimligiTasiyor(Veri.Gerekli) ? Dil.Getir("ipucu.ac") : Dil.Getir("ipucu.kilitli");
                 case KilitTuru.Sifre:
                     return Dil.Getir("ipucu.sifre");
+                // Aletler elde değil kapıcının çantasında (#61).
                 case KilitTuru.Tornavida:
-                    return Cep.KimligiTasiyor(Veri.Gerekli) ? Dil.Getir("ipucu.sok") : Dil.Getir("ipucu.kilitli");
+                    return Aletler.Var(Veri.Gerekli) ? Dil.Getir("ipucu.sok") : Dil.Getir("ipucu.kilitli");
                 case KilitTuru.Kirma:
-                    return Cep.KimligiTasiyor(Veri.Gerekli) ? Dil.Getir("ipucu.kir") : Dil.Getir("ipucu.kilitli");
+                    return Aletler.Var(Veri.Gerekli) ? Dil.Getir("ipucu.kir") : Dil.Getir("ipucu.kilitli");
                 default:
                     return Dil.Getir("ipucu.kilitli");
             }
@@ -66,7 +67,7 @@ public class Kilit : MonoBehaviour
             Coz(acilsin: true);
             return true;
         }
-        if (Veri.Tur == KilitTuru.Tornavida && Cep.KimligiTasiyor(Veri.Gerekli))
+        if (Veri.Tur == KilitTuru.Tornavida && Aletler.Var(Veri.Gerekli))
         {
             // Her basış bir vida; son vida çıkınca kapı devrilir. Tornavida bir alettir,
             // bitmez: oyuncunun elinde kalır, başka bir yerde yine işe yarayabilir (#61).
@@ -74,7 +75,7 @@ public class Kilit : MonoBehaviour
             if (sokucu == null || sokucu.VidaSok()) Coz(acilsin: false);
             return true;
         }
-        if (Veri.Tur == KilitTuru.Kirma && Cep.KimligiTasiyor(Veri.Gerekli))
+        if (Veri.Tur == KilitTuru.Kirma && Aletler.Var(Veri.Gerekli))
         {
             // Kilit kavanozun kapağında; kırılan kavanozun kendisi (kapağın ebeveyni).
             // Alet elde kalır.

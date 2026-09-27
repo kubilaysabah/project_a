@@ -129,6 +129,8 @@ public class ZincirUygulayici
         foreach (ZincirEsyasi e in zincir.Esyalar)
         {
             if (KullanilmisMi(zincir, e, kat)) continue;
+            // Kapıcının çantasında zaten olan alet (önceki bir katta bulunan tornavida) yeniden konmaz.
+            if (AletCantasi.AletMi(e.Tur) && Aletler.Var(e.Kimlik)) continue;
             Transform yer = YerYolu(daire, zincir, e.Yer);
             if (yer == null) { Debug.LogWarning($"[ZINCIR] '{e.Kimlik}' eşyasının yeri bulunamadı."); continue; }
             if (!sablonlar.TryGetValue(e.Tur, out GameObject sablon)) { Debug.LogWarning($"[ZINCIR] {e.Tur} şablonu yok."); continue; }

@@ -59,6 +59,7 @@ public static class Kayit
         PlayerPrefs.DeleteKey(KatAnahtari);
         PlayerPrefs.DeleteKey(KilitAnahtari);
         kilitler = null;
+        Aletler.Bosalt();   // yeni oyun: bulunan aletler de gider (#61)
         PlayerPrefs.Save();
     }
 }

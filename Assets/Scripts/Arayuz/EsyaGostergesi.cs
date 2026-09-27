@@ -59,9 +59,23 @@ public class EsyaGostergesi : MonoBehaviour
 
     private void OnGUI()
     {
-        if (Cep.ElBos || DuraklatmaMenusu.BaslikEkraninda) return;
+        if (DuraklatmaMenusu.BaslikEkraninda) return;
         ArayuzOlcegi.Uygula();
         float w = ArayuzOlcegi.Genislik, h = ArayuzOlcegi.Yukseklik;
+
+        // ALETLER (#61): elin simgesinin solunda, daha küçük kutucuklarda, hep görünür.
+        var aletler = Aletler.Liste();
+        for (int i = 0; i < aletler.Count; i++)
+        {
+            Rect k = new Rect(w - 270f - 58f * (i + 1), h - 98f, 48f, 48f);
+            GUI.color = new Color(0f, 0f, 0f, 0.35f);
+            GUI.DrawTexture(k, Texture2D.whiteTexture);
+            GUI.color = new Color(0.75f, 0.78f, 0.80f, 1f);   // çelik grisi
+            GUI.DrawTexture(new Rect(k.x + 6f, k.y + 6f, 36f, 36f), tornavida);
+        }
+        GUI.color = Color.white;
+
+        if (Cep.ElBos) return;
         Rect kutu = new Rect(w - 270f, h - 110f, 64f, 64f);   // poşet sayacının solu
         GUI.color = new Color(0f, 0f, 0f, 0.45f);
         GUI.DrawTexture(kutu, Texture2D.whiteTexture);

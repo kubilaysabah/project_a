@@ -63,6 +63,17 @@ public class Esya : MonoBehaviour, IEtkilesimli
 
     public void Etkilesim(GameObject oyuncu)
     {
+        // ALET (#61): tornavida gibi aletler ele değil kapıcının çantasına gider; eli meşgul
+        // etmez, bitmez, sonraki katlarda da işe yarar (Şahan'ın kararı).
+        if (AletCantasi.AletMi(tur))
+        {
+            Aletler.Ekle(kimlik);
+            UcanKopya.ElineUcur(transform);
+            SikirtiCal();
+            gameObject.SetActive(false);
+            return;
+        }
+
         // El doluysa: elindekini buraya bırak (aynı ebeveyn, aynı yer ve duruş).
         if (!Cep.ElBos)
         {
@@ -86,8 +97,13 @@ public class Esya : MonoBehaviour, IEtkilesimli
         if (!Cep.Al(tur, kat, kimlik)) return;
         Cep.TasinanNesne = gameObject;
         UcanKopya.ElineUcur(transform);
+        SikirtiCal();
+        gameObject.SetActive(false);
+    }
+
+    private void SikirtiCal()
+    {
         if (sikirti == null) sikirti = Resources.Load<AudioClip>("Sesler/Anahtar_Al");
         if (sikirti != null) AudioSource.PlayClipAtPoint(sikirti, transform.position, 0.6f);
-        gameObject.SetActive(false);
     }
 }
