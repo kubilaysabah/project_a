@@ -23,7 +23,7 @@ using UnityEngine;
 [TestFixture]
 public class MetinButunlukTestleri
 {
-    private static readonly string[] Onekler = { "ipucu", "not", "menu", "dil", "bina", "ayar", "tus" };
+    private static readonly string[] Onekler = { "ipucu", "not", "menu", "dil", "bina", "ayar", "tus", "liste" };
 
     // Tablo dosyasını okuyup kurar. Testlerin hepsi buradan başlar.
     private static MetinTablosu TabloyuOku()
@@ -81,7 +81,9 @@ public class MetinButunlukTestleri
     {
         MetinTablosu tablo = TabloyuOku();
         HashSet<string> kodda = KoddakiAnahtarlar();
-        List<string> olu = tablo.Anahtarlar.Where(a => !kodda.Contains(a)).ToList();
+        // "esya.<kimlik>" anahtarları kodda tek tek yazılmaz, eşya kimliğinden kurulur (T listesi,
+        // #75). Onları ZincirVarlikTestleri zincirlerdeki eşyalarla eşleştirir.
+        List<string> olu = tablo.Anahtarlar.Where(a => !a.StartsWith(EsyaAdlari.Onek) && !kodda.Contains(a)).ToList();
 
         Assert.IsEmpty(olu, "Tabloda olup hiçbir kodda kullanılmayan anahtarlar: " + string.Join(", ", olu));
     }

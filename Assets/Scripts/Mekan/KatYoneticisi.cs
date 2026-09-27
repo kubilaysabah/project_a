@@ -318,6 +318,8 @@ public class KatYoneticisi : MonoBehaviour
         // Çözülen her kilit kaydedilsin (#54). Kilit.Cozuldu "static" bir olay: bütün kilitler
         // aynı olayı tetikler, burada bir kez abone oluyoruz (OnDestroy'da bırakıyoruz).
         Kilit.Cozuldu += Kayit.KilitCozuldu;
+        // Yeni oturum: T listesinin "bu oturumda ele alınanlar" kümesi boş başlar (#75).
+        EsyaListesi.Temizle();
         // Tohum 0 ise her oyun farklı olsun diye saatin o anki değerini kullanıyoruz.
         int gercekTohum = tohum != 0 ? tohum : System.Environment.TickCount;
 
@@ -712,6 +714,15 @@ public class KatYoneticisi : MonoBehaviour
         return katZincirleri[kat - 1];
     }
 
+    /// <summary>Bu katın kilit zinciri; tanımlı değilse null. T listesi (#75) de okur.</summary>
+    public KilitZinciri KatinZinciri(int kat) { return ZincirBul(kat); }
+
+    /// <summary>Oyun hâlâ zemin kattaki açılışta mı (#16)?</summary>
+    public bool AcilisModunda { get { return acilisModu; } }
+
+    /// <summary>Bu katın kat kapısı açıldı mı (ya da kat geride mi kaldı)?</summary>
+    public bool KatKapisiAcikMi(int kat) { return KapiAcikMi(kat); }
+
     /// <summary>Bu katın kilit zinciri; tanımlı değilse null.</summary>
     private KilitZinciri ZincirBul(int kat)
     {
@@ -1073,6 +1084,7 @@ public class KatYoneticisi : MonoBehaviour
         // Karanlıkta: elindeki (katın anahtarı) düşer, katın kaydı silinir, oyuncu başa alınır.
         Cep.Bosalt();
         Kayit.KatiSifirla(kat);
+        EsyaListesi.KatiUnut(kat);   // T listesi de o katı baştan saysın (#75)
         OyuncuyuBasaAl();
         // Sahanlıklar ve daire zorla yeniden kurulur: zincir uygulayıcısı kayda bakar, kayıtta
         // artık bu katın hiçbir kilidi yok, her şey baştan yerine konur. Eski KacisAni sökülürken

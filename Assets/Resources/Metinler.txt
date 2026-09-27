@@ -106,3 +106,25 @@ bina.asansor_notu	ARIZALI\n<size=48>Yönetim</size>	<size=78>OUT OF\nORDER</size
 # ---- Tuş adları (#29): ipuçları son kullanılan cihaza göre (klavye / oyun kolu) ----
 tus.kapat_klavye	E / Esc	E / Esc
 tus.kapat_kol	A / B	A / B
+
+# ---- T listesi (#75): bulunulan katın eşyaları. esya.* adları eşya kimliğinden kurulur (EsyaAdlari);
+# her zincir eşyasının adı olmalı (ZincirVarlikTestleri denetliyor). {0} = iç ad, {1} = parça numarası. ----
+liste.baslik	{0}. KAT	FLOOR {0}
+liste.alt	{0} / {1} bulundu	{0} / {1} found
+esya.tornavida	Tornavida	Screwdriver
+esya.levye	Levye	Crowbar
+esya.kaydirici	Mobilya kaydırıcıları	Furniture sliders
+esya.sigorta	Sigorta	Fuse
+esya.asansor_sigortasi	Asansör sigortası	Elevator fuse
+esya.kat_anahtari	Kat kapısının anahtarı	Floor door key
+esya.cati_anahtari	Çatı kapısının anahtarı	Roof door key
+esya.odaA_anahtari	Yatak odası anahtarı	Bedroom key
+esya.odaB_anahtari	Çocuk odası anahtarı	Children's room key
+esya.salon_anahtari	Salon anahtarı	Living room key
+esya.mutfak_anahtari	Mutfak anahtarı	Kitchen key
+esya.kiler_anahtari	Kiler anahtarı	Pantry key
+esya.dosya_anahtari	Dosya dolabının anahtarı	Filing cabinet key
+esya.kirik_bas	{0} (sap)	{0} (bow)
+esya.kirik_uc	{0} (uç)	{0} (bit)
+esya.cizim_parcasi	Yırtık çizim, parça {1}	Torn drawing, piece {1}
+esya.tabak	Tabak: {0}	Plate: {0}

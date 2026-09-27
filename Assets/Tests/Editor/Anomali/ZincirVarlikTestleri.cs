@@ -148,4 +148,32 @@ public class ZincirVarlikTestleri
         }
         finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
     }
+
+    // T listesi (#75): her zincir eşyasının adı metin tablosunda olmalı, tablodaki her esya.*
+    // satırı da bir eşyaya ait olmalı. Yeni bir eşya eklenip adı unutulursa listede anahtarın
+    // kendisi ("esya.bilmem_ne") görünürdü; eşya silinip adı kalırsa tablo çöplenirdi.
+    [Test]
+    public void Her_zincir_esyasinin_listede_adi_var()
+    {
+        string yol = System.IO.Path.Combine(Application.dataPath, "Resources", "Metinler.txt");
+        MetinTablosu tablo = MetinTablosu.Oku(System.IO.File.ReadAllText(yol));
+        var kullanilan = new HashSet<string>();
+        var eksik = new List<string>();
+        foreach (var z in Zincirler())
+            foreach (ZincirEsyasi e in z.Value.Esyalar)
+            {
+                EsyaAdi a = EsyaAdlari.Coz(e.Kimlik, e.Tur);
+                foreach (string k in new[] { a.Ana, a.Ic })
+                {
+                    if (k == null) continue;
+                    kullanilan.Add(k);
+                    if (!tablo.Var(k)) eksik.Add($"{z.Key}: {e.Kimlik} -> {k}");
+                }
+            }
+        var sahipsiz = new List<string>();
+        foreach (string a in tablo.Anahtarlar)
+            if (a.StartsWith(EsyaAdlari.Onek) && !kullanilan.Contains(a)) sahipsiz.Add(a);
+        Assert.IsEmpty(eksik, "Listede adı olmayan eşyalar: " + string.Join(", ", eksik));
+        Assert.IsEmpty(sahipsiz, "Hiçbir eşyaya ait olmayan esya.* satırları: " + string.Join(", ", sahipsiz));
+    }
 }

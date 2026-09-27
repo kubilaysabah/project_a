@@ -146,6 +146,7 @@ public class Esya : MonoBehaviour, IEtkilesimli
 
         if (!Cep.Al(tur, kat, kimlik)) return;
         Cep.TasinanNesne = gameObject;
+        EsyaListesi.Alindi(kat, kimlik);   // T listesinde artık "bulundu" (#75)
         UcanKopya.ElineUcur(transform);
         SikirtiCal();
         gameObject.SetActive(false);
