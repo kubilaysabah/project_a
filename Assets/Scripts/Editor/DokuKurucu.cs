@@ -71,12 +71,14 @@ public static class DokuKurucu
     static readonly Tur Madeni  = new Tur("Doku_Madeni", null, 1f, 0.55f, new Color(0.45f, 0.43f, 0.40f));  // kapı kolu, kapı gözü
     static readonly Tur Naylon  = new Tur("Doku_Naylon", null, 1f, 0.6f, new Color(0.04f, 0.04f, 0.045f)); // çöp poşeti: siyah naylon
     static readonly Tur Kumas   = new Tur("Doku_Kumas", null, 1f, 0.05f, new Color(0.70f, 0.68f, 0.62f));   // yastık
-    // 3+1 daire (#53). ŞİMDİLİK ELDEKİ DOKULARLA: duvar kâğıdı, parke ve fayans Şahan'ın
-    // seçeceği CC0 dokularla değişecek; o zaman yalnızca bu satırlar değişir, adlar aynı kalır.
-    static readonly Tur DaireDuvar  = new Tur("Doku_DaireDuvar", "worn_plaster_wall", 1.5f, 0.10f, new Color(0.95f, 0.90f, 0.80f));
-    static readonly Tur Parke       = new Tur("Doku_Parke", "sapele_veneer", 1.0f, 0.30f, new Color(0.85f, 0.80f, 0.75f));
-    static readonly Tur Fayans      = new Tur("Doku_Fayans", "marble_mosaic_tiles", 1.5f, 0.45f, Color.white);
-    static readonly Tur FayansDuvar = new Tur("Doku_FayansDuvar", "marble_mosaic_tiles", 0.75f, 0.45f, new Color(0.92f, 0.95f, 0.95f));
+    // 3+1 daire (#53). Bu dört tür dairenin EDİTÖRDEKİ görünüşü ve yüzeyin kimliğidir: oyunda
+    // KatYoneticisi her katta bunların yerine o katın kaplamasını (KatKaplamalari) takar ve
+    // hangi parçanın hangi yüzey olduğunu malzemenin bu adından tanır. Döşeme boyu 1: UV'ler
+    // metre cinsinden; katın malzemesi dokuyu kendi gerçek boyuna göre tekrar eder.
+    static readonly Tur DaireDuvar  = new Tur("Doku_DaireDuvar", "beige_wall_002", 1.0f, 0.08f, Color.white);
+    static readonly Tur Parke       = new Tur("Doku_Parke", "herringbone_parquet", 1.0f, 0.35f, Color.white);
+    static readonly Tur Fayans      = new Tur("Doku_Fayans", "terrazzo_tiles", 1.0f, 0.50f, Color.white);
+    static readonly Tur FayansDuvar = new Tur("Doku_FayansDuvar", "long_white_tiles", 1.0f, 0.50f, Color.white);
     static readonly Tur IcBoya      = new Tur("Doku_IcBoya", null, 1f, 0.35f, new Color(0.80f, 0.78f, 0.72f)); // oda kapıları: kirli beyaz yağlı boya
 
     // Bir kutuya ne olacağı: üst, alt ve yan yüzlerin türü ve UV'nin nereden hesaplanacağı.
@@ -120,8 +122,55 @@ public static class DokuKurucu
                 : new[] { MalzemeAl(k.ust, malzemeler), MalzemeAl(k.alt, malzemeler), MalzemeAl(k.yan, malzemeler) };
             sayi++;
         }
+        KatKaplamalariniKur();
         AssetDatabase.SaveAssets();
         Debug.Log($"[DOKU] {sayi} kutu dokulandı, {malzemeler.Count} malzeme.");
+    }
+
+    // ---------- KAT KAPLAMALARI (#53) ----------
+    // Sekiz katın her biri için dört malzeme (oda duvarı, parke, ıslak zemin, ıslak duvar):
+    // Assets/Materials/Kaplama_K1_OdaDuvari.mat ... Kaplama_K8_IslakDuvar.mat. Hangi dokunun
+    // hangi kata gideceği KatKaplamalari'nda (düz C#, testli). Malzemeler sahnedeki
+    // KatYoneticisi'ne BAĞLANIR: oyun build'de onları adıyla aramaz, elindeki listeden alır
+    // (build'e yalnızca bağlı olan varlıklar girer; adla arananlar girmeyebilir).
+    public static void KatKaplamalariniKur()
+    {
+        int n = KatKaplamalari.KatSayisi * KatKaplamalari.YuzeySayisi;
+        var liste = new Material[n];
+        for (int kat = 1; kat <= KatKaplamalari.KatSayisi; kat++)
+            for (int y = 0; y < KatKaplamalari.YuzeySayisi; y++)
+            {
+                var yuzey = (KatKaplamalari.Yuzey)y;
+                KatKaplamalari.Kaplama k = KatKaplamalari.Getir(kat, yuzey);
+                string yol = $"{MalzemeKlasoru}Kaplama_K{kat}_{yuzey}.mat";
+                Material m = AssetDatabase.LoadAssetAtPath<Material>(yol);
+                if (m == null)
+                {
+                    m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                    AssetDatabase.CreateAsset(m, yol);
+                }
+                m.SetColor("_BaseColor", new Color(k.R, k.G, k.B));
+                m.SetFloat("_Smoothness", k.Parlaklik);
+                m.SetFloat("_Metallic", 0f);
+                m.SetTexture("_BaseMap", DokuAl(k.Doku + "_renk", false));
+                m.SetTexture("_BumpMap", DokuAl(k.Doku + "_normal", true));
+                m.EnableKeyword("_NORMALMAP");
+                // UV metre cinsinden; doku "Boy" metrede bir tekrar etsin: 1 / Boy kez.
+                m.SetTextureScale("_BaseMap", Vector2.one / k.Boy);
+                EditorUtility.SetDirty(m);
+                liste[(kat - 1) * KatKaplamalari.YuzeySayisi + y] = m;
+            }
+
+        // Sahnedeki KatYoneticisi'ne bağla. SerializedObject: bileşenin kaydedilen alanlarını
+        // (Inspector'da görünen) koddan düzenlemenin yolu; özel (private) alanlara da ulaşır.
+        KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>(FindObjectsInactive.Include);
+        if (yonetici == null) { Debug.LogWarning("[DOKU] Sahnede KatYoneticisi yok; kat kaplamaları bağlanmadı."); return; }
+        var seri = new SerializedObject(yonetici);
+        SerializedProperty dizi = seri.FindProperty("kaplamalar");
+        dizi.arraySize = n;
+        for (int i = 0; i < n; i++) dizi.GetArrayElementAtIndex(i).objectReferenceValue = liste[i];
+        seri.ApplyModifiedPropertiesWithoutUndo();
+        Debug.Log($"[DOKU] {KatKaplamalari.KatSayisi} katın {n} kaplama malzemesi kuruldu ve KatYoneticisi'ne bağlandı.");
     }
 
     // ---------- HANGİ KUTU NE OLACAK ----------

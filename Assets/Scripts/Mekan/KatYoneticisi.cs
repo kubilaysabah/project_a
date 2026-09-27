@@ -148,6 +148,21 @@ public class KatYoneticisi : MonoBehaviour
     // biri açık (DairePlani.AcikDaire): o dairenin sahanlıktaki kapısı ardına kadar açılır,
     // kapının arkasındaki karanlık hol (Daire_Ici) kalkar, gerçek daire görünür.
     private readonly GameObject[] daireler = new GameObject[MekanOlculeri.DaireSayisi + 1];
+
+    // Her katın kaplama malzemeleri: [(kat - 1) * 4 + yüzey]. DokuKurucu üretir ve buraya bağlar.
+    // Yüzey sırası KatKaplamalari.Yuzey ile aynı: oda duvarı, parke, ıslak zemin, ıslak duvar.
+    [SerializeField] private Material[] kaplamalar;
+
+    // Bir dairenin kaplanan parçaları: hangi çizicinin (MeshRenderer) hangi malzeme yuvası
+    // hangi yüzey. Başta bir kez, editördeki malzeme adlarından çıkarılır; sonra her katta
+    // yalnızca bu yuvalara o katın malzemesi takılır.
+    private class KaplamaYeri
+    {
+        public MeshRenderer cizici;
+        public int[] yuzeyler;   // her malzeme yuvası için yüzey numarası; -1 = dokunma (tavan)
+    }
+    private readonly System.Collections.Generic.List<KaplamaYeri>[] kaplamaYerleri =
+        new System.Collections.Generic.List<KaplamaYeri>[MekanOlculeri.DaireSayisi + 1];
     private const float GirisAcikAci = 80f;   // açık dairenin sahanlık kapısı: içeri doğru 80°
 
     // ---- KAT OLAYLARI (#35) ----
@@ -701,6 +716,7 @@ public class KatYoneticisi : MonoBehaviour
         {
             Transform d = sahanlikA != null ? sahanlikA.Find($"Daire_{n}") : null;
             daireler[n] = d != null ? d.gameObject : null;
+            kaplamaYerleri[n] = d != null ? KaplamaYerleriniBul(d) : null;
         }
         if (daireler[1] == null) Debug.LogWarning("[DAIRE] Sahanlik_A/Daire_1 bulunamadı; graybox yeniden kurulmalı.");
     }
@@ -721,11 +737,62 @@ public class KatYoneticisi : MonoBehaviour
                 // Yeni katın dairesi baştan: bütün oda kapıları kapalı. (Hangi odanın kilitli
                 // olacağını #55'in kat içerikleri söyleyecek; balkon kapısı zaten hep kilitli.)
                 if (acik)
+                {
                     foreach (IcKapi k in daireler[n].GetComponentsInChildren<IcKapi>(true))
                         k.Ayarla(false);
+                    KaplamayiGiydir(n, aKat);
+                }
             }
             SahanlikKapisiniAyarla(sahanlikA, n, acik, gercekDaire: true);
             SahanlikKapisiniAyarla(sahanlikB, n, n == bAcik, gercekDaire: false);
+        }
+    }
+
+    // Editördeki malzeme adı -> yüzey numarası. DokuKurucu'nun dairelere verdiği adlar.
+    private static int YuzeyNumarasi(Material m)
+    {
+        if (m == null) return -1;
+        switch (m.name)
+        {
+            case "Doku_DaireDuvar": return (int)KatKaplamalari.Yuzey.OdaDuvari;
+            case "Doku_Parke": return (int)KatKaplamalari.Yuzey.Parke;
+            case "Doku_Fayans": return (int)KatKaplamalari.Yuzey.IslakZemin;
+            case "Doku_FayansDuvar": return (int)KatKaplamalari.Yuzey.IslakDuvar;
+            default: return -1;
+        }
+    }
+
+    private static System.Collections.Generic.List<KaplamaYeri> KaplamaYerleriniBul(Transform daire)
+    {
+        var sonuc = new System.Collections.Generic.List<KaplamaYeri>();
+        foreach (MeshRenderer r in daire.GetComponentsInChildren<MeshRenderer>(true))
+        {
+            Material[] mats = r.sharedMaterials;
+            var yuzeyler = new int[mats.Length];
+            bool kaplanacak = false;
+            for (int i = 0; i < mats.Length; i++)
+            {
+                yuzeyler[i] = YuzeyNumarasi(mats[i]);
+                if (yuzeyler[i] >= 0) kaplanacak = true;
+            }
+            if (kaplanacak) sonuc.Add(new KaplamaYeri { cizici = r, yuzeyler = yuzeyler });
+        }
+        return sonuc;
+    }
+
+    // Dairenin kaplanan parçalarına bu katın malzemelerini takar.
+    private void KaplamayiGiydir(int daire, int kat)
+    {
+        if (kaplamalar == null || kaplamalar.Length < KatKaplamalari.KatSayisi * KatKaplamalari.YuzeySayisi) return;
+        if (kaplamaYerleri[daire] == null) return;
+        int k = Mathf.Clamp(kat, 1, KatKaplamalari.KatSayisi) - 1;
+        foreach (KaplamaYeri yer in kaplamaYerleri[daire])
+        {
+            // sharedMaterials bir KOPYA dizi döndürür: değiştirip geri atamak gerekir.
+            Material[] mats = yer.cizici.sharedMaterials;
+            for (int i = 0; i < mats.Length; i++)
+                if (yer.yuzeyler[i] >= 0) mats[i] = kaplamalar[k * KatKaplamalari.YuzeySayisi + yer.yuzeyler[i]];
+            yer.cizici.sharedMaterials = mats;
         }
     }
 
