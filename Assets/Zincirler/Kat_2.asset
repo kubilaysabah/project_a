@@ -187,8 +187,8 @@ MonoBehaviour:
     OnU: -1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 8041882230845368845, guid: 4dd44763c05de494d980450fff7226d5, type: 3}
-    Metin: 
+    Sablon: {fileID: 5234316692392655128, guid: a3bd2326066d8f34f96cc9a4e76d48d9, type: 3}
+    Metin: kat2
   - Yol: 
     X: 3.8
     Y: 1.6

@@ -52,12 +52,12 @@ public class DuraklatmaMenusu : MonoBehaviour
 
     // Menünün üç sayfası var: ana sayfa, ayarlar (#27) ve görüntü (#30). Anomali defteri (#45)
     // eski kuralla birlikte kaldırıldı (#59).
-    private const int SayfaAna = 0, SayfaAyarlar = 1, SayfaGoruntu = 2;
+    private const int SayfaAna = 0, SayfaAyarlar = 1, SayfaGoruntu = 2, SayfaFoto = 3;   // Fotoğraflar sayfası: #69
     private int sayfa = SayfaAna;
 
     // ---------- KLAVYE / KOL İLE GEZİNME (#29) ----------
     // Öğelerin sırası (yukarıdan aşağı). Numara, gezginin "Secili" değeriyle eşleşir.
-    private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaDil = 3, AnaCik = 4, AnaOgeSayisi = 5;
+    private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaFoto = 3, AnaDil = 4, AnaCik = 5, AnaOgeSayisi = 6;
     private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3,
                       AyarVarsayilan = 4, AyarGeri = 5, AyarOgeSayisi = 6;
     private const int GorCozunurluk = 0, GorEkran = 1, GorVSync = 2, GorKalite = 3,
@@ -101,6 +101,11 @@ public class DuraklatmaMenusu : MonoBehaviour
     // yine buraya döner.
     [Tooltip("Oyun başlık ekranıyla mı açılsın? Kapatılırsa doğrudan kapıcı odasında başlar (test için).")]
     [SerializeField] private bool baslikEkraniGoster = true;
+
+    // Aile fotoğrafları (#69): bakılanlar Fotoğraflar sayfasında yeniden açılır. Albüm kurucuda bağlanır.
+    [SerializeField] private FotografAlbumu album;
+    private int fotoSira;          // sayfada gösterilen fotoğraf (bakılanlar arasında)
+    private bool fotoArka;         // arkası mı gösteriliyor
 
     /// <summary>Şu an başlık ekranında mıyız (test göstergesi bunu görünce çizilmez).</summary>
     public static bool BaslikEkraninda { get; private set; }
@@ -358,11 +363,15 @@ public class DuraklatmaMenusu : MonoBehaviour
                 case AnaDevam: if (baslikta) Basla(); else DevamIste(); break;
                 case AnaAyarlar: SayfaAc(SayfaAyarlar); break;
                 case AnaGoruntu: SayfaAc(SayfaGoruntu); break;
+                case AnaFoto: SayfaAc(SayfaFoto); break;
                 case AnaDil: Dil.Sonraki(); break;
                 case AnaCik: OyundanCik(); break;
             }
             return;
         }
+
+        // Fotoğraflar: onay tuşu fotoğrafı çevirir (tek düğme "Geri"yi fare ya da Esc / B çalıştırır).
+        if (sayfa == SayfaFoto) { fotoArka = !fotoArka; return; }
 
         if (sayfa == SayfaAyarlar)
         {
@@ -398,6 +407,14 @@ public class DuraklatmaMenusu : MonoBehaviour
             return;
         }
 
+        if (sayfa == SayfaFoto)
+        {
+            int n = BakilanFotograflar().Count;
+            if (n > 0) fotoSira = (fotoSira + yon + n) % n;   // uçlarda başa sarar
+            fotoArka = false;
+            return;
+        }
+
         if (sayfa == SayfaGoruntu)
         {
             switch (gezgin.Secili)
@@ -426,14 +443,52 @@ public class DuraklatmaMenusu : MonoBehaviour
     {
         int onceki = sayfa;
         sayfa = yeni;
-        gezgin.OgeSayisiniAyarla(yeni == SayfaAyarlar ? AyarOgeSayisi : yeni == SayfaGoruntu ? GorOgeSayisi : AnaOgeSayisi);
+        gezgin.OgeSayisiniAyarla(yeni == SayfaAyarlar ? AyarOgeSayisi : yeni == SayfaGoruntu ? GorOgeSayisi
+                                 : yeni == SayfaFoto ? 1 : AnaOgeSayisi);
 
         // Bir sayfaya girince ilk öğe seçili. Ana sayfaya dönünce geldiği sayfanın düğmesi
         // seçili kalsın (oyuncu nereden geldiğini görür, tekrar girmek isterse tek tuş yeter).
-        if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : AnaAyarlar);
+        if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : onceki == SayfaFoto ? AnaFoto : AnaAyarlar);
         else gezgin.Sec(0);
 
         if (yeni == SayfaGoruntu) CozunurlukListesiniKur();
+        if (yeni == SayfaFoto) { fotoSira = 0; fotoArka = false; }
+    }
+
+    // ---------- FOTOĞRAFLAR SAYFASI (#69) ----------
+    // Albümdeki fotoğraflardan oyuncunun baktıkları, albümdeki sırayla (kat 1, kat 2 ... kapıcı).
+    private System.Collections.Generic.List<FotografAlbumu.Fotograf> BakilanFotograflar()
+    {
+        var liste = new System.Collections.Generic.List<FotografAlbumu.Fotograf>();
+        if (album == null) return liste;
+        foreach (FotografAlbumu.Fotograf f in album.fotograflar)
+            if (f != null && Kayit.FotografBulunduMu(f.Kimlik)) liste.Add(f);
+        return liste;
+    }
+
+    private void FotograflariCiz()
+    {
+        var liste = BakilanFotograflar();
+        int toplam = album != null ? album.fotograflar.Count : 0;
+        float y = ArayuzOlcegi.Yukseklik / 2f - 360f;
+        GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f),
+                  string.Format(Dil.Getir("menu.fotograflar_baslik"), liste.Count, toplam), baslikStili);
+
+        var ortali = new GUIStyle(yaziStili) { alignment = TextAnchor.MiddleCenter };
+        if (liste.Count == 0)
+            GUI.Label(new Rect(0, ArayuzOlcegi.Yukseklik / 2f - 30f, ArayuzOlcegi.Genislik, 60f), Dil.Getir("foto.bos"), ortali);
+        else
+        {
+            fotoSira = Mathf.Clamp(fotoSira, 0, liste.Count - 1);
+            FotografEkrani.Ciz(liste[fotoSira], fotoArka, new Vector2(ArayuzOlcegi.Genislik / 2f, ArayuzOlcegi.Yukseklik / 2f - 10f), 520f);
+            bool kol = GirisCihazi.Kol;
+            GUI.Label(new Rect(0, ArayuzOlcegi.Yukseklik / 2f + 290f, ArayuzOlcegi.Genislik, 30f),
+                      $"◄  {fotoSira + 1} / {liste.Count}  ►     " + string.Format(Dil.Getir("foto.menu_tuslar"), kol ? "A" : "Enter"), ortali);
+        }
+
+        Rect r = new Rect((ArayuzOlcegi.Genislik - 240f) / 2f, ArayuzOlcegi.Yukseklik / 2f + 330f, 240f, 50f);
+        Vurgula(0, r);
+        if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAna);
     }
 
     // ---------- ÇÖZÜNÜRLÜK LİSTESİ (#30) ----------
@@ -618,6 +673,7 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         if (sayfa == SayfaAyarlar) { AyarlariCiz(); return; }
         if (sayfa == SayfaGoruntu) { GoruntuCiz(); return; }
+        if (sayfa == SayfaFoto) { FotograflariCiz(); return; }
 
         float en = 360f, boy = 56f, ara = 16f;
         float x = (ArayuzOlcegi.Genislik - en) / 2f;
@@ -633,7 +689,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         }
         else
         {
-            y = ArayuzOlcegi.Yukseklik / 2f - 224f;   // beş düğme
+            y = ArayuzOlcegi.Yukseklik / 2f - 260f;   // altı düğme (#69'da Fotoğraflar eklendi)
             GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.baslik"), baslikStili);
             y += 60f + 2f * ara;
         }
@@ -655,6 +711,11 @@ public class DuraklatmaMenusu : MonoBehaviour
         r = new Rect(x, y, en, boy);
         Vurgula(AnaGoruntu, r);
         if (GUI.Button(r, Dil.Getir("menu.goruntu"), dugmeStili)) SayfaAc(SayfaGoruntu);
+        y += boy + ara;
+
+        r = new Rect(x, y, en, boy);
+        Vurgula(AnaFoto, r);
+        if (GUI.Button(r, Dil.Getir("menu.fotograflar"), dugmeStili)) SayfaAc(SayfaFoto);
         y += boy + ara;
 
         // "Dil: Türkçe" / "Language: English". Dilin adı her zaman kendi dilinde

@@ -1336,6 +1336,29 @@ public static partial class GrayboxKurucu
         ty.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         takvimYazi.GetComponent<MeshRenderer>().sharedMaterial = YaziMalzeme(ty.font);
 
+        // Önceki üç kapıcının fotoğrafı (#69): masanın üstünde, ön duvarda. Duvar çerçevesinin noktası
+        // arka yüzü; ön yüzü (+Z) odanın içine (-z) dönsün diye 180° çevrilir. Fotoğrafı oyun başında
+        // kimliğinden kendisi takar (AileFotografi.Start).
+        GameObject fotoSablonu = FotografKurucu.Sablon(duvar: true);
+        if (fotoSablonu != null)
+        {
+            GameObject foto = (GameObject)PrefabUtility.InstantiatePrefab(fotoSablonu, o);
+            foto.name = "Kapici_Fotografi";
+            foto.transform.localPosition = new Vector3(disOda + 1.35f, 1.45f, zOn);
+            foto.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            var fotoSeri = new SerializedObject(foto.GetComponent<AileFotografi>());
+            fotoSeri.FindProperty("kimlik").stringValue = "kapici";
+            fotoSeri.ApplyModifiedPropertiesWithoutUndo();
+        }
+        // Menüdeki Fotoğraflar sayfası da albümü bilsin.
+        DuraklatmaMenusu menu = Object.FindAnyObjectByType<DuraklatmaMenusu>(FindObjectsInactive.Include);
+        if (menu != null)
+        {
+            var menuSeri = new SerializedObject(menu);
+            menuSeri.FindProperty("album").objectReferenceValue = FotografKurucu.AlbumKur();
+            menuSeri.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         // Oda lambası: loş, sıcak, gölgesiz tek bir ampul.
         GameObject lamba = new GameObject("Oda_Lambasi");
         lamba.transform.SetParent(o, false);

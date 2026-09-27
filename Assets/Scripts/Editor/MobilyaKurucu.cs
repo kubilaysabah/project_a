@@ -51,7 +51,9 @@ public static class MobilyaKurucu
             m.SetFloat("_Smoothness", 0.9f);
             m.SetOverrideTag("RenderType", "Transparent");
             m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-            m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            // URP Lit, "speküler ışığı koru" açıkken kaynağı One ile karıştırır (renk alfayla önceden
+            // çarpılır). SrcAlpha yazsaydık Unity malzemeyi sonradan kendisi düzeltir, dosya boşuna değişirdi.
+            m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
             m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
             m.SetInt("_ZWrite", 0);
             m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");

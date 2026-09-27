@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81db9be72d1068e41b48710ee60798b5, type: 3}
+  m_Name: Album
+  m_EditorClassIdentifier: Assembly-CSharp::FotografAlbumu
+  fotograflar:
+  - Kimlik: kat1
+    Doku: {fileID: 2800000, guid: 637c37d5b8c053649b878efaacb64574, type: 3}
+    Arka: foto.kat1
+  - Kimlik: kat2
+    Doku: {fileID: 2800000, guid: c71d6b80e8f457249a6314e9e20531e8, type: 3}
+    Arka: foto.kat2
+  - Kimlik: kat3
+    Doku: {fileID: 2800000, guid: 467269feac5e7c741b6c82a5337a6738, type: 3}
+    Arka: foto.kat3
+  - Kimlik: kat4
+    Doku: {fileID: 2800000, guid: cdcb8f006b7d7d041ac2bd47a52f0981, type: 3}
+    Arka: foto.kat4
+  - Kimlik: kat5
+    Doku: {fileID: 2800000, guid: 9aeeacebf0410464aa507c0ccd853217, type: 3}
+    Arka: foto.kat5
+  - Kimlik: kat6
+    Doku: {fileID: 2800000, guid: 118a52af0383efe4cb10900cc6abb462, type: 3}
+    Arka: foto.kat6
+  - Kimlik: kat7
+    Doku: {fileID: 2800000, guid: be9ead220cddb3543ad92f5de2f1cc87, type: 3}
+    Arka: foto.kat7
+  - Kimlik: kat8
+    Doku: {fileID: 2800000, guid: 2b007ba3759ba6945bc0b3f81694e660, type: 3}
+    Arka: foto.kat8
+  - Kimlik: kapici
+    Doku: {fileID: 2800000, guid: f5691d201fc2bea40b8810d29e220061, type: 3}
+    Arka: foto.kapici

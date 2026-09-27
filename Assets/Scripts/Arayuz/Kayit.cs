@@ -18,6 +18,33 @@ public static class Kayit
     private static string KilitAnahtari { get { return KayitYuvasi.Anahtar("kayit_kilitler"); } }   // çözülen kilitler (#54)
     private static string ParcaAnahtari { get { return KayitYuvasi.Anahtar("kayit_parcalar"); } }   // bulunan çizim parçaları (#63)
 
+    private static string FotografAnahtari { get { return KayitYuvasi.Anahtar("kayit_fotograflar"); } }   // bakılan aile fotoğrafları (#69)
+
+    // ---------- AİLE FOTOĞRAFLARI (#69) ----------
+    // Oyuncunun baktığı fotoğraflar bir koleksiyon: menüdeki Fotoğraflar sayfası onları gösterir.
+    // Kat baştan kurulunca (kaçışta yakalanma) silinmez; bakılmış bir fotoğraf unutulmaz. Kilit
+    // kaydıyla aynı biçimi kullanır ("kat:kimlik"), fotoğrafların katı yok sayılır: 0.
+    private static KilitKaydi fotograflar;
+    private static KilitKaydi Fotograflar
+    {
+        get
+        {
+            if (fotograflar == null) fotograflar = KilitKaydi.Oku(PlayerPrefs.GetString(FotografAnahtari, ""));
+            return fotograflar;
+        }
+    }
+
+    /// <summary>Oyuncu bu fotoğrafa baktı: koleksiyona eklenir (zaten varsa bir şey olmaz).</summary>
+    public static void FotografBulundu(string kimlik)
+    {
+        if (!Fotograflar.Ekle(0, kimlik)) return;
+        PlayerPrefs.SetString(FotografAnahtari, Fotograflar.Metin());
+        PlayerPrefs.Save();
+        Debug.Log($"[KAYIT] '{kimlik}' fotoğrafı koleksiyona eklendi.");
+    }
+
+    public static bool FotografBulunduMu(string kimlik) { return Fotograflar.Iceriyor(0, kimlik); }
+
     // Kilit kaydı ilk sorulduğunda PlayerPrefs'ten bir kez okunur, sonra bellekte tutulur.
     private static KilitKaydi kilitler;
     private static KilitKaydi Kilitler

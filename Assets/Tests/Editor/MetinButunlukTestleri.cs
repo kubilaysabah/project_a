@@ -23,7 +23,7 @@ using UnityEngine;
 [TestFixture]
 public class MetinButunlukTestleri
 {
-    private static readonly string[] Onekler = { "ipucu", "not", "menu", "dil", "bina", "ayar", "tus", "liste" };
+    private static readonly string[] Onekler = { "ipucu", "not", "menu", "dil", "bina", "ayar", "tus", "liste", "foto" };
 
     // Tablo dosyasını okuyup kurar. Testlerin hepsi buradan başlar.
     private static MetinTablosu TabloyuOku()

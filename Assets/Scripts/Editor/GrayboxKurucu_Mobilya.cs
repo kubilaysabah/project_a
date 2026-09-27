@@ -32,6 +32,13 @@ public static partial class GrayboxKurucu
         return g;
     }
 
+    // Aile fotoğrafı (#69): dik fotoğraf masa çerçevesine, yatay fotoğraf duvar çerçevesine. Süsün
+    // Metin'i fotoğrafın kimliği (ZincirUygulayici çerçeveye takar).
+    static KatSusu Foto(string kimlik, bool duvar, float u, float y, float v, float onU, float onV)
+    {
+        return new KatSusu { Sablon = FotografKurucu.Sablon(duvar), Metin = kimlik, X = u, Y = y, Z = v, OnU = onU, OnV = onV };
+    }
+
     // YatakA'nın "uzun" değeri: yatağın oda derinliği (u) boyunca kapladığı yer. Gotik yatak boyuna
     // yatar (2,04); gündüz yatağı duvara yaslı, yalnızca derinliği kadar (0,85).
     // Bir mobilya: plan noktası (u, yükseklik, v) ve ön yönü. yol "B:" ise ikinci dairede (#70).
@@ -67,7 +74,7 @@ public static partial class GrayboxKurucu
             case 1:   // Taşınan aile: evin çoğu gitmiş, geride kalanlar (#55: koliler zaten var).
                 m.Add(AntreAynasi());
                 m.Add(M("television_02", 2.95f, 0f, 5.05f, 0.2f, 1f));            // yerde bırakılmış TV
-                m.Add(M("standing_picture_frame_01", 3.10f, 0.41f, 5.05f, 0.4f, 1f)); // TV'nin üstünde unutulmuş fotoğraf
+                m.Add(Foto("kat1", true, 5.0f, 1.55f, 7.15f, -1f, 0f));        // duvarda unutulmuş aile fotoğrafı
                 m.Add(M("plastic_monobloc_chair_01", 4.30f, 0f, 6.60f, -1f, 0.3f));
                 m.Add(HolSaati());
                 m.Add(M("painted_wooden_chair_01", 5.70f, 0f, 5.60f, 1f, 0.2f));  // Oda B
@@ -83,7 +90,7 @@ public static partial class GrayboxKurucu
                 m.Add(Avize("Chandelier_02"));
                 m.Add(SalonCercevesi("fancy_picture_frame_01"));
                 m.Add(AntreSehpasi());
-                m.Add(M("standing_picture_frame_01", 2.35f, 0.55f, 1.60f, -1f, 0f));
+                m.Add(Foto("kat2", false, 2.35f, 0.55f, 1.60f, -1f, 0f));      // Nuri Bey ve Rıza Efendi
                 m.Add(HolCercevesi("hanging_picture_frame_02"));
                 m.Add(YatakA("GothicBed_01", 2.04f));
                 m.Add(SifonyerA("GothicCommode_01", 0.58f));
@@ -99,7 +106,7 @@ public static partial class GrayboxKurucu
                 m.Add(SalonCercevesi("hanging_picture_frame_02"));
                 m.Add(AntreSehpasi());
                 m.Add(M("ceramic_vase_01", 2.35f, 0.55f, 1.60f, -1f, 0f));
-                m.Add(HolCercevesi("fancy_picture_frame_01"));
+                m.Add(Foto("kat3", true, 3.80f, 1.60f, 4.65f, 0f, -1f));       // Kerem'in yaş günü
                 m.Add(HolSaati());
                 m.Add(YatakA("vintage_day_bed", 0.85f));   // Oda A'da gündüz yatağı (yatak odası sade)
                 m.Add(SifonyerA("vintage_wooden_drawer_01", 0.46f));
@@ -111,7 +118,7 @@ public static partial class GrayboxKurucu
                 m.Add(AntreAynasi());
                 m.Add(M("Ottoman_01", 3.00f, 0f, 6.30f, 0.2f, 1f));
                 m.Add(M("wall_clock", 5.0f, 1.90f, 5.30f, -1f, 0f));   // v 7,2'de fosforlu şifre var
-                m.Add(M("standing_picture_frame_01", 8.10f, 0.55f, 7.90f, 0f, -1f)); // Oda A, komodinin üstünde
+                m.Add(Foto("kat4", true, 3.80f, 1.60f, 4.65f, 0f, -1f));       // eski kiracılar (holde)
                 break;
 
             case 5:   // Cemal'in son çalıştığı daire.
@@ -119,6 +126,7 @@ public static partial class GrayboxKurucu
                 m.Add(Berjer("Rockingchair_01"));
                 m.Add(TvDolabi("ClassicConsole_01", 0.59f));
                 m.Add(TvUstu("television_02", 0.95f));
+                m.Add(Foto("kat5", false, 2.40f, 0.95f, 5.00f, 0.2f, 1f));      // Cemal işe başladığı gün
                 m.Add(Avize("Chandelier_02"));
                 m.Add(SalonCercevesi("fancy_picture_frame_01"));
                 m.Add(HolSaati());
@@ -132,7 +140,7 @@ public static partial class GrayboxKurucu
                 m.Add(TvDolabi("painted_wooden_cabinet", 0.62f));
                 m.Add(TvUstu("Television_01", 1.18f));
                 m.Add(Avize("Chandelier_01"));
-                m.Add(HolCercevesi("hanging_picture_frame_02"));
+                m.Add(Foto("kat6", true, 3.80f, 1.60f, 4.65f, 0f, -1f));       // dört tabaklı sofra
                 m.Add(YatakA("vintage_day_bed", 0.85f));
                 m.Add(M("ArmChair_01", 1.40f, 0f, 7.60f, 0.3f, -1f, KilitZinciri.IkinciOnek));
                 m.Add(M("GothicCommode_01", 7.70f + 0.31f, 0f, 5.90f, 1f, 0f, KilitZinciri.IkinciOnek));
@@ -144,6 +152,7 @@ public static partial class GrayboxKurucu
                 m.Add(Berjer("ArmChair_01"));
                 m.Add(TvDolabi("GothicCommode_01", 0.58f));
                 m.Add(TvUstu("television_02", 1.21f));
+                m.Add(Foto("kat7", false, 2.50f, 1.21f, 4.98f, 0.2f, 1f));      // Cemal ve arkasındaki adam
                 m.Add(Avize("Chandelier_02"));
                 m.Add(SalonCercevesi("hanging_picture_frame_02"));
                 m.Add(HolSaati());
@@ -159,6 +168,7 @@ public static partial class GrayboxKurucu
                 m.Add(AntreAynasi());
                 m.Add(M("wall_clock", 5.0f, 1.90f, 7.15f, -1f, 0f));
                 m.Add(SifonyerA("GothicCommode_01", 0.58f));
+                m.Add(Foto("kat8", true, 3.80f, 1.60f, 4.65f, 0f, -1f));       // 1974 iskân töreni
                 break;
         }
         v.suslar.AddRange(m);

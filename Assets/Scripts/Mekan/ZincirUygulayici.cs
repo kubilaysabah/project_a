@@ -268,6 +268,9 @@ public class ZincirUygulayici
             GameObject g = Yerlestir(daire, eksen, s.Sablon, s, "Sus_" + (s.Sablon != null ? s.Sablon.name : "?"));
             // Süsün yazısı (isim kartı, #66): şablonun "Yazi" çocuğuna metin tablosundan; dil
             // değişince YerelYazi yeniler.
+            // Aile fotoğrafı (#69): süsün "Metin"i fotoğrafın kimliğidir; çerçeve onu albümden takar.
+            AileFotografi foto = g != null ? g.GetComponent<AileFotografi>() : null;
+            if (foto != null) { foto.Ayarla(s.Metin); continue; }
             Transform yaziNesnesi = g != null && !string.IsNullOrEmpty(s.Metin) ? g.transform.Find("Yazi") : null;
             if (yaziNesnesi != null)
             {
