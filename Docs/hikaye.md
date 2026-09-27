@@ -84,11 +84,32 @@ Beş tür, her karışımı taşır; oyuncu kuralları ilk katlarda öğrenir:
 | **Kol** | Bir yerde bir kol/manivela çekilir, başka yerdeki bir kapının kilidi "tak" diye açılır: kilerde duvar kolu, sigorta kutusunun ana şalteri, sifon zinciri, tablonun arkasındaki gizli kol | #55'te belirlenecek (öneri 3) |
 | **Sigorta / elektrik** | Sigorta atık; sigorta teli bulunup takılınca ışık ve elektrikli şeyler çalışır | 4 |
 | **Tornavida ile menteşe** | Kilidi açılmayan kapının menteşeleri sökülür; tornavida dairede | 5 |
+| **Kırma** (#61) | Bir nesne (cam kavanoz, cam dolap) bulunan bir aletle kırılır, içindeki ortaya çıkar | 1 |
+
+**Aletler** (tornavida gibi) bitmez ve eli meşgul etmez: bir kez bulunan alet kafa lambası gibi
+kapıcıda kalır, sonraki katlarda da işe yarar (Şahan, 2026-09-27). Elde tek eşya kuralı yalnızca
+anahtar, sigorta ve not için geçerlidir.
 
 Zincir yükselişi: **1-1-2-2-2-3-3-3** (kat başına geçilmesi gereken kilitli oda sayısı; zincirin
 dışındaki kapalı odalar bu sayıya girmez).
 
 ## 7. Kat kat taslak
+
+**Her katın geçişi farklıdır (Şahan, 2026-09-27).** Kilit türleri her katta karışık kullanılır ama her
+katın bir **imza mekaniği** vardır; oyuncu hiçbir katı "yine aynısı" diye geçmez:
+
+| Kat | İmza mekaniği | İş |
+|---|---|---|
+| 1 | Anahtar + kırma (öğretici): ayakkabılıktaki tornavidayla kavanozu kır, anahtarı al | #54, #61 |
+| 2 | Sesle bulma: kendiliğinden açılan radyonun sesini takip et | #62 |
+| 3 | Parça birleştirme: çocuğun yırtılmış çizimini odalardan topla, şifre birleşince okunur | #63 |
+| 4 | Işık ve karanlık: sigorta, ancak ışıkta görünen not ve yol | #64 |
+| 5 | Mekanizma: vana, su saati, itilen dolap; suyu kesince lavabodan anahtar | #65 |
+| 6 | Sıralama/yerleştirme + zamanlı: sofraya dört tabak; kaçış anı 1 | #66, #58 |
+| 7 | Gözlem (anomali) + kovalamaca: dört "13" kapısından gerçeği; kaçış anı 2 | #67, #58 |
+| 8 | Asansör: panoya sigorta, kabini çağır, çatı anahtarı kabinde | #68 |
+
+Aşağıdaki tablonun zincir sütunu bu mekaniklere göre #55'te yeniden yazılır.
 
 | Kat | Daire, kimin | Kilitli odalar ve zincir | Sahanlık işi | Olaylar | Hikâye |
 |---|---|---|---|---|---|
