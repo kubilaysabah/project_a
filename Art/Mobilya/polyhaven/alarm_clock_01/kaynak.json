@@ -1,0 +1,15 @@
+{
+  "kimlik": "alarm_clock_01",
+  "ad": "Alarm Clock 01",
+  "yazarlar": {
+    "Yann Kervran": "Rigging",
+    "James Ray Cock": "Modeling & Texturing"
+  },
+  "lisans": "CC0 1.0",
+  "adres": "https://polyhaven.com/a/alarm_clock_01",
+  "boyutlar_mm": [
+    227.71471738815308,
+    168.41959953308105,
+    174.15538430213928
+  ]
+}

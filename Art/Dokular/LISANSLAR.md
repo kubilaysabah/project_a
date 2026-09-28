@@ -35,7 +35,7 @@ ambientCG'nin 1K-JPG paketinden yalnızca `_Color` ve `_NormalGL` alındı, dosy
 | Rectangular Parquet (`rectangular_parquet`) | 3. kat parke | https://polyhaven.com/a/rectangular_parquet | Jenelle van Heerden, Sergej Majboroda |
 | Floor Tiles 08 (`floor_tiles_08`) | 3. kat ıslak zemin, 5. kat ıslak duvar | https://polyhaven.com/a/floor_tiles_08 | Rob Tuytel |
 | Tiled Floor 001 (`tiled_floor_001`) | 3. kat ıslak duvar, 8. kat ıslak zemin | https://polyhaven.com/a/tiled_floor_001 | Rob Tuytel, Dimitrios Savva |
-| Worn Cracked Plaster (`worn_cracked_plaster`) | 4. kat oda duvarı | https://polyhaven.com/a/worn_cracked_plaster | Amal Kumar |
+| Peeling Painted Wall (`peeling_painted_wall`) | 4. kat oda duvarı (#81, çatlak sıvanın yerine) | https://polyhaven.com/a/peeling_painted_wall | Dimitrios Savva |
 | Wood Floor Worn (`wood_floor_worn`) | 4. kat parke | https://polyhaven.com/a/wood_floor_worn | Dimitrios Savva |
 | Worn Tile Floor (`worn_tile_floor`) | 4. kat ıslak zemin | https://polyhaven.com/a/worn_tile_floor | Dimitrios Savva |
 | Dirty Tiles (`dirty_tiles`) | 4. kat ıslak duvar, 5. kat ıslak zemin, 7. kat ıslak duvar | https://polyhaven.com/a/dirty_tiles | Matterfield, Jenelle van Heerden |
@@ -44,7 +44,7 @@ ambientCG'nin 1K-JPG paketinden yalnızca `_Color` ve `_NormalGL` alındı, dosy
 | Wallpaper002A (`wallpaper002a`) | 6. kat oda duvarı | https://ambientcg.com/view?id=Wallpaper002A | ambientCG (Lennart Demes) |
 | Diagonal Parquet (`diagonal_parquet`) | 6. kat parke | https://polyhaven.com/a/diagonal_parquet | Jenelle van Heerden, Sergej Majboroda |
 | Marble Tiles (`marble_tiles`) | 6. kat ıslak zemin, 8. kat ıslak duvar | https://polyhaven.com/a/marble_tiles | Charlotte Baglioni |
-| Wallpaper002C (`wallpaper002c`) | 7. kat oda duvarı | https://ambientcg.com/view?id=Wallpaper002C | ambientCG (Lennart Demes) |
+| Yellow Plaster (`yellow_plaster`) | 7. kat oda duvarı (#81, Wallpaper002C'nin yerine; Poly Haven) | https://polyhaven.com/a/yellow_plaster | Rob Tuytel |
 | Plank Flooring (`plank_flooring`) | 7. kat parke | https://polyhaven.com/a/plank_flooring | Dario Barresi, Dimitrios Savva, Rico Cilliers |
 | Beige Wall 001 (`beige_wall_001`) | 8. kat oda duvarı | https://polyhaven.com/a/beige_wall_001 | Dimitrios Savva, Rico Cilliers |
 | Wooden Floor 02 (`wooden_floor_02`) | 8. kat parke | https://polyhaven.com/a/wooden_floor_02 | Charlotte Baglioni, Rico Cilliers |

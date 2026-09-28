@@ -1314,10 +1314,14 @@ public static partial class GrayboxKurucu
         Kutu("Yatak", o, new Vector3(disOda + 1.05f, 0.22f, zArka + 0.5f), new Vector3(1.95f, 0.44f, 0.9f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
         Kutu("Battaniye", o, new Vector3(disOda + 1.2f, 0.47f, zArka + 0.5f), new Vector3(1.5f, 0.07f, 0.92f)).GetComponent<MeshRenderer>().sharedMaterial = kumas;
         Kutu("Yastik", o, new Vector3(disOda + 0.3f, 0.5f, zArka + 0.5f), new Vector3(0.4f, 0.12f, 0.6f));
-        Kutu("Masa", o, new Vector3(disOda + 1.1f, 0.37f, zOn - 0.35f), new Vector3(1.0f, 0.74f, 0.6f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
-        Kutu("Sandalye", o, new Vector3(disOda + 1.1f, 0.23f, zOn - 0.85f), new Vector3(0.42f, 0.46f, 0.42f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
-        Kutu("Radyo", o, new Vector3(disOda + 0.8f, 0.83f, zOn - 0.3f), new Vector3(0.3f, 0.18f, 0.15f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
-        Kutu("Dolap", o, new Vector3(disOda + 0.3f, 0.95f, YakinKapiZ + 0.15f), new Vector3(0.55f, 1.9f, 0.8f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
+        // #81 (Şahan'ın seçimi): masa, sandalye, dolap ve masadaki kutu artık Poly Haven modelleri (MobilyaKurucu
+        // prefab'ları). Masa eski ahşap masa: 1,8 m uzun, 55 cm alçak bir masa; odaya sığsın ve telefon eskisi gibi
+        // 74 cm'de dursun diye boyu 0,72, yüksekliği 1,35 kat (bacaklar biraz incelir, göze batmaz). Dolap 2,57 m:
+        // %80'e küçülür (2,06 m). Radyo konmayacaktı (#56); o gri kutunun yerinde 90'lar çalar saati.
+        MobKoy("Masa", o, "WoodenTable_01", new Vector3(disOda + 1.2f, 0f, zOn - 0.36f), 180f, new Vector3(0.72f, 1.35f, 1f));
+        MobKoy("Sandalye", o, "painted_wooden_chair_02", new Vector3(disOda + 1.1f, 0f, zOn - 0.95f), 0f, Vector3.one);
+        MobKoy("Calar_Saat", o, "alarm_clock_01", new Vector3(disOda + 0.8f, 0.7425f, zOn - 0.32f), 200f, Vector3.one);
+        MobKoy("Dolap", o, "painted_wooden_cabinet_02", new Vector3(disOda + 0.30f, 0f, YakinKapiZ + 0.15f), 90f, Vector3.one * 0.8f);
 
         // Duvar takvimi: tarihi söyleyen tek ayrıntı. Oyuncu odanın içinden (-z tarafından)
         // bakıyor; TextMesh'in okunan yüzü de o yöne dönük, döndürmeye gerek yok.
@@ -1513,7 +1517,25 @@ public static partial class GrayboxKurucu
 
         // ---- BODRUM KAPISI: aşağı inen merdivenin başını kapatır ----
         // Zemin kat binanın dibi; oyuncu açılışta aşağıdaki sahte katlara inmesin.
-        Kutu("Bodrum_Kapisi", z, new Vector3(VarisKoluX, 1.1f, 0.14f), new Vector3(KolGen, 2.2f, 0.06f)).GetComponent<MeshRenderer>().sharedMaterial = metal;
+        // #81: eskiden kolun tamamını kapatan düz açık gri bir levhaydı; testte dokusuz bir yüzey gibi
+        // göründü. Artık sıvalı bir set (malzemesi verilmez: DokuKurucu adından duvar dokusunu verir) ve
+        // ortasında 90'lar bodrumlarının koyu yeşil boyalı, paslı demir kapısı. Çarpışma kutusu setin kendisi:
+        // oyuncu yine geçemez.
+        Kutu("Duvar_Bodrum", z, new Vector3(VarisKoluX, 1.1f, 0.14f), new Vector3(KolGen, 2.2f, 0.06f));   // adı "Duvar": sıva dokusu
+        Material bodrumBoya = MalzemeBul("Assets/Materials/Bodrum_Kapi_Boya.mat", new Color(0.13f, 0.20f, 0.16f));
+        KirKurucu.KirEkle(bodrumBoya, 1.2f);
+        GameObject bodrumKanat = Kutu("Bodrum_Kanadi", z, new Vector3(VarisKoluX, 1.0f, 0.105f), new Vector3(0.84f, 2.0f, 0.03f));
+        bodrumKanat.GetComponent<MeshRenderer>().sharedMaterial = bodrumBoya;
+        Object.DestroyImmediate(bodrumKanat.GetComponent<Collider>());   // set zaten kapatıyor
+        foreach (var kasa in new[] { (-0.44f, 1.02f, 0.04f, 2.04f), (0.44f, 1.02f, 0.04f, 2.04f), (0f, 2.03f, 0.92f, 0.04f) })
+        {
+            GameObject k = Kutu("Bodrum_Kasa", z, new Vector3(VarisKoluX + kasa.Item1, kasa.Item2, 0.1f), new Vector3(kasa.Item3, kasa.Item4, 0.05f));
+            k.GetComponent<MeshRenderer>().sharedMaterial = metal;
+            Object.DestroyImmediate(k.GetComponent<Collider>());
+        }
+        GameObject bodrumKol = Kutu("Bodrum_Kolu", z, new Vector3(VarisKoluX + 0.32f, 1.0f, 0.08f), new Vector3(0.12f, 0.03f, 0.04f));
+        bodrumKol.GetComponent<MeshRenderer>().sharedMaterial = metal;
+        Object.DestroyImmediate(bodrumKol.GetComponent<Collider>());
     }
 
     // ---------- DIŞ CEPHE ve FİNAL (#16) ----------
@@ -1902,6 +1924,21 @@ public static partial class GrayboxKurucu
     }
 
     // Adı, ebeveyni, yerel konumu ve ölçeği verilen bir küp üretir.
+    // Poly Haven mobilyasının prefab'ından sahneye kalıcı bir kopya koyar (#81, kapıcı odası). Kat mobilyaları
+    // oyun sırasında kat dosyasından konur (GrayboxKurucu_Mobilya); zemin kat her zaman aynı olduğu için bunlar
+    // sahneye doğrudan yerleşir. Prefab yoksa (Mobilyaları Kur çalışmadıysa) uyarır ve geçer.
+    static GameObject MobKoy(string ad, Transform ebeveyn, string kimlik, Vector3 konum, float yDonus, Vector3 olcek)
+    {
+        GameObject sablon = Mob(kimlik);
+        if (sablon == null) return null;
+        GameObject g = (GameObject)PrefabUtility.InstantiatePrefab(sablon, ebeveyn);
+        g.name = ad;
+        g.transform.localPosition = konum;
+        g.transform.localRotation = Quaternion.Euler(0f, yDonus, 0f);
+        g.transform.localScale = olcek;
+        return g;
+    }
+
     static GameObject Kutu(string ad, Transform ebeveyn, Vector3 konum, Vector3 olcek)
     {
         // CreatePrimitive hazır bir küp yapar: mesh, malzeme ve çarpışma kutusu dahil.

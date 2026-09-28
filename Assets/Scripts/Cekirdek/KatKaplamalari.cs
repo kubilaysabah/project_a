@@ -46,14 +46,14 @@ public static class KatKaplamalari
         { Duvar("decrepit_wallpaper", 2.5f), Tahta("old_wooden_floor_03", 1.2f), Karo("floor_tiles_06", 3.0f), Karo("interior_tiles", 1.9f) },
         // 3. kat: çocuklu aile. Açık maviye boyanmış kabartmalı kâğıt, hasır parke.
         { Duvar("wallpaper001a", 1.0f, 0.74f, 0.84f, 0.95f), Tahta("rectangular_parquet", 2.25f), Karo("floor_tiles_08", 1.5f), Karo("tiled_floor_001", 1.5f) },
-        // 4. kat: boş ve elektriksiz. Çatlak sıva, aşınmış tahta, kırık karo.
-        { Duvar("worn_cracked_plaster", 1.8f), Tahta("wood_floor_worn", 2.0f), Karo("worn_tile_floor", 2.0f), Karo("dirty_tiles", 2.26f) },
+        // 4. kat: boş ve elektriksiz. Dökülen eski boya (#81, Şahan: çatlak sıva sürüngen derisi gibiydi), aşınmış tahta, kırık karo.
+        { Duvar("peeling_painted_wall", 1.8f), Tahta("wood_floor_worn", 2.0f), Karo("worn_tile_floor", 2.0f), Karo("dirty_tiles", 2.26f) },
         // 5. kat: Cemal'in son çalıştığı daire. Temiz beyaz sıva, laminat.
         { Duvar("white_plaster_02", 1.0f), Tahta("laminate_floor_02", 1.7f), Karo("dirty_tiles", 2.26f), Karo("floor_tiles_08", 1.5f) },
         // 6. kat: kimse oturmuyor ama sofra kurulu. Mint yeşili kabartmalı kâğıt, çapraz parke.
         { Duvar("wallpaper002a", 1.0f, 0.76f, 0.92f, 0.82f), Tahta("diagonal_parquet", 2.36f), Karo("marble_tiles", 2.0f), Karo("long_white_tiles", 1.27f, 0.82f, 0.95f, 0.87f) },
-        // 7. kat: Cemal'in eşyaları, bütün kapılar 13. Küflü kâğıt, hasarlı tahta.
-        { Duvar("wallpaper002c", 1.0f), Tahta("plank_flooring", 1.34f), Karo("interior_tiles", 1.9f), Karo("dirty_tiles", 2.26f) },
+        // 7. kat: Cemal'in eşyaları, bütün kapılar 13. Sarı badana (#81, Şahan: gri benekli kâğıt granit gibiydi), hasarlı tahta.
+        { Duvar("yellow_plaster", 2.0f), Tahta("plank_flooring", 1.34f), Karo("interior_tiles", 1.9f), Karo("dirty_tiles", 2.26f) },
         // 8. kat: Yönetim dairesi (dosyalar). Düz bej boya, düz şerit tahta.
         { Duvar("beige_wall_001", 3.0f), Tahta("wooden_floor_02", 1.94f), Karo("tiled_floor_001", 1.5f), Karo("marble_tiles", 2.0f) },
     };

@@ -57,9 +57,11 @@ public static partial class GrayboxKurucu
     static KatSusu Avize(string ad) { return M(ad, 2.80f, Tavan, 6.30f, 0f, 1f); }
     static KatSusu SalonCercevesi(string ad) { return M(ad, 5.0f, 1.55f, 7.15f, -1f, 0f); }
     static KatSusu HolCercevesi(string ad) { return M(ad, 3.80f, 1.60f, 4.65f, 0f, -1f); }
-    static KatSusu HolSaati() { return M("wall_clock", 7.60f, 1.90f, 4.65f, 0f, -1f); }
+    // Duvar saati (#81, Şahan): ofis tipi quartz saatin yerine eski telefonlu süs saati; 50 cm boyunda, merkezi 1,55.
+    static KatSusu HolSaati() { return M("vintage_telephone_wall_clock", 7.60f, 1.55f, 4.65f, 0f, -1f); }
     static KatSusu AntreAynasi() { return M("ornate_mirror_01", 2.60f, 1.55f, 1.60f, -1f, 0f); }
-    static KatSusu AntreSehpasi() { return M("side_table_01", 2.35f, 0f, 1.60f, -1f, 0f); }
+    // Antre sehpası (#81, Şahan): yalın modern sehpanın yerine boyalı ahşap komodin (üstü 62 cm).
+    static KatSusu AntreSehpasi() { return M("painted_wooden_nightstand", 2.35f, 0f, 1.60f, -1f, 0f); }
     static KatSusu YatakA(string ad, float uzun) { return M(ad, 10.5f - uzun / 2f - 0.02f, 0f, 6.60f, -1f, 0f); }
     static KatSusu SifonyerA(string ad, float derin) { return M(ad, 7.70f + derin / 2f + 0.02f, 0f, 5.90f, 1f, 0f); }
     static KatSusu YatakB() { return M("vintage_day_bed", 7.6f - 0.43f - 0.02f, 0f, 6.60f, -1f, 0f); }
@@ -90,7 +92,7 @@ public static partial class GrayboxKurucu
                 m.Add(Avize("Chandelier_02"));
                 m.Add(SalonCercevesi("fancy_picture_frame_01"));
                 m.Add(AntreSehpasi());
-                m.Add(Foto("kat2", false, 2.35f, 0.55f, 1.60f, -1f, 0f));      // Nuri Bey ve Rıza Efendi
+                m.Add(Foto("kat2", false, 2.35f, 0.62f, 1.60f, -1f, 0f));      // Nuri Bey ve Rıza Efendi
                 m.Add(HolCercevesi("hanging_picture_frame_02"));
                 m.Add(YatakA("GothicBed_01", 2.04f));
                 m.Add(SifonyerA("GothicCommode_01", 0.58f));
@@ -105,7 +107,7 @@ public static partial class GrayboxKurucu
                 m.Add(Avize("Chandelier_01"));
                 m.Add(SalonCercevesi("hanging_picture_frame_02"));
                 m.Add(AntreSehpasi());
-                m.Add(M("ceramic_vase_01", 2.35f, 0.55f, 1.60f, -1f, 0f));
+                m.Add(M("ceramic_pot", 2.28f, 0f, 2.30f, -1f, 0f));           // #81: sırlı toprak çömlek, komodinin yanında yerde
                 m.Add(Foto("kat3", true, 3.80f, 1.60f, 4.65f, 0f, -1f));       // Kerem'in yaş günü
                 m.Add(HolSaati());
                 m.Add(YatakA("vintage_day_bed", 0.85f));   // Oda A'da gündüz yatağı (yatak odası sade)
@@ -117,7 +119,7 @@ public static partial class GrayboxKurucu
             case 4:   // Boş ve elektriksiz: neredeyse hiçbir şey; karanlıkta ayna ve durmuş saat.
                 m.Add(AntreAynasi());
                 m.Add(M("Ottoman_01", 3.00f, 0f, 6.30f, 0.2f, 1f));
-                m.Add(M("wall_clock", 5.0f, 1.90f, 5.30f, -1f, 0f));   // v 7,2'de fosforlu şifre var
+                m.Add(M("vintage_telephone_wall_clock", 5.0f, 1.55f, 5.30f, -1f, 0f));   // v 7,2'de fosforlu şifre var
                 // Geride bırakılmış orta sehpa: sofra ile gardırop arasındaki boşlukta, uzun kenarı v boyunca
                 // (model x'i ön yönüne dik; ön yön +u). Gardıroba ~25 cm, sofranın sandalyelerine ~15 cm kalır.
                 m.Add(M("CoffeeTable_01", 1.45f, 0f, 6.10f, 1f, 0f));
@@ -169,13 +171,22 @@ public static partial class GrayboxKurucu
                 m.Add(M("Ottoman_01", 4.40f, 0f, 6.60f, -1f, 0f));
                 // Oda B toplantı odası: ortada yuvarlak masa (1,3 m). Oyuncak sandığına (u 5,3 v 7,3,
                 // zincirin yeri) ve kapıya (hol duvarı, v 4,75) yol bırakır.
-                m.Add(M("coffee_table_round_01", 6.35f, 0f, 6.30f, 0f, 1f));
+                m.Add(M("small_wooden_table_01", 6.35f, 0f, 6.30f, 0f, 1f));  // #81: mermer tablalı modern masanın yerine küçük ahşap masa
                 m.Add(Avize("Chandelier_01"));
                 m.Add(AntreAynasi());
-                m.Add(M("wall_clock", 5.0f, 1.90f, 7.15f, -1f, 0f));
+                m.Add(M("vintage_telephone_wall_clock", 5.0f, 1.55f, 7.15f, -1f, 0f));
                 m.Add(SifonyerA("GothicCommode_01", 0.58f));
                 m.Add(Foto("kat8", true, 3.80f, 1.60f, 4.65f, 0f, -1f));       // 1974 iskân töreni
                 break;
+        }
+        // MUTFAK (#81, Şahan): her dairede fırınlı beyaz ocak, buzdolabının yanında dış duvara (v = -0,8)
+        // yaslı; yaşanan evlerde üstünde eski çaydanlık. Taşınan aile (1) ve boş daire (4) çaydanlığı götürmüş.
+        m.Add(M("electric_stove", 8.30f, 0f, -0.8f + 0.34f, 0f, 1f));
+        if (kat != 1 && kat != 4) m.Add(M("vintage_electric_kettle", 8.36f, 0.86f, -0.48f, 0.3f, 1f));
+        if (v.ikinciDaire > 0)   // 6. kat: iki daire birlikte açık, ikincisinin mutfağı da
+        {
+            m.Add(M("electric_stove", 8.30f, 0f, -0.8f + 0.34f, 0f, 1f, KilitZinciri.IkinciOnek));
+            m.Add(M("vintage_electric_kettle", 8.36f, 0.86f, -0.48f, 0.3f, 1f, KilitZinciri.IkinciOnek));
         }
         v.suslar.AddRange(m);
         EditorUtility.SetDirty(v);

@@ -177,11 +177,11 @@ MonoBehaviour:
     OnU: -1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 246261370235220362, guid: 821daf35abaeb4640a9007f3e6249a58, type: 3}
+    Sablon: {fileID: 153515130804803642, guid: a78e6e60e66ddf54ba56083a72f658d6, type: 3}
     Metin: 
   - Yol: 
     X: 2.35
-    Y: 0.55
+    Y: 0.62
     Z: 1.6
     Donus: 0
     OnU: -1
@@ -228,6 +228,26 @@ MonoBehaviour:
     OnV: -1
     Yatik: 0
     Sablon: {fileID: 2115781984987569264, guid: 777dae95170c120408f8a920b527acb5, type: 3}
+    Metin: 
+  - Yol: 
+    X: 8.3
+    Y: 0
+    Z: -0.46
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 8155458018765825896, guid: 01f771af6036d29498ac1a00819b4ae1, type: 3}
+    Metin: 
+  - Yol: 
+    X: 8.36
+    Y: 0.86
+    Z: -0.48
+    Donus: 0
+    OnU: 0.3
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 6074168209427321076, guid: 928be3d2bd1d09e42ae7543543a36088, type: 3}
     Metin: 
   sesler:
   - Yol: Esyalar/Radyo

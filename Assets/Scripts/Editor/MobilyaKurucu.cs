@@ -150,6 +150,13 @@ public static class MobilyaKurucu
                     // ms haritası varken bu değer çarpandır (haritanın A kanalı asıl değer). 0,55: tozlu
                     // yüzey matlaşır, cilalı ahşap ve deri eskisi kadar parlamaz (#78).
                     x.SetFloat("_Smoothness", 0.55f);
+                    // AYNA (#81): aynanın camı tam metal ve parlak; yansıtacağı tek şey gece göğü
+                    // olduğu için simsiyah bir delik gibi görünüyordu. "Ortam yansımalarını kapat"
+                    // (URP Lit: _EnvironmentReflections = 0) deyince metal yüzey gökyüzü yerine sahnenin
+                    // ortam ışığından renk alır: karanlıkta soluk, kafa lambası vurunca parlayan kirli bir cam.
+                    bool ayna = ad.StartsWith("ornate_mirror");
+                    x.SetFloat("_EnvironmentReflections", ayna ? 0f : 1f);
+                    if (ayna) x.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF"); else x.DisableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
                     KirKurucu.KirEkle(x, 3f, 0.9f);
                 });
             }

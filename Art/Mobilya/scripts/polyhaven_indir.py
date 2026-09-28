@@ -20,18 +20,21 @@ MODELLER = [
     # Salon: oturma
     "Sofa_01", "sofa_02", "ArmChair_01", "GreenChair_01", "Rockingchair_01", "Ottoman_01",
     # Salon: sehpa, dolap, TV, avize
-    "CoffeeTable_01", "side_table_01", "coffee_table_round_01",
+    "CoffeeTable_01", "small_wooden_table_01", "painted_wooden_nightstand",
     "ClassicConsole_01", "GothicCommode_01", "painted_wooden_cabinet", "vintage_wooden_drawer_01",
     "Television_01", "television_02", "Chandelier_01", "Chandelier_02",
     # Duvar: ayna, çerçeveler, saatler
     "ornate_mirror_01", "fancy_picture_frame_01", "hanging_picture_frame_02", "standing_picture_frame_01",
-    "wall_clock", "mantel_clock_01",
+    "vintage_telephone_wall_clock", "mantel_clock_01",
     # Yatak odaları
     "GothicBed_01", "vintage_day_bed",
     # Diğer
-    "vintage_suitcase", "throw_pillows_01", "ceramic_vase_01",
+    "vintage_suitcase", "throw_pillows_01", "ceramic_pot",
     # Sandalyeler (Şahan'ın seçimi, 2026-09-28): plastik ve boyalı sandalyenin (01) yerine
     "SchoolChair_01", "painted_wooden_chair_02",
+    # 90'lar denetimi (#81, Şahan'ın seçimleri, 2026-09-28): kapıcı odası, mutfak, bulmaca eşyalarının yeni görünümü
+    "WoodenTable_01", "painted_wooden_cabinet_02", "alarm_clock_01", "electric_stove", "vintage_electric_kettle",
+    "GothicCabinet_01", "vintage_cabinet_01", "treasure_chest",
 ]
 
 BASLIK = {"User-Agent": "huzur-apartmani-asset-script/1.0"}

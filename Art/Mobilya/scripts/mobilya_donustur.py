@@ -31,8 +31,11 @@ FBX_KLASORU = os.path.join(PROJE, "Assets", "Models", "Mobilya")
 DOKU_KLASORU = os.path.join(FBX_KLASORU, "Dokular")
 
 # Yerleştirme türü: "zemin" (varsayılan), "duvar" (arka yüzü duvara), "tavan" (tepesinden asılır).
-DUVAR = {"ornate_mirror_01", "fancy_picture_frame_01", "hanging_picture_frame_02", "wall_clock"}
+DUVAR = {"ornate_mirror_01", "fancy_picture_frame_01", "hanging_picture_frame_02", "vintage_telephone_wall_clock"}
 TAVAN = {"Chandelier_01", "Chandelier_02"}
+# Tek parça kalacaklar (#81): açılır parçası olsa da oyunda açılmaz, gövdeye birleşir. Ocağın fırın kapağı
+# alttan menteşelidir; yan menteşeli dolap kapağı gibi açılsaydı tuhaf dururdu.
+TEK_PARCA = {"electric_stove"}
 
 
 def yerlesim(kimlik):
@@ -155,7 +158,7 @@ def donustur(kimlik):
         ad = o.name.lower()
         if o.material_slots and o.material_slots[0].material and rol(o.material_slots[0].material.name) == "resim" and len(o.material_slots) == 1:
             resimler.append(o)
-        elif ("drawer" in ad or "door" in ad) and "body" not in ad:
+        elif ("drawer" in ad or "door" in ad) and "body" not in ad and kimlik not in TEK_PARCA:
             # "vintage_wooden_drawer_01_body": modelin adında "drawer" geçiyor ama bu gövde.
             d = o.dimensions
             # Derin parça (>15 cm) çekmecedir; ince olan kapaktır (şifonyerin "door"ları aslında çekmece).
