@@ -29,7 +29,9 @@ MODELLER = [
     # Yatak odaları
     "GothicBed_01", "vintage_day_bed",
     # Diğer
-    "vintage_suitcase", "throw_pillows_01", "ceramic_vase_01", "plastic_monobloc_chair_01", "painted_wooden_chair_01",
+    "vintage_suitcase", "throw_pillows_01", "ceramic_vase_01",
+    # Sandalyeler (Şahan'ın seçimi, 2026-09-28): plastik ve boyalı sandalyenin (01) yerine
+    "SchoolChair_01", "painted_wooden_chair_02",
 ]
 
 BASLIK = {"User-Agent": "huzur-apartmani-asset-script/1.0"}

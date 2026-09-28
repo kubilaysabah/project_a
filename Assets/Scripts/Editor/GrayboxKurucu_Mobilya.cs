@@ -75,9 +75,9 @@ public static partial class GrayboxKurucu
                 m.Add(AntreAynasi());
                 m.Add(M("television_02", 2.95f, 0f, 5.05f, 0.2f, 1f));            // yerde bırakılmış TV
                 m.Add(Foto("kat1", true, 5.0f, 1.55f, 7.15f, -1f, 0f));        // duvarda unutulmuş aile fotoğrafı
-                m.Add(M("plastic_monobloc_chair_01", 4.30f, 0f, 6.60f, -1f, 0.3f));
+                m.Add(M("SchoolChair_01", 4.30f, 0f, 6.60f, -1f, 0.3f));            // okul sandalyesi (Şahan, plastiğin yerine)
                 m.Add(HolSaati());
-                m.Add(M("painted_wooden_chair_01", 5.70f, 0f, 5.60f, 1f, 0.2f));  // Oda B
+                m.Add(M("painted_wooden_chair_02", 5.70f, 0f, 5.60f, 1f, 0.2f));  // Oda B
                 break;
 
             case 2:   // Nuri: yaşlı bir adamın klasik evi.
@@ -110,14 +110,17 @@ public static partial class GrayboxKurucu
                 m.Add(HolSaati());
                 m.Add(YatakA("vintage_day_bed", 0.85f));   // Oda A'da gündüz yatağı (yatak odası sade)
                 m.Add(SifonyerA("vintage_wooden_drawer_01", 0.46f));
-                m.Add(M("painted_wooden_chair_01", 5.70f, 0f, 5.60f, 1f, 0.2f));  // Oda B
-                m.Add(M("plastic_monobloc_chair_01", 8.40f, 0f, 1.00f, 0.3f, 1f)); // mutfak
+                m.Add(M("painted_wooden_chair_02", 5.70f, 0f, 5.60f, 1f, 0.2f));  // Oda B
+                m.Add(M("SchoolChair_01", 8.40f, 0f, 1.00f, 0.3f, 1f));            // mutfak
                 break;
 
             case 4:   // Boş ve elektriksiz: neredeyse hiçbir şey; karanlıkta ayna ve durmuş saat.
                 m.Add(AntreAynasi());
                 m.Add(M("Ottoman_01", 3.00f, 0f, 6.30f, 0.2f, 1f));
                 m.Add(M("wall_clock", 5.0f, 1.90f, 5.30f, -1f, 0f));   // v 7,2'de fosforlu şifre var
+                // Geride bırakılmış orta sehpa: sofra ile gardırop arasındaki boşlukta, uzun kenarı v boyunca
+                // (model x'i ön yönüne dik; ön yön +u). Gardıroba ~25 cm, sofranın sandalyelerine ~15 cm kalır.
+                m.Add(M("CoffeeTable_01", 1.45f, 0f, 6.10f, 1f, 0f));
                 m.Add(Foto("kat4", true, 3.80f, 1.60f, 4.65f, 0f, -1f));       // eski kiracılar (holde)
                 break;
 
@@ -164,6 +167,9 @@ public static partial class GrayboxKurucu
                 m.Add(M("mantel_clock_01", 3.10f, 0.55f, 4.98f, 0f, 1f));
                 m.Add(Berjer("GreenChair_01"));
                 m.Add(M("Ottoman_01", 4.40f, 0f, 6.60f, -1f, 0f));
+                // Oda B toplantı odası: ortada yuvarlak masa (1,3 m). Oyuncak sandığına (u 5,3 v 7,3,
+                // zincirin yeri) ve kapıya (hol duvarı, v 4,75) yol bırakır.
+                m.Add(M("coffee_table_round_01", 6.35f, 0f, 6.30f, 0f, 1f));
                 m.Add(Avize("Chandelier_01"));
                 m.Add(AntreAynasi());
                 m.Add(M("wall_clock", 5.0f, 1.90f, 7.15f, -1f, 0f));

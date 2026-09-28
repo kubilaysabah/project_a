@@ -9,6 +9,8 @@ sürümü `scripts/mobilya_donustur.py` (Blender) üretir: `Assets/Models/Mobily
 
 Klozet (`Art/Blender/scripts/klozet.py`) Poly Haven'da yok; projenin kendi Blender betiği.
 
+Şahan'ın seçimiyle (2026-09-28) `painted_wooden_chair_01` ve `plastic_monobloc_chair_01` çıkarıldı; yerlerine `painted_wooden_chair_02` ve `SchoolChair_01` indirildi.
+
 | Kimlik | Ad | Yazar(lar) | Kaynak | Lisans |
 |---|---|---|---|---|
 | `ArmChair_01` | Arm Chair 01 | Kirill Sannikov | [polyhaven.com/a/ArmChair_01](https://polyhaven.com/a/ArmChair_01) | CC0 1.0 |
@@ -30,8 +32,8 @@ Klozet (`Art/Blender/scripts/klozet.py`) Poly Haven'da yok; projenin kendi Blend
 | `mantel_clock_01` | Mantel Clock 01 | Yann Kervran, Rico Cilliers | [polyhaven.com/a/mantel_clock_01](https://polyhaven.com/a/mantel_clock_01) | CC0 1.0 |
 | `ornate_mirror_01` | Ornate Mirror 01 | James Ray Cock | [polyhaven.com/a/ornate_mirror_01](https://polyhaven.com/a/ornate_mirror_01) | CC0 1.0 |
 | `painted_wooden_cabinet` | Painted Wooden Cabinet | Kirill Sannikov | [polyhaven.com/a/painted_wooden_cabinet](https://polyhaven.com/a/painted_wooden_cabinet) | CC0 1.0 |
-| `painted_wooden_chair_01` | Painted Wooden Chair 01 | Kuutti Siitonen | [polyhaven.com/a/painted_wooden_chair_01](https://polyhaven.com/a/painted_wooden_chair_01) | CC0 1.0 |
-| `plastic_monobloc_chair_01` | Plastic Monobloc Chair 01 | Kuutti Siitonen | [polyhaven.com/a/plastic_monobloc_chair_01](https://polyhaven.com/a/plastic_monobloc_chair_01) | CC0 1.0 |
+| `painted_wooden_chair_02` | Painted Wooden Chair 02 | Kirill Sannikov | [polyhaven.com/a/painted_wooden_chair_02](https://polyhaven.com/a/painted_wooden_chair_02) | CC0 1.0 |
+| `SchoolChair_01` | School Chair 01 | Ethan Place | [polyhaven.com/a/SchoolChair_01](https://polyhaven.com/a/SchoolChair_01) | CC0 1.0 |
 | `side_table_01` | Side Table 01 | James Ray Cock | [polyhaven.com/a/side_table_01](https://polyhaven.com/a/side_table_01) | CC0 1.0 |
 | `sofa_02` | Sofa 02 | Kirill Sannikov | [polyhaven.com/a/sofa_02](https://polyhaven.com/a/sofa_02) | CC0 1.0 |
 | `standing_picture_frame_01` | Standing Picture Frame 01 | James Ray Cock | [polyhaven.com/a/standing_picture_frame_01](https://polyhaven.com/a/standing_picture_frame_01) | CC0 1.0 |

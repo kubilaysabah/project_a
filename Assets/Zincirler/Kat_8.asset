@@ -434,6 +434,16 @@ MonoBehaviour:
     Sablon: {fileID: 5902982433520243845, guid: 7d6fa98f2460d534c8b686b82e22f2c0, type: 3}
     Metin: 
   - Yol: 
+    X: 6.35
+    Y: 0
+    Z: 6.3
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 2430587212267966409, guid: 4e132788da3090940a424d353d47c343, type: 3}
+    Metin: 
+  - Yol: 
     X: 2.8
     Y: 2.8
     Z: 6.3

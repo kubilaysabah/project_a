@@ -308,7 +308,7 @@ MonoBehaviour:
     OnU: 1
     OnV: 0.2
     Yatik: 0
-    Sablon: {fileID: 7424505426031823278, guid: e9f7af3c197d5b9458f66549cda317ba, type: 3}
+    Sablon: {fileID: 3225832680137285329, guid: 075216c72d34b2341bfe20f19cba76f8, type: 3}
     Metin: 
   - Yol: 
     X: 8.4
@@ -318,7 +318,7 @@ MonoBehaviour:
     OnU: 0.3
     OnV: 1
     Yatik: 0
-    Sablon: {fileID: 3226188752472143075, guid: 0b022382b8850984a9fddc3ed341de07, type: 3}
+    Sablon: {fileID: 5648442490865177686, guid: e7d45cf6b38313d408368d7f902bf505, type: 3}
     Metin: 
   sesler: []
   parcalar:
