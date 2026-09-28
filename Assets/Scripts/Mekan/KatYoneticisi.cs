@@ -371,6 +371,14 @@ public class KatYoneticisi : MonoBehaviour
     private void AcilisiBaslat()
     {
         acilisModu = true;
+
+        // #56: kafa lambası henüz oyuncuda değil; odadaki çivide asılı ve yanıyor (CividekiLamba).
+        // Oyuncu onu alınca kafasına takılır. Kayıttan devamda buraya hiç gelinmez: lamba takılı kalır.
+        // SIRA ÖNEMLİ: zemin kattan ÖNCE. Zemin kat etkinleşince çivideki lamba OnEnable'da "oyuncuda
+        // lamba var mı" diye bakar; lamba hâlâ takılıysa kendini gizler ve oyuncu onu hiç bulamaz.
+        KafaLambasi lamba = oyuncu.GetComponentInChildren<KafaLambasi>(true);
+        if (lamba != null) lamba.Birak();
+
         zeminKat.SetActive(true);
         if (sahteAlt1 != null) sahteAlt1.SetActive(false);
 

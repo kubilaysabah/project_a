@@ -1392,6 +1392,65 @@ public static partial class GrayboxKurucu
         panoSeri.FindProperty("kagitMalzemesi").objectReferenceValue = kagit;
         panoSeri.ApplyModifiedPropertiesWithoutUndo();
 
+        // ÇİVİ VE CEMAL'İN KAFA LAMBASI (#56): yan duvarda (z = zArka, yüzü odaya +z), yatağın ayak
+        // ucuyla kapı arasında, göz hizasının biraz altında. Oyuncu uyanınca sağ önünde görür. Lamba
+        // çivide asılıyken yanıyor: karanlık odanın tek ışığı (notu da o gösterir). Kapıya 1,15 m uzak:
+        // daha yakında, içeri ardına kadar açık kapının kanadı (z ≈ -1,05'te, x -3,7 ile -4,6 arası)
+        // ışığı kesiyor ve odayı karanlıkta bırakıyordu. İki parçanın pivotu da çivinin duvara girdiği
+        // nokta, ikisi aynı yere konur. Model yoksa (FBX silinmişse) atlanır.
+        Vector3 civiYeri = new Vector3(icX - 1.15f, 1.62f, zArka);
+        Model("Civi", o, "Kafa_Lambasi", "Civi", civiYeri, 0f, carpisma: false);
+        GameObject asiliLamba = Model("Cividen_Lamba", o, "Kafa_Lambasi", "Lamba", civiYeri, 0f, carpisma: true);
+        if (asiliLamba != null)
+        {
+            // Lambanın camı: parlayan ampul camının malzemesiyle küçük bir disk (bloom hale yapar),
+            // yani oyuncu ışığın nereden geldiğini görür. Çarpıştırıcısı silinir: nişan lambaya gelsin.
+            GameObject camIsigi = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            camIsigi.name = "Cam_Isigi";
+            Object.DestroyImmediate(camIsigi.GetComponent<Collider>());
+            camIsigi.transform.SetParent(asiliLamba.transform, false);
+            camIsigi.transform.localPosition = new Vector3(0f, -0.202f, 0.0585f);   // modelin camının önü
+            camIsigi.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);       // silindirin ekseni +z'ye
+            camIsigi.transform.localScale = new Vector3(0.029f, 0.001f, 0.029f);
+            camIsigi.GetComponent<MeshRenderer>().sharedMaterial = CamMalzeme();
+
+            // Lambanın ışığı: camdan odaya, 35° aşağı ve biraz kapıya (+x) eğik, geniş bir spot.
+            // Odanın ortasını, masayı ve kapının dibindeki notu aydınlatır: oyuncu kapıya dönük uyanır,
+            // ilk gördüğü şey ışıkta duran not olsun. Tek hareketsiz spot, gölgesi ucuz; gölge odaya
+            // derinlik verir.
+            GameObject isikNesne = new GameObject("Isik");
+            isikNesne.transform.SetParent(asiliLamba.transform, false);
+            isikNesne.transform.localPosition = new Vector3(0f, -0.202f, 0.075f);
+            // +x dönüşü ileriyi aşağı eğer; +y dönüşü ileriyi (+z) kapıya (+x) çevirir.
+            isikNesne.transform.localRotation = Quaternion.Euler(35f, 8f, 0f);
+            Light civiIsigi = isikNesne.AddComponent<Light>();
+            civiIsigi.type = LightType.Spot;
+            civiIsigi.spotAngle = 105f;
+            civiIsigi.innerSpotAngle = 55f;
+            civiIsigi.range = 7f;
+            civiIsigi.intensity = 4f;
+            civiIsigi.color = KafaLambasi.Renk;             // kafadaki lambayla aynı sıcak beyaz: aynı lamba
+            civiIsigi.shadows = LightShadows.Soft;
+
+            // Saçılma: camın çevresine sızan ışık. Spot yalnızca önünü aydınlatır; lambanın kendisi,
+            // kayışı ve çivi karanlıkta kalıp görünmüyordu. Kısa menzilli, gölgesiz, loş bir nokta
+            // ışık lambayı ve arkasındaki duvarı hafifçe gösterir: oyuncu ışığın kaynağını bulur.
+            GameObject sacilim = new GameObject("Sacilim");
+            sacilim.transform.SetParent(asiliLamba.transform, false);
+            sacilim.transform.localPosition = new Vector3(0f, -0.15f, 0.18f);
+            Light sacilimIsigi = sacilim.AddComponent<Light>();
+            sacilimIsigi.type = LightType.Point;
+            sacilimIsigi.range = 0.9f;
+            sacilimIsigi.intensity = 0.12f;   // 0,35'te lambanın kırmızı gövdesi bembeyaz görünüyordu
+            sacilimIsigi.color = KafaLambasi.Renk;
+            sacilimIsigi.shadows = LightShadows.None;
+
+            CividekiLamba cl = asiliLamba.AddComponent<CividekiLamba>();
+            var clSeri = new SerializedObject(cl);
+            clSeri.FindProperty("isik").objectReferenceValue = civiIsigi;
+            clSeri.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         // Oda lambası: loş, sıcak, gölgesiz tek bir ampul.
         GameObject lamba = new GameObject("Oda_Lambasi");
         lamba.transform.SetParent(o, false);

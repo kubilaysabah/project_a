@@ -2,7 +2,9 @@
 // Kapıcının kafa lambası (#51): bina artık karanlık, ışığı oyuncu taşır.
 //
 // Hikâye bağı: lamba önceki kapıcı Cemal'in; oyunun ilk dakikasında kapıcı odasındaki
-// çividen alınır (o sahne #56'da). Şimdilik oyuncu lambayla başlar.
+// çividen alınır (#56, CividekiLamba). Açılışla başlayan oyunda KatYoneticisi Birak() der:
+// lamba "takılı değil", ışık sönük, L bir şey yapmaz. Çivideki lamba alınınca Tak() çağrılır.
+// Kayıttan devam eden ya da açılışsız başlayan oyunda lamba baştan takılıdır.
 //
 // NASIL ÇALIŞIR
 //   - Kameranın çocuğu olan bir SPOT ışık: kamera nereye bakarsa huzme oraya. Oyuncu yalnızca
@@ -38,7 +40,11 @@ public class KafaLambasi : MonoBehaviour
     private AudioSource kaynak;
     private AudioClip tik;
     private bool acik = true;
+    private bool takili = true;   // lamba oyuncunun kafasında mı (açılışta çividen alınana kadar değil)
     private Coroutine titreme;
+
+    /// <summary>Lamba oyuncunun kafasında mı? Açılışta çividen alınana kadar false (#56).</summary>
+    public bool Takili { get { return takili; } }
 
     /// <summary>Lamba şu an yanıyor mu (senaryolu sönme sırasında da false).</summary>
     public bool Acik { get { return acik; } }
@@ -73,15 +79,39 @@ public class KafaLambasi : MonoBehaviour
     {
         // Menü açıkken ve başlık ekranında tuş okunmaz (kontrolcü zaten kapalı, bu bileşen değil).
         if (DuraklatmaMenusu.BaslikEkraninda || Time.timeScale == 0f) return;
+        if (!takili) return;   // lamba henüz çivide: kafada yanacak bir şey yok
 
         bool l = Keyboard.current != null && Keyboard.current.lKey.wasPressedThisFrame;
         bool omuz = Gamepad.current != null && Gamepad.current.leftShoulder.wasPressedThisFrame;
         if (l || omuz) Degistir();
     }
 
+    /// <summary>
+    /// Lamba oyuncuda değil (açılış, #56): ışık söner ve takılana kadar tuş da senaryolu
+    /// titreme/sönme de bir şey yapmaz. KatYoneticisi açılışı başlatırken çağırır.
+    /// </summary>
+    public void Birak()
+    {
+        takili = false;
+        acik = false;
+        if (titreme != null) { StopCoroutine(titreme); titreme = null; }
+        Uygula(false);
+    }
+
+    /// <summary>Çividen alınan lamba kafaya takılır ve yanar, anahtar tıkıyla (#56, CividekiLamba).</summary>
+    public void Tak()
+    {
+        if (takili) return;
+        takili = true;
+        acik = true;
+        Uygula(true);
+        if (tik != null) kaynak.PlayOneShot(tik, 0.35f);
+    }
+
     /// <summary>Lambayı açar ya da kapatır (oyuncunun tuşu).</summary>
     public void Degistir()
     {
+        if (!takili) return;
         acik = !acik;
         if (titreme != null) { StopCoroutine(titreme); titreme = null; }
         Uygula(acik);
@@ -102,6 +132,7 @@ public class KafaLambasi : MonoBehaviour
     /// <summary>Senaryolu sönme: 'sure' saniye kapanır, sonra kendiliğinden yanar (oyuncu açmaya çalışırsa yanmaz).</summary>
     public void Sondur(float sure)
     {
+        if (!takili) return;   // kafada lamba yokken söndürülecek bir şey de yok
         if (titreme != null) StopCoroutine(titreme);
         titreme = StartCoroutine(SonmeAkisi(sure));
     }

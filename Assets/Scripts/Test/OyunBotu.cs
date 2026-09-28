@@ -112,6 +112,13 @@ public class OyunBotu : MonoBehaviour
         // Açılış: kapıcı odasındaysa (zemin kat, y < -1) merdivenden 1. kata yürü.
         if (kontrol.transform.position.y < -1f)
         {
+            // #56: önce çivideki kafa lambası alınır (alınmadan oyuncunun lambası yanmaz).
+            CividekiLamba civi = FindAnyObjectByType<CividekiLamba>();
+            KafaLambasi kafa = FindAnyObjectByType<KafaLambasi>();
+            if (kafa != null && kafa.Takili) Sorun("açılışta kafa lambası zaten takılı (çivide olmalıydı)");
+            if (civi == null || !civi.EtkilesimeAcik) Sorun("açılışta çivide alınacak kafa lambası yok");
+            else { civi.Etkilesim(kontrol.gameObject); yield return new WaitForSeconds(0.5f); }
+            if (kafa != null && (!kafa.Takili || !kafa.Acik)) Sorun("çividen alınan kafa lambası takılmadı ya da yanmıyor");
             Yaz("açılış: kapıcı odasından 1. kata yürüyor");
             yield return Yuru(new[] { new Vector3(-3.4f, 0, -1.45f), new Vector3(1.1f, 0, -0.3f) }, "kapıcı odası -> sahanlık");
             yield return Merdivenden(null);
