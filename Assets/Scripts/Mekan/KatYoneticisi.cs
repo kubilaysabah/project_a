@@ -1145,6 +1145,24 @@ public class KatYoneticisi : MonoBehaviour
     /// <summary>Kaçışta yakalanıldı: katı baştan kurar (KacisAni çağırır).</summary>
     public void KacistaYakalandi(int kat) { StartCoroutine(KatiBastanKur(kat, kilitleriSil: true)); }
 
+    // ---------- KATI SIFIRLA (Esc menüsü, Şahan 2026-09-28) ----------
+    // Bir katta bir hata oyuncuyu sıkıştırırsa (bir eşya ulaşılmaz yere düştü, bir kapı takıldı) oyuncu
+    // katı baştan oynayabilsin. Kovalamacada yakalanmakla aynı yol: karartma, el boşalır, katın kilitleri ve
+    // parçaları kayıttan silinir, oyuncu katın başına alınır, daire yeniden kurulur. Bulunan aletler kalır.
+    private bool sifirlaniyor;
+
+    /// <summary>Menü "Katı Sıfırla"yı gösterebilir mi: açılışta (kapıcı odası), finalde ve bir sıfırlama
+    /// sürerken hayır.</summary>
+    public bool KatSifirlanabilir { get { return sayac != null && oyuncu != null && !acilisModu && !catiAcildi && !sifirlaniyor; } }
+
+    /// <summary>Oyuncunun ulaştığı katı baştan kurar (Esc → Katı Sıfırla).</summary>
+    public void KatiSifirla()
+    {
+        if (!KatSifirlanabilir) return;
+        Debug.Log($"[KAT] Oyuncu {MevcutKat}. katı menüden sıfırladı.");
+        StartCoroutine(KatiBastanKur(MevcutKat, kilitleriSil: true));
+    }
+
     /// <summary>
     /// 6. katın saklanma anında görüldü (#58, SaklanmaAni): karanlık, oyuncu katın başında uyanır;
     /// ama kovalamacadan farklı olarak çözülmüş kilitler çözülmüş kalır (#58'in ilk kuralı). Elindeki
@@ -1154,6 +1172,7 @@ public class KatYoneticisi : MonoBehaviour
 
     private IEnumerator KatiBastanKur(int kat, bool kilitleriSil)
     {
+        sifirlaniyor = true;
         // Karanlıkta oyuncu yürüyemesin.
         BirinciSahisKontrolcu kontrol = oyuncu != null ? oyuncu.GetComponent<BirinciSahisKontrolcu>() : null;
         if (kontrol != null) kontrol.enabled = false;
@@ -1181,6 +1200,7 @@ public class KatYoneticisi : MonoBehaviour
         // 1,2 sn'de ekran açılır.
         for (float t = 1f; t > 0f; t -= Time.deltaTime / 1.2f) { yakalanmaKarartmasi = t; yield return null; }
         yakalanmaKarartmasi = 0f;
+        sifirlaniyor = false;
     }
 
     private void OyuncuyuBasaAl()

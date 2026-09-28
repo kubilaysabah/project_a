@@ -60,7 +60,34 @@ public class DuraklatmaMenusu : MonoBehaviour
 
     // ---------- KLAVYE / KOL İLE GEZİNME (#29) ----------
     // Öğelerin sırası (yukarıdan aşağı). Numara, gezginin "Secili" değeriyle eşleşir.
-    private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaFoto = 3, AnaDil = 4, AnaCik = 5, AnaOgeSayisi = 6;
+    // AnaSifirla (Katı Sıfırla, Şahan 2026-09-28): yalnızca oyunda, bir kat oynanırken görünür; başlık ekranında,
+    // açılışta ve finalde gizli, gezinme onu atlar (SifirlamaGorunur).
+    private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaFoto = 3, AnaSifirla = 4, AnaDil = 5, AnaCik = 6, AnaOgeSayisi = 7;
+
+    // ---------- KATI SIFIRLA ----------
+    // Bir katta bir hata oyuncuyu sıkıştırırsa katı baştan oynayabilsin. Yanlışlıkla basılmasın diye iki adımlı:
+    // ilk basış "Emin misin?" sorar, ikincisi menüyü kapatır ve katı sıfırlar. Seçim başka düğmeye geçince ya da
+    // menü kapanınca soru geri alınır. Sıfırlamayı kat yöneticisi yapar (KatYoneticisi.KatiSifirla); menü önce
+    // kapanır ki oyun saati akıp karartma oynayabilsin.
+    private KatYoneticisi yonetici;
+    private bool sifirlaOnay, sifirlaIstendi;
+
+    private KatYoneticisi Yonetici()
+    {
+        if (yonetici == null) yonetici = FindAnyObjectByType<KatYoneticisi>();
+        return yonetici;
+    }
+
+    private bool SifirlamaGorunur { get { return !baslikta && Yonetici() != null && Yonetici().KatSifirlanabilir; } }
+
+    private void SifirlaBas()
+    {
+        if (!SifirlamaGorunur) return;
+        if (!sifirlaOnay) { sifirlaOnay = true; return; }   // ilk basış: yalnızca sor
+        sifirlaOnay = false;
+        sifirlaIstendi = true;
+        DevamIste();
+    }
     private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3,
                       AyarKontroller = 4, AyarVarsayilan = 5, AyarGeri = 6, AyarOgeSayisi = 7;
 
@@ -205,7 +232,14 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         // unscaledTime: oyun saati durmuşken de ilerleyen gerçek zaman.
         if (dikeyTekrar.Guncelle(dikey, Time.unscaledTime))
-            gezgin.Tasi(yon.y > 0f ? -1 : +1);   // yukarı = listede geri
+        {
+            int adim = yon.y > 0f ? -1 : +1;   // yukarı = listede geri
+            gezgin.Tasi(adim);
+            // Görünmeyen "Katı Sıfırla" atlanır: bir adım daha aynı yöne.
+            if (sayfa == SayfaAna && gezgin.Secili == AnaSifirla && !SifirlamaGorunur) gezgin.Tasi(adim);
+        }
+        // Seçim "Katı Sıfırla"dan ayrılınca "Emin misin?" sorusu geri alınır.
+        if (gezgin.Secili != AnaSifirla || sayfa != SayfaAna) sifirlaOnay = false;
         if (yatayTekrar.Guncelle(yatay, Time.unscaledTime)) Kaydir(yon.x > 0f ? +1 : -1);
 
         bool onay = (onayEylemi != null && onayEylemi.WasPressedThisFrame())
@@ -221,6 +255,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         {
             devamIstendi = false;
             Devam();
+            // Katı Sıfırla: menü kapandı, oyun saati akıyor; şimdi kat baştan kurulur (karartmayla).
+            if (sifirlaIstendi) { sifirlaIstendi = false; if (Yonetici() != null) Yonetici().KatiSifirla(); }
         }
         oncekiKareOynanabilir = !acik && kontrolcu != null && kontrolcu.enabled;
 
@@ -376,6 +412,7 @@ public class DuraklatmaMenusu : MonoBehaviour
                 case AnaAyarlar: SayfaAc(SayfaAyarlar); break;
                 case AnaGoruntu: SayfaAc(SayfaGoruntu); break;
                 case AnaFoto: SayfaAc(SayfaFoto); break;
+                case AnaSifirla: SifirlaBas(); break;
                 case AnaDil: Dil.Sonraki(); break;
                 case AnaCik: OyundanCik(); break;
             }
@@ -557,6 +594,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     private void Ac()
     {
         acik = true;
+        sifirlaOnay = false;
         SayfaAc(SayfaAna);
         gezgin.Sec(AnaDevam);   // menü her zaman ana sayfada, "Devam" seçili açılır
 
@@ -707,7 +745,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         }
         else
         {
-            y = ArayuzOlcegi.Yukseklik / 2f - 260f;   // altı düğme (#69'da Fotoğraflar eklendi)
+            // Altı ya da yedi düğme (#69'da Fotoğraflar, sonra Katı Sıfırla eklendi): yedinci varsa liste yukarı kayar.
+            y = ArayuzOlcegi.Yukseklik / 2f - (SifirlamaGorunur ? 296f : 260f);
             GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.baslik"), baslikStili);
             y += 60f + 2f * ara;
         }
@@ -735,6 +774,19 @@ public class DuraklatmaMenusu : MonoBehaviour
         Vurgula(AnaFoto, r);
         if (GUI.Button(r, Dil.Getir("menu.fotograflar"), dugmeStili)) SayfaAc(SayfaFoto);
         y += boy + ara;
+
+        // Katı Sıfırla: yalnızca oyunda, bir kat oynanırken. İlk basışta düğmenin yazısı soruya döner.
+        if (SifirlamaGorunur)
+        {
+            r = new Rect(x, y, en, boy);
+            Vurgula(AnaSifirla, r);
+            if (GUI.Button(r, Dil.Getir(sifirlaOnay ? "menu.kati_sifirla_onay" : "menu.kati_sifirla"), dugmeStili))
+            {
+                gezgin.Sec(AnaSifirla);
+                SifirlaBas();
+            }
+            y += boy + ara;
+        }
 
         // "Dil: Türkçe" / "Language: English". Dilin adı her zaman kendi dilinde
         // yazılır; İngilizce bir oyuncu da "Türkçe"yi, Türk oyuncu da "English"i tanır.
