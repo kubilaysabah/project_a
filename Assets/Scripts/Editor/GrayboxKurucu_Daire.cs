@@ -374,6 +374,27 @@ public static partial class GrayboxKurucu
             kanat = Kutu("Ic_Kanat", m, kanatMerkez, Boyut(kanatYonu, gen, boy, KanatKalin));
             // Kol: kanadın serbest ucuna yakın, iki yüzünde, 1 m yükseklikte.
             Vector3 dik = new Vector3(-kanatYonu.z, 0f, kanatYonu.x);   // kanadın yüzüne dik yön
+            // TABLALAR (#81, Şahan'ın seçimi: "tablalı boyalı kapı"): iki yüzde alt ve üst dikdörtgen çerçeve,
+            // dörder ince çıta. Adları "Ic_Kasa": DokuKurucu onlara kanadın kirli beyaz yağlı boyasını verir.
+            // Menteşenin çocuğu (kanatla döner), çarpışmasız (kanadın kutusu yeter).
+            float tGen = gen - 0.20f;
+            foreach (float yan in new[] { -1f, 1f })
+                foreach (var t in new[] { (0.18f, 0.95f), (1.08f, boy - 0.18f) })
+                {
+                    Vector3 yuz = dik * yan * (KanatKalin / 2f + 0.005f);
+                    Vector3 orta = kanatYonu * (a.Gen / 2f);
+                    float yOrta = (t.Item1 + t.Item2) / 2f, yBoy = t.Item2 - t.Item1;
+                    var parcalar = new[] {
+                        (orta + Vector3.up * t.Item1, Boyut(kanatYonu, tGen, 0.03f, 0.01f)),
+                        (orta + Vector3.up * t.Item2, Boyut(kanatYonu, tGen, 0.03f, 0.01f)),
+                        (orta - kanatYonu * (tGen / 2f) + Vector3.up * yOrta, Boyut(kanatYonu, 0.03f, yBoy, 0.01f)),
+                        (orta + kanatYonu * (tGen / 2f) + Vector3.up * yOrta, Boyut(kanatYonu, 0.03f, yBoy, 0.01f)) };
+                    foreach (var p in parcalar)
+                    {
+                        GameObject cita = Kutu("Ic_Kasa", m, p.Item1 + yuz, p.Item2);
+                        Object.DestroyImmediate(cita.GetComponent<Collider>());
+                    }
+                }
             foreach (float yan in new[] { -1f, 1f })
                 Kutu("Kol", m, kanatYonu * (a.Gen - 0.08f) + Vector3.up * 1.0f + dik * yan * 0.045f,
                      Boyut(kanatYonu, 0.12f, 0.03f, 0.04f));
@@ -582,7 +603,8 @@ public static partial class GrayboxKurucu
             ayar.ipucuAnahtari = "ipucu.cevir";
         }
         SofraKur(e, d);
-        GameObject gardirop = DaireEsyasi("Gardirop", e, d, 0.03f + 0.14f + 0.275f, 0f, 6.6f, 1f, 0f);
+        // #81: gardırop artık eski vitrinli dolap (%60, derinliği 0,40): vananın 14 cm önünde, sırtı ona dönük.
+        GameObject gardirop = DaireEsyasi("Gardirop", e, d, 0.03f + 0.14f + 0.20f, 0f, 6.6f, 1f, 0f);
         if (gardirop != null)
         {
             // Plan +v yönünün gardırobun kendi eksenlerindeki karşılığı: dört aynalı dairede de
@@ -593,7 +615,7 @@ public static partial class GrayboxKurucu
             var seri = new SerializedObject(a);
             seri.FindProperty("hareket").enumValueIndex = (int)AcilirParca.Hareket.Kaydir;
             seri.FindProperty("eksen").vector3Value = yerelYon;
-            seri.FindProperty("miktar").floatValue = 0.95f;
+            seri.FindProperty("miktar").floatValue = 0.78f;   // #81: 1,21 m'lik dolap vanayı açar, pencere duvarına (v 8,1) çarpmaz
             seri.FindProperty("sure").floatValue = 1.4f;
             seri.FindProperty("ipucuAc").stringValue = "ipucu.it";
             seri.FindProperty("ipucuKapat").stringValue = "ipucu.it";

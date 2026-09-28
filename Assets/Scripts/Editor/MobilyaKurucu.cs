@@ -68,6 +68,14 @@ public static class MobilyaKurucu
             PrefabKur(kimlik, varlikYolu);
             sayi++;
         }
+        // Bulmaca eşyalarının yeni görünümü (#81): büfe, gardırop ve oyuncak kutusu Poly Haven modellerinden
+        // Props klasörüne yazılır (mobilya_donustur.py, BULMACA); malzemeleri de mobilyalarınkiyle aynı adı taşır.
+        // Onları da aynı malzemelere yönlendiririz; prefab kurulmaz, daire kurucu parça parça yerleştirir.
+        foreach (string ad in new[] { "Bufe", "Gardirop", "Oyuncak_Kutusu" })
+        {
+            string yol = "Assets/Models/Props/" + ad + ".fbx";
+            if (File.Exists(yol)) MalzemeleriBagla(yol, cam);
+        }
         AssetDatabase.SaveAssets();
         Debug.Log($"[MOBILYA] {sayi} mobilya prefab'ı kuruldu: {PrefabKlasoru}");
     }

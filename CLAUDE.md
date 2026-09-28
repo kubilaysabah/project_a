@@ -166,6 +166,13 @@ The developer on this project is **Şahan** — the second developer from Moguls
   - **Test tools:** `OyunBotu.Inis(n)` walks down n floors, into the janitor room and back up. Photos and notes save keys are `kayit_fotograflar`/`kayit_notlar` (test slot: `_test`).
   - **Text table edits:** never write `\\n` through a bash heredoc into Python; it became real newlines and split rows (#69). Write a Python file with raw strings.
 
+- **90s audit rules (#81, 2026-09-28).**
+  - **Puzzle props appear only where their floor needs them:** `ZincirUygulayici.BulmacaEsyalariniAyarla` hides `Dosya_Dolabi`, `Gardirop`, `Bufe`, `Oyuncak_Kutusu`, `Alet_Cantasi`, `Duvar_Kolu`, `Boy_Cetveli` unless the floor file references `Esyalar/<name>` (a chain place, a lock part, a note/decor/sound anchor). A new puzzle prop that should not sit in every flat goes into that list.
+  - **Puzzle-prop reskins keep the prop contract:** `mobilya_donustur.py` `BULMACA` writes a second FBX into `Assets/Models/Props/` with the old file and part names (`Bufe` + `Kapi_1/2`, `Oyuncak_Kutusu` + `Kapak`, `Gardirop`), fitted to the old size, the space behind the locked doors carved out; `MobilyaKurucu` remaps their materials to the furniture materials. Item heights inside follow the carved floor (`GrayboxKurucu_Zincir.BufeTaban/SandikTaban`). The old box scripts were deleted so a rerun cannot overwrite them.
+  - **16-bit PNG textures are linear in Blender:** `mobilya_donustur` converts them to sRGB before writing `_renk` (they came out nearly black).
+  - **Blender material colours are linear values:** Unity shows them much lighter (0.16 walnut rendered light tan); pick dark linear values (walnut ≈ 0.05).
+  - The Tezgah FBX has an old "self-intersecting polygon discarded" import warning from the sink boolean; it predates #81.
+
 - **Game logic in plain C# classes**, separate from MonoBehaviours, for testability.
 - **CONTENT IS DATA:** every anomaly is a ScriptableObject card (`AnomalyCard`: id, tier, difficulty, what it changes on the landing). The landing is built/reset from data; adding anomaly #47 must require ZERO new code, only a new asset. This is the whole game — one landing + stair loop modeled once, 60+ data-driven variations.
 - Single modeled space: one landing + one stair flight, looped (player repositioned seamlessly). No open world, no walking nav beyond the loop.

@@ -62,13 +62,14 @@ public static class DokuKurucu
     static readonly Tur Duvar   = new Tur("Doku_Duvar", "worn_plaster_wall", 1.5f, 0.12f, Color.white);
     static readonly Tur Zemin   = new Tur("Doku_Zemin", "marble_mosaic_tiles", 1.5f, 0.45f, Color.white);
     static readonly Tur Tavan   = new Tur("Doku_Tavan", "plaster_grey_04", 1.5f, 0.08f, new Color(0.9f, 0.9f, 0.9f));
-    static readonly Tur Kapi    = new Tur("Doku_Kapi", "sapele_veneer", 1.0f, 0.35f, Color.white);
+    // #81 (Şahan'ın seçimi, "ceviz kaplama çıtalı kapı"): sapele kaplamanın turuncusu koyu cevize çekilir.
+    static readonly Tur Kapi    = new Tur("Doku_Kapi", "sapele_veneer", 1.0f, 0.35f, new Color(0.55f, 0.38f, 0.27f));
     static readonly Tur Cati    = new Tur("Doku_Cati", "worn_concrete_floor", 2.0f, 0.08f, Color.white);
     // Dokusuz, düz renkli küçük parçalar.
     static readonly Tur Demir   = new Tur("Doku_Demir", null, 1f, 0.3f, new Color(0.10f, 0.10f, 0.09f));    // korkuluk dikmeleri: koyu boyalı demir
     static readonly Tur Tirabzan = new Tur("Doku_Tirabzan", null, 1f, 0.35f, new Color(0.22f, 0.12f, 0.07f)); // tirabzan: koyu ahşap
     static readonly Tur Boya    = new Tur("Doku_Boya", null, 1f, 0.3f, new Color(0.78f, 0.76f, 0.70f));     // pencere, plaka, zil: kirli beyaz yağlı boya
-    static readonly Tur Madeni  = new Tur("Doku_Madeni", null, 1f, 0.55f, new Color(0.45f, 0.43f, 0.40f));  // kapı kolu, kapı gözü
+    static readonly Tur Madeni  = new Tur("Doku_Madeni", null, 1f, 0.55f, new Color(0.52f, 0.40f, 0.20f));  // kapı kolu, kapı gözü: eskimiş pirinç (#81)
     static readonly Tur Naylon  = new Tur("Doku_Naylon", null, 1f, 0.6f, new Color(0.04f, 0.04f, 0.045f)); // çöp poşeti: siyah naylon
     static readonly Tur Kumas   = new Tur("Doku_Kumas", null, 1f, 0.05f, new Color(0.70f, 0.68f, 0.62f));   // yastık
     // 3+1 daire (#53). Bu dört tür dairenin EDİTÖRDEKİ görünüşü ve yüzeyin kimliğidir: oyunda
@@ -199,6 +200,7 @@ public static class DokuKurucu
         if (ad.StartsWith("Parapet")) return Tek(Cati);
         if (ad.StartsWith("Duvar") || ad.StartsWith("Oda_Duvar")) return Tek(cati ? Cati : Duvar);
         if (ad == "Kanat" || ad == "CatiKapisi") return Tek(Kapi, yerel: true);
+        if (ad == "Kasa_Cita") return Tek(Kapi, yerel: true);   // #81: kapının çıtaları kanatla döner, doku kaymasın
         if (ad.StartsWith("Kasa")) return Tek(Kapi);
         if (ad.StartsWith("Dikme")) return Tek(Demir);
         if (ad.StartsWith("Tirabzan")) return Tek(Tirabzan);

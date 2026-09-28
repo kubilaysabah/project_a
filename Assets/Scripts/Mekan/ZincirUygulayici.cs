@@ -234,6 +234,8 @@ public class ZincirUygulayici
     public void DekorUygula(Transform daire, KatZinciriVarligi varlik, int kat)
     {
         if (varlik == null) return;
+        BulmacaEsyalariniAyarla(daire, varlik, "");
+        if (IkinciDaire != null) BulmacaEsyalariniAyarla(IkinciDaire, varlik, KilitZinciri.IkinciOnek);
         DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
         // Elektriksiz kat (#67): sigorta kilidi olmadan da daire karanlık; fosforlu yazı görünür.
         if (varlik.elektrikYok) Elektrik(daire).Ayarla(false);
@@ -580,6 +582,45 @@ public class ZincirUygulayici
             g.AddComponent<KaranliktaParlayan>();
         }
         konanlar.Add(g);
+    }
+
+    // ---------- BULMACA EŞYALARI YALNIZCA GEREKEN KATTA (#81) ----------
+    // Dört daire bir kez kurulur ve her katta biri açılır; bulmaca eşyaları (dosya dolabı, gardırop, büfe,
+    // oyuncak kutusu, alet çantası, duvar kolu, boy cetveli) bu yüzden her dairede duruyordu: yaşlı Nuri
+    // Bey'in evinde metal ofis dolabı, çocuksuz evlerde renkli oyuncak kutusu (Şahan'ın testi, 2026-09-28).
+    // Kural: kat dosyası bir eşyaya başvuruyorsa (bulmaca yeri, kilitlenen parçası, notun ya da sesin
+    // çapası) o eşya görünür; başvurmuyorsa o katta yok. Yerine kiracıya uygun mobilyayı kat dosyası koyar.
+    // Daire başka bir katta yeniden açılınca kural baştan işler.
+    private static readonly string[] BulmacaEsyalari =
+        { "Dosya_Dolabi", "Gardirop", "Bufe", "Oyuncak_Kutusu", "Alet_Cantasi", "Duvar_Kolu", "Boy_Cetveli" };
+
+    private static void BulmacaEsyalariniAyarla(Transform daire, KatZinciriVarligi varlik, string onek)
+    {
+        // Kat dosyasının bu daireye (önekine göre: "" ya da "B:") verdiği bütün yollar.
+        var yollar = new List<string>();
+        void Ekle(string yol)
+        {
+            if (string.IsNullOrEmpty(yol)) return;
+            bool ikinci = yol.StartsWith(KilitZinciri.IkinciOnek);
+            if (ikinci != (onek.Length > 0)) return;            // öbür dairenin yolu
+            yollar.Add(ikinci ? yol.Substring(onek.Length) : yol);
+        }
+        if (varlik.zincir != null)
+            foreach (ZincirYeri y in varlik.zincir.Yerler) { Ekle(y.Yol); Ekle(y.KilitYolu); }
+        foreach (KatNotu n in varlik.notlar) Ekle(n.Yol);
+        foreach (KatSusu s in varlik.suslar) Ekle(s.Yol);
+        foreach (KatSesi s in varlik.sesler) Ekle(s.Yol);
+
+        foreach (string ad in BulmacaEsyalari)
+        {
+            Transform t = daire.Find("Esyalar/" + ad);
+            if (t == null) continue;
+            string kok = "Esyalar/" + ad;
+            bool gerekli = false;
+            foreach (string yol in yollar)
+                if (yol == kok || yol.StartsWith(kok + "/")) { gerekli = true; break; }
+            t.gameObject.SetActive(gerekli);
+        }
     }
 
     // ÇİFT DAİRE (#70): adı "B:" ile başlıyorsa öneki atar ve ikinci daireyi verir; değilse daireyi.

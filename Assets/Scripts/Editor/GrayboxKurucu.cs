@@ -705,8 +705,10 @@ public static partial class GrayboxKurucu
              new Vector3(0.09f, 0.04f, 0.12f));
         Kutu("Numaralik", m, new Vector3(-yon * 0.04f, 1.78f, kanatZ),
              new Vector3(0.02f, 0.16f, 0.26f));
+        KapiCitalari(m, yon, kanatZ);
 
-        // Sahte katlarda kapı sadece kanat, kol ve plakadan ibaret.
+        // Sahte katlarda kapı sadece kanat, kol, plaka ve çıtalardan ibaret (çıtalar sahte katta da:
+        // döngü bütün katların aynı görünmesine dayanır).
         if (!tam) return;
 
         // NUMARA YAZISI. KatYoneticisi her katta günceller.
@@ -1285,7 +1287,6 @@ public static partial class GrayboxKurucu
     static void ZeminKatiDonat(Transform z)
     {
         Material ahsap = MalzemeBul("Assets/Materials/Ahsap_Koyu.mat", new Color(0.24f, 0.14f, 0.07f));
-        Material kumas = MalzemeBul("Assets/Materials/Kumas_Battaniye.mat", new Color(0.33f, 0.10f, 0.09f));
         Material kagit = MalzemeBul("Assets/Materials/Kagit.mat", new Color(0.86f, 0.82f, 0.70f));
         Material metal = MalzemeBul("Assets/Materials/Metal_Gri.mat", new Color(0.42f, 0.44f, 0.45f));
 
@@ -1311,9 +1312,10 @@ public static partial class GrayboxKurucu
         Kutu("Duvar_Yan", o, new Vector3(ortaX, DuvarYuksek / 2f, zArka - DuvarKalin / 2f), new Vector3(OdaDerin, DuvarYuksek, DuvarKalin));
 
         // Eşyalar: dar bir kapıcı odası. Yatak arka köşede, masa karşı duvarda.
-        Kutu("Yatak", o, new Vector3(disOda + 1.05f, 0.22f, zArka + 0.5f), new Vector3(1.95f, 0.44f, 0.9f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
-        Kutu("Battaniye", o, new Vector3(disOda + 1.2f, 0.47f, zArka + 0.5f), new Vector3(1.5f, 0.07f, 0.92f)).GetComponent<MeshRenderer>().sharedMaterial = kumas;
-        Kutu("Yastik", o, new Vector3(disOda + 0.3f, 0.5f, zArka + 0.5f), new Vector3(0.4f, 0.12f, 0.6f));
+        // #81 (Şahan'ın seçimi): tahta divan ve çizgili yün yorgan (Art/Blender/scripts/divan.py). Önceden üç düz
+        // kutuydu (yatak, battaniye, yastık). Yastık arka duvar tarafında kalsın diye 180° çevrilir.
+        if (Model("Yatak", o, "Divan", "Divan", new Vector3(disOda + 1.05f, 0f, zArka + 0.5f), 180f, carpisma: true) == null)
+            Kutu("Yatak", o, new Vector3(disOda + 1.05f, 0.22f, zArka + 0.5f), new Vector3(1.95f, 0.44f, 0.9f)).GetComponent<MeshRenderer>().sharedMaterial = ahsap;
         // #81 (Şahan'ın seçimi): masa, sandalye, dolap ve masadaki kutu artık Poly Haven modelleri (MobilyaKurucu
         // prefab'ları). Masa eski ahşap masa: 1,8 m uzun, 55 cm alçak bir masa; odaya sığsın ve telefon eskisi gibi
         // 74 cm'de dursun diye boyu 0,72, yüksekliği 1,35 kat (bacaklar biraz incelir, göze batmaz). Dolap 2,57 m:
@@ -1924,6 +1926,36 @@ public static partial class GrayboxKurucu
     }
 
     // Adı, ebeveyni, yerel konumu ve ölçeği verilen bir küp üretir.
+    // ---------- DAİRE KAPISININ ÇITALARI (#81) ----------
+    // Şahan'ın seçimi: "ceviz kaplama çıtalı kapı". Kanadın iki yüzünde ikişer tabla (üst ve alt dikdörtgen),
+    // her biri dört ince çıtadan. Çıtalar menteşenin çocuğu: kapı açılınca kanatla birlikte döner. Adları
+    // "Kasa_Cita": DokuKurucu "Kasa" ile başlayan her şeye kapının ceviz kaplamasını verir. Çarpışmaları
+    // silinir: kanadın kendi kutusu yeter, 1 cm'lik çıtalar oyuncuyu takılmasın.
+    static void KapiCitalari(Transform m, float yon, float kanatZ)
+    {
+        const float Cikinti = 0.012f, Kalin = 0.035f;
+        float genislik = KapiGen - 0.24f;                       // kenarlardan 12'şer cm içeride
+        var tablalar = new[] { (0.18f, 0.98f), (1.10f, 1.95f) }; // alt ve üst tabla (y aralığı)
+        foreach (float yuz in new[] { -1f, 1f })                // -yon: sahanlık yüzü, +yon: daire yüzü
+        {
+            float x = yuz * yon * (0.03f + Cikinti / 2f);
+            foreach (var t in tablalar)
+            {
+                float yOrta = (t.Item1 + t.Item2) / 2f, yBoy = t.Item2 - t.Item1;
+                var citalar = new[] {
+                    (new Vector3(x, t.Item1, kanatZ), new Vector3(Cikinti, Kalin, genislik)),
+                    (new Vector3(x, t.Item2, kanatZ), new Vector3(Cikinti, Kalin, genislik)),
+                    (new Vector3(x, yOrta, kanatZ - genislik / 2f), new Vector3(Cikinti, yBoy, Kalin)),
+                    (new Vector3(x, yOrta, kanatZ + genislik / 2f), new Vector3(Cikinti, yBoy, Kalin)) };
+                foreach (var c in citalar)
+                {
+                    GameObject cita = Kutu("Kasa_Cita", m, c.Item1, c.Item2);
+                    Object.DestroyImmediate(cita.GetComponent<Collider>());
+                }
+            }
+        }
+    }
+
     // Poly Haven mobilyasının prefab'ından sahneye kalıcı bir kopya koyar (#81, kapıcı odası). Kat mobilyaları
     // oyun sırasında kat dosyasından konur (GrayboxKurucu_Mobilya); zemin kat her zaman aynı olduğu için bunlar
     // sahneye doğrudan yerleşir. Prefab yoksa (Mobilyaları Kur çalışmadıysa) uyarır ve geçer.
