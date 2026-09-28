@@ -121,14 +121,14 @@ MonoBehaviour:
       Tur: 2
       Yer: salon_bufe
       X: -0.45
-      Y: 0.245
+      Y: 0.27
       Z: 0
       Donus: 20
     - Kimlik: odaA_anahtari_bas
       Tur: 9
       Yer: salon_bufe
       X: -0.22
-      Y: 0.245
+      Y: 0.27
       Z: 0
       Donus: -40
     - Kimlik: odaA_anahtari_uc
@@ -149,7 +149,7 @@ MonoBehaviour:
       Tur: 1
       Yer: sandik
       X: 0
-      Y: 0.035
+      Y: 0.02
       Z: 0
       Donus: 20
     Kilitler:

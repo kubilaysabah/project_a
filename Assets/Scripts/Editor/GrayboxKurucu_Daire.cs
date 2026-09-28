@@ -644,8 +644,13 @@ public static partial class GrayboxKurucu
                 c.size = new Vector3(0.26f, 0.04f, 0.26f);
             }
         }
-        // Büfe: pivot tabanın ortası; arkası duvara 1 cm kala (derinlik 0,48).
-        GameObject bufe = DaireEsyasi("Bufe", e, d, 3.6f, 0f, 8.1f - 0.25f, 0f, -1f, "Kapi_1", "Kapi_2");
+        // Büfe: pivot tabanın ortası; arkası duvara 1 cm kala (derinlik 0,47).
+        // YER (#81'den sonra, Şahan'ın 6. kat testi, 2026-09-28): eskiden arka duvardaydı (v 8,1), sofranın hemen
+        // arkasında. Alçak eski büfede sorun olmuyordu; yeni büfe 1,9 m ve anahtar alt bölmenin tabanında: sofranın
+        // sandalyeleri önünü kapatınca oyuncu yaklaşıp içine bakamadı, 7. kata çıkamadı. Artık landing duvarında
+        // (u = 0, iç kaplama 3 cm), salon kapısı (u 0,85-1,75, hol duvarında) ile su vanasının (v 6,6) arasında;
+        // önünde sofraya kadar 1,6 m boşluk var. Büfe yalnızca 6. ve 7. katta görünür (BulmacaEsyalariniAyarla).
+        GameObject bufe = DaireEsyasi("Bufe", e, d, 0.03f + 0.235f + 0.01f, 0f, 5.75f, 1f, 0f, "Kapi_1", "Kapi_2");
         Acilir(bufe, "Kapi_1", AcilirParca.Hareket.Dondur, Vector3.up, 100f, 0.6f);
         Acilir(bufe, "Kapi_2", AcilirParca.Hareket.Dondur, Vector3.up, -100f, 0.6f);
         Yonlendir(bufe, "Kapi_1", "Kapi_2");

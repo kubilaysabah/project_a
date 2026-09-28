@@ -28,9 +28,12 @@ public static partial class GrayboxKurucu
 {
     // #81: büfe artık oymalı dolap, oyuncak kutusu ahşap sandık (Art/Mobilya/scripts/mobilya_donustur.py, BULMACA).
     // İçlerine konan eşyaların yüksekliği yeni modellerin oyulmuş bölmesinin tabanı (dönüştürücü "IC_TABAN" yazar):
-    // büfenin alt kapaklarının arkası 23,7 cm'de, sandığın içi 3 cm'de; eşya tabana 5-8 mm yukarıdan konur.
-    const float BufeTaban = 0.245f;
-    const float SandikTaban = 0.035f;
+    // İlk değerler dönüştürücünün oyduğu tabandandı; ama modelin kendi raf tahtası daha yukarıda kaldı ve büfedeki
+    // anahtar tahtanın 1,4 cm içinde görünmez duruyordu (Şahan'ın 6. kat testi, 2026-09-28). Tabanlar artık
+    // oyunda ölçüldü (MeshCollider ile yukarıdan aşağı ışın): büfenin tahtası 25,9 cm, sandığın tabanı 1,3 cm.
+    // Eşya tabana 7-11 mm yukarıdan konur.
+    const float BufeTaban = 0.27f;
+    const float SandikTaban = 0.02f;
 
     const string SablonKlasoru = "Assets/Prefabs/Esyalar";
     const string ZincirKlasoru = "Assets/Zincirler";
