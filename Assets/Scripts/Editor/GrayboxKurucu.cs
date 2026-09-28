@@ -1451,6 +1451,26 @@ public static partial class GrayboxKurucu
             clSeri.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        // İKİNCİ ÇİVİ VE MERDİVEN KAPISININ ANAHTARI (#56, Şahan 2026-09-28): lambanın 16 cm
+        // kapı tarafında. Açılışta zemin kattan 1. kata çıkan kapı kilitli (KatYoneticisi kilitler);
+        // anahtarı burada asılı, lambanın saçılma ışığı onu da gösterir. Anahtar modeli yatık
+        // yapılmış (sahanlıkta rafta durur): X ekseninde -90° çevrilince halkası yukarıda (çivide),
+        // ucu aşağıda duvara sarkar (+90° baş aşağı asıyordu). KatAnahtari "0. kat": yalnızca zemin
+        // kapısını açar.
+        Vector3 civi2Yeri = civiYeri + new Vector3(0.16f, 0f, 0f);
+        Model("Civi_2", o, "Kafa_Lambasi", "Civi", civi2Yeri, 0f, carpisma: false);
+        GameObject zeminAnahtari = Model("Zemin_Anahtari", o, "Anahtar", null,
+                                         civi2Yeri + new Vector3(0f, -0.045f, 0.02f), 0f, carpisma: true);
+        if (zeminAnahtari != null)
+        {
+            zeminAnahtari.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+            // Anahtar küçük: nişan ıskalamasın diye çarpışma kutusu büyütülür (sahanlıktaki gibi).
+            BoxCollider zc = zeminAnahtari.GetComponent<BoxCollider>();
+            zc.center = new Vector3(0f, 0.02f, 0f);
+            zc.size = new Vector3(0.12f, 0.06f, 0.14f);
+            zeminAnahtari.AddComponent<KatAnahtari>();
+        }
+
         // Oda lambası: loş, sıcak, gölgesiz tek bir ampul.
         GameObject lamba = new GameObject("Oda_Lambasi");
         lamba.transform.SetParent(o, false);

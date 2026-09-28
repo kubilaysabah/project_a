@@ -119,6 +119,21 @@ public class OyunBotu : MonoBehaviour
             if (civi == null || !civi.EtkilesimeAcik) Sorun("açılışta çivide alınacak kafa lambası yok");
             else { civi.Etkilesim(kontrol.gameObject); yield return new WaitForSeconds(0.5f); }
             if (kafa != null && (!kafa.Takili || !kafa.Acik)) Sorun("çividen alınan kafa lambası takılmadı ya da yanmıyor");
+            // Merdiven kapısının anahtarı da çivide (0. kat); kapı kilitli olmalı, anahtarla açılır.
+            KatAnahtari zeminAnahtari = null;
+            foreach (KatAnahtari a in FindObjectsByType<KatAnahtari>()) if (a.Kat == 0 && a.gameObject.activeInHierarchy && a.name == "Zemin_Anahtari") zeminAnahtari = a;
+            Transform zk = GameObject.Find("Sahte_Katlar")?.transform.Find("Alt/Cekirdek_Alt1/Kat_Kapisi");
+            KatKapisi zeminKapisi = zk != null ? zk.GetComponent<KatKapisi>() : null;
+            if (zeminKapisi == null) Sorun("zemin kapısı bulunamadı");
+            else if (zeminKapisi.Acik) Sorun("açılışta zemin kapısı kilitli değil");
+            if (zeminAnahtari == null) Sorun("çivide merdiven kapısının anahtarı yok");
+            else
+            {
+                zeminAnahtari.Etkilesim(kontrol.gameObject);
+                yield return new WaitForSeconds(0.4f);
+                if (zeminKapisi != null) { zeminKapisi.Etkilesim(kontrol.gameObject); yield return new WaitForSeconds(2.6f); }
+                if (zeminKapisi != null && !zeminKapisi.Acik) Sorun("zemin kapısı anahtarla açılmadı");
+            }
             Yaz("açılış: kapıcı odasından 1. kata yürüyor");
             yield return Yuru(new[] { new Vector3(-3.4f, 0, -1.45f), new Vector3(1.1f, 0, -0.3f) }, "kapıcı odası -> sahanlık");
             yield return Merdivenden(null);

@@ -190,6 +190,8 @@ public class KatYoneticisi : MonoBehaviour
     // ---- AÇILIŞ ----
     private GameObject zeminKat;       // kapıcı dairesi olan zemin kat (başta kapalı)
     private GameObject sahteAlt1;      // 1. katın altındaki sahte kat; açılışta zemin kata yer bırakır
+    private KatKapisi zeminKapisi;     // zemin kattan 1. kata çıkan kolun kapısı (Cekirdek_Alt1'de)
+    private KatAnahtari zeminAnahtari; // o kapının anahtarı: kapıcı odasında, çivide (#56)
     private bool acilisModu;
 
     // ---------- KURULUM ----------
@@ -359,7 +361,12 @@ public class KatYoneticisi : MonoBehaviour
         SahanliklariGuncelle(zorla: true);
 
         if (acilisIleBasla && zeminKat != null && !kayittanDevam) AcilisiBaslat();
-        else ZeminiAyarla();   // #56: kayıttan devamda zemin kapalı, 1. katta açık
+        else
+        {
+            ZeminiAyarla();   // #56: kayıttan devamda zemin kapalı, 1. katta açık
+            // Kayıttan devamda zemin kapısını oyuncu çoktan açmıştır: çivideki anahtar da yok.
+            if (zeminAnahtari != null) zeminAnahtari.gameObject.SetActive(false);
+        }
     }
 
     // ---------- AÇILIŞ (#16) ----------
@@ -378,6 +385,11 @@ public class KatYoneticisi : MonoBehaviour
         // lamba var mı" diye bakar; lamba hâlâ takılıysa kendini gizler ve oyuncu onu hiç bulamaz.
         KafaLambasi lamba = oyuncu.GetComponentInChildren<KafaLambasi>(true);
         if (lamba != null) lamba.Birak();
+
+        // Zemin kattan çıkan kapı kilitli, anahtarı çivide (#56). Kurucu kapıyı AÇIK kurar (kayıttan
+        // devam eden oyunda oyuncu o kapıdan zaten geçmiştir); yalnızca açılış onu kilitler.
+        if (zeminKapisi != null) zeminKapisi.Ayarla(0, false);
+        if (zeminAnahtari != null) zeminAnahtari.Ayarla(0, true);
 
         zeminKat.SetActive(true);
         if (sahteAlt1 != null) sahteAlt1.SetActive(false);
@@ -673,6 +685,13 @@ public class KatYoneticisi : MonoBehaviour
         Transform aB = sahanlikB != null ? sahanlikB.Find("Kat_Anahtari") : null;
         anahtarA = aA != null ? aA.GetComponent<KatAnahtari>() : null;
         anahtarB = aB != null ? aB.GetComponent<KatAnahtari>() : null;
+        // ZEMİN KAPISI (#56, Şahan 2026-09-28): açılışta zemin kattan 1. kata çıkan kapı kilitli,
+        // anahtarı kafa lambasının yanında çivide asılı. Kapı 1. altındaki sahte çekirdeğin kapısı
+        // (açılışta oyuncu o koldan çıkar); anahtar zemin katın kapıcı odasında. İkisi de "0. kat":
+        // hiçbir katın anahtarı bu kapıyı, bu anahtar da başka bir kapıyı açmaz.
+        Transform kZ = sahte != null ? sahte.transform.Find("Alt/Cekirdek_Alt1/Kat_Kapisi") : null;
+        zeminKapisi = kZ != null ? kZ.GetComponent<KatKapisi>() : null;
+        zeminAnahtari = zeminKat != null ? zeminKat.GetComponentInChildren<KatAnahtari>(true) : null;
         if (kapiA == null) Debug.LogWarning("[KAPI] Cekirdek_A/Kat_Kapisi bulunamadı; kat kapısı yok.");
         if (kapiB == null) Debug.LogWarning("[KAPI] Sahte_Katlar/Ust/Cekirdek_B/Kat_Kapisi bulunamadı.");
     }
