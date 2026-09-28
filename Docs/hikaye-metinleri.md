@@ -44,6 +44,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Hasan 1991-1993
 > Cemal 1993-
 >
+> Hepsi bu odada uyudu.
+> Hepsi lambayı aynı çividen aldı.
+>
 > Sıradaki:
 
 **EN**
@@ -53,6 +56,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Rıza Efendi 1987-1991
 > Hasan 1991-1993
 > Cemal 1993-
+>
+> They all slept in this room.
+> They all took the lamp from the same nail.
 >
 > Next:
 
@@ -202,17 +208,25 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **TR**
 
-> Bayram 1992 — Yıldız ailesi, Daire 2.
+> Bayram 1992 — Yıldız ailesi, Daire 2.
 >
-> Bu evde çok mutluyduk.
-> Geceleri tavandan gelen ayak seslerine kadar.
+> Bu evde çok mutluyduk,
+> geceleri tavandan gelen ayak seslerine kadar.
+> Yönetim'in kâğıdı kapıya asıldığında
+> kolilerin yarısını bile kapatamamıştık.
+>
+> — Nermin
 
 **EN**
 
-> Bayram 1992 — the Yıldız family, Flat 2.
+> Bayram 1992 — the Yıldız family, Flat 2.
 >
-> We were so happy in this home.
-> Until the footsteps on the ceiling at night.
+> We were so happy in this home,
+> until the footsteps on the ceiling at night.
+> When the Management's notice went up on the door
+> we hadn't even closed half the boxes.
+>
+> — Nermin
 
 ## 2. kat
 
@@ -259,7 +273,8 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Rıza Efendi'yle, 1989.
 >
 > "Gürültüye dayanamıyorum Nuri Bey" dedi.
-> İki yıl sonra gitti. Ben alıştım.
+> İki yıl sonra gitti. Ben alıştım:
+> radyo açıkken yukarıdan ses gelmiyor.
 >
 > — N.
 
@@ -268,7 +283,8 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > With Rıza Efendi, 1989.
 >
 > "I can't stand the noise, Nuri Bey," he said.
-> He left two years later. I got used to it.
+> He left two years later. I got used to it:
+> while the radio is on, nothing comes from upstairs.
 >
 > — N.
 
@@ -305,6 +321,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Mumları üfleyince "dokuzuncu kattaki amcaya
 > da bir dilim ayıralım" dedi.
 > Binamız sekiz katlı.
+> O geceden beri resim yapıp yırtıyor.
+>
+> — Ayla
 
 **EN**
 
@@ -313,6 +332,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > He blew out the candles and said we should
 > save a slice for the man on the ninth floor.
 > Our building has eight floors.
+> Since that night he draws, and tears up what he draws.
+>
+> — Ayla
 
 ## 4. kat
 
@@ -360,21 +382,23 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **TR**
 
-> Karaca'lar, Daire 4, Ekim 1991.
+> Karaca'lar, Daire 4, Ekim 1991.
 >
 > Fotoğrafı ben çektim.
 > Arkalarında kimse yoktu.
-> Bir ay sonra taşındılar.
+> Bir ay sonra taşındılar;
+> giderken bütün ampulleri söküp götürdüler.
 >
 > — Hasan
 
 **EN**
 
-> The Karacas, Flat 4, October 1991.
+> The Karacas, Flat 4, October 1991.
 >
 > I took this photo myself.
 > There was no one behind them.
-> They moved out a month later.
+> They moved out a month later
+> and took every light bulb with them.
 >
 > — Hasan
 
@@ -416,6 +440,8 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > "Merdivende biri var" dedi.
 > Baktık. Yoktu.
+> O günden sonra alet çantasını
+> hiç yanından ayırmadı.
 >
 > — Yönetim
 
@@ -425,6 +451,8 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > "There's someone on the stairs," he said.
 > We looked. There was no one.
+> From that day on he never let
+> his toolbag out of his sight.
 >
 > — The Management
 
@@ -494,8 +522,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > Rıza Efendi, Hasan, Cemal ve Yönetim'den Bekir Bey.
 >
-> Arkamızda ayakta duranı
-> kimse hatırlamıyor.
+> Arkamızda ayakta duranı kimse hatırlamıyor.
+> Her yıl aynı sofrayı kurarız;
+> herkes kendi tabağının başına oturur.
 >
 > Sofrada senin yerin de hazır.
 
@@ -503,8 +532,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > Rıza Efendi, Hasan, Cemal and Bekir Bey from the Management.
 >
-> No one remembers the man
-> standing behind us.
+> No one remembers the man standing behind us.
+> Every year we set the same table;
+> everyone sits at their own plate.
 >
 > There is a seat for you at the table too.
 
@@ -613,8 +643,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Ağustos 1994.
 >
 > Her fotoğrafta biraz daha yakın.
-> Kendi yüzüme bakınca artık
-> kendimi göremiyorum.
+> Kendi yüzüme bakınca artık kendimi göremiyorum.
+> Kapımın numarasını bile karıştırıyorum;
+> herkes 13 diyor.
 >
 > — C.
 
@@ -623,8 +654,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > August 1994.
 >
 > He is a little closer in every photo.
-> When I look at my own face
-> I can no longer see myself.
+> When I look at my own face I can no longer see myself.
+> I even mix up the number on my door;
+> everyone says 13.
 >
 > — C.
 
@@ -804,6 +836,8 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > Yönetim Kurulu: dört kişi.
 > Fotoğrafta beş kişi var.
+> Ruhsatta sekiz kat yazıyor;
+> asansörün düğmeleri dokuza kadar.
 
 **EN**
 
@@ -811,6 +845,8 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > Management board: four members.
 > There are five people in the photo.
+> The permit says eight floors;
+> the lift's buttons go up to nine.
 
 ## Diğer
 

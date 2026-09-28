@@ -140,7 +140,14 @@ public class FotografEkrani : MonoBehaviour
                 yaziStili = new GUIStyle(GUI.skin.label) { fontSize = 28, fontStyle = FontStyle.Italic, wordWrap = true, alignment = TextAnchor.MiddleCenter };
                 yaziStili.normal.textColor = new Color(0.12f, 0.14f, 0.32f);   // mavi tükenmez kalem
             }
-            GUI.Label(new Rect(baski.x + 50f, baski.y + 40f, baski.width - 100f, baski.height - 80f), Dil.Getir(f.Arka), yaziStili);
+            // Yazı alanı: kâğıdın kenarlarından içeride. Metin sığmazsa punto 28'den 2'şer küçülür
+            // (en az 16): menüdeki küçük baskıda uzun bir hikâye taşmasın, yakın bakışta büyük kalsın.
+            // CalcHeight: bu genişlikte, satır kaydırmayla metnin kaç piksel yükseklik tuttuğunu hesaplar.
+            Rect alan = new Rect(baski.x + 50f, baski.y + 40f, baski.width - 100f, baski.height - 80f);
+            GUIContent metin = new GUIContent(Dil.Getir(f.Arka));
+            yaziStili.fontSize = 28;
+            while (yaziStili.fontSize > 16 && yaziStili.CalcHeight(metin, alan.width) > alan.height) yaziStili.fontSize -= 2;
+            GUI.Label(alan, metin, yaziStili);
         }
         GUI.color = Color.white;
         GUI.matrix = eski;
