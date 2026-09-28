@@ -162,6 +162,7 @@ The developer on this project is **Şahan** — the second developer from Moguls
   - **Hub (#56):**
     - `Kayit.NotOkundu` records every note/call; the janitor room `Pano` lists them.
     - `TelefonZili` (child of KatYoneticisi; the ground floor is inactive upstairs) rings on first arrival at floors 2 and 5, louder the lower the player is. `Telefon` answers it; a miss after 150 s leaves `not.telefon_katN_kacti`.
+    - **Nail (`be0a29f`):** Cemal's headlamp hangs **lit** on a nail in the janitor room (`Kapici_Odasi/Civi` + `Cividen_Lamba`, Blender `kafa_lambasi.py`); it is the room's only light. `CividekiLamba` ("AL") calls `KafaLambasi.Tak()`. An opening-started game calls `KafaLambasi.Birak()` in `AcilisiBaslat` **before** the ground floor is activated (the nail lamp hides itself in `OnEnable` if the player already has the lamp). Not saved: a resumed game already has it. Keep the nail away from the door: the fully open door leaf blocked its light.
   - **Test tools:** `OyunBotu.Inis(n)` walks down n floors, into the janitor room and back up. Photos and notes save keys are `kayit_fotograflar`/`kayit_notlar` (test slot: `_test`).
   - **Text table edits:** never write `\\n` through a bash heredoc into Python; it became real newlines and split rows (#69). Write a Python file with raw strings.
 
@@ -206,6 +207,8 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 2. **#1 — decide the final game name with Şahan.** Urgent: the Steam page must go live in week 4 (milestone H3-4, due 2026-10-18) and it needs the name and capsule art. Candidates and the Steam collision scan are on #1 and in "Name decision" above.
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
+
+- 2026-09-28 (Lesson 55): after the night the Editor crashed while idle (Unity's own "Access version should be odd" assertion flooded `Logs/Editor.log` to 10.6 GB); nothing lost, log deleted, project reopened (scene backups declined). **#50 and #47 CLOSED** with Şahan's OK. **#56 nail built** (`be0a29f`): lit headlamp on the nail, taken in the opening; 200/200 tests; waiting for Şahan's test (#56 stays open: no radio in the janitor room, the floor-1 key on the nail is obsolete).
 
 - 2026-09-27/28 (Lesson 54, night plan while Şahan is away; he tests on return). Plan and his choices: scratchpad `gece_plani.json` (floor events #55 and chores #57 NOT chosen; the T-key list #75 replaces the chores board). Done so far:
   - **Full playthrough bot** (`a647002`, `Assets/Scripts/Test/OyunBotu.cs`, Editor only, `OyunBotu.Baslat()` after `Basla`): solves every chain in `Cozumle` order from the opening to the finale; found and fixed the floor-2 radio double-setup NRE (`b6a1181`).
