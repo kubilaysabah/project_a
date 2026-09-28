@@ -53,13 +53,24 @@ public class DuraklatmaMenusu : MonoBehaviour
     // Menünün üç sayfası var: ana sayfa, ayarlar (#27) ve görüntü (#30). Anomali defteri (#45)
     // eski kuralla birlikte kaldırıldı (#59).
     private const int SayfaAna = 0, SayfaAyarlar = 1, SayfaGoruntu = 2, SayfaFoto = 3;   // Fotoğraflar sayfası: #69
+    // Kontroller sayfası (#80): Ayarlar'ın altında, oyundaki bütün tuşların listesi. Şahan'ın kararı
+    // (2026-09-28): oyun içinde tuş ipucu çıkmaz; oyuncu tuşları oyunlarda alışık olduğu yerde bulur.
+    private const int SayfaKontrol = 4;
     private int sayfa = SayfaAna;
 
     // ---------- KLAVYE / KOL İLE GEZİNME (#29) ----------
     // Öğelerin sırası (yukarıdan aşağı). Numara, gezginin "Secili" değeriyle eşleşir.
     private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaFoto = 3, AnaDil = 4, AnaCik = 5, AnaOgeSayisi = 6;
     private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3,
-                      AyarVarsayilan = 4, AyarGeri = 5, AyarOgeSayisi = 6;
+                      AyarKontroller = 4, AyarVarsayilan = 5, AyarGeri = 6, AyarOgeSayisi = 7;
+
+    // Kontroller sayfasının satırları. Her satırın metni "eylem|klavye ve fare|oyun kolu": üç sütun
+    // tek anahtarda durur, dil değişince üçü birlikte değişir. Tuşların kendisi de çevrilir
+    // ("basılı tut" / "hold"). Anahtarlar düz yazılır ki metin bütünlük testi onları kodda bulsun.
+    private static readonly string[] KontrolSatirlari = {
+        "menu.kontrol_yuru", "menu.kontrol_bak", "menu.kontrol_etkilesim", "menu.kontrol_lamba",
+        "menu.kontrol_liste", "menu.kontrol_egil", "menu.kontrol_menu", "menu.kontrol_geri",
+    };
     private const int GorCozunurluk = 0, GorEkran = 1, GorVSync = 2, GorKalite = 3,
                       GorParlaklik = 4, GorVarsayilan = 5, GorGeri = 6, GorOgeSayisi = 7;
 
@@ -169,7 +180,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (baslat && !baslikta) { DevamIste(); return; }
         if (esc || geri)                                // Esc / B: bir geri git
         {
-            if (sayfa != SayfaAna) SayfaAc(SayfaAna);
+            if (sayfa == SayfaKontrol) SayfaAc(SayfaAyarlar);   // Kontroller Ayarlar'ın altında: bir geri = Ayarlar
+            else if (sayfa != SayfaAna) SayfaAc(SayfaAna);
             else if (!baslikta) DevamIste();            // başlık ekranının ana sayfasında geri yok
             return;
         }
@@ -373,11 +385,15 @@ public class DuraklatmaMenusu : MonoBehaviour
         // Fotoğraflar: onay tuşu fotoğrafı çevirir (tek düğme "Geri"yi fare ya da Esc / B çalıştırır).
         if (sayfa == SayfaFoto) { fotoArka = !fotoArka; return; }
 
+        // Kontroller: tek öğe "Geri"; onay tuşu Ayarlar'a döner.
+        if (sayfa == SayfaKontrol) { SayfaAc(SayfaAyarlar); return; }
+
         if (sayfa == SayfaAyarlar)
         {
             switch (gezgin.Secili)
             {
                 case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
+                case AyarKontroller: SayfaAc(SayfaKontrol); break;
                 case AyarVarsayilan: Ayarlar.VarsayilanaDon(); break;
                 case AyarGeri: SayfaAc(SayfaAna); break;
                 // Kaydırıcılarda onay tuşunun işi yok; sol/sağ ile değiştirilir.
@@ -444,11 +460,12 @@ public class DuraklatmaMenusu : MonoBehaviour
         int onceki = sayfa;
         sayfa = yeni;
         gezgin.OgeSayisiniAyarla(yeni == SayfaAyarlar ? AyarOgeSayisi : yeni == SayfaGoruntu ? GorOgeSayisi
-                                 : yeni == SayfaFoto ? 1 : AnaOgeSayisi);
+                                 : yeni == SayfaFoto || yeni == SayfaKontrol ? 1 : AnaOgeSayisi);
 
         // Bir sayfaya girince ilk öğe seçili. Ana sayfaya dönünce geldiği sayfanın düğmesi
         // seçili kalsın (oyuncu nereden geldiğini görür, tekrar girmek isterse tek tuş yeter).
         if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : onceki == SayfaFoto ? AnaFoto : AnaAyarlar);
+        else if (yeni == SayfaAyarlar && onceki == SayfaKontrol) gezgin.Sec(AyarKontroller);   // geldiği düğme seçili
         else gezgin.Sec(0);
 
         if (yeni == SayfaGoruntu) CozunurlukListesiniKur();
@@ -674,6 +691,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (sayfa == SayfaAyarlar) { AyarlariCiz(); return; }
         if (sayfa == SayfaGoruntu) { GoruntuCiz(); return; }
         if (sayfa == SayfaFoto) { FotograflariCiz(); return; }
+        if (sayfa == SayfaKontrol) { KontrolleriCiz(); return; }
 
         float en = 360f, boy = 56f, ara = 16f;
         float x = (ArayuzOlcegi.Genislik - en) / 2f;
@@ -754,7 +772,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     {
         float en = 480f, ara = 14f;
         float x = (ArayuzOlcegi.Genislik - en) / 2f;
-        float y = ArayuzOlcegi.Yukseklik / 2f - 230f;
+        float y = ArayuzOlcegi.Yukseklik / 2f - 260f;   // #80: Kontroller düğmesi eklendi, sayfa 30 px yukarı
 
         GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.ayarlar"), baslikStili);
         y += 60f + 2f * ara;
@@ -803,6 +821,12 @@ public class DuraklatmaMenusu : MonoBehaviour
         Vurgula(AyarTers, r);
         string tersYazisi = string.Format(Dil.Getir("ayar.ters"), Ayarlar.Ters ? Dil.Getir("ayar.acik") : Dil.Getir("ayar.kapali"));
         if (GUI.Button(r, tersYazisi, dugmeStili)) Ayarlar.Ters = !Ayarlar.Ters;
+        y += 44f + ara;
+
+        // Kontroller (#80): tuş listesinin sayfası.
+        r = new Rect(x, y, en, 44f);
+        Vurgula(AyarKontroller, r);
+        if (GUI.Button(r, Dil.Getir("menu.kontroller"), dugmeStili)) SayfaAc(SayfaKontrol);
         y += 44f + 2f * ara;
 
         float dugmeEn = (en - ara) / 2f, boy = 52f;
@@ -813,6 +837,48 @@ public class DuraklatmaMenusu : MonoBehaviour
         r = new Rect(x + dugmeEn + ara, y, dugmeEn, boy);
         Vurgula(AyarGeri, r);
         if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAna);
+    }
+
+    // ---------- KONTROLLER SAYFASI (#80) ----------
+    // Üç sütunlu bir tablo: eylem, klavye ve fare, oyun kolu. Oyuncunun o an kullandığı cihazın
+    // sütunu parlak, öbürü soluk yazılır (GirisCihazi.Kol, #29): göz önce kendi tuşunu bulur.
+    private void KontrolleriCiz()
+    {
+        float en = 900f, satir = 44f;
+        float x = (ArayuzOlcegi.Genislik - en) / 2f;
+        float y = ArayuzOlcegi.Yukseklik / 2f - 300f;
+        GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.kontroller"), baslikStili);
+        y += 80f;
+
+        // Sütun genişlikleri: eylem dar, tuşlar geniş (bazı tuş tarifleri uzun: "Sağ çubuğa bas").
+        float s1 = 260f, s2 = 320f, s3 = en - s1 - s2;
+        var parlak = new GUIStyle(yaziStili);
+        var soluk = new GUIStyle(yaziStili);
+        soluk.normal.textColor = new Color(0.62f, 0.60f, 0.56f);
+        var baslik = new GUIStyle(yaziStili) { fontStyle = FontStyle.Bold };
+        bool kol = GirisCihazi.Kol;
+
+        // Sütun başlıkları ve altında ince bir çizgi.
+        GUI.Label(new Rect(x + s1, y, s2, satir), Dil.Getir("menu.kontrol_klavye"), baslik);
+        GUI.Label(new Rect(x + s1 + s2, y, s3, satir), Dil.Getir("menu.kontrol_kol"), baslik);
+        y += satir;
+        GUI.color = new Color(0.92f, 0.90f, 0.84f, 0.25f);
+        GUI.DrawTexture(new Rect(x, y - 6f, en, 1f), Texture2D.whiteTexture);
+        GUI.color = Color.white;
+
+        foreach (string anahtar in KontrolSatirlari)
+        {
+            // "eylem|klavye|kol": üç parça. Eksik parça olursa (tablo hatası) boş yazılır, çökmez.
+            string[] p = Dil.Getir(anahtar).Split('|');
+            GUI.Label(new Rect(x, y, s1, satir), p[0], parlak);
+            GUI.Label(new Rect(x + s1, y, s2, satir), p.Length > 1 ? p[1] : "", kol ? soluk : parlak);
+            GUI.Label(new Rect(x + s1 + s2, y, s3, satir), p.Length > 2 ? p[2] : "", kol ? parlak : soluk);
+            y += satir;
+        }
+
+        Rect r = new Rect((ArayuzOlcegi.Genislik - 240f) / 2f, y + 30f, 240f, 50f);
+        Vurgula(0, r);
+        if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAyarlar);
     }
 
     // ---------- GÖRÜNTÜ SAYFASI (#30) ----------
