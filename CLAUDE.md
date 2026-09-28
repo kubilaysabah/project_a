@@ -208,6 +208,14 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-28 (Lesson 55, later): Şahan made remote decisions on two Artifact pages (furniture https://claude.ai/artifact/4KePW9Dw3Xyv1EsZcmoLBk, pending decisions https://claude.ai/artifact/DL3abkoDJxVRKA7xvVR4D7; choices live in their `db`, read with ArtifactData).
+  - **Furniture (#73, `7920882`):** 28 kept; the two chairs became `painted_wooden_chair_02` and `SchoolChair_01` (old ones removed from the repo). The two unused coffee tables were placed: floor 4 salon and floor 8 Oda B. `standing_picture_frame_01` was already in use as the family-photo desk frame.
+  - **Texts (#60, `be5f991`):** 16 notes rewritten as hints, not instructions (Şahan: "görevi nasıl yapacağını söylemesin ama ufak ipuçları versin"). Apply the same rule to any new note.
+  - **Photos (#69):** all nine visuals kept.
+  - **Janitor room (#56, `ab73d06`):** no radio. The ground-floor stair door (`Cekirdek_Alt1/Kat_Kapisi`) is locked in the opening; its key (`Zemin_Anahtari`, floor 0) hangs on a second nail next to the headlamp.
+  - **#48 closed** (no time limit). **#57** postponed; Şahan's idea: each floor's notice board explains why we enter that flat. **#80 built** (`e3c4702`): Controls page under Settings; no in-game key hints.
+  - 200/200 tests, release build rebuilt. Waiting for Şahan's test.
+
 - 2026-09-28 (Lesson 55): after the night the Editor crashed while idle (Unity's own "Access version should be odd" assertion flooded `Logs/Editor.log` to 10.6 GB); nothing lost, log deleted, project reopened (scene backups declined). **#50 and #47 CLOSED** with Şahan's OK. **#56 nail built** (`be0a29f`): lit headlamp on the nail, taken in the opening; 200/200 tests; waiting for Şahan's test (#56 stays open: no radio in the janitor room, the floor-1 key on the nail is obsolete).
 
 - 2026-09-27/28 (Lesson 54, night plan while Şahan is away; he tests on return). Plan and his choices: scratchpad `gece_plani.json` (floor events #55 and chores #57 NOT chosen; the T-key list #75 replaces the chores board). Done so far:
