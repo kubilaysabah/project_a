@@ -52,3 +52,4 @@ ambientCG'nin 1K-JPG paketinden yalnızca `_Color` ve `_NormalGL` alındı, dosy
 ## Projede üretilen dokular
 
 - `Assets/Textures/Goblen_Degirmen.png`: 1. katın holündeki goblen (#83). Saf Python ile üretildi (`Art/Dokular/scripts/goblen_uret.py`), dış kaynak yok; projeye aittir.
+- `Assets/Textures/Hali_Salon.png`: 1. katın salonundaki yarı rulo halı (#83). Saf Python ile üretildi (`Art/Dokular/scripts/hali_uret.py`), dış kaynak yok; projeye aittir.
