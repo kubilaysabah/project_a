@@ -215,6 +215,14 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-09-29 (Lesson 56): Şahan filled the final decisions page (https://claude.ai/artifact/QrAg3sEeZEU6bNDtjYUXxk).
+  - **Notes (#60):** all 16 hint texts approved as they are.
+  - **Photos (#69, `d2c9fb3`):** signature lines removed from the back texts, and "Sıradaki:" removed from the janitor photo.
+  - **Wardrobe (#81, `2be5842`):** floor 5's wardrobe is now a Blender two-door mirrored walnut model (`gardirop.py`, 1.00 × 0.55 × 1.90 m). The vintage-cabinet copy was removed from `mobilya_donustur.py`.
+  - **Name (#1):** only "8. Kat — olabilir"; still open with Kubilay.
+  - **Floor-6 sideboard fix (`bbcba96`):** the sideboard moved to the landing-side wall, and its key was lifted out of the shelf board.
+  - Verification: 200/200 tests; release build 354.5 MB.
+
 - 2026-09-28 (Lesson 55, later): Şahan made remote decisions on two Artifact pages (furniture https://claude.ai/artifact/4KePW9Dw3Xyv1EsZcmoLBk, pending decisions https://claude.ai/artifact/DL3abkoDJxVRKA7xvVR4D7; choices live in their `db`, read with ArtifactData).
   - **Furniture (#73, `7920882`):** 28 kept; the two chairs became `painted_wooden_chair_02` and `SchoolChair_01` (old ones removed from the repo). The two unused coffee tables were placed: floor 4 salon and floor 8 Oda B. `standing_picture_frame_01` was already in use as the family-photo desk frame.
   - **Texts (#60, `be5f991`):** 16 notes rewritten as hints, not instructions (Şahan: "görevi nasıl yapacağını söylemesin ama ufak ipuçları versin"). Apply the same rule to any new note.
