@@ -305,18 +305,18 @@ public static partial class GrayboxKurucu
         return sablon;
     }
 
-    // ---------- 1. KAT: YENİDEN TASARLANIYOR (#83, Şahan, 2026-09-29) ----------
-    // Şahan 1. kattan başlayarak katları oda oda yeniden döşüyor: önce dairedeki bütün eşyalar ve
-    // görev parçaları kaldırıldı, sonra her oda için eşyalar birlikte seçiliyor; kapılar ve görev
-    // parçaları odalar bitince seçilecek. Kat "tasarımda": zincir yok, odalar kilitsiz, kat anahtarı
-    // sahanlıkta. Eski tasarım (tornavida -> kavanoz -> Oda A anahtarı -> komodin) git geçmişinde.
+    // ---------- 1. KAT: ÖĞRETİCİ, ODA ODA YENİDEN DÖŞENDİ (#83, Şahan, 2026-09-29) ----------
+    // Şahan katları oda oda yeniden döşedi: her oda için 90'ların evinde neler olduğu listelendi,
+    // Şahan numaralarla seçti; kapılar ve görev parçaları odalar bitince kapı açılış sırasına göre
+    // kuruldu. Eski tasarım (ayakkabılıkta tornavida, Nermin'in ipucu notu) git geçmişinde.
     //
-    // Onaylanan kapı sırası: antre ve hol açık -> salon (kilitsiz) -> mutfak (kilitsiz) ->
-    // Oda A (anahtarla). Banyo, kiler, Oda B ve balkon bu katta kapalı.
-    // Görev parçaları (zincir aşamasında kurulacak): tornavida antrede portmantonun çekmecesinde;
-    // mutfakta kapağı sıkışmış kavanoz, tornavidayla kırılır, içinde Oda A'nın anahtarı; Oda A'da
-    // kat anahtarı. Kural (Şahan): bir odada en fazla bir görev parçası; ipucu notu yok, oyuncu
-    // neyi nerede arayacağını bir nottan okumaz.
+    // Kapı sırası ve görev parçaları (kural: bir odada en fazla bir görev parçası, ipucu notu yok):
+    //   1. Antre: portmantonun çekmecesinde tornavida (alet çantasına girer, hiç harcanmaz).
+    //   2. Salon: kilitsiz; görev parçası yok (aile fotoğrafı, boşaltılan ev).
+    //   3. Mutfak: kilitsiz; tezgâhta beş kavanoz, hepsi tornavidayla kırılır (süsleri KirilanKavanoz),
+    //      anahtar zincir kavanozunda; cam saydam, anahtar kafa lambasıyla görünür.
+    //   4. Oda A: kavanozdan çıkan anahtarla açılır; kat anahtarı komodinin kapalı çekmecesinde.
+    //   Banyo, kiler (Oda C), Oda B ve balkon bu katta kapalı.
     //
     // Hikâye: Yıldız ailesi (2 numara) borç yüzünden tahliye ediliyor; ev yarı toplanmış.
 
@@ -329,11 +329,26 @@ public static partial class GrayboxKurucu
             v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
             AssetDatabase.CreateAsset(v, yol);
         }
-        v.aciklama = "1. kat, daire 2, Yıldız ailesi (tahliye). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
-                     "(antre, hol, salon, mutfak ve Oda A bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
-        v.tasarimda = true;
+        v.aciklama = "1. kat, daire 2, Yıldız ailesi (tahliye), öğretici. Portmantonun çekmecesinde tornavida; " +
+                     "mutfakta kavanozlar (hepsi kırılır), birinde Oda A'nın anahtarı; Oda A'da komodinin çekmecesinde " +
+                     "katın anahtarı. Salon ve mutfak kilitsiz; banyo, kiler, Oda B kapalı. Oda oda döşendi (#83).";
+        v.tasarimda = false;
         v.yalnizSecilenEsyalar = true;
-        v.zincir = new KilitZinciri();
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_B", "Oda_C" });
+        // Yerler: portmantonun çekmecesi (antre), tezgâhtaki kavanoz (mutfak; kilidi kapağında),
+        // komodinin çekmecesi (Oda A).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "portmanto", Yol = "Esyalar/Portmanto/Cekmece", Oda = "Antre" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "kavanoz", Yol = "Esyalar/Tezgah/Kavanoz", Oda = "Mutfak", KilitYolu = "Esyalar/Tezgah/Kavanoz/Kapak" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "komodin", Yol = "Esyalar/Komodin/Cekmece", Oda = "Oda_A" });
+        // Tornavida çekmecenin tepsisinde yatar: tepsinin tabanı 0,752 m, ortası portmantonun ekseninden
+        // 7,8 cm geride (çekmece yuvası panoya bitişik); 90° çevrilip çekmecenin enine uzanır.
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "portmanto", Y = 0.752f, Z = -0.078f, Donus = 90f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "kavanoz", Y = 0.012f, Donus = 30f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "komodin", Y = 0.375f, Donus = 15f });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "kavanoz", Tur = KilitTuru.Kirma, OdaKapisi = false, Hedef = "kavanoz", Gerekli = "tornavida" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_A", Gerekli = "odaA_anahtari" });
+        v.zincir = z;
         v.sesler = new List<KatSesi>();
         v.parcalar = new List<KatParcasi>();
 
@@ -471,6 +486,12 @@ public static partial class GrayboxKurucu
         // Boşaltılmış buzdolabı: fişi çekilmiş, kapısı aralık.
         v.acikParcalar = new List<AcikParca> { new AcikParca { Yol = "Esyalar/Buzdolabi/Kapi", Oran = 0.35f } };
         v.buzdolabiFisiCekili = true;
+
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        KilitZinciri.Sonuc sonuc = z.Cozumle(odalar);
+        if (!sonuc.Cozulebilir) Debug.LogError("[ZINCIR] 1. kat zinciri çözülemiyor: " + string.Join("; ", sonuc.Hatalar));
+        else Debug.Log("[ZINCIR] 1. kat zinciri çözülebilir: " + string.Join(" -> ", sonuc.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
     }
