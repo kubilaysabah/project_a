@@ -644,6 +644,17 @@ public class ZincirUygulayici
             }
             t.gameObject.SetActive(gorunur);
         }
+        // Tezgâhın üstündeki bulmaca kavanozu (Esyalar/Tezgah/Kavanoz) tezgâhla birlikte kurulu. Oda oda
+        // döşenen katta (#83) yalnızca kat dosyası ona başvuruyorsa görünür; yoksa her katta aynı kavanoz
+        // dururdu (Şahan: katlarda aynı model eşya olmasın). Öbür katlarda eskisi gibi hep görünür.
+        Transform kavanoz = daire.Find("Esyalar/Tezgah/Kavanoz");
+        if (kavanoz != null)
+        {
+            bool gerekli = !varlik.yalnizSecilenEsyalar;
+            foreach (string yol in yollar)
+                if (yol.StartsWith("Esyalar/Tezgah/Kavanoz")) { gerekli = true; break; }
+            kavanoz.gameObject.SetActive(gerekli);
+        }
     }
 
     // ÇİFT DAİRE (#70): adı "B:" ile başlıyorsa öneki atar ve ikinci daireyi verir; değilse daireyi.

@@ -125,6 +125,10 @@ public static partial class GrayboxKurucu
         PortreSablonuKur("Portre_Kat2_Es", "Assets/Textures/Portreler/kat2_es.png");
         foreach (string ad in new[] { "Orgu_Battaniye", "Cay_Takimi", "Gazete_Kilif", "Kuru_Sardunya", "Dikis_Makinesi", "Koltuk_Danteli" })
             ParcaSablonuKur(ad, ad);
+        // 2. kat mutfak dekoru (#83).
+        foreach (string ad in new[] { "Buzdolabi_70", "Ocak_Emaye", "Tup_Turuncu", "Mutfak_Masasi", "Mutfak_Sandalyesi",
+                                      "Teneke_Rafi", "Mutfak_Perdesi", "Bulasiklik" })
+            ParcaSablonuKur(ad, ad);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
@@ -891,7 +895,7 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(v, yol);
         }
         v.aciklama = "2. kat, daire 3, yaşlı Nuri Bey (hastanede). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
-                     "(antre, hol ve salon bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
+                     "(antre, hol, salon ve mutfak bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
         v.tasarimda = true;
         v.yalnizSecilenEsyalar = true;
         v.zincir = new KilitZinciri();
@@ -899,7 +903,7 @@ public static partial class GrayboxKurucu
         v.parcalar = new List<KatParcasi>();
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;
-        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu" };
+        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Tezgah" };
 
         KatSusu Sus(GameObject sablon, float u, float y, float vv, float onU, float onV)
         { return new KatSusu { Sablon = sablon, X = u, Y = y, Z = vv, OnU = onU, OnV = onV }; }
@@ -982,6 +986,24 @@ public static partial class GrayboxKurucu
             M("Chandelier_02", 2.60f, Tavan, 6.45f, 0f, 1f),
             // Eşinden kalma dikiş makinesi: balkon kapısının yanındaki köşede, üstü dantel örtülü.
             Sus(Sablon("Dikis_Makinesi"), 4.50f, 0f, 8.10f - 0.225f, 0f, -1f),
+
+            // ---------- MUTFAK (Şahan'ın seçimi: 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12) ----------
+            // Mutfak u 6,8-10,5, v -0,8-2,85. Kapı hol duvarında (u 7,0-7,8). Dip duvarda (u = 10,6) pencere ve
+            // altında dairenin tezgâhı (u 9,88-10,5, v 0,09-1,91, üstü 0,90). Onun son sabahı: masada yarım
+            // kahvaltı, ocakta soğumuş çorba, bulaşıklıkta tek tabak; her şey yerli yerinde, sahibi yok.
+            // 70'ler buzdolabı köşede; kapısında ilaç saatleri kâğıdı, üstünde plastik çiçekli vazo.
+            Sus(Sablon("Buzdolabi_70"), 7.25f, 0f, -0.80f + 0.33f, 0f, 1f),
+            // Emaye tüplü ocak ve yanında ona bağlı turuncu tüp.
+            Sus(Sablon("Ocak_Emaye"), 8.25f, 0f, -0.80f + 0.31f, 0f, 1f),
+            Sus(Sablon("Tup_Turuncu"), 8.95f, 0f, -0.55f, 0f, 1f),
+            // Kiler duvarında teneke kutu rafı.
+            Sus(Sablon("Teneke_Rafi"), 6.80f, 1.50f, 1.20f, 1f, 0f),
+            // Pencerenin alt yarısında kareli kafe perdesi; tezgâhta evyenin yanında tek kişilik bulaşıklık.
+            Sus(Sablon("Mutfak_Perdesi"), 10.50f, 1.62f, 1.00f, -1f, 0f),
+            Sus(Sablon("Bulasiklik"), 10.22f, 0.90f, 0.95f, -1f, 0f),
+            // Muşambalı masa ortada, üstünde yarım kahvaltı; tek sandalye.
+            Sus(Sablon("Mutfak_Masasi"), 8.45f, 0f, 1.50f, 0f, 1f),
+            Sus(Sablon("Mutfak_Sandalyesi"), 8.45f, 0f, 2.10f, 0f, -1f),
         };
         EditorUtility.SetDirty(v);
         return v;
