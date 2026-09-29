@@ -3,22 +3,7 @@ guid: 2e56d587cf7fb3141bc23f871ed73990
 ModelImporter:
   serializedVersion: 24501
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: vintage_cabinet_01__0
-    second: {fileID: 2100000, guid: 30b277e229ad73c449bc04ac24e84fec, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: vintage_cabinet_01__1
-    second: {fileID: 2100000, guid: a8014ae4454886748904662ab2320909, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: vintage_cabinet_01__2_cam
-    second: {fileID: 2100000, guid: caae5500201420643a4e975803e71d0b, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0

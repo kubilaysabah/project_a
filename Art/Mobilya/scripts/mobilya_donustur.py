@@ -37,7 +37,7 @@ TAVAN = {"Chandelier_01", "Chandelier_02"}
 # alttan menteşelidir; yan menteşeli dolap kapağı gibi açılsaydı tuhaf dururdu.
 TEK_PARCA = {"electric_stove"}
 
-# BULMACA EŞYALARININ YENİ GÖRÜNÜMÜ (#81, Şahan'ın seçimi). Bu üç model normal mobilya olarak da çevrilir, ama
+# BULMACA EŞYALARININ YENİ GÖRÜNÜMÜ (#81, Şahan'ın seçimi). Bu iki model normal mobilya olarak da çevrilir, ama
 # ayrıca eski bulmaca eşyasının yerini alacak bir kopya Assets/Models/Props/'a yazılır: aynı dosya adı, aynı
 # parça adları, eskisine yakın ölçü. Böylece kilitler, kapaklar ve içine konan anahtarlar kod değişmeden çalışır.
 #   olcu: hedef (en, derinlik, boy) metre; olcek: tek sayı (oranı bozmadan küçült).
@@ -47,8 +47,8 @@ BULMACA = {
     "GothicCabinet_01": {"ad": "Bufe", "olcu": (1.40, 0.45, 1.90)},
     # Ahşap sandık -> oyuncak kutusu: eni eski kutunun (0,60), oranı korunur. Kapak arka üst kenardan açılır.
     "treasure_chest": {"ad": "Oyuncak_Kutusu", "en": 0.60},
-    # Vitrinli dolap -> gardırop (5. kat, vananın önünde): %60. Tam boyu itildiğinde duvara çarpıyordu.
-    "vintage_cabinet_01": {"ad": "Gardirop", "olcek": 0.60},
+    # (Vitrinli dolap -> gardırop kopyası 2026-09-29'da kaldırıldı: Şahan Blender'da iki kapılı aynalı ceviz
+    # gardırop seçti, Art/Blender/scripts/gardirop.py. Burada kalsaydı yeniden çalışınca onu ezerdi.)
 }
 
 

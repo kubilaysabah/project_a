@@ -603,8 +603,9 @@ public static partial class GrayboxKurucu
             ayar.ipucuAnahtari = "ipucu.cevir";
         }
         SofraKur(e, d);
-        // #81: gardırop artık eski vitrinli dolap (%60, derinliği 0,40): vananın 14 cm önünde, sırtı ona dönük.
-        GameObject gardirop = DaireEsyasi("Gardirop", e, d, 0.03f + 0.14f + 0.20f, 0f, 6.6f, 1f, 0f);
+        // #81: gardırop iki kapılı aynalı ceviz (1,00 x 0,55 x 1,90, gardirop.py): vananın 14 cm önünde, sırtı ona
+        // dönük; merkezi sırtından yarım derinlik (0,275) ileride.
+        GameObject gardirop = DaireEsyasi("Gardirop", e, d, 0.03f + 0.14f + 0.275f, 0f, 6.6f, 1f, 0f);
         if (gardirop != null)
         {
             // Plan +v yönünün gardırobun kendi eksenlerindeki karşılığı: dört aynalı dairede de
@@ -615,7 +616,7 @@ public static partial class GrayboxKurucu
             var seri = new SerializedObject(a);
             seri.FindProperty("hareket").enumValueIndex = (int)AcilirParca.Hareket.Kaydir;
             seri.FindProperty("eksen").vector3Value = yerelYon;
-            seri.FindProperty("miktar").floatValue = 0.78f;   // #81: 1,21 m'lik dolap vanayı açar, pencere duvarına (v 8,1) çarpmaz
+            seri.FindProperty("miktar").floatValue = 0.78f;   // #81: 1,0 m'lik (taçla 1,07) gardırop vanayı açar, pencere duvarına (v 8,1) çarpmaz
             seri.FindProperty("sure").floatValue = 1.4f;
             seri.FindProperty("ipucuAc").stringValue = "ipucu.it";
             seri.FindProperty("ipucuKapat").stringValue = "ipucu.it";
