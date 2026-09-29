@@ -111,6 +111,14 @@ public static partial class GrayboxKurucu
         ParcaSablonuKur("Yaprak_Takvim", "Yaprak_Takvim");
         SaatSablonuKur();
         TerlikCiftiSablonuKur("Yasli");
+        // 2. kat hol dekoru (#83).
+        YollukSablonuKur();
+        ParcaSablonuKur("Kitaplik", "Kitaplik");
+        ParcaSablonuKur("Kus_Kafesi", "Kus_Kafesi");
+        ParcaSablonuKur("Ilac_Dolabi", "Ilac_Dolabi");
+        ParcaSablonuKur("Sacilmis_Ilaclar", "Sacilmis_Ilaclar");
+        ParcaSablonuKur("Devrik_Sandalye", "Devrik_Sandalye");
+        ParcaSablonuKur("Kirik_Gozluk", "Kirik_Gozluk");
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
@@ -726,6 +734,24 @@ public static partial class GrayboxKurucu
         return g;
     }
 
+    // Yolluk şablonu (#83, 2. kat holü): halı ve uç kenarları (Yolluk.fbx); yüne desenli doku takılır.
+    // Doku 1,6 m'lik bir tekrar birimi; UV'si boy boyunca tekrar eder (dokunun sarma kipi Repeat).
+    static GameObject YollukSablonuKur()
+    {
+        Material m = DokuluMalzeme("Yolluk_Nuri", "Assets/Textures/Yolluk_Nuri.png", new Color(0.8f, 0.8f, 0.8f), 0.02f);
+        GameObject gecici = new GameObject("Yolluk");
+        GameObject y = Model("Hali", gecici.transform, "Yolluk", "Yolluk", Vector3.zero, 0f, carpisma: false);
+        if (y == null) { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Yolluk.fbx yok."); return null; }
+        MeshRenderer r = y.GetComponent<MeshRenderer>();
+        Material[] mats = r.sharedMaterials;
+        for (int i = 0; i < mats.Length; i++) if (mats[i] != null && mats[i].name.StartsWith("Yolluk_Yun")) mats[i] = m;
+        r.sharedMaterials = mats;
+        // Çarpıştırıcı yok: 1 cm'lik halı ve 5 cm'lik kıvrım yürürken takılmasın, nişanı da tutmasın.
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Yolluk.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
     // Sarkaçlı duvar saati şablonu (#83, 2. kat): kasa (Saat) ve sarkaç (Sarkac, SarkacSallanir ile sallanır).
     // Kasanın alt camı saydam malzemeyle değiştirilir: sarkaç camın arkasından görünsün.
     static GameObject SaatSablonuKur()
@@ -803,7 +829,7 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(v, yol);
         }
         v.aciklama = "2. kat, daire 3, yaşlı Nuri Bey (hastanede). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
-                     "(antre bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
+                     "(antre ve hol bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
         v.tasarimda = true;
         v.yalnizSecilenEsyalar = true;
         v.zincir = new KilitZinciri();
@@ -839,6 +865,27 @@ public static partial class GrayboxKurucu
             Sus(Sablon("Posta_Yigini"), 0.45f, 0f, -0.12f, 1f, 0f),
             // Terlikleri: kapının içinde, burunları eve dönük.
             Sus(Sablon("Terlik_Cifti_Yasli"), 1.05f, 0f, -0.58f, -1f, 0f),
+
+            // ---------- HOL (Şahan'ın seçimi: 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14) ----------
+            // Hol u 0-10,5, v 2,95-4,65. Güney duvarı (v = 2,95) kapıları: banyo u 3,25-3,95, kiler 5,25-6,05,
+            // mutfak 7,0-7,8. Kuzey duvarı (v = 4,65): salon 0,85-1,75, Oda B 5,95-6,75, Oda A 8,7-9,5.
+            // Holün başı düzenli (tablo, kitaplık, fotoğraf); ortası olay yeri: Nuri Bey burada fenalaşmış.
+            // Yolluk: baştan dibe serili; buruşmuş kıvrımı olay yerinde (u ~4,6).
+            Sus(Sablon("Yolluk"), 5.15f, 0f, 3.80f, 0f, 1f),
+            Sus(Sablon("Petek"), 10.50f, 0f, 3.80f, -1f, 0f),
+            // Holün başı: salon ile Oda B kapıları arasında yağlı boya tablo, altında kitaplık, rafın
+            // üstünde Nuri Bey'in aile fotoğrafı (Rıza Efendi'yle, 1989; masa çerçevesi).
+            Sus(Sablon("Kitaplik"), 2.60f, 0f, 4.65f - 0.15f, 0f, -1f),
+            M("hanging_picture_frame_02", 2.60f, 1.72f, 4.65f, 0f, -1f),
+            Foto("kat2", false, 2.88f, 1.10f, 4.52f, 0f, -1f),
+            // Kuş kafesi: askılı ayağıyla Oda B kapısının yanında; yem kabı boş.
+            Sus(Sablon("Kus_Kafesi"), 5.25f, 0f, 4.40f, 0f, -1f),
+            // Olay yeri: kiler kapısının yanında kapağı açık ilaç dolabı; altında saçılmış ilaçlar,
+            // yan yatmış hasır sandalye ve kırık gözlük.
+            Sus(Sablon("Ilac_Dolabi"), 4.60f, 1.45f, 2.95f, 0f, 1f),
+            Sus(Sablon("Sacilmis_Ilaclar"), 4.65f, 0.004f, 3.45f, 0f, 1f),
+            Sus(Sablon("Devrik_Sandalye"), 4.05f, 0f, 3.72f, 0.4f, 1f),
+            Sus(Sablon("Kirik_Gozluk"), 5.05f, 0.008f, 3.95f, 0.3f, 1f),
         };
         EditorUtility.SetDirty(v);
         return v;
