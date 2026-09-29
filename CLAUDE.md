@@ -228,7 +228,9 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
   - Rooms furnished so far: antre (`234ba24`, `12e1726`), hol (`b69cd78`), salon (`9e707a9`).
   - Agreed floor-1 door order: salon and kitchen unlocked, Oda A with a key; bathroom, pantry, Oda B and balcony shut.
   - Planned task items (to be set up after the rooms): screwdriver in the portmanto drawer, the jar with Oda A's key in the kitchen, the floor key in Oda A.
-  - Remaining rooms on floor 1: kitchen, Oda A. 200/200 tests; the full playthrough bot passed with floor 1 in design mode.
+  - Kitchen (`6dcfc66`: clear jar glass, every jar breaks with the screwdriver via `KirilanKavanoz`, `acikParcalar`, `buzdolabiFisiCekili`) and Oda A (`c52c18d`) furnished.
+  - **Floor 1 chain set and design mode left (`5c599d2`):** screwdriver in the portmanto drawer → chain jar in the kitchen (Kirma) → Oda A key → floor key in the nightstand drawer; bathroom, pantry and Oda B shut.
+  - 200/200 tests; the full playthrough bot passed (0 problems); release build 367.4 MB. Waiting for Şahan's floor-1 test, then floor 2.
 
 - 2026-09-29 (Lesson 56): Şahan filled the final decisions page (https://claude.ai/artifact/QrAg3sEeZEU6bNDtjYUXxk).
   - **Notes (#60):** all 16 hint texts approved as they are.
