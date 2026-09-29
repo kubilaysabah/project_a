@@ -68,7 +68,6 @@ public static partial class GrayboxKurucu
         GameObject koliKucuk = ParcaSablonuKur("Koli_Kucuk", "Koli_Kucuk");
         GameObject koliAcik = ParcaSablonuKur("Koli_Acik", "Koli_Acik");
         // Antre dekoru (#83): yeni Blender modelleri ve bileşik şablonlar.
-        ParcaSablonuKur("Portmanto", "Portmanto");
         ParcaSablonuKur("Anahtar_Askiligi", "Anahtar_Askiligi");
         ParcaSablonuKur("Nazar_Boncugu", "Nazar_Boncugu");
         TelefonTakimiSablonuKur();
@@ -284,12 +283,12 @@ public static partial class GrayboxKurucu
     //
     // Onaylanan kapı sırası: antre ve hol açık -> salon (kilitsiz) -> mutfak (kilitsiz) ->
     // Oda A (anahtarla). Banyo, kiler, Oda B ve balkon bu katta kapalı.
+    // Görev parçaları (zincir aşamasında kurulacak): tornavida antrede portmantonun çekmecesinde;
+    // mutfakta kapağı sıkışmış kavanoz, tornavidayla kırılır, içinde Oda A'nın anahtarı; Oda A'da
+    // kat anahtarı. Kural (Şahan): bir odada en fazla bir görev parçası; ipucu notu yok, oyuncu
+    // neyi nerede arayacağını bir nottan okumaz.
     //
     // Hikâye: Yıldız ailesi (2 numara) borç yüzünden tahliye ediliyor; ev yarı toplanmış.
-    //
-    // Şahan'ın onayladığı Nermin'in notu yeni tasarımda kullanılmak üzere bekliyor; metin
-    // tablosundaki satırı silinmesin diye adı burada duruyor.
-    static readonly string[] Kat1BekleyenNotlar = { "not.kat1_kavanoz" };
 
     static KatZinciriVarligi Kat1Kur(GameObject koliBuyuk, GameObject koliKucuk, GameObject koliAcik)
     {
@@ -309,7 +308,7 @@ public static partial class GrayboxKurucu
         v.parcalar = new List<KatParcasi>();
 
         // Dairenin kalıcı eşyalarından bu katta görünenler (oda oda seçildikçe eklenir).
-        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu" };
+        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Portmanto" };
 
         // Yerel fonksiyon: bu fonksiyonun içinde kullanılan kısa bir yardımcı (bir süsü plan noktasına koyar).
         // u: landing duvarından içeri, y: yükseklik, vv: giriş kapısından boyuna; (onU, onV): modelin
@@ -327,10 +326,10 @@ public static partial class GrayboxKurucu
             // Tahliye yazısı: sigorta kutusunun yanında duvarda (Yönetim kapıcıya bıraktırmış).
             new KatNotu { Metin = "not.kat1_tahliye", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
         };
+        // Portmanto dairenin kalıcı eşyası (Esyalar/Portmanto, yukarıdaki listede): banyo duvarında,
+        // girene karşıdan bakar. Ağır olduğu için geride kalmış; askıları boş.
         v.suslar = new List<KatSusu>
         {
-            // Portmanto: banyo duvarında, girene karşıdan bakar. Ağır olduğu için geride kalmış; askıları boş.
-            Sus(Sablon("Portmanto"), 2.60f - 0.18f, 0f, 1.25f, -1f, 0f),
             // Telefon sehpası (boyalı komodin) portmantonun yanında, hol ağzına yakın; üstünde dantel,
             // telefon ve rehber. Hat borç yüzünden kesilmiş: kablo duvardan sökülmüş, fişi rehberin üstünde.
             M("painted_wooden_nightstand", 2.60f - 0.255f, 0f, 2.35f, -1f, 0f),

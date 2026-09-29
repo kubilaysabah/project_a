@@ -552,6 +552,13 @@ public static partial class GrayboxKurucu
         // SALON: Oda B tarafındaki duvarda takvim.
         DaireEsyasi("Takvim", e, d, 5.0f, 1.35f, 6.0f, -1f, 0f);
 
+        // ANTRE (#83): portmanto banyo duvarında (u = 2,6), yüzü girişe dönük; aynanın altındaki
+        // çekmecesi öne kayarak açılır. Bulmaca eşyası gibi yalnızca kat dosyası isterse görünür
+        // (ZincirUygulayici.BulmacaEsyalari); 1. katta tornavida bu çekmecede.
+        GameObject portmanto = DaireEsyasi("Portmanto", e, d, 2.60f - 0.18f, 0f, 1.25f, -1f, 0f, "Cekmece");
+        Acilir(portmanto, "Cekmece", AcilirParca.Hareket.Kaydir, Vector3.forward, 0.12f, 0.4f);
+        Yonlendir(portmanto, "Cekmece");
+
         // ODA A: arka duvarda, pencerenin solunda komodin.
         GameObject komodin = DaireEsyasi("Komodin", e, d, 8.1f, 0f, 7.9f, 0f, -1f, "Cekmece");
         Acilir(komodin, "Cekmece", AcilirParca.Hareket.Kaydir, Vector3.forward, 0.26f, 0.4f);

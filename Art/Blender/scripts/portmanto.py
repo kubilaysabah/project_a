@@ -1,11 +1,14 @@
 # portmanto.py
 # 90'ların antre portmantosu (#83, Şahan'ın seçimi 2026-09-29: 1. katın antresi).
-# Türk evinin antresindeki tek parça mobilya: altta kapaklı ayakkabı dolabı, üstünde aynalı arka pano,
+# Türk evinin antresindeki mobilya: altta kapaklı ayakkabı dolabı, üstünde aynalı arka pano,
 # aynanın iki yanında pirinç mont askıları, tepede şapka rafı, aynanın altında küçük bir çekmece.
 # 1. kattaki taşınan aile onu ağır olduğu için geride bırakmış; askıları boş.
 #
 # PARÇALAR
-#   Portmanto : tek parça. Pivot tabanın ortası. Ön yüz -y tarafında; Unity'de +Z.
+#   Portmanto : gövde (dolap, pano, ayna, askılar, çekmece yuvası). Pivot tabanın ortası.
+#   Cekmece   : aynanın altındaki küçük çekmece, içi boş tepsi. Pivotu gövdeyle aynı nokta (tabanın
+#               ortası); Unity'de öne (+Z) kayarak açılır. 1. katta tornavida bunun içinde (#83).
+# Ön yüz -y tarafında; Unity'de +Z.
 # Ölçü 1,00 (en) x 0,36 (derinlik, alt dolap) x 1,95 (boy) m.
 # (Döndürme yok: ortak.kutu tuzağı, bkz. vana.py.)
 
@@ -64,9 +67,13 @@ for dx in (-1, 1):
     p.append(ortak.kutu("AynaCerceve", (0.04, 0.02, AYNA_BOY), (dx * (AYNA_EN / 2 + 0.02), yuz - 0.01, AYNA_Z), ceviz_koyu, 0.004))
 p.append(ortak.kutu("AynaTaci", (0.26, 0.02, 0.05), (0, yuz - 0.01, AYNA_Z + AYNA_BOY / 2 + 0.065), ceviz_koyu, 0.004))
 
-# Aynanın altında küçük çekmece (anahtar, eldiven çekmecesi) ve pirinç kulbu.
-p.append(ortak.kutu("Cekmece", (0.40, 0.14, 0.09), (0, ARKA - 0.092, 0.78), ceviz, 0.004))
-p.append(ortak.kutu("CekmeceKulp", (0.08, 0.012, 0.012), (0, ARKA - 0.168, 0.78), pirinc, 0.003))
+# Aynanın altında çekmece yuvası: panodan öne çıkan kutu, önü açık oyuk (çekmece içine girer).
+CEK_Z = 0.78
+YUVA_ARKA = ARKA - 0.022                  # panonun ön yüzü
+yuva_y = YUVA_ARKA - 0.075                # yuvanın merkezi (15 cm derin)
+yuva = ortak.kutu("Yuva", (0.44, 0.15, 0.11), (0, yuva_y, CEK_Z), ceviz, 0.004)
+ortak.oy(yuva, ortak.kutu("YuvaIc", (0.40, 0.15, 0.09), (0, yuva_y - 0.01, CEK_Z), ceviz))
+p.append(yuva)
 
 # Askılar: aynanın iki yanında, iki sıra halinde çift kollu pirinç askı (taban pulu, gövde, iki uç).
 for yon in (-1, 1):
@@ -80,4 +87,16 @@ for yon in (-1, 1):
 portmanto = ortak.birlestir(p, "Portmanto")
 ortak.yumusat(portmanto, 30)
 ortak.pivotu_tasi(portmanto, (0, 0, 0))
-ortak.calistir_ve_bitir("Portmanto", [portmanto], 1.95, 3.4)
+
+# ---------- ÇEKMECE ----------
+# İçi oyulmuş tepsi, önünde yuvanın ağzını kapatan ön yüz ve pirinç kulp.
+on_y = yuva_y - 0.075                     # yuvanın ağzı
+tepsi = ortak.kutu("Tepsi", (0.39, 0.13, 0.085), (0, yuva_y - 0.005, CEK_Z), ceviz, 0.002)
+ortak.oy(tepsi, ortak.kutu("TepsiIc", (0.37, 0.11, 0.08), (0, yuva_y - 0.005, CEK_Z + 0.01), ceviz))
+on = ortak.kutu("On", (0.42, 0.012, 0.10), (0, on_y - 0.006, CEK_Z), ceviz, 0.003)
+kulp = ortak.kutu("Kulp", (0.08, 0.012, 0.012), (0, on_y - 0.018, CEK_Z), pirinc, 0.003)
+cekmece = ortak.birlestir([tepsi, on, kulp], "Cekmece")
+ortak.yumusat(cekmece, 30)
+ortak.pivotu_tasi(cekmece, (0, 0, 0))
+
+ortak.calistir_ve_bitir("Portmanto", [portmanto, cekmece], 1.95, 3.4)

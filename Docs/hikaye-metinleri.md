@@ -184,25 +184,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > The Management
 
-### `not.kat1_kavanoz`
+### `not.kat1_kavanoz` (kaldırıldı)
 
-**TR**
-
-> Kapıcı Bey,
->
-> Yatak odasının anahtarını sakladım ama şimdi kendim bile çıkaramıyorum; kapağı yine sıkıştı. Siz aletlerle benden iyisinizdir.
-> Kalan kolileri pazartesi alacağız.
->
-> Nermin (2 numara)
-
-**EN**
-
-> Mr Caretaker,
->
-> I hid the bedroom key, and now even I can't get it out; the lid is stuck again. You are handier with tools than I am.
-> We will collect the rest of the boxes on Monday.
->
-> Nermin (no. 2)
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): oyuncu neyi nerede arayacağını bir nottan okumamalı.
 
 ### `foto.kat1`
 

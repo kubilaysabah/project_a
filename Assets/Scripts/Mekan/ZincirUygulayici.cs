@@ -592,7 +592,7 @@ public class ZincirUygulayici
     // çapası) o eşya görünür; başvurmuyorsa o katta yok. Yerine kiracıya uygun mobilyayı kat dosyası koyar.
     // Daire başka bir katta yeniden açılınca kural baştan işler.
     private static readonly string[] BulmacaEsyalari =
-        { "Dosya_Dolabi", "Gardirop", "Bufe", "Oyuncak_Kutusu", "Alet_Cantasi", "Duvar_Kolu", "Boy_Cetveli" };
+        { "Dosya_Dolabi", "Gardirop", "Bufe", "Oyuncak_Kutusu", "Alet_Cantasi", "Duvar_Kolu", "Boy_Cetveli", "Portmanto" };
 
     private static void BulmacaEsyalariniAyarla(Transform daire, KatZinciriVarligi varlik, string onek)
     {

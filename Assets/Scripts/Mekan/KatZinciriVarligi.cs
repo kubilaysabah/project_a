@@ -35,7 +35,7 @@ public class KatYerlesimi
 [System.Serializable]
 public class KatNotu : KatYerlesimi
 {
-    public string Metin;          // metin tablosundaki anahtar ("not.kat1_kavanoz")
+    public string Metin;          // metin tablosundaki anahtar ("not.kat1_tahliye")
 }
 
 [System.Serializable]

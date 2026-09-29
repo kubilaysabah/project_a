@@ -19,6 +19,7 @@ MonoBehaviour:
   yalnizSecilenEsyalar: 1
   gorunenEsyalar:
   - Sigorta_Kutusu
+  - Portmanto
   zincir:
     KapaliOdalar: []
     Yerler: []
@@ -35,16 +36,6 @@ MonoBehaviour:
     Yatik: 0
     Metin: not.kat1_tahliye
   suslar:
-  - Yol: 
-    X: 2.4199998
-    Y: 0
-    Z: 1.25
-    Donus: 0
-    OnU: -1
-    OnV: 0
-    Yatik: 0
-    Sablon: {fileID: 1188025801659912191, guid: 0b6c6d583c217ad4982e8c07962594fc, type: 3}
-    Metin: 
   - Yol: 
     X: 2.3449998
     Y: 0
