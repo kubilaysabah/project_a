@@ -70,18 +70,10 @@ public static partial class GrayboxKurucu
     static void MobilyalariEkle(KatZinciriVarligi v, int kat)
     {
         if (v == null) return;
+        if (v.tasarimda) return;   // yeniden tasarlanan kat boş kalır (Şahan, 2026-09-29)
         var m = new List<KatSusu>();
         switch (kat)
         {
-            case 1:   // Taşınan aile: evin çoğu gitmiş, geride kalanlar (#55: koliler zaten var).
-                m.Add(AntreAynasi());
-                m.Add(M("television_02", 2.95f, 0f, 5.05f, 0.2f, 1f));            // yerde bırakılmış TV
-                m.Add(Foto("kat1", true, 5.0f, 1.55f, 7.15f, -1f, 0f));        // duvarda unutulmuş aile fotoğrafı
-                m.Add(M("SchoolChair_01", 4.30f, 0f, 6.60f, -1f, 0.3f));            // okul sandalyesi (Şahan, plastiğin yerine)
-                m.Add(HolSaati());
-                m.Add(M("painted_wooden_chair_02", 5.70f, 0f, 5.60f, 1f, 0.2f));  // Oda B
-                break;
-
             case 2:   // Nuri: yaşlı bir adamın klasik evi.
                 m.Add(Kanepe("sofa_02", 0.82f));
                 m.Add(M("throw_pillows_01", 4.55f, 0.42f, 6.50f, -1f, 0f));

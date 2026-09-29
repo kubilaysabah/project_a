@@ -801,7 +801,8 @@ public class KatYoneticisi : MonoBehaviour
     private KilitZinciri ZincirBul(int kat)
     {
         KatZinciriVarligi v = VarlikBul(kat);
-        return v != null ? v.zincir : null;
+        // Tasarımdaki kat zinciri yokmuş gibi davranır: daire kilitsiz, kat anahtarı sahanlıkta.
+        return v != null && !v.tasarimda ? v.zincir : null;
     }
 
     // Editördeki malzeme adı -> yüzey numarası. DokuKurucu'nun dairelere verdiği adlar.

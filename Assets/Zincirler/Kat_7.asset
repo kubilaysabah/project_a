@@ -18,6 +18,7 @@ MonoBehaviour:
     banyo (mente\u015Fe), salon (do\u011Fum g\xFCn\xFC 1107, n\xFCfus c\xFCzdan\u0131
     banyoda), kiler (anahtar b\xFCfede), mutfak (kiler kolu), Oda A (k\u0131r\u0131k
     anahtar), Oda B (fosforlu 0913), sand\u0131k (levye) -> kat\u0131n anahtar\u0131."
+  tasarimda: 0
   zincir:
     KapaliOdalar: []
     Yerler:

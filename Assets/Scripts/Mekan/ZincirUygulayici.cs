@@ -236,6 +236,8 @@ public class ZincirUygulayici
         if (varlik == null) return;
         BulmacaEsyalariniAyarla(daire, varlik, "");
         if (IkinciDaire != null) BulmacaEsyalariniAyarla(IkinciDaire, varlik, KilitZinciri.IkinciOnek);
+        // Tasarımdaki kat (Şahan, 2026-09-29): daire boş kalır; not, süs, ses, parça konmaz.
+        if (varlik.tasarimda) return;
         DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
         // Elektriksiz kat (#67): sigorta kilidi olmadan da daire karanlık; fosforlu yazı görünür.
         if (varlik.elektrikYok) Elektrik(daire).Ayarla(false);
@@ -611,15 +613,25 @@ public class ZincirUygulayici
         foreach (KatSusu s in varlik.suslar) Ekle(s.Yol);
         foreach (KatSesi s in varlik.sesler) Ekle(s.Yol);
 
-        foreach (string ad in BulmacaEsyalari)
+        // Dairenin bütün eşyaları: bulmaca eşyası ise kat dosyası başvuruyorsa görünür; öbürleri
+        // (komodin, tezgâh, sofra...) her katta görünür. Tasarımdaki katta hiçbiri görünmez. Her
+        // eşyaya her açılışta açıkça karar verilir: aynı daire başka bir katta yeniden açılınca
+        // (1. katın dairesi 5. katta da açılır) önceki katın gizledikleri geri gelir.
+        Transform esyalar = daire.Find("Esyalar");
+        if (esyalar == null) return;
+        foreach (Transform t in esyalar)
         {
-            Transform t = daire.Find("Esyalar/" + ad);
-            if (t == null) continue;
-            string kok = "Esyalar/" + ad;
-            bool gerekli = false;
-            foreach (string yol in yollar)
-                if (yol == kok || yol.StartsWith(kok + "/")) { gerekli = true; break; }
-            t.gameObject.SetActive(gerekli);
+            bool gorunur;
+            if (varlik.tasarimda) gorunur = false;
+            else if (System.Array.IndexOf(BulmacaEsyalari, t.name) < 0) gorunur = true;
+            else
+            {
+                string kok = "Esyalar/" + t.name;
+                gorunur = false;
+                foreach (string yol in yollar)
+                    if (yol == kok || yol.StartsWith(kok + "/")) { gorunur = true; break; }
+            }
+            t.gameObject.SetActive(gorunur);
         }
     }
 

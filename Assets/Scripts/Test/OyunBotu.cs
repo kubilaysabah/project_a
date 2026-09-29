@@ -166,6 +166,18 @@ public class OyunBotu : MonoBehaviour
     private IEnumerator KatiCoz(int kat)
     {
         KilitZinciri z = Zincir(kat, out KatZinciriVarligi varlik);
+        // Yeniden tasarlanan kat: daire boş, katın anahtarı sahanlıkta; bot onu alıp geçer.
+        if (varlik != null && varlik.tasarimda)
+        {
+            KatAnahtari sahanlikta = null;
+            foreach (KatAnahtari a in FindObjectsByType<KatAnahtari>())
+                if (a.Kat == kat && a.gameObject.activeInHierarchy && a.EtkilesimeAcik) sahanlikta = a;
+            if (sahanlikta == null) { Sorun($"{kat}. kat tasarımda ama sahanlıkta kat anahtarı yok"); yield break; }
+            sahanlikta.Etkilesim(kontrol.gameObject);
+            yield return new WaitForSeconds(0.5f);
+            if (!Cep.Tasiyor(EsyaTuru.KatAnahtari, kat)) Sorun($"{kat}. kat: sahanlıktaki kat anahtarı alınamadı");
+            yield break;
+        }
         if (z == null) { Sorun($"{kat}. katın zinciri yok"); yield break; }
 
         // 7. kat gibi girişi kapalı katlar: gerçek kapıyı çal.

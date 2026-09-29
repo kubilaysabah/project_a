@@ -17,6 +17,7 @@ MonoBehaviour:
     kafa lambas\u0131 kapal\u0131yken g\xF6r\xFCn\xFCr. Dolapta sigorta; tak\u0131l\u0131nca
     lambalar yanar ve buzdolab\u0131 a\xE7\u0131l\u0131r, i\xE7inde Hasan'\u0131n
     notu ve kat\u0131n anahtar\u0131. Yaln\u0131zca salon ve mutfak a\xE7\u0131k."
+  tasarimda: 0
   zincir:
     KapaliOdalar:
     - Banyo

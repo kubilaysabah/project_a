@@ -18,6 +18,7 @@ MonoBehaviour:
     (anahtar 4'\xFCn buzdolab\u0131nda), 3'\xFCn yatak odas\u0131 (k\u0131r\u0131k
     anahtar, iki dairede), 4'\xFCn banyosu (mente\u015Fe), 4'\xFCn yatak odas\u0131
     (3'\xFCn kilerindeki kol), b\xFCfe (sofra)."
+  tasarimda: 0
   zincir:
     KapaliOdalar:
     - Banyo

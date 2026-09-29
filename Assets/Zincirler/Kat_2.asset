@@ -17,6 +17,7 @@ MonoBehaviour:
     duyulur; kadran\u0131ndaki istasyon (102.7) kilerin \u015Fifresi; kilerde alet
     \xE7antas\u0131nda kat\u0131n anahtar\u0131. Banyo ve Oda B kapal\u0131. Notlar:
     Y\xF6netim'in hastane notu, Nuri'nin \u015Fifre notu."
+  tasarimda: 0
   zincir:
     KapaliOdalar:
     - Banyo

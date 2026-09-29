@@ -93,6 +93,11 @@ public class KatParcasi
 public class KatZinciriVarligi : ScriptableObject
 {
     [TextArea] public string aciklama;
+    // TASARIMDA (Şahan, 2026-09-29): kat yeniden tasarlanırken işaretlenir. İşaretliyken dairede
+    // hiçbir eşya görünmez (Esyalar altındakilerin hepsi gizlenir), zincir, notlar ve süsler
+    // uygulanmaz, odaların hepsi kilitsizdir ve katın anahtarı sahanlıkta durur (kat geçilebilir
+    // kalır). Zincir testleri bu dosyayı atlar. Tasarım bitince işaret kaldırılır.
+    public bool tasarimda;
     public KilitZinciri zincir = new KilitZinciri();
     public List<KatNotu> notlar = new List<KatNotu>();
     public List<KatSusu> suslar = new List<KatSusu>();

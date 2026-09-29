@@ -19,6 +19,7 @@ MonoBehaviour:
     a\xE7ar; buzdolab\u0131nda Oda B'nin anahtar\u0131; oyuncak kutusunda kat\u0131n
     anahtar\u0131. Banyonun mente\u015Feleri ayn\u0131 tornavidayla s\xF6k\xFCl\xFCr
     (yan oda)."
+  tasarimda: 0
   zincir:
     KapaliOdalar: []
     Yerler:

@@ -18,6 +18,7 @@ MonoBehaviour:
     Oda B'nin anahtar\u0131 mutfak \xE7ekmecesinde. Birle\u015Fen resmin k\xF6\u015Felerinde
     0 3 0 9: Oda A'n\u0131n \u015Fifresi; komodinde kat\u0131n anahtar\u0131. Banyo
     ve kiler kapal\u0131."
+  tasarimda: 0
   zincir:
     KapaliOdalar:
     - Banyo

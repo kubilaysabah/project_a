@@ -19,6 +19,7 @@ MonoBehaviour:
     gard\u0131rop (levye kilerde, kayd\u0131r\u0131c\u0131 banyoda bulununca) itilince
     arkas\u0131nda ana vana; \xE7ark \xE7evrilince su kesilir, damla susar, lavabonun
     sifonu s\xF6k\xFCl\xFCr, i\xE7inde kat\u0131n anahtar\u0131. Oda A ve Oda B kapal\u0131."
+  tasarimda: 0
   zincir:
     KapaliOdalar:
     - Oda_A

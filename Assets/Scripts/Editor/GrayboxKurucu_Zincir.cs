@@ -67,7 +67,7 @@ public static partial class GrayboxKurucu
         GameObject koliBuyuk = ParcaSablonuKur("Koli_Buyuk", "Koli_Buyuk");
         GameObject koliKucuk = ParcaSablonuKur("Koli_Kucuk", "Koli_Kucuk");
         GameObject koliAcik = ParcaSablonuKur("Koli_Acik", "Koli_Acik");
-        KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
+        KatZinciriVarligi kat1 = Kat1Kur();
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
@@ -269,16 +269,17 @@ public static partial class GrayboxKurucu
         return sablon;
     }
 
-    // ---------- 1. KAT: ÖĞRETİCİ ZİNCİR (#55, Docs/hikaye.md §7) ----------
-    // Daire 2, taşınmış aile: ortalıkta koliler; salon, Oda B, kiler ve banyo bu katta kapalı.
-    // Oyuncu burada kuralları öğrenir, her adım bir şey öğretir:
-    //   1. Kapının önündeki ayakkabılıkta tornavida: alet alınınca çantaya gider (AL).
-    //   2. Antrede Yönetim'in tahliye yazısı: notlar okunur (OKU).
-    //   3. Mutfakta kavanoz ve yanında kiracının notu: "anahtarı kavanoza koydum, kapağı sıkıştı".
-    //      Sıkışan kapak aletle kırılır (KIR); içinde Oda A'nın anahtarı.
-    //   4. Oda A doğru anahtarla açılır (KİLİTLİ -> AÇ).
-    //   5. Komodinin çekmecesinde katın anahtarı (çekmece AÇ, AL) -> kat kapısı.
-    static KatZinciriVarligi Kat1Kur(GameObject koliBuyuk, GameObject koliKucuk, GameObject koliAcik)
+    // ---------- 1. KAT: YENİDEN TASARLANIYOR (Şahan, 2026-09-29) ----------
+    // Şahan 1. kattan başlayarak katları oda oda yeniden döşemeye karar verdi: önce dairedeki bütün
+    // eşyalar ve görev parçaları kaldırıldı, sonra her oda için mobilya ve görev parçaları birlikte
+    // seçilecek. Kat "tasarımda" işaretli: daire boş ve kilitsiz, kat anahtarı sahanlıkta.
+    // Eski tasarım (tornavida -> kavanoz -> Oda A anahtarı -> komodin, koliler) git geçmişinde
+    // (bu dosyanın 2026-09-29 öncesi hâli).
+    // Şahan'ın onayladığı iki not yeni tasarımda yeniden kullanılmak üzere bekliyor; metin
+    // tablosundaki satırları silinmesin diye adları burada duruyor.
+    static readonly string[] Kat1BekleyenNotlar = { "not.kat1_tahliye", "not.kat1_kavanoz" };
+
+    static KatZinciriVarligi Kat1Kur()
     {
         string yol = $"{ZincirKlasoru}/Kat_1.asset";
         KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
@@ -287,50 +288,14 @@ public static partial class GrayboxKurucu
             v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
             AssetDatabase.CreateAsset(v, yol);
         }
-        v.aciklama = "1. kat, daire 2, taşınmış aile (öğretici). Ayakkabılıkta tornavida; kavanoz kırılır, içinde Oda A'nın " +
-                     "anahtarı; Oda A'nın komodininde katın anahtarı. Salon, Oda B, kiler ve banyo kapalı. Notlar: tahliye yazısı, " +
-                     "kiracının notu. Dekor: koliler.";
-        var z = new KilitZinciri();
-        z.KapaliOdalar.AddRange(new[] { "Salon", "Oda_B", "Oda_C", "Banyo" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "ayakkabilik", Yol = "Sahanlik:Kapi_{n}/Ayakkabilik", Oda = KilitZinciri.SahanlikOdasi });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "kavanoz", Yol = "Esyalar/Tezgah/Kavanoz", Oda = "Mutfak", KilitYolu = "Esyalar/Tezgah/Kavanoz/Kapak" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "komodin", Yol = "Esyalar/Komodin/Cekmece", Oda = "Oda_A" });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "ayakkabilik", Y = 1.025f, Donus = 80f });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "kavanoz", Y = 0.012f, Donus = 30f });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "komodin", Y = 0.375f, Donus = 15f });
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "kavanoz", Tur = KilitTuru.Kirma, OdaKapisi = false, Hedef = "kavanoz", Gerekli = "tornavida" });
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_A", Gerekli = "odaA_anahtari" });
-        v.zincir = z;
-
-        // NOTLAR: tahliye yazısı antrede sigorta kutusunun yanında duvarda; kiracının notu
-        // tezgâhta kavanozun yanında (ikisi de çapaya göre, aynalı dairelerde de yanında durur).
-        v.notlar = new List<KatNotu>
-        {
-            new KatNotu { Metin = "not.kat1_tahliye", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
-            // Tezgâhın arkasında, duvara dayalı dik duruyor: beyaz tezgâhın üstüne yatık konunca
-            // görünmüyordu (oynatma modu görüntüsü).
-            new KatNotu { Metin = "not.kat1_kavanoz", Yol = "Esyalar/Tezgah", X = 0.40f, Y = 0.902f, Z = -0.285f, Donus = -8f },
-        };
-
-        // DEKOR: koliler (plan konumları, bkz. DairePlani). Kapıların önünden ve yollardan uzakta.
-        // Yerel fonksiyon: yalnızca bu fonksiyonun içinde kullanılan kısa bir yardımcı (koli yazmak kısa olsun).
-        KatSusu Koli(GameObject s, float u, float y, float vv, float onU, float onV) { return new KatSusu { Sablon = s, X = u, Y = y, Z = vv, OnU = onU, OnV = onV }; }
-        v.suslar = new List<KatSusu>
-        {
-            Koli(koliBuyuk, 2.20f, 0f, -0.45f, -1f, 0.3f),    // antre: köşede büyük koli
-            Koli(koliKucuk, 2.20f, 0.40f, -0.45f, -1f, 0.1f), //        üstünde küçük koli
-            Koli(koliAcik, 0.55f, 0f, 2.35f, 0.4f, -1f),     //        kapının yanında açık koli
-            Koli(koliBuyuk, 4.40f, 0f, 4.30f, 0f, -1f),      // koridor: salon ile Oda B kapıları arasında
-            Koli(koliKucuk, 10.10f, 0f, 3.40f, -1f, 0f),     // koridorun dibinde
-            Koli(koliAcik, 8.60f, 0f, 2.30f, -0.5f, -1f),    // mutfak: kapının içinde açık koli
-            Koli(koliBuyuk, 9.90f, 0f, 5.40f, -1f, 0.2f),    // Oda A: yatağın gittiği köşede
-        };
-
-        var odalar = new List<string>();
-        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
-        KilitZinciri.Sonuc s2 = z.Cozumle(odalar);
-        if (!s2.Cozulebilir) Debug.LogError("[ZINCIR] 1. kat zinciri çözülemiyor: " + string.Join("; ", s2.Hatalar));
-        else Debug.Log("[ZINCIR] 1. kat zinciri çözülebilir: " + string.Join(" -> ", s2.AcilanKilitler));
+        v.aciklama = "1. kat, daire 2. YENİDEN TASARLANIYOR: daire boş ve kilitsiz, kat anahtarı sahanlıkta. " +
+                     "Odalar ve görev parçaları Şahan'la oda oda seçilecek.";
+        v.tasarimda = true;
+        v.zincir = new KilitZinciri();
+        v.notlar = new List<KatNotu>();
+        v.suslar = new List<KatSusu>();
+        v.sesler = new List<KatSesi>();
+        v.parcalar = new List<KatParcasi>();
         EditorUtility.SetDirty(v);
         return v;
     }

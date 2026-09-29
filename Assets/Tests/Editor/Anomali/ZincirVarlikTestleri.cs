@@ -29,6 +29,9 @@ public class ZincirVarlikTestleri
             string yol = AssetDatabase.GUIDToAssetPath(guid);
             ScriptableObject v = AssetDatabase.LoadAssetAtPath<ScriptableObject>(yol);
             var alan = v != null ? v.GetType().GetField("zincir") : null;
+            // Yeniden tasarlanan kat (tasarimda işaretli) henüz zincir taşımaz; oyunda da uygulanmaz.
+            var tasarim = v != null ? v.GetType().GetField("tasarimda") : null;
+            if (tasarim != null && (bool)tasarim.GetValue(v)) continue;
             if (alan != null) sonuc.Add(new KeyValuePair<string, KilitZinciri>(yol, (KilitZinciri)alan.GetValue(v)));
         }
         return sonuc;
