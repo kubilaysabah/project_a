@@ -173,6 +173,14 @@ The developer on this project is **Şahan** — the second developer from Moguls
   - **Blender material colours are linear values:** Unity shows them much lighter (0.16 walnut rendered light tan); pick dark linear values (walnut ≈ 0.05).
   - The Tezgah FBX has an old "self-intersecting polygon discarded" import warning from the sink boolean; it predates #81.
 
+- **Floors are redesigned room by room (#83, Şahan, 2026-09-29).** One floor at a time, starting with floor 1; other floors are handled when their turn comes.
+  - Order of work: rooms are furnished first (Claude lists what a 90s Turkish flat had in that room, Şahan picks numbers), then doors and task items are set in door-opening order.
+  - `KatZinciriVarligi.tasarimda`: no chain is applied (rooms unlocked, the floor key on the landing, chain tests skip the file, the bot takes the landing key); notes and decor are still applied so the furnished rooms can be seen.
+  - `yalnizSecilenEsyalar` + `gorunenEsyalar`: only the flat items (`Esyalar/...`) the floor lists or references are shown. The portmanto is now a permanent flat item (`Esyalar/Portmanto`, sliding drawer) that only appears where asked.
+  - **At most one task item per room**; an item inside its container counts as the container's content.
+  - **No hint notes**: a note must not tell the player what to search or where (supersedes the #60 hint rule); story notes stay. Nermin's jar note was removed.
+  - New decor props are Blender scripts; textured ones (cross-stitch, carpet) get their material from the template builder (`DokuluMalzeme`), because the FBX does not carry the texture path. Translucent wall/floor patches (`TabloIziSablonuKur`) work on every floor's wallpaper.
+
 - **Game logic in plain C# classes**, separate from MonoBehaviours, for testability.
 - **CONTENT IS DATA:** every anomaly is a ScriptableObject card (`AnomalyCard`: id, tier, difficulty, what it changes on the landing). The landing is built/reset from data; adding anomaly #47 must require ZERO new code, only a new asset. This is the whole game — one landing + stair loop modeled once, 60+ data-driven variations.
 - Single modeled space: one landing + one stair flight, looped (player repositioned seamlessly). No open world, no walking nav beyond the loop.
@@ -214,6 +222,13 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 2. **#1 — decide the final game name with Şahan.** Urgent: the Steam page must go live in week 4 (milestone H3-4, due 2026-10-18) and it needs the name and capsule art. Candidates and the Steam collision scan are on #1 and in "Name decision" above.
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
+
+- 2026-09-29 (Lesson 56, later): **#83 opened** (floor-by-floor redesign).
+  - Floor 1 emptied and put in design mode (`cb64b69`).
+  - Rooms furnished so far: antre (`234ba24`, `12e1726`), hol (`b69cd78`), salon (`9e707a9`).
+  - Agreed floor-1 door order: salon and kitchen unlocked, Oda A with a key; bathroom, pantry, Oda B and balcony shut.
+  - Planned task items (to be set up after the rooms): screwdriver in the portmanto drawer, the jar with Oda A's key in the kitchen, the floor key in Oda A.
+  - Remaining rooms on floor 1: kitchen, Oda A. 200/200 tests; the full playthrough bot passed with floor 1 in design mode.
 
 - 2026-09-29 (Lesson 56): Şahan filled the final decisions page (https://claude.ai/artifact/QrAg3sEeZEU6bNDtjYUXxk).
   - **Notes (#60):** all 16 hint texts approved as they are.
