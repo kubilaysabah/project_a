@@ -21,6 +21,21 @@ GRUPLAR = [
     ("8. kat", lambda k: k.startswith("not.kat8") or k == "foto.kat8"),
 ]
 
+# Oyundan çıkarılan notlar (#83, Şahan 2026-09-29: ipucu notu yok; oyuncu neyi nerede arayacağını bir
+# nottan okumamalı). Tabloda artık yoklar; belgede katlarının sonunda gerekçeleriyle anılırlar.
+IPUCU = "Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): "
+KALDIRILAN = {
+    "not.kat1_kavanoz": IPUCU + "oyuncu neyi nerede arayacağını bir nottan okumamalı.",
+    "not.kat2_kiler": IPUCU + "kilerin şifresini radyoya bağlayan not oyuncuya ne yapacağını söylüyordu.",
+    "not.kat6_kol": IPUCU + "kolun öbür dairede bir kapıyı açtığını söylüyordu.",
+    "not.kat6_takvim": IPUCU + "kilerin şifresinin yan dairedeki takvimde olduğunu söylüyordu.",
+    "not.kat7_kol": IPUCU + "kolun mutfağı açtığını ve kırık anahtarın parçalarının yerini söylüyordu.",
+    "not.kat7_sifre": IPUCU + "Oda B'nin şifresinin yatak odasında, karanlıkta olduğunu söylüyordu.",
+    "not.kat8_kiler": IPUCU + "kolun ve mutfak anahtarının yerini söylüyordu.",
+    "not.kat8_salon": IPUCU + "kırık anahtarın parçalarının yerini söylüyordu.",
+    "not.kat8_arsiv": IPUCU + "arşivin şifresinin binanın yapım yılı olduğunu söylüyordu.",
+}
+
 
 def oku():
     satirlar = []
@@ -65,6 +80,12 @@ def main():
             out.append("")
             out.extend("> " + x if x else ">" for x in metin(en).split("\n"))
             out.append("")
+        for k, neden in KALDIRILAN.items():
+            if uyar(k):
+                out.append(f"### `{k}` (kaldırıldı)")
+                out.append("")
+                out.append(neden)
+                out.append("")
     kalan = [t for t in tum if t[0] not in kullanilan]
     if kalan:
         out.append("## Diğer")

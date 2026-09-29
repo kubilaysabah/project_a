@@ -12,32 +12,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
   m_Name: Kat_5
   m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
-  aciklama: "5. kat, daire 2, Cemal'in son \xE7al\u0131\u015Ft\u0131\u011F\u0131
-    daire (mekanizma). Mutfak kilerdeki kolla a\xE7\u0131l\u0131r; salonun anahtar\u0131
-    k\u0131r\u0131k, ba\u015F\u0131 buzdolab\u0131nda, ucu alet \xE7antas\u0131nda.
-    Banyo i\xE7eriden kilitli: mente\u015Feler tornavidayla s\xF6k\xFCl\xFCr. Salondaki
-    gard\u0131rop (levye kilerde, kayd\u0131r\u0131c\u0131 banyoda bulununca) itilince
-    arkas\u0131nda ana vana; \xE7ark \xE7evrilince su kesilir, damla susar, lavabonun
-    sifonu s\xF6k\xFCl\xFCr, i\xE7inde kat\u0131n anahtar\u0131. Oda A ve Oda B kapal\u0131."
+  aciklama: "5. kat, daire 2, Karaca ailesinin evi; Cemal'in yar\u0131m b\u0131rakt\u0131\u011F\u0131
+    i\u015F (mekanizma). Kilerdeki kol mutfa\u011F\u0131 a\xE7ar; salonun anahtar\u0131
+    k\u0131r\u0131k: ba\u015F\u0131 mutfak \xE7ekmecesinde, ucu Oda B'de masada.
+    Gard\u0131rop levye (Oda A) ve kayd\u0131r\u0131c\u0131yla (hol) itilir, arkas\u0131nda
+    vana; su kesilince sifon s\xF6k\xFCl\xFCr, a\u011Fz\u0131nda kat\u0131n anahtar\u0131.
+    Banyo mente\u015Feli. Oda oda d\xF6\u015Fendi (#83)."
   tasarimda: 0
-  yalnizSecilenEsyalar: 0
-  gorunenEsyalar: []
+  yalnizSecilenEsyalar: 1
+  gorunenEsyalar:
+  - Sigorta_Kutusu
+  - Tezgah
+  - Klozet
+  - Lavabo
+  - Vana
+  - Gardirop
   acikParcalar: []
   buzdolabiFisiCekili: 0
   zincir:
-    KapaliOdalar:
-    - Oda_A
-    - Oda_B
+    KapaliOdalar: []
     Yerler:
-    - Kimlik: alet_cantasi
-      Yol: Esyalar/Alet_Cantasi
-      Oda: Oda_C
+    - Kimlik: antre_yer
+      Yol: 
+      Oda: Antre
       KilitYolu: 
-      PlandaNokta: 0
-      U: 0
-      Y: 0
-      V: 0
-      Donus: 0
+      PlandaNokta: 1
+      U: 1.6
+      Y: 0.004
+      V: 0.6
+      Donus: 70
+      OnU: 0
+      OnV: 0
+    - Kimlik: hol_yer
+      Yol: 
+      Oda: Hol
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 9.7
+      Y: 0.004
+      V: 3.3
+      Donus: 15
       OnU: 0
       OnV: 0
     - Kimlik: kiler_kolu
@@ -51,15 +65,37 @@ MonoBehaviour:
       Donus: 0
       OnU: 0
       OnV: 0
-    - Kimlik: buzdolabi
-      Yol: Esyalar/Buzdolabi
+    - Kimlik: cekmece
+      Yol: Esyalar/Tezgah/Cekmece_2
       Oda: Mutfak
-      KilitYolu: Esyalar/Buzdolabi/Kapi
+      KilitYolu: 
       PlandaNokta: 0
       U: 0
       Y: 0
       V: 0
       Donus: 0
+      OnU: 0
+      OnV: 0
+    - Kimlik: masa_yer
+      Yol: 
+      Oda: Oda_B
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 6.05
+      Y: 0.755
+      V: 7.72
+      Donus: 30
+      OnU: 0
+      OnV: 0
+    - Kimlik: levye_yer
+      Yol: 
+      Oda: Oda_A
+      KilitYolu: 
+      PlandaNokta: 1
+      U: 8.85
+      Y: 0.004
+      V: 7.65
+      Donus: 60
       OnU: 0
       OnV: 0
     - Kimlik: vana
@@ -71,28 +107,6 @@ MonoBehaviour:
       Y: 0
       V: 0
       Donus: 0
-      OnU: 0
-      OnV: 0
-    - Kimlik: levye_yeri
-      Yol: 
-      Oda: Oda_C
-      KilitYolu: 
-      PlandaNokta: 1
-      U: 6.1
-      Y: 0.004
-      V: 0.3
-      Donus: 70
-      OnU: 0
-      OnV: 0
-    - Kimlik: tekne
-      Yol: 
-      Oda: Banyo
-      KilitYolu: 
-      PlandaNokta: 1
-      U: 4.2
-      Y: 0.004
-      V: -0.5
-      Donus: 15
       OnU: 0
       OnV: 0
     - Kimlik: sifon
@@ -109,35 +123,35 @@ MonoBehaviour:
     Esyalar:
     - Kimlik: tornavida
       Tur: 4
-      Yer: alet_cantasi
-      X: 0
-      Y: 0.03
-      Z: 0
-      Donus: 20
-    - Kimlik: salon_anahtari_bas
-      Tur: 9
-      Yer: buzdolabi
-      X: 0.1
-      Y: 0.47
-      Z: 0
-      Donus: 40
-    - Kimlik: salon_anahtari_uc
-      Tur: 9
-      Yer: alet_cantasi
-      X: -0.12
-      Y: 0.03
-      Z: 0
-      Donus: -25
-    - Kimlik: levye
-      Tur: 7
-      Yer: levye_yeri
+      Yer: antre_yer
       X: 0
       Y: 0
       Z: 0
       Donus: 0
     - Kimlik: kaydirici
       Tur: 8
-      Yer: tekne
+      Yer: hol_yer
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
+    - Kimlik: salon_anahtari_bas
+      Tur: 9
+      Yer: cekmece
+      X: 0.59
+      Y: 0.39
+      Z: 0.04
+      Donus: 40
+    - Kimlik: salon_anahtari_uc
+      Tur: 9
+      Yer: masa_yer
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
+    - Kimlik: levye
+      Tur: 7
+      Yer: levye_yer
       X: 0
       Y: 0
       Z: 0
@@ -246,95 +260,348 @@ MonoBehaviour:
     Metin: not.kat5_liste
   suslar:
   - Yol: 
-    X: 4.57
+    X: 2.3899999
     Y: 0
-    Z: 6.5
+    Z: 1.4
     Donus: 0
     OnU: -1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 9130452927379219228, guid: 62894a50110d580459f30676a32ec3a6, type: 3}
+    Sablon: {fileID: 149393768690459654, guid: b40d8aba92769ae49b3b59ba10cdde11, type: 3}
     Metin: 
     Ad: 
   - Yol: 
-    X: 1.4
+    X: 2.32
     Y: 0
-    Z: 7.6
+    Z: 2.25
     Donus: 0
-    OnU: 0.3
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 2218337194466627984, guid: 385c882291c57684ab68651dab205549, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 2.3
+    Y: 1.65
+    Z: -0.8
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 8358345586251596168, guid: 84d054cf0426ede42bf7473f0d811ee0, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 3.9
+    Y: 0
+    Z: 3.8
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 8767748355483272985, guid: de6631051c34eb148b6ac16f9d22d91c, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 6.6
+    Y: 0
+    Z: 3.8
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 143855111789105283, guid: 0fb5298e8f0d72040a1dea4f0c915f44, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 7.7
+    Y: 0
+    Z: 4.4900002
+    Donus: 0
+    OnU: 0
     OnV: -1
     Yatik: 0
-    Sablon: {fileID: 2115781984987569264, guid: 777dae95170c120408f8a920b527acb5, type: 3}
+    Sablon: {fileID: 4022442775392071010, guid: d2cb8e76c8fff424d895d51b5c0e10bf, type: 3}
     Metin: 
     Ad: 
   - Yol: 
-    X: 2.95
-    Y: 0
-    Z: 5.065
+    X: 7.5
+    Y: 0.8
+    Z: 4.52
     Donus: 0
     OnU: 0
-    OnV: 1
+    OnV: -1
     Yatik: 0
-    Sablon: {fileID: 6781195258026543408, guid: 75c56dcdd0077684495f1be2be5a9b1a, type: 3}
+    Sablon: {fileID: 5146463092970874109, guid: 3141259a5e3417b4fb107511340c2873, type: 3}
     Metin: 
     Ad: 
   - Yol: 
-    X: 2.95
-    Y: 0.95
-    Z: 5.02
+    X: 7.92
+    Y: 0.8
+    Z: 4.52
     Donus: 0
     OnU: 0
-    OnV: 1
-    Yatik: 0
-    Sablon: {fileID: 920054691084407115, guid: 5faf442163404b346a6b83772318fee5, type: 3}
-    Metin: 
-    Ad: 
-  - Yol: 
-    X: 2.4
-    Y: 0.95
-    Z: 5
-    Donus: 0
-    OnU: 0.2
-    OnV: 1
+    OnV: -1
     Yatik: 0
     Sablon: {fileID: 5234316692392655128, guid: a3bd2326066d8f34f96cc9a4e76d48d9, type: 3}
     Metin: kat5
     Ad: 
   - Yol: 
-    X: 2.8
-    Y: 2.8
-    Z: 6.3
-    Donus: 0
-    OnU: 0
-    OnV: 1
-    Yatik: 0
-    Sablon: {fileID: 8570057508259605690, guid: 5a7859b57223420429e3ce6c51b40cb9, type: 3}
-    Metin: 
-    Ad: 
-  - Yol: 
-    X: 5
-    Y: 1.55
-    Z: 7.15
+    X: 10.5
+    Y: 0
+    Z: 3.8
     Donus: 0
     OnU: -1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 5054030734195706825, guid: 61d50ed1c1bdcab498d44e694bd6df50, type: 3}
+    Sablon: {fileID: 1296758185639191944, guid: 8c22a98bc0bbf1044aacd70b4a46af75, type: 3}
     Metin: 
     Ad: 
   - Yol: 
-    X: 7.6
-    Y: 1.55
-    Z: 4.65
+    X: 4.53
+    Y: 0
+    Z: 6.45
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 3871077550911596075, guid: b52a08e4312b56644b1d32d1efa5ab4b, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 3.6
+    Y: 0
+    Z: 6.45
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 8908595676981482546, guid: 2de5c924b3c6e52448ed9aae9d237b8a, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 2.3
+    Y: 0
+    Z: 7.5
+    Donus: 0
+    OnU: 0.3
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 6283401388694094786, guid: dbb348bd62ed5a041a7668aa64d74730, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 3
+    Y: 0
+    Z: 5
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 8727421171844192132, guid: aa05182bc1794f5418c8745482513453, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 2.8
+    Y: 0
+    Z: 6.45
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 5012606409497167943, guid: 9d5773087cd811849903b62ac5b2e28d, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 1.4
+    Y: 2.46
+    Z: 8.1
     Donus: 0
     OnU: 0
     OnV: -1
     Yatik: 0
-    Sablon: {fileID: 3542150911484553745, guid: 70a754fa881a1e742aa25906f208e979, type: 3}
+    Sablon: {fileID: 5763735893143760662, guid: 8d8bab4b9270157439a69238845787f8, type: 3}
     Metin: 
     Ad: 
   - Yol: 
-    X: 9.46
+    X: 1.4
+    Y: 0
+    Z: 8.1
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 1296758185639191944, guid: 8c22a98bc0bbf1044aacd70b4a46af75, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 7.1700006
+    Y: 0
+    Z: 0.9
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 6195372055580513512, guid: 537b3c8b417321d4a9add32e0e692215, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 7.2
+    Y: 0
+    Z: -0.46
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 505510689883438326, guid: ad193804a050e154299f845327f98948, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 8
+    Y: 0
+    Z: -0.45000002
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 827085840418914793, guid: f9d9144fc439d5e41809d5297ddc2ef0, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 8.1
+    Y: 0.86
+    Z: -0.36
+    Donus: 0
+    OnU: 0.3
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 6074168209427321076, guid: 928be3d2bd1d09e42ae7543543a36088, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 8.6
+    Y: 0
+    Z: 1.4
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 8572156736709207635, guid: 8b55806a47306894c9c20e1e9071c51e, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 8.6
+    Y: 0
+    Z: 2
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 9019452294609360695, guid: a8b148a55c5ac17478426a45d14b43bf, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 8.6
+    Y: 0
+    Z: 0.8
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 9019452294609360695, guid: a8b148a55c5ac17478426a45d14b43bf, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 10.2
+    Y: 0.9
+    Z: 0.35
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 8429939613248528449, guid: 13893e21726e2cd42877fa418b737d7b, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 4.27
+    Y: 0
+    Z: 0.1
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 586260128148637979, guid: 09f602ef5d59f9b42ab14a04c047a45d, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 2.7
+    Y: 1.3
+    Z: 1.1
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 917739139063528665, guid: a5ca87d75e1b6cb45a86dfe56ce87812, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 3.6
+    Y: 1.5
+    Z: -0.8
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 7185369480534020277, guid: 76bed957cfabcc24985b901b320b2bad, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 4.2
+    Y: 0
+    Z: 0.72
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 2521300559841631454, guid: 4ef2891536ccf784196fc1e0e9709fe4, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 4.81
+    Y: 0
+    Z: 0.3
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 3572479603601957109, guid: 3411042bb1943a745aee8dc67854d7f5, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 5.6
+    Y: 0
+    Z: -0.3
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 4118622429109690197, guid: a9eeb7c95ead0e4408c1e706ae8e3bfd, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 6.3
+    Y: 0
+    Z: -0.5
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 7438841625117624038, guid: 80ba941a16c0cef47a194ee7a4cd3e4b, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 9.459999
     Y: 0
     Z: 6.6
     Donus: 0
@@ -345,36 +612,80 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 7.15
+    X: 10.3
     Y: 0
-    Z: 6.6
+    Z: 7.62
     Donus: 0
     OnU: -1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 4861881410216561460, guid: 4080fd92c53173548a46cae984df6e86, type: 3}
+    Sablon: {fileID: 6505701438800211961, guid: 0eba6bc3040605d4b815159657b120f6, type: 3}
     Metin: 
     Ad: 
   - Yol: 
-    X: 8.3
+    X: 7.93
     Y: 0
-    Z: -0.46
+    Z: 6.6
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 8151707839199228925, guid: ab0635a6514b4924899f64be294e0de1, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 9.1
+    Y: 2.3
+    Z: 8.1
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 8834299384557850088, guid: f81c3252fe5f09f41b5c57e405e4f6a8, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 6.35
+    Y: 0
+    Z: 7.7700005
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 3653947309628631812, guid: 4c130030258e5c3419934cb19307bc1f, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 6.35
+    Y: 0
+    Z: 7.2
     Donus: 0
     OnU: 0
     OnV: 1
     Yatik: 0
-    Sablon: {fileID: 8155458018765825896, guid: 01f771af6036d29498ac1a00819b4ae1, type: 3}
+    Sablon: {fileID: 8548475806137304465, guid: a51542760e3b2bf449a68d918e164a5b, type: 3}
     Metin: 
     Ad: 
   - Yol: 
-    X: 8.36
-    Y: 0.86
-    Z: -0.48
+    X: 5.2799997
+    Y: 0
+    Z: 6.3
     Donus: 0
-    OnU: 0.3
-    OnV: 1
+    OnU: 1
+    OnV: 0
     Yatik: 0
-    Sablon: {fileID: 6074168209427321076, guid: 928be3d2bd1d09e42ae7543543a36088, type: 3}
+    Sablon: {fileID: 5387665601130715410, guid: 8456e1e352ae5cf4aa792012c794a091, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 6.35
+    Y: 2.3
+    Z: 8.1
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 4464116728267996970, guid: 831afab0cfb53e24ea0e15ca888eef6f, type: 3}
     Metin: 
     Ad: 
   sesler:

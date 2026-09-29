@@ -46,8 +46,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > Hepsi bu odada uyudu.
 > Hepsi lambayı aynı çividen aldı.
->
-> Sıradaki:
 
 **EN**
 
@@ -59,8 +57,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > They all slept in this room.
 > They all took the lamp from the same nail.
->
-> Next:
 
 ### `not.telefon_kat2`
 
@@ -184,10 +180,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > The Management
 
-### `not.kat1_kavanoz` (kaldırıldı)
-
-Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): oyuncu neyi nerede arayacağını bir nottan okumamalı.
-
 ### `foto.kat1`
 
 **TR**
@@ -198,8 +190,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > geceleri tavandan gelen ayak seslerine kadar.
 > Yönetim'in kâğıdı kapıya asıldığında
 > kolilerin yarısını bile kapatamamıştık.
->
-> — Nermin
 
 **EN**
 
@@ -209,8 +199,10 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > until the footsteps on the ceiling at night.
 > When the Management's notice went up on the door
 > we hadn't even closed half the boxes.
->
-> — Nermin
+
+### `not.kat1_kavanoz` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): oyuncu neyi nerede arayacağını bir nottan okumamalı.
 
 ## 2. kat
 
@@ -232,10 +224,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > — The Management
 
-### `not.kat2_kiler` (kaldırıldı)
-
-Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): kilerin şifresini radyoya bağlayan not oyuncuya ne yapacağını söylüyordu.
-
 ### `foto.kat2`
 
 **TR**
@@ -245,8 +233,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > "Gürültüye dayanamıyorum Nuri Bey" dedi.
 > İki yıl sonra gitti. Ben alıştım:
 > radyo açıkken yukarıdan ses gelmiyor.
->
-> — N.
 
 **EN**
 
@@ -255,8 +241,10 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > "I can't stand the noise, Nuri Bey," he said.
 > He left two years later. I got used to it:
 > while the radio is on, nothing comes from upstairs.
->
-> — N.
+
+### `not.kat2_kiler` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): kilerin şifresini radyoya bağlayan not oyuncuya ne yapacağını söylüyordu.
 
 ## 3. kat
 
@@ -267,8 +255,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Murat,
 > Kerem bu gece de uyandı. "Yukarıdaki amca camdan bakıyor" diyor.
 > Bu binada dokuzuncu kat yok ki.
-> Sabah o amcayı çizmiş, sonra kâğıdı yırtıp saklamış. Nereye diye sorunca güldü.
-> Yatak odasının kilidini değiştirdim. Yeni şifreyi Kerem'e ezberlettim, o da hemen resmine karalamış.
+> Sabah o amcayı çizmiş; resmi kimseye göstermiyor. Nereye koydun diye sorunca güldü.
 >
 > — Ayla
 
@@ -277,8 +264,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Murat,
 > Kerem woke up again tonight. He says "the man upstairs is looking through the window".
 > There is no ninth floor in this building.
-> This morning he drew that man, then tore up the paper and hid it. When I asked where, he laughed.
-> I changed the bedroom lock. I made Kerem learn the new code by heart, and he scribbled it straight onto his drawing.
+> This morning he drew that man, and he won't show the drawing to anyone. When I asked where he put it, he laughed.
 >
 > — Ayla
 
@@ -292,8 +278,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > da bir dilim ayıralım" dedi.
 > Binamız sekiz katlı.
 > O geceden beri resim yapıp yırtıyor.
->
-> — Ayla
 
 **EN**
 
@@ -303,8 +287,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > save a slice for the man on the ninth floor.
 > Our building has eight floors.
 > Since that night he draws, and tears up what he draws.
->
-> — Ayla
 
 ## 4. kat
 
@@ -313,18 +295,12 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 **TR**
 
 > Elektriği ben kestim. Bu evde ışık yalan söylüyor.
-> Sigortayı da ben sakladım.
-> Aradığını ışıkla bulamazsın;
-> karanlıkta durup bekleyen görür.
 >
 > — Hasan
 
 **EN**
 
 > I cut the power myself. In this flat, the light lies.
-> I hid the fuse as well.
-> You won't find what you are looking for with a light;
-> whoever stands in the dark and waits will see.
 >
 > — Hasan
 
@@ -358,8 +334,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Arkalarında kimse yoktu.
 > Bir ay sonra taşındılar;
 > giderken bütün ampulleri söküp götürdüler.
->
-> — Hasan
 
 **EN**
 
@@ -369,8 +343,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > There was no one behind them.
 > They moved out a month later
 > and took every light bulb with them.
->
-> — Hasan
 
 ## 5. kat
 
@@ -378,29 +350,21 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **TR**
 
-> İŞ LİSTESİ — Daire 18
-> 1. Banyo lavabosu damlatıyor. Sifona dokunmadan önce su kesilmeli.
->    Vana salonun duvarında, ama önüne ağır bir şey koydular.
-> 2. O ağır şey tek başına itilmez. Doğru aletler evde bir yerde.
-> 3. Banyo kapısı içeriden kilitlenmiş. Kimse yokken nasıl? Kapı illa kilidinden açılmaz.
-> 4. Salonun anahtarı kilitte kırıldı. Parçalarını atmadım.
-> 5. Mutfak kapısı sıkışıyor; kilerde onu tutan bir şey var.
-> 6. Asansör yine kendi kendine çalışıyor. Yönetime söyle.
+> İŞ EMRİ — Daire 18
+> Karaca ailesi yazlıkta, anahtarları kapıcıda.
+> Banyo lavabosu damlatıyor; su holün tavanına iniyor.
+> Kapıcı Cemal'e verildi.
 >
-> — Cemal
+> — Yönetim
 
 **EN**
 
-> JOB LIST — Flat 18
-> 1. The bathroom sink drips. The water has to be shut off before anyone touches the trap.
->    The valve is on the living-room wall, but somebody put something heavy in front of it.
-> 2. That heavy thing won't move by hand alone. The right tools are somewhere in the flat.
-> 3. The bathroom door is locked from the inside. How, with nobody here? A door doesn't only open at its lock.
-> 4. The living-room key broke in the lock. I didn't throw the pieces away.
-> 5. The kitchen door sticks; something in the pantry is holding it.
-> 6. The lift is running by itself again. Tell the management.
+> WORK ORDER — Flat 18
+> The Karaca family is at their summer house; the janitor has the keys.
+> The bathroom sink drips; water is coming through the corridor ceiling.
+> Assigned to the janitor, Cemal.
 >
-> — Cemal
+> — The Management
 
 ### `foto.kat5`
 
@@ -412,8 +376,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Baktık. Yoktu.
 > O günden sonra alet çantasını
 > hiç yanından ayırmadı.
->
-> — Yönetim
 
 **EN**
 
@@ -423,8 +385,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > We looked. There was no one.
 > From that day on he never let
 > his toolbag out of his sight.
->
-> — The Management
 
 ## 6. kat
 
@@ -435,7 +395,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Bu akşam sofrayı kuruyoruz.
 > Dördümüz de geleceğiz: Rıza Efendi, Hasan, Cemal.
 > Senin yerin de hazır.
-> Herkes kendi adının yazdığı yere oturur.
 > Misafirimiz gelince ortada durma.
 >
 > — Yönetim
@@ -445,46 +404,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > We are setting the table tonight.
 > All four of us will be there: Rıza Efendi, Hasan, Cemal.
 > Your seat is ready too.
-> Everyone sits where their own name is written.
 > When our guest arrives, don't stand in the open.
 >
 > — The Management
-
-### `not.kat6_kol`
-
-**TR**
-
-> Bu kolu çektim; duvarın öbür yanında bir şey tık etti.
-> Bu iki ev birbirini duyuyor.
-> Bir daha dokunmayacağım.
->
-> — C.
-
-**EN**
-
-> I pulled this lever and something clicked on the other side of the wall.
-> These two flats can hear each other.
-> I won't touch it again.
->
-> — C.
-
-### `not.kat6_takvim`
-
-**TR**
-
-> Kilerin şifresi mi?
-> Bu binada zaman bir yılda durdu.
-> Yan dairede duvara bakan hâlâ o yılı görür.
->
-> — C.
-
-**EN**
-
-> The pantry code?
-> Time stopped in one year in this building.
-> Next door, whoever looks at the wall still sees that year.
->
-> — C.
 
 ### `foto.kat6`
 
@@ -508,6 +430,14 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > There is a seat for you at the table too.
 
+### `not.kat6_kol` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): kolun öbür dairede bir kapıyı açtığını söylüyordu.
+
+### `not.kat6_takvim` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): kilerin şifresinin yan dairedeki takvimde olduğunu söylüyordu.
+
 ## 7. kat
 
 ### `not.kat7_cemal`
@@ -515,8 +445,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 **TR**
 
 > Bu katta bütün kapılar 13 oldu. Hangisi benimki, ben bile şaşırıyorum.
-> Benim kapımın önünde gelen misafiri karşılayacak hiçbir şey yok.
-> İçeride ışığım hep yanık kalır.
 > Öbür kapıları çalma. Ardından cevap veriyorlar.
 >
 > — Cemal
@@ -524,8 +452,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 **EN**
 
 > Every door on this floor turned into 13. Even I mix up which one is mine.
-> There is nothing in front of my door to welcome a visitor.
-> Inside, my light always stays on.
 > Don't knock on the other doors. Something answers.
 >
 > — Cemal
@@ -558,7 +484,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > Asansör beni bekliyor.
 > Dokuzuncu kata çıkıyorum; Rıza Efendi de Hasan da oraya çıktı.
-> Anahtarı öyle bir yere koydum ki zorlamadan açılmaz.
 > Arkamdan gelme.
 >
 > — Cemal
@@ -567,42 +492,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > The lift is waiting for me.
 > I am going up to the ninth floor; Rıza Efendi and Hasan went up there too.
-> I put the key somewhere that won't open without force.
 > Don't come after me.
->
-> — Cemal
-
-### `not.kat7_kol`
-
-**TR**
-
-> Bu kol evin başka bir kapısını tutuyor.
-> Yatak odasının anahtarını da kırdım.
-> Bir parçası yiyeceklerin, öbürü tabakların yanında.
->
-> — Cemal
-
-**EN**
-
-> This lever holds another door in this flat.
-> I broke the bedroom key as well.
-> One piece is with the food, the other with the plates.
->
-> — Cemal
-
-### `not.kat7_sifre`
-
-**TR**
-
-> Odamın şifresini unutmayayım diye yatak odasında bir yere yazdım.
-> Işığı seven göremez.
->
-> — Cemal
-
-**EN**
-
-> I wrote my room's code somewhere in the bedroom so I wouldn't forget it.
-> Whoever loves the light won't see it.
 >
 > — Cemal
 
@@ -616,8 +506,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Kendi yüzüme bakınca artık kendimi göremiyorum.
 > Kapımın numarasını bile karıştırıyorum;
 > herkes 13 diyor.
->
-> — C.
 
 **EN**
 
@@ -627,8 +515,14 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > When I look at my own face I can no longer see myself.
 > I even mix up the number on my door;
 > everyone says 13.
->
-> — C.
+
+### `not.kat7_kol` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): kolun mutfağı açtığını ve kırık anahtarın parçalarının yerini söylüyordu.
+
+### `not.kat7_sifre` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): Oda B'nin şifresinin yatak odasında, karanlıkta olduğunu söylüyordu.
 
 ## 8. kat
 
@@ -642,10 +536,6 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Cemal gittikten sonra asansörden geldi,
 > asansöre geri bıraktım.
 >
-> Asansörün sigortası dosya dolabında,
-> dolabın anahtarı arşivde.
-> Banyonun kapısı sıkışık; menteşeden sökersin.
->
 > — Yönetim
 
 **EN**
@@ -656,51 +546,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > It came up with the lift after Cemal left,
 > so I left it in the lift.
 >
-> The lift's fuse is in the filing cabinet,
-> the cabinet key is in the archive.
-> The bathroom door is stuck; take it off its hinges.
->
 > — The Management
-
-### `not.kat8_kiler`
-
-**TR**
-
-> Bu kolun neyi açtığını ancak çekince anlarsın.
-> Mutfağın anahtarını da aletlerin arasına attım.
-
-**EN**
-
-> You only find out what this lever opens by pulling it.
-> I threw the kitchen key in with the tools.
-
-### `not.kat8_salon`
-
-**TR**
-
-> Salonun anahtarı kırıldı.
-> Bir parçası oyuncakların arasında kaldı,
-> öbürü soğukta.
-
-**EN**
-
-> The living-room key broke.
-> One piece stayed among the toys,
-> the other in the cold.
-
-### `not.kat8_arsiv`
-
-**TR**
-
-> ARŞİV
->
-> Şifre: bu binanın kâğıt üstünde doğduğu yıl.
-
-**EN**
-
-> ARCHIVE
->
-> Code: the year this building was born on paper.
 
 ### `not.kat8_ruhsat`
 
@@ -817,6 +663,18 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > There are five people in the photo.
 > The permit says eight floors;
 > the lift's buttons go up to nine.
+
+### `not.kat8_kiler` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): kolun ve mutfak anahtarının yerini söylüyordu.
+
+### `not.kat8_salon` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): kırık anahtarın parçalarının yerini söylüyordu.
+
+### `not.kat8_arsiv` (kaldırıldı)
+
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): arşivin şifresinin binanın yapım yılı olduğunu söylüyordu.
 
 ## Diğer
 

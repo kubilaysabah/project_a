@@ -180,6 +180,13 @@ The developer on this project is **Şahan** — the second developer from Moguls
   - **At most one task item per room**; an item inside its container counts as the container's content.
   - **No hint notes**: a note must not tell the player what to search or where (supersedes the #60 hint rule); story notes stay. Nermin's jar note was removed.
   - New decor props are Blender scripts; textured ones (cross-stitch, carpet) get their material from the template builder (`DokuluMalzeme`), because the FBX does not carry the texture path. Translucent wall/floor patches (`TabloIziSablonuKur`) work on every floor's wallpaper.
+  - **No model reuse across floors** covers the chain containers too. A task item's container is a floor-specific model:
+    - a named decor item (`KatSusu.Ad`, helper `DA(ad, şablon, …)`) is placed **before** the chain (`ZincirUygulayici.Uygula(…, varlik)` → `SusleriKoy`), so a chain place can be `"Komodin_Ayla/Cekmece_1"`.
+    - the openable model follows `Art/Blender/scripts/acilir_ortak.py`: FBX objects `Govde` (hollow body, MeshCollider), `Cekmece_N` (pivot at the drawer's inner floor), `Kapi_N` (pivot on the hinge line; opening direction from which side the leaf lies), `Kapak` (back-top hinge), `Surgu_N`. `GrayboxKurucu.AcilirSablonKur(ad, buzdolabıIşığı?)` builds the template with `AcilirParca`s and a `Yonlendirici`.
+    - `ZincirVarlikTestleri` resolves such paths inside the decor template.
+    - Building fixtures stay shared: fuse box, doors, windows, radiator (`Petek`), `Tezgah`, `Lavabo`, `Klozet`, `Vana`, `Duvar_Kolu`, the elevator, the family-photo frames.
+  - Each floor lives in its own file `Assets/Scripts/Editor/GrayboxKurucu_Kat3..8.cs` (`KatNSablonlariniKur` + `KatNKur`); floors 1-2 are still in `GrayboxKurucu_Zincir.cs`. A Poly Haven library model is used on one floor only; `GrayboxKurucu_Mobilya.cs` only keeps the `M`/`Foto` helpers.
+  - Removed hint notes are listed with their reason in `Docs/scripts/metin_belgesi.py` (`KALDIRILAN`), so the generated `Docs/hikaye-metinleri.md` keeps them without hand edits.
 
 - **Game logic in plain C# classes**, separate from MonoBehaviours, for testability.
 - **CONTENT IS DATA:** every anomaly is a ScriptableObject card (`AnomalyCard`: id, tier, difficulty, what it changes on the landing). The landing is built/reset from data; adding anomaly #47 must require ZERO new code, only a new asset. This is the whole game — one landing + stair loop modeled once, 60+ data-driven variations.
@@ -222,6 +229,19 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 2. **#1 — decide the final game name with Şahan.** Urgent: the Steam page must go live in week 4 (milestone H3-4, due 2026-10-18) and it needs the name and capsule art. Candidates and the Steam collision scan are on #1 and in "Name decision" above.
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
+
+- 2026-09-30 (Lesson 57): Şahan asked Claude to finish **all floors and rooms** in the #83 way on its own; he tests later.
+  - **Floor 2 finished** (`59bedb4`): Oda A key in the sewing-machine drawer → radio (102.7) in the locked bedroom → pantry padlock 1027 → floor key in a biscuit tin on Nuri's repair bench. The named-decor infrastructure (see the #83 architecture bullet) came with it.
+  - **Floors 3-8 refurnished room by room**, about 150 new Blender models (scripts `Art/Blender/scripts/kat3..8_esyalar*.py`, modelled by six parallel Claude subagents). Every chain was redone so each room holds at most one task item. Hint notes were removed or cut down to story (`not.kat6_kol/_takvim`, `kat7_kol/_sifre`, `kat8_kiler/_salon/_arsiv` deleted; `kat3_anne`, `kat4_giris`, `kat5_liste`, `kat6_davet`, `kat7_cemal/_son`, `kat8_yonetim` trimmed).
+  - **Per-floor story:**
+    - 3: Kerem's family.
+    - 4: the empty flat where Hasan hid.
+    - 5: the Karaca family's flat with Cemal's unfinished job.
+    - 6: a 1974 flat plus the tailor Sabri's workshop.
+    - 7: Cemal's own flat; the chest is pried with the screwdriver.
+    - 8: the Yönetim office; the iskân ruhsatı hangs in the corridor, and the filing-cabinet key is in the archive's key cabinet.
+  - **Verification:** 200/200 tests; the full playthrough bot passed with 0 problems and no new errors; every room captured from four corners and above; containers opened and checked; release build 391.2 MB.
+  - **Waiting for Şahan's test of all floors.** The floor-8 plan frame shows nine floors (matches the ninth-floor plan and Cemal's research wall); change `KAT_SAYISI` in `kat8_esyalar.py` if he objects.
 
 - 2026-09-29 (Lesson 56, later): **#83 opened** (floor-by-floor redesign).
   - Floor 1 emptied and put in design mode (`cb64b69`).

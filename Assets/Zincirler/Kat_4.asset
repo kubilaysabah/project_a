@@ -13,20 +13,22 @@ MonoBehaviour:
   m_Name: Kat_4
   m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
   aciklama: "4. kat, daire 4, bo\u015F ve elektriksiz (\u0131\u015F\u0131k ve karanl\u0131k).
-    Dolab\u0131n \u015Fifresi salon duvar\u0131nda fosforlu boyayla: yaln\u0131zca
-    kafa lambas\u0131 kapal\u0131yken g\xF6r\xFCn\xFCr. Dolapta sigorta; tak\u0131l\u0131nca
-    lambalar yanar ve buzdolab\u0131 a\xE7\u0131l\u0131r, i\xE7inde Hasan'\u0131n
-    notu ve kat\u0131n anahtar\u0131. Yaln\u0131zca salon ve mutfak a\xE7\u0131k."
+    Oda B'nin \u015Fifresi salon duvar\u0131nda fosforlu boyayla: yaln\u0131zca kafa
+    lambas\u0131 kapal\u0131yken g\xF6r\xFCn\xFCr. Oda B'de Hasan'\u0131n alet kutusunda
+    sigorta; tak\u0131l\u0131nca lambalar yanar ve buzdolab\u0131 a\xE7\u0131l\u0131r,
+    i\xE7inde Hasan'\u0131n notu ve kat\u0131n anahtar\u0131. Banyo, kiler ve Oda
+    A kapal\u0131. Oda oda d\xF6\u015Fendi (#83)."
   tasarimda: 0
-  yalnizSecilenEsyalar: 0
-  gorunenEsyalar: []
+  yalnizSecilenEsyalar: 1
+  gorunenEsyalar:
+  - Sigorta_Kutusu
+  - Tezgah
   acikParcalar: []
   buzdolabiFisiCekili: 0
   zincir:
     KapaliOdalar:
     - Banyo
     - Oda_A
-    - Oda_B
     - Oda_C
     Yerler:
     - Kimlik: duvar
@@ -40,10 +42,10 @@ MonoBehaviour:
       Donus: 0
       OnU: -1
       OnV: 0
-    - Kimlik: dolap
-      Yol: Esyalar/Tezgah
-      Oda: Mutfak
-      KilitYolu: Esyalar/Tezgah/Kapak_1
+    - Kimlik: kutu
+      Yol: Alet_Kutusu_Hasan
+      Oda: Oda_B
+      KilitYolu: Alet_Kutusu_Hasan/Kapak
       PlandaNokta: 0
       U: 0
       Y: 0
@@ -52,9 +54,9 @@ MonoBehaviour:
       OnU: 0
       OnV: 0
     - Kimlik: buzdolabi
-      Yol: Esyalar/Buzdolabi
+      Yol: Buzdolabi_Hasan
       Oda: Mutfak
-      KilitYolu: Esyalar/Buzdolabi/Kapi
+      KilitYolu: Buzdolabi_Hasan/Kapi_1
       PlandaNokta: 0
       U: 0
       Y: 0
@@ -65,23 +67,23 @@ MonoBehaviour:
     Esyalar:
     - Kimlik: sigorta
       Tur: 3
-      Yer: dolap
+      Yer: kutu
       X: 0
-      Y: 0.475
-      Z: 0.02
+      Y: 0.006
+      Z: 0
       Donus: 20
     - Kimlik: kat_anahtari
       Tur: 1
       Yer: buzdolabi
-      X: 0
-      Y: 0.47
-      Z: 0
+      X: 0.06
+      Y: 0.762
+      Z: -0.03
       Donus: 20
     Kilitler:
-    - Kimlik: dolap
+    - Kimlik: odaB
       Tur: 1
-      OdaKapisi: 0
-      Hedef: dolap
+      OdaKapisi: 1
+      Hedef: Oda_B
       Gerekli: duvar
       Sifre: 4816
       IpucuMetni: 4816
@@ -120,16 +122,27 @@ MonoBehaviour:
     OnV: 1
     Yatik: 0
     Metin: not.kat4_giris
-  - Yol: Esyalar/Buzdolabi
-    X: 0.05
-    Y: 0.805
-    Z: -0.255
+  - Yol: Buzdolabi_Hasan
+    X: -0.1
+    Y: 0.763
+    Z: -0.06
     Donus: -6
     OnU: 0
     OnV: 1
     Yatik: 0
     Metin: not.kat4_buzdolabi
   suslar:
+  - Yol: 
+    X: 0.55
+    Y: 0
+    Z: 1.15
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 3140066004148444498, guid: 9fa93ef1f9c6618409fd6f838952eff8, type: 3}
+    Metin: 
+    Ad: 
   - Yol: 
     X: 2.6
     Y: 1.55
@@ -142,36 +155,25 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 3
-    Y: 0
-    Z: 6.3
+    X: 5.2
+    Y: 2.8
+    Z: 3.8
     Donus: 0
-    OnU: 0.2
+    OnU: 0
     OnV: 1
     Yatik: 0
-    Sablon: {fileID: 5902982433520243845, guid: 7d6fa98f2460d534c8b686b82e22f2c0, type: 3}
+    Sablon: {fileID: 4540231848042765693, guid: 41b97271d52fa414a83edb5583d51c77, type: 3}
     Metin: 
     Ad: 
   - Yol: 
-    X: 5
-    Y: 1.55
-    Z: 5.3
-    Donus: 0
-    OnU: -1
-    OnV: 0
-    Yatik: 0
-    Sablon: {fileID: 3542150911484553745, guid: 70a754fa881a1e742aa25906f208e979, type: 3}
-    Metin: 
-    Ad: 
-  - Yol: 
-    X: 1.45
+    X: 4.6
     Y: 0
-    Z: 6.1
+    Z: 2.95
     Donus: 0
-    OnU: 1
-    OnV: 0
+    OnU: 0
+    OnV: 1
     Yatik: 0
-    Sablon: {fileID: 1457294183311545730, guid: 408781a8c3f9a934db2957ad62282ec3, type: 3}
+    Sablon: {fileID: 8335694142079942387, guid: d5cfe98698ee5b34ca9ae6194e12f84a, type: 3}
     Metin: 
     Ad: 
   - Yol: 
@@ -186,14 +188,146 @@ MonoBehaviour:
     Metin: kat4
     Ad: 
   - Yol: 
-    X: 8.3
+    X: 10.5
     Y: 0
-    Z: -0.46
+    Z: 3.8
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 1296758185639191944, guid: 8c22a98bc0bbf1044aacd70b4a46af75, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 2
+    Y: 0
+    Z: 6.8
+    Donus: 0
+    OnU: 1
+    OnV: 0.3
+    Yatik: 0
+    Sablon: {fileID: 2749008396648094811, guid: 4edc43a9c433e784987ec83822523198, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 3.2
+    Y: 0
+    Z: 6.2
     Donus: 0
     OnU: 0
     OnV: 1
     Yatik: 0
-    Sablon: {fileID: 8155458018765825896, guid: 01f771af6036d29498ac1a00819b4ae1, type: 3}
+    Sablon: {fileID: 6931809584646123963, guid: 7cb58b8cd21559e4eaf5fb0cd32310bb, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 3.8
+    Y: 0
+    Z: 7.5
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 2818917730744998597, guid: c2619de983679874ca94c23b6d3c46f3, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 1.4
+    Y: 0
+    Z: 8.1
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 1296758185639191944, guid: 8c22a98bc0bbf1044aacd70b4a46af75, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 7.2
+    Y: 0
+    Z: -0.48000002
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 4222351993243315640, guid: 3cab968fdd4c2aa438a95c8cf50d8f4b, type: 3}
+    Metin: 
+    Ad: Buzdolabi_Hasan
+  - Yol: 
+    X: 8.3
+    Y: 0
+    Z: -0.5
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 3760840194264000, guid: 243a590ffd688494580f430b67820e50, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 8.6
+    Y: 0
+    Z: 1.5
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 4606842368619120146, guid: 0f854cd6522af854296ef7590615067b, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 7.23
+    Y: 0
+    Z: 6.9
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 2267646983623102627, guid: b3529f145085fb24cbc02abb887efba0, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 6.55
+    Y: 0
+    Z: 7.7
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 5062040417135036101, guid: 0a4fe44347fdfce4e9741fcb89eaa6a7, type: 3}
+    Metin: 
+    Ad: Alet_Kutusu_Hasan
+  - Yol: 
+    X: 6.55
+    Y: 0
+    Z: 6.3
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 1202562565857814259, guid: 411cab23648ca0b4ab589354f0c7c3b6, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 6.2
+    Y: 0
+    Z: 7.85
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 1336047352791339197, guid: 24aecd65eb0974344bbaffcc73168020, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 5.1
+    Y: 1
+    Z: 6.5
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 6644345255804689640, guid: 4dd8838ffd47250458815e8c2b6d34c8, type: 3}
     Metin: 
     Ad: 
   sesler: []
@@ -203,6 +337,7 @@ MonoBehaviour:
   - Hol
   - Salon
   - Mutfak
+  - Oda_B
   ikinciDaire: 0
   ikinciKaplamaKati: 0
   esyaYazilari: []
