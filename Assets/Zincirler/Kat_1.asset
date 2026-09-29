@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Kat_1
   m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
   aciklama: "1. kat, daire 2, Y\u0131ld\u0131z ailesi (tahliye). YEN\u0130DEN TASARLANIYOR:
-    odalar oda oda d\xF6\u015Feniyor (antre bitti); zincir yok, odalar kilitsiz,
+    odalar oda oda d\xF6\u015Feniyor (antre ve hol bitti); zincir yok, odalar kilitsiz,
     kat anahtar\u0131 sahanl\u0131kta."
   tasarimda: 1
   yalnizSecilenEsyalar: 1
@@ -135,6 +135,106 @@ MonoBehaviour:
     OnV: 1
     Yatik: 0
     Sablon: {fileID: 1476046072882310728, guid: 2473b53b40575fd4ca081cf75d05f9e1, type: 3}
+    Metin: 
+  - Yol: 
+    X: 10.5
+    Y: 0
+    Z: 3.8
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 1296758185639191944, guid: 8c22a98bc0bbf1044aacd70b4a46af75, type: 3}
+    Metin: 
+  - Yol: 
+    X: 3.8
+    Y: 1.55
+    Z: 4.65
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 5397336063181684718, guid: 9c2c44a1502e35648bfcde15e43ff27d, type: 3}
+    Metin: 
+  - Yol: 
+    X: 2.55
+    Y: 1.55
+    Z: 4.65
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 793194540970412601, guid: 2b1f1a9d9a8f3574b9fd80abe68a7f09, type: 3}
+    Metin: 
+  - Yol: 
+    X: 5.05
+    Y: 1.6
+    Z: 4.65
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 5164442720858770966, guid: 88bb7f5f942c8f54197bed166411aebf, type: 3}
+    Metin: 
+  - Yol: 
+    X: 4.6
+    Y: 1.6
+    Z: 2.95
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 3745151917650341015, guid: 655a262685b2b1544b5eed8a8e6e1d24, type: 3}
+    Metin: 
+  - Yol: 
+    X: 8.6
+    Y: 1.7
+    Z: 2.95
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 8807149708814491857, guid: 3e42b0229684e2d48889c8cfd14ca994, type: 3}
+    Metin: 
+  - Yol: 
+    X: 7.6
+    Y: 1.55
+    Z: 4.65
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 3542150911484553745, guid: 70a754fa881a1e742aa25906f208e979, type: 3}
+    Metin: 
+  - Yol: 
+    X: 4.6
+    Y: 0
+    Z: 3.16
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 6813529233286673208, guid: e3298e1273de64c47bf5913f1ca46af6, type: 3}
+    Metin: 
+  - Yol: 
+    X: 4.62
+    Y: 0.4
+    Z: 3.16
+    Donus: 0
+    OnU: 0.15
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 2352641571865322946, guid: faf29ac5cd381f14ca67789e90528e05, type: 3}
+    Metin: 
+  - Yol: 
+    X: 9.3
+    Y: 0
+    Z: 2.95
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 3884383117584472173, guid: c97db299956ccb5488b5cdcab9ad3901, type: 3}
     Metin: 
   sesler: []
   parcalar: []

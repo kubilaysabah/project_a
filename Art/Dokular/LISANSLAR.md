@@ -48,3 +48,7 @@ ambientCG'nin 1K-JPG paketinden yalnızca `_Color` ve `_NormalGL` alındı, dosy
 | Plank Flooring (`plank_flooring`) | 7. kat parke | https://polyhaven.com/a/plank_flooring | Dario Barresi, Dimitrios Savva, Rico Cilliers |
 | Beige Wall 001 (`beige_wall_001`) | 8. kat oda duvarı | https://polyhaven.com/a/beige_wall_001 | Dimitrios Savva, Rico Cilliers |
 | Wooden Floor 02 (`wooden_floor_02`) | 8. kat parke | https://polyhaven.com/a/wooden_floor_02 | Charlotte Baglioni, Rico Cilliers |
+
+## Projede üretilen dokular
+
+- `Assets/Textures/Goblen_Degirmen.png`: 1. katın holündeki goblen (#83). Saf Python ile üretildi (`Art/Dokular/scripts/goblen_uret.py`), dış kaynak yok; projeye aittir.

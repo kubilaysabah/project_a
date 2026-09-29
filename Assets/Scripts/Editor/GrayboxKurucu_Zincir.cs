@@ -73,6 +73,14 @@ public static partial class GrayboxKurucu
         TelefonTakimiSablonuKur();
         TerlikCiftiSablonuKur("Kadin");
         TerlikCiftiSablonuKur("Cocuk");
+        // Hol dekoru (#83).
+        ParcaSablonuKur("Petek", "Petek");
+        ParcaSablonuKur("Hali_Rulolari", "Hali_Rulolari");
+        GoblenSablonuKur();
+        TabloIziSablonuKur("Tablo_Izi_Genis", 0.55f, 0.42f);
+        TabloIziSablonuKur("Tablo_Izi_Dik", 0.36f, 0.48f);
+        TabloIziSablonuKur("Tablo_Izi_Kucuk", 0.30f, 0.24f);
+        TabloIziSablonuKur("Bos_Civi", 0f, 0f);
         KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
@@ -300,7 +308,7 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(v, yol);
         }
         v.aciklama = "1. kat, daire 2, Yıldız ailesi (tahliye). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
-                     "(antre bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
+                     "(antre ve hol bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
         v.tasarimda = true;
         v.yalnizSecilenEsyalar = true;
         v.zincir = new KilitZinciri();
@@ -348,9 +356,123 @@ public static partial class GrayboxKurucu
             Sus(koliBuyuk, 2.20f, 0f, -0.52f, -1f, 0.3f),
             Sus(koliKucuk, 2.20f, 0.40f, -0.52f, -1f, 0.1f),
             Sus(koliAcik, 1.35f, 0f, -0.50f, 0f, 1f),
+
+            // ---------- HOL (Şahan'ın seçimi: 2, 4, 10, 11, 12, 13) ----------
+            // Hol u 0-10,5, v 2,95-4,65 (1,7 m). Güney duvarı (v = 2,95) kapıları: banyo u 3,25-3,95, kiler
+            // 5,25-6,05, mutfak 7,0-7,8. Kuzey duvarı (v = 4,65): salon 0,85-1,75, Oda B 5,95-6,75,
+            // Oda A 8,7-9,5. Dip duvar u = 10,5. Kapılar odalara açılır; holün ortası yol, boş kalır.
+            // Yolluk ve tablolar götürülmüş: duvarda açık renkli izler ve boş bir çivi.
+            // Petek: dip duvarda, ortada.
+            Sus(Sablon("Petek"), 10.50f, 0f, 3.80f, -1f, 0f),
+            // Goblen: salon ile Oda B kapılarının arasında; duvarda unutulmuş tek tablo.
+            Sus(Sablon("Goblen"), 3.80f, 1.55f, 4.65f, 0f, -1f),
+            // Tablo izleri: goblenin iki yanında ve karşı duvarda; mutfağın yanında boşta bir çivi.
+            Sus(Sablon("Tablo_Izi_Genis"), 2.55f, 1.55f, 4.65f, 0f, -1f),
+            Sus(Sablon("Tablo_Izi_Dik"), 5.05f, 1.60f, 4.65f, 0f, -1f),
+            Sus(Sablon("Tablo_Izi_Kucuk"), 4.60f, 1.60f, 2.95f, 0f, 1f),
+            Sus(Sablon("Bos_Civi"), 8.60f, 1.70f, 2.95f, 0f, 1f),
+            // Durmuş saat: Oda B ile Oda A kapılarının arasında; pili bitmiş, akrep ve yelkovan kıpırdamıyor.
+            M("vintage_telephone_wall_clock", 7.60f, 1.55f, 4.65f, 0f, -1f),
+            // Koliler: banyo ile kiler kapılarının arasında, küçük tablo izinin altında.
+            Sus(koliBuyuk, 4.60f, 0f, 2.95f + 0.21f, 0f, 1f),
+            Sus(koliKucuk, 4.62f, 0.40f, 2.95f + 0.21f, 0.15f, 1f),
+            // Rulo halılar: mutfak kapısından sonra güney duvarına dayalı; ikisi dik, yolluk önlerinde yerde.
+            Sus(Sablon("Hali_Rulolari"), 9.30f, 0f, 2.95f, 0f, 1f),
         };
         EditorUtility.SetDirty(v);
         return v;
+    }
+
+    // Goblen şablonu (#83): çerçeve ve kanaviçe (Goblen.fbx); kanaviçeye Goblen_Degirmen dokulu malzeme
+    // takılır (Assets/Materials/Goblen.mat, yoksa kurulur). FBX'in içindeki düz malzeme yerine kendi
+    // malzememiz: dokunun yolu FBX'te saklanmıyor (aktarımda silinir), Unity onu kendi bulamaz.
+    static GameObject GoblenSablonuKur()
+    {
+        const string MalzemeYolu = "Assets/Materials/Goblen.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(MalzemeYolu);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            AssetDatabase.CreateAsset(m, MalzemeYolu);
+        }
+        m.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Textures/Goblen_Degirmen.png"));
+        m.SetColor("_BaseColor", new Color(0.85f, 0.85f, 0.85f));   // biraz soluk: yıllarca duvarda kalmış
+        m.SetFloat("_Smoothness", 0.05f);                            // kumaş: parlamaz
+        EditorUtility.SetDirty(m);
+
+        GameObject gecici = new GameObject("Goblen");
+        GameObject cerceve = Model("Cerceve", gecici.transform, "Goblen", "Cerceve", Vector3.zero, 0f, carpisma: false);
+        GameObject kanavice = Model("Kanavice", gecici.transform, "Goblen", "Kanavice", Vector3.zero, 0f, carpisma: false);
+        if (cerceve == null || kanavice == null) { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Goblen.fbx yok."); return null; }
+        kanavice.GetComponent<MeshRenderer>().sharedMaterial = m;
+        BoxCollider c = gecici.AddComponent<BoxCollider>();
+        c.center = new Vector3(0f, 0f, 0.015f);
+        c.size = new Vector3(0.58f, 0.46f, 0.03f);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Goblen.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // Tablo izi şablonu (#83): indirilmiş bir tablonun duvarda bıraktığı açık renkli dikdörtgen ve üstünde
+    // boşta kalan çivi. İz, duvarın rengini biraz açan yarı saydam beyaz bir dörtgen (Unity'nin hazır
+    // Quad'ı): böylece her kattaki duvar kaplamasında çalışır. en = 0 ise yalnızca çivi. Çarpıştırıcı
+    // yok: oyuncunun nişanını engellemesin.
+    static GameObject TabloIziSablonuKur(string ad, float en, float boy)
+    {
+        const string IzYolu = "Assets/Materials/Tablo_Izi.mat";
+        Material iz = AssetDatabase.LoadAssetAtPath<Material>(IzYolu);
+        if (iz == null)
+        {
+            iz = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            AssetDatabase.CreateAsset(iz, IzYolu);
+        }
+        // URP Lit, yarı saydam (Surface Type = Transparent); ayarlar MobilyaKurucu'daki camınkiyle aynı.
+        iz.SetFloat("_Surface", 1f);
+        iz.SetFloat("_Blend", 0f);
+        iz.SetColor("_BaseColor", new Color(0.95f, 0.90f, 0.80f, 0.09f));
+        iz.SetFloat("_Smoothness", 0f);
+        iz.SetOverrideTag("RenderType", "Transparent");
+        iz.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        iz.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+        iz.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        iz.SetInt("_ZWrite", 0);
+        iz.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        EditorUtility.SetDirty(iz);
+
+        const string CiviYolu = "Assets/Materials/Tablo_Civi.mat";
+        Material civiM = AssetDatabase.LoadAssetAtPath<Material>(CiviYolu);
+        if (civiM == null)
+        {
+            civiM = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            civiM.SetColor("_BaseColor", new Color(0.12f, 0.11f, 0.10f));
+            civiM.SetFloat("_Metallic", 0.6f);
+            AssetDatabase.CreateAsset(civiM, CiviYolu);
+        }
+
+        GameObject gecici = new GameObject(ad);
+        if (en > 0f)
+        {
+            // Quad'ın görünen yüzü kendi -Z'sine bakar; şablonun önü +Z olduğu için 180° çevrilir.
+            GameObject q = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            q.name = "Iz";
+            Object.DestroyImmediate(q.GetComponent<Collider>());
+            q.transform.SetParent(gecici.transform, false);
+            q.transform.localPosition = new Vector3(0f, 0f, 0.003f);   // duvardan 3 mm önde: titremesin
+            q.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            q.transform.localScale = new Vector3(en, boy, 1f);
+            q.GetComponent<MeshRenderer>().sharedMaterial = iz;
+        }
+        // Çivi: izin üst kenarının biraz altında, duvardan 1 cm çıkık.
+        GameObject civi = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        civi.name = "Civi";
+        Object.DestroyImmediate(civi.GetComponent<Collider>());
+        civi.transform.SetParent(gecici.transform, false);
+        civi.transform.localPosition = new Vector3(0f, en > 0f ? boy / 2f - 0.05f : 0f, 0.005f);
+        civi.transform.localScale = new Vector3(0.006f, 0.006f, 0.012f);
+        civi.GetComponent<MeshRenderer>().sharedMaterial = civiM;
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/{ad}.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
     }
 
     // Dekor şablonunu adıyla bulur (Assets/Prefabs/Esyalar/<ad>.prefab); ZincirleriKur önce kurar.
