@@ -39,11 +39,35 @@ public class ZincirVarlikTestleri
 
     // Oyundaki ZincirUygulayici.YolBul ile aynı kural: "Sahanlik:" yolları sahanlıktan, {n} daire numarası.
     // İkinci dairenin yolları ("B:...", #70) öneksiz olarak aynı dairede aranır: dört daire aynı planla kurulu.
-    private static Transform Bul(Transform sahanlik, Transform daire, int n, string yol)
+    // Adı verilmiş bir süsün yolu (#83, "Komodin_Kerem/Cekmece_1") sahnede değil, oyun sırasında konan
+    // süsün şablonunda (prefab) aranır: ilk parça süsün adı, gerisi şablonun içindeki yol.
+    private static Transform Bul(Transform sahanlik, Transform daire, int n, string yol, Dictionary<string, GameObject> susler = null)
     {
         const string On = "Sahanlik:";
         if (yol.StartsWith(KilitZinciri.IkinciOnek)) yol = yol.Substring(KilitZinciri.IkinciOnek.Length);
+        if (susler != null)
+        {
+            int bolu = yol.IndexOf('/');
+            string ilk = bolu < 0 ? yol : yol.Substring(0, bolu);
+            if (susler.TryGetValue(ilk, out GameObject sablon))
+                return sablon == null ? null : (bolu < 0 ? sablon.transform : sablon.transform.Find(yol.Substring(bolu + 1)));
+        }
         return yol.StartsWith(On) ? sahanlik.Find(yol.Substring(On.Length).Replace("{n}", n.ToString())) : daire.Find(yol);
+    }
+
+    // Kat dosyasındaki adı verilmiş süsler: ad -> şablon (yansımayla; bkz. dosyanın başı).
+    private static Dictionary<string, GameObject> AdliSusler(string dosyaYolu)
+    {
+        var sonuc = new Dictionary<string, GameObject>();
+        ScriptableObject v = AssetDatabase.LoadAssetAtPath<ScriptableObject>(dosyaYolu);
+        var alan = v != null ? v.GetType().GetField("suslar") : null;
+        if (alan == null) return sonuc;
+        foreach (object s in (System.Collections.IEnumerable)alan.GetValue(v))
+        {
+            string ad = (string)s.GetType().GetField("Ad").GetValue(s);
+            if (!string.IsNullOrEmpty(ad)) sonuc[ad] = (GameObject)s.GetType().GetField("Sablon").GetValue(s);
+        }
+        return sonuc;
     }
 
     [Test]
@@ -74,6 +98,8 @@ public class ZincirVarlikTestleri
             foreach (GameObject g in sahne.GetRootGameObjects()) if (g.name == "Sahanlik_A") a = g.transform;
             Assert.IsNotNull(a);
             foreach (var z in Zincirler())
+            {
+                Dictionary<string, GameObject> susler = AdliSusler(z.Key);
                 for (int n = 1; n <= 4; n++)
                 {
                     Transform d = a.Find($"Daire_{n}");
@@ -81,9 +107,9 @@ public class ZincirVarlikTestleri
                     {
                         // Planda nokta olan yer (#63) bir nesne değil; odasını kural denetliyor.
                         if (y.PlandaNokta) continue;
-                        Assert.IsNotNull(Bul(a, d, n, y.Yol), $"{z.Key}: Daire_{n} için '{y.Yol}' yok ('{y.Kimlik}')");
+                        Assert.IsNotNull(Bul(a, d, n, y.Yol, susler), $"{z.Key}: Daire_{n} için '{y.Yol}' yok ('{y.Kimlik}')");
                         if (!string.IsNullOrEmpty(y.KilitYolu))
-                            Assert.IsNotNull(Bul(a, d, n, y.KilitYolu), $"{z.Key}: Daire_{n} için '{y.KilitYolu}' yok ('{y.Kimlik}' kilit yolu)");
+                            Assert.IsNotNull(Bul(a, d, n, y.KilitYolu, susler), $"{z.Key}: Daire_{n} için '{y.KilitYolu}' yok ('{y.Kimlik}' kilit yolu)");
                     }
                     foreach (ZincirKilidi k in z.Value.Kilitler)
                         if (k.OdaKapisi)
@@ -91,6 +117,7 @@ public class ZincirVarlikTestleri
                     foreach (string oda in z.Value.KapaliOdalar)
                         Assert.IsNotNull(d.Find("Kapilar/Kapi_" + KilitZinciri.OdaAdi(oda)), $"{z.Key}: kapalı oda '{oda}' için kapı yok");
                 }
+            }
         }
         finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
     }
@@ -145,7 +172,7 @@ public class ZincirVarlikTestleri
                     Assert.IsTrue(klip != null, $"{yol}: '{sesYolu}' için ses dosyası bağlı değil");
                     Assert.Contains(oda, odalar, $"{yol}: '{sesYolu}' için oda '{oda}' planda yok");
                     for (int n = 1; n <= 4; n++)
-                        Assert.IsNotNull(Bul(a, a.Find($"Daire_{n}"), n, sesYolu), $"{yol}: Daire_{n} için '{sesYolu}' yok");
+                        Assert.IsNotNull(Bul(a, a.Find($"Daire_{n}"), n, sesYolu, AdliSusler(yol)), $"{yol}: Daire_{n} için '{sesYolu}' yok");
                 }
             }
         }

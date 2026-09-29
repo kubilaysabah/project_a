@@ -125,8 +125,10 @@ public class CalanEsya : MonoBehaviour, IEtkilesimli
         // HEMEN silinir (DestroyImmediate): kat açılırken daire aynı karede iki kez kurulabiliyor.
         // Destroy kare sonunda silerdi; ikinci kurulum eski süzgeci yerinde bulur, Unity ikinci bir
         // AudioLowPassFilter eklemez (null döner) ve radyo yarım kurulurdu (gece oynanış testi).
-        if (kaynak != null) DestroyImmediate(kaynak);
+        // Önce süzgeç, sonra kaynak: AudioLowPassFilter AudioSource'a bağlıdır; kaynak önce silinmeye
+        // çalışılınca Unity "süzgeç ona bağlı" diye reddeder ve hata basar (2. kattan çıkarken görüldü).
         if (suzgec != null) DestroyImmediate(suzgec);
+        if (kaynak != null) DestroyImmediate(kaynak);
         if (isik != null) DestroyImmediate(isik.gameObject);
     }
 

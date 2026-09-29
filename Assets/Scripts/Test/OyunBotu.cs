@@ -357,7 +357,8 @@ public class OyunBotu : MonoBehaviour
             foreach (AcilirParca p in e.transform.parent.GetComponentsInChildren<AcilirParca>())
                 if (!p.Acik && !p.Kilitli) { p.Etkilesim(kontrol.gameObject); yield return new WaitForSeconds(0.8f); }
         var kap = typeof(Esya).GetField("kap", Gizli)?.GetValue(e) as AcilirParca;
-        if (kap != null && !kap.Acik) { kap.Etkilesim(kontrol.gameObject); yield return new WaitForSeconds(0.9f); }
+        // Kırılan kavanozun kapağı kırılınca gizlenir (Kirilan); gizli parça açılamaz (oyuncu da ona bakamaz).
+        if (kap != null && !kap.Acik && kap.gameObject.activeInHierarchy) { kap.Etkilesim(kontrol.gameObject); yield return new WaitForSeconds(0.9f); }
         if (!e.EtkilesimeAcik)
         {
             Sorun($"{kat}. kat: '{kimlik}' alınmaya açık değil (yer: {e.transform.parent?.name}, el: {Cep.Tasinan})");

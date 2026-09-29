@@ -330,6 +330,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 9130452927379219228, guid: 62894a50110d580459f30676a32ec3a6, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 1.4
     Y: 0
@@ -340,6 +341,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 4997426922442264344, guid: 0e605d06fc7ac0d459974be86d6d6a32, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 2.95
     Y: 0
@@ -350,6 +352,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 197800623002613473, guid: 1c41c69374827784f8976d96979e3ddf, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 2.95
     Y: 1.21
@@ -360,6 +363,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 920054691084407115, guid: 5faf442163404b346a6b83772318fee5, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 2.5
     Y: 1.21
@@ -370,6 +374,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 5234316692392655128, guid: a3bd2326066d8f34f96cc9a4e76d48d9, type: 3}
     Metin: kat7
+    Ad: 
   - Yol: 
     X: 2.8
     Y: 2.8
@@ -380,6 +385,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 8570057508259605690, guid: 5a7859b57223420429e3ce6c51b40cb9, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 5
     Y: 1.55
@@ -390,6 +396,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 8917934533972976352, guid: eb1f7f93e49b2ed45846cfbcde95aa53, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 7.6
     Y: 1.55
@@ -400,6 +407,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 3542150911484553745, guid: 70a754fa881a1e742aa25906f208e979, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 6.35
     Y: 0
@@ -410,6 +418,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 4419568890474193754, guid: 3a1a3b8d6b9500e4694c39ea6429b3f7, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 8.3
     Y: 0
@@ -420,6 +429,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 8155458018765825896, guid: 01f771af6036d29498ac1a00819b4ae1, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 8.36
     Y: 0.86
@@ -430,6 +440,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 6074168209427321076, guid: 928be3d2bd1d09e42ae7543543a36088, type: 3}
     Metin: 
+    Ad: 
   sesler: []
   parcalar: []
   yananOdalar: []

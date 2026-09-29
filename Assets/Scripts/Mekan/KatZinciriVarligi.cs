@@ -43,6 +43,11 @@ public class KatSusu : KatYerlesimi
 {
     public GameObject Sablon;     // koyulacak modelin şablonu (koli...)
     public string Metin;          // şablonun "Yazi" çocuğuna yazılacak metin anahtarı (isim kartı, #66); boş: yok
+    // Süsün sahnedeki adı (#83). Boşsa "Sus_<şablon adı>" olur. Dolu olduğunda zincir bu süse
+    // yoluyla başvurabilir: "Komodin_Kerem/Cekmece_1" gibi. Böylece her katın görev kabı (çekmece,
+    // sandık, dolap) o kata özel bir model olur; aynı model iki katta kullanılmaz (Şahan'ın kuralı).
+    // Süsler zincirden ÖNCE konur (ZincirUygulayici.Uygula), yoksa zincir bu yolu bulamazdı.
+    public string Ad;
 }
 
 /// <summary>Bir zincir eşyasının üstüne yazılacak metin (#66: tabaktaki isim).</summary>

@@ -59,10 +59,13 @@ public class ZincirUygulayici
     }
 
     /// <summary>Daireyi temizler ve (varsa) zinciri kurar. zincir null: bütün odalar açık.</summary>
-    public void Uygula(Transform daire, KilitZinciri zincir, int kat)
+    public void Uygula(Transform daire, KilitZinciri zincir, int kat, KatZinciriVarligi varlik = null)
     {
         Temizle(daire);
         if (IkinciDaire != null) DaireyiTemizle(IkinciDaire);
+        // Katın süsleri (mobilya, dekor) zincirden ÖNCE konur (#83): zincirin bir yeri bir süsün
+        // çekmecesi olabilir ("Komodin_Kerem/Cekmece_1"); süs henüz yokken o yol bulunamazdı.
+        if (varlik != null) SusleriKoy(daire, varlik);
         if (zincir == null) return;
         DaireElektrigi elektrik = Elektrik(daire);
 
@@ -288,22 +291,6 @@ public class ZincirUygulayici
             YoneticiNotu not = g != null ? g.GetComponent<YoneticiNotu>() : null;
             if (not != null) not.Ayarla(n.Metin);
         }
-        foreach (KatSusu s in varlik.suslar)
-        {
-            GameObject g = Yerlestir(daire, eksen, s.Sablon, s, "Sus_" + (s.Sablon != null ? s.Sablon.name : "?"));
-            // Süsün yazısı (isim kartı, #66): şablonun "Yazi" çocuğuna metin tablosundan; dil
-            // değişince YerelYazi yeniler.
-            // Aile fotoğrafı (#69): süsün "Metin"i fotoğrafın kimliğidir; çerçeve onu albümden takar.
-            AileFotografi foto = g != null ? g.GetComponent<AileFotografi>() : null;
-            if (foto != null) { foto.Ayarla(s.Metin); continue; }
-            Transform yaziNesnesi = g != null && !string.IsNullOrEmpty(s.Metin) ? g.transform.Find("Yazi") : null;
-            if (yaziNesnesi != null)
-            {
-                YerelYazi yy = yaziNesnesi.GetComponent<YerelYazi>();
-                if (yy == null) yy = yaziNesnesi.gameObject.AddComponent<YerelYazi>();
-                yy.AnahtariKur(s.Metin);
-            }
-        }
         // Eşyaların üstündeki yazılar (tabaktaki isim, #66): eşyanın üstüne, yüzü yukarı bakan yazı.
         foreach (EsyaYazisi ey in varlik.esyaYazilari)
         {
@@ -334,6 +321,30 @@ public class ZincirUygulayici
             // Oyuncunun odasını eşyanın kendi dairesinin eksenleriyle bulur (ikinci daire olabilir).
             c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, KilitZinciri.OdaAdi(ks.Oda), KapiBul(daire, ks.Oda), t.GetComponentInParent<DaireEksenleri>(),
                       ks.Kapatilabilir, ks.SusturanKilit, kat);
+        }
+    }
+
+    // Katın süslerini (mobilya, dekor, aile fotoğrafı, isim kartları) daireye koyar (#83'ten beri
+    // zincirden önce, Uygula'nın içinde). Adı verilmiş süs o adla konur; zincir ona yoluyla başvurur.
+    private void SusleriKoy(Transform daire, KatZinciriVarligi varlik)
+    {
+        DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
+        foreach (KatSusu s in varlik.suslar)
+        {
+            string ad = !string.IsNullOrEmpty(s.Ad) ? s.Ad : "Sus_" + (s.Sablon != null ? s.Sablon.name : "?");
+            GameObject g = Yerlestir(daire, eksen, s.Sablon, s, ad);
+            // Süsün yazısı (isim kartı, #66): şablonun "Yazi" çocuğuna metin tablosundan; dil
+            // değişince YerelYazi yeniler.
+            // Aile fotoğrafı (#69): süsün "Metin"i fotoğrafın kimliğidir; çerçeve onu albümden takar.
+            AileFotografi foto = g != null ? g.GetComponent<AileFotografi>() : null;
+            if (foto != null) { foto.Ayarla(s.Metin); continue; }
+            Transform yaziNesnesi = g != null && !string.IsNullOrEmpty(s.Metin) ? g.transform.Find("Yazi") : null;
+            if (yaziNesnesi != null)
+            {
+                YerelYazi yy = yaziNesnesi.GetComponent<YerelYazi>();
+                if (yy == null) yy = yaziNesnesi.gameObject.AddComponent<YerelYazi>();
+                yy.AnahtariKur(s.Metin);
+            }
         }
     }
 
@@ -473,6 +484,11 @@ public class ZincirUygulayici
             if (g == null) continue;
             // Oyuncunun elindeki eşya da temizlenir: başka katın anahtarı bu katta işe yaramaz.
             if (Cep.TasinanNesne == g) Cep.TasinanNesne = null;
+            // Önce daireden ayrılır, sonra silinir (#83): Destroy nesneyi ancak karenin sonunda
+            // kaldırır. Daire aynı karede yeniden kurulursa zincir, adı aynı olan ESKİ süsü
+            // ("Komodin_Kerem/Cekmece_1") bulup eşyayı silinecek nesnenin içine koyardı.
+            g.SetActive(false);
+            g.transform.SetParent(null, false);
             Object.Destroy(g);
         }
         konanlar.Clear();

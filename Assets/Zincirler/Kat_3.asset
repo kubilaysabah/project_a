@@ -195,6 +195,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 8804200984019698290, guid: 5d4dcf69c0bedde4d9e8acdd48730ab1, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 1.4
     Y: 0
@@ -205,6 +206,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 4997426922442264344, guid: 0e605d06fc7ac0d459974be86d6d6a32, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 2.95
     Y: 0
@@ -215,6 +217,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 153209043106312920, guid: d90539b5f3a4290409528ea7992e9688, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 2.95
     Y: 1.18
@@ -225,6 +228,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 920054691084407115, guid: 5faf442163404b346a6b83772318fee5, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 2.8
     Y: 2.8
@@ -235,6 +239,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 7568500997975027366, guid: b85d181cfeb205242b62cba29810d682, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 5
     Y: 1.55
@@ -245,6 +250,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 8917934533972976352, guid: eb1f7f93e49b2ed45846cfbcde95aa53, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 2.35
     Y: 0
@@ -255,6 +261,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 153515130804803642, guid: a78e6e60e66ddf54ba56083a72f658d6, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 2.28
     Y: 0
@@ -265,6 +272,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 1398501895348122143, guid: c173b0591c70c8541abf64f13f80f12b, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 3.8
     Y: 1.6
@@ -275,6 +283,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 367041216046510937, guid: e360aaf92ffd69d438fcca1677f62ee8, type: 3}
     Metin: kat3
+    Ad: 
   - Yol: 
     X: 7.6
     Y: 1.55
@@ -285,6 +294,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 3542150911484553745, guid: 70a754fa881a1e742aa25906f208e979, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 10.055
     Y: 0
@@ -295,6 +305,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 4861881410216561460, guid: 4080fd92c53173548a46cae984df6e86, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 7.95
     Y: 0
@@ -305,6 +316,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 3203632128626437959, guid: 7a51cc99d41cbc743988af31d966552f, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 5.7
     Y: 0
@@ -315,6 +327,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 3225832680137285329, guid: 075216c72d34b2341bfe20f19cba76f8, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 8.4
     Y: 0
@@ -325,6 +338,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 5648442490865177686, guid: e7d45cf6b38313d408368d7f902bf505, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 8.3
     Y: 0
@@ -335,6 +349,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 8155458018765825896, guid: 01f771af6036d29498ac1a00819b4ae1, type: 3}
     Metin: 
+    Ad: 
   - Yol: 
     X: 8.36
     Y: 0.86
@@ -345,6 +360,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 6074168209427321076, guid: 928be3d2bd1d09e42ae7543543a36088, type: 3}
     Metin: 
+    Ad: 
   sesler: []
   parcalar:
   - Kimlik: p1

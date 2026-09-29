@@ -775,7 +775,7 @@ public class KatYoneticisi : MonoBehaviour
         if (aAcik > 0 && daireler[aAcik] != null && zincirUygulayici != null)
         {
             zincirUygulayici.IkinciDaire = ikinci > 0 && daireler[ikinci] != null ? daireler[ikinci].transform : null;
-            zincirUygulayici.Uygula(daireler[aAcik].transform, ZincirBul(aKat), aKat);
+            zincirUygulayici.Uygula(daireler[aAcik].transform, ZincirBul(aKat), aKat, varlik);
             // Katın notları ve dekoru (koliler...), #55.
             zincirUygulayici.DekorUygula(daireler[aAcik].transform, varlik, aKat);
         }

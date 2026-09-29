@@ -8,18 +8,21 @@
 #   Gazete_Kilif     : sehpada açık bırakılmış gazete ve içi boş gözlük kılıfı (gözlük holde kırık).
 #   Kuru_Sardunya    : denizlikte üç toprak saksı, günlerdir sulanmamış, kurumuş sardunyalar.
 #   Dikis_Makinesi   : eşinden kalma pedallı dikiş makinesi masası; makinenin üstünde dantel örtü.
+#                      Tablanın altında öne kayan çekmecesi ayrı parça (Cekmece_1): 2. katın görev kabı.
 #   Koltuk_Danteli   : koltuk sırtının üstüne atılmış dantel (üstte yatay kısım, önde sarkan kısım).
 # Ön yüz -y; Unity'de +Z. Pivot: masaüstü eşyalarında tabanın ortası; dantelde sırtın üst ön kenarı.
 
 import os, sys, math, random
 sys.path.append(os.path.dirname(__file__))
 import ortak
+import acilir_ortak as ac
 import bpy
 
 hangi = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv else "cay"
 ortak.sahneyi_temizle()
 rnd = random.Random(71)
 p = []
+parcalar = []          # açılır eşyada Govde dışındaki ayrı nesneler (dikiş masasının çekmecesi)
 
 
 def silindir_yatik(ad, r, boy, konum, rot, mat, kose=16):
@@ -132,7 +135,12 @@ elif hangi == "dikis":
     # Masa: ahşap tabla, altında döküm ayak çerçevesi, pedal ve volan.
     EN, DER, H = 0.90, 0.45, 0.76
     p.append(ortak.kutu("Tabla", (EN, DER, 0.03), (0, 0, H - 0.015), ahsap, 0.006))
-    p.append(ortak.kutu("Cekmece", (0.30, DER - 0.04, 0.10), (0.25, 0, H - 0.08), ahsap, 0.004))
+    # Çekmece (#83, 2. katın görev kabı: Oda A'nın anahtarı burada): tablanın altında asılı bir yuva
+    # (iki yan, taban yok) ve ayrı bir parça olarak öne kayan çekmece (acilir_ortak kuralı).
+    p.append(ortak.kutu("YuvaYan", (0.012, DER - 0.04, 0.11), (0.25 - 0.162, 0.01, H - 0.085), ahsap, 0.002))
+    p.append(ortak.kutu("YuvaYan", (0.012, DER - 0.04, 0.11), (0.25 + 0.162, 0.01, H - 0.085), ahsap, 0.002))
+    p.append(ortak.kutu("YuvaArka", (0.33, 0.012, 0.11), (0.25, DER / 2 - 0.02, H - 0.085), ahsap, 0.002))
+    parcalar.append(ac.cekmece("Cekmece_1", 0.25, H - 0.14, 0.31, 0.105, DER - 0.07, -DER / 2 + 0.01, ahsap, ahsap, dokum, "topuz"))
     for x in (-EN / 2 + 0.06, EN / 2 - 0.06):
         p.append(ortak.kutu("AyakYan", (0.04, DER - 0.04, 0.05), (x, 0, 0.025), dokum, 0.006))
         p.append(ortak.kutu("AyakDik", (0.03, 0.05, H - 0.10), (x, 0, (H - 0.10) / 2 + 0.03), dokum, 0.005))
@@ -160,7 +168,14 @@ else:
         p.append(f)
     ad, h = "Koltuk_Danteli", 0.3
 
-nesne = ortak.birlestir(p, ad)
-ortak.yumusat(nesne, 35)
-ortak.pivotu_tasi(nesne, (0, 0, 0))
-ortak.calistir_ve_bitir(ad, [nesne], h, 1.0 if hangi not in ("dikis",) else 2.2)
+if parcalar:
+    # Açılır eşya (#83): gövde "Govde" adıyla, çekmece ayrı nesne (Unity: GrayboxKurucu.AcilirSablonKur).
+    govde = ortak.birlestir(p, "Govde")
+    ortak.yumusat(govde, 35)
+    ortak.pivotu_tasi(govde, (0, 0, 0))
+    ortak.calistir_ve_bitir(ad, [govde] + parcalar, h, 2.2)
+else:
+    nesne = ortak.birlestir(p, ad)
+    ortak.yumusat(nesne, 35)
+    ortak.pivotu_tasi(nesne, (0, 0, 0))
+    ortak.calistir_ve_bitir(ad, [nesne], h, 1.0)

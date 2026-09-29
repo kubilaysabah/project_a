@@ -123,12 +123,20 @@ public static partial class GrayboxKurucu
         HaliDuzSablonuKur("Hali_Nuri", "Assets/Textures/Hali_Nuri.png");
         PerdeKadifeSablonuKur();
         PortreSablonuKur("Portre_Kat2_Es", "Assets/Textures/Portreler/kat2_es.png");
-        foreach (string ad in new[] { "Orgu_Battaniye", "Cay_Takimi", "Gazete_Kilif", "Kuru_Sardunya", "Dikis_Makinesi", "Koltuk_Danteli" })
+        foreach (string ad in new[] { "Orgu_Battaniye", "Cay_Takimi", "Gazete_Kilif", "Kuru_Sardunya", "Koltuk_Danteli" })
             ParcaSablonuKur(ad, ad);
+        // Dikiş makinesinin çekmecesi açılır (#83): 2. katta Oda A'nın anahtarı onda.
+        AcilirSablonKur("Dikis_Makinesi");
         // 2. kat mutfak dekoru (#83).
         foreach (string ad in new[] { "Buzdolabi_70", "Ocak_Emaye", "Tup_Turuncu", "Mutfak_Masasi", "Mutfak_Sandalyesi",
                                       "Teneke_Rafi", "Mutfak_Perdesi", "Bulasiklik" })
             ParcaSablonuKur(ad, ad);
+        // 2. kat Oda A ve kiler dekoru (#83): Blender odaA_kiler_nuri.py.
+        foreach (string ad in new[] { "Karyola_Nuri", "Tuvalet_Masasi", "Elbise_Sandalyesi", "Kilim_Nuri", "Perde_Cicekli", "Hat_Levha",
+                                      "Kiler_Rafi", "Radyo_Tezgahi", "Kiler_Cuvallari", "Supurge_Faras", "Damacana", "Sogan_Sepeti" })
+            ParcaSablonuKur(ad, ad);
+        foreach (string ad in new[] { "Komodin_Nuri", "Gardirop_Nuri", "Teneke_Nuri" })
+            AcilirSablonKur(ad);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
@@ -244,6 +252,99 @@ public static partial class GrayboxKurucu
         BoxCollider c = gecici.AddComponent<BoxCollider>();
         c.center = b.center;
         c.size = b.size;
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/{ad}.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // AÇILIR SÜS ŞABLONU (#83): görev kabı olabilecek, kata özel bir mobilya (komodin, sandık, dolap).
+    // Blender betiği (Art/Blender/scripts/acilir_ortak.py kuralı) FBX'e şu adlı nesneleri koyar:
+    //   Govde       : gövde (içi oyulmuş); MeshCollider alır, nişan ışını içine, eşyaya kadar girebilsin.
+    //   Cekmece_N   : öne (+Z) kayan çekmece; pivotu çekmecenin iç tabanının ortası.
+    //   Kapi_N      : dik menteşeli kapı; pivotu menteşe çizgisi. Kapının gövdesi pivotun hangi yanındaysa
+    //                 dönüş yönü ondan bulunur (MobilyaKurucu'daki kural): öne, odaya doğru açılır.
+    //   Kapak       : arka üst kenarından menteşeli kapak (sandık); ön kenarı yukarı kalkar.
+    //   Surgu_N     : yana kayan parça (yerel +X yönünde, genişliğinin %90'ı kadar).
+    // Parçalar kökün çocuğudur; zincir onlara "<süsün adı>/Cekmece_1" yoluyla başvurur. Gövdeye
+    // Yonlendirici eklenir: gövdeye bakan oyuncuya parçası (en yakını) sunulur. buzdolabiIsigi: kapının
+    // iç ışığı (BuzdolabiIsigi) da kurulsun; ışığın yeri kökün eksenlerinde.
+    static GameObject AcilirSablonKur(string ad, Vector3? buzdolabiIsigi = null)
+    {
+        GameObject fbx = AssetDatabase.LoadAssetAtPath<GameObject>(ModelKlasoru + ad + ".fbx");
+        if (fbx == null) { Debug.LogWarning($"[ZINCIR] {ad}.fbx yok."); return null; }
+        GameObject gecici = new GameObject(ad);
+        GameObject govde = Model("Govde", gecici.transform, ad, "Govde", Vector3.zero, 0f, carpisma: false);
+        if (govde == null) { Object.DestroyImmediate(gecici); Debug.LogWarning($"[ZINCIR] {ad}.fbx içinde Govde yok."); return null; }
+        govde.AddComponent<MeshCollider>().sharedMesh = govde.GetComponent<MeshFilter>().sharedMesh;
+        var parcalar = new List<MonoBehaviour>();
+        AcilirParca ilkKapi = null;
+        // FBX'in kökündeki bütün nesneler sırayla: Govde dışındakiler açılır parça ya da düz süs.
+        foreach (Transform t in fbx.transform)
+        {
+            if (t.name == "Govde") continue;
+            bool cekmece = t.name.StartsWith("Cekmece"), kapi = t.name.StartsWith("Kapi"),
+                 kapak = t.name.StartsWith("Kapak"), surgu = t.name.StartsWith("Surgu");
+            GameObject g = Model(t.name, gecici.transform, ad, t.name, Vector3.zero, 0f, carpisma: true);
+            if (g == null || !(cekmece || kapi || kapak || surgu)) continue;
+            Bounds b = g.GetComponent<MeshFilter>().sharedMesh.bounds;   // parçanın kendi (yerel) sınırı
+            AcilirParca a = g.AddComponent<AcilirParca>();
+            var seri = new SerializedObject(a);
+            if (cekmece || surgu)
+            {
+                seri.FindProperty("hareket").enumValueIndex = (int)AcilirParca.Hareket.Kaydir;
+                seri.FindProperty("eksen").vector3Value = cekmece ? Vector3.forward : Vector3.right;
+                seri.FindProperty("miktar").floatValue = cekmece ? b.size.z * 0.65f : b.size.x * 0.9f;
+                seri.FindProperty("sure").floatValue = 0.45f;
+            }
+            else if (kapi)
+            {
+                // Unity'de +Y etrafında pozitif dönüş +X'i -Z'ye çevirir: gövdesi +X'te duran kapı eksi
+                // yönde dönerse öne (+Z) açılır, -X'te duran artı yönde.
+                seri.FindProperty("hareket").enumValueIndex = (int)AcilirParca.Hareket.Dondur;
+                seri.FindProperty("eksen").vector3Value = Vector3.up;
+                seri.FindProperty("miktar").floatValue = b.center.x > 0f ? -105f : 105f;
+                seri.FindProperty("sure").floatValue = 0.6f;
+                if (ilkKapi == null) ilkKapi = a;
+            }
+            else
+            {
+                // Kapak arka üst kenarında döner: x ekseninde eksi dönüş ön kenarı (+Z) yukarı kaldırır.
+                seri.FindProperty("hareket").enumValueIndex = (int)AcilirParca.Hareket.Dondur;
+                seri.FindProperty("eksen").vector3Value = Vector3.right;
+                seri.FindProperty("miktar").floatValue = -100f;
+                seri.FindProperty("sure").floatValue = 0.7f;
+            }
+            seri.ApplyModifiedPropertiesWithoutUndo();
+            parcalar.Add(a);
+        }
+        if (parcalar.Count > 0)
+        {
+            Yonlendirici y = govde.AddComponent<Yonlendirici>();
+            var seri = new SerializedObject(y);
+            SerializedProperty dizi = seri.FindProperty("parcalar");
+            dizi.arraySize = parcalar.Count;
+            for (int i = 0; i < parcalar.Count; i++) dizi.GetArrayElementAtIndex(i).objectReferenceValue = parcalar[i];
+            seri.ApplyModifiedPropertiesWithoutUndo();
+        }
+        if (buzdolabiIsigi.HasValue && ilkKapi != null)
+        {
+            // Buzdolabının iç ışığı (bkz. GrayboxKurucu_Daire.BuzdolabiIsigiKur): kapı açıkken ve elektrik varken yanar.
+            GameObject l = new GameObject("Elektrik_Isigi");
+            l.transform.SetParent(gecici.transform, false);
+            l.transform.localPosition = buzdolabiIsigi.Value;
+            Light isik = l.AddComponent<Light>();
+            isik.type = LightType.Point;
+            isik.range = 0.9f;
+            isik.intensity = 0.5f;
+            isik.color = new Color(0.86f, 0.93f, 1f);
+            isik.shadows = LightShadows.None;
+            isik.enabled = false;
+            BuzdolabiIsigi bi = gecici.AddComponent<BuzdolabiIsigi>();
+            var bs = new SerializedObject(bi);
+            bs.FindProperty("isik").objectReferenceValue = isik;
+            bs.FindProperty("kapi").objectReferenceValue = ilkKapi;
+            bs.ApplyModifiedPropertiesWithoutUndo();
+        }
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/{ad}.prefab");
         Object.DestroyImmediate(gecici);
         return sablon;
@@ -877,14 +978,18 @@ public static partial class GrayboxKurucu
         return sablon;
     }
 
-    // ---------- 2. KAT: YENİDEN TASARLANIYOR (#83, Şahan, 2026-09-29) ----------
+    // ---------- 2. KAT: ODA ODA YENİDEN DÖŞENDİ (#83, 2026-09-29) ----------
     // Daire 3 (kapıda 7), yaşlı Nuri Bey'in evi: eşini kaybetmiş, yalnız yaşayan, radyo meraklısı emekli.
     // Birkaç gün önce hastaneye kaldırılmış (Yönetim'in notu); ev dolu ve yaşanmış, aniden bırakılmış.
-    // Katın imza mekaniği sesle bulma (#62): radyo kapalı bir odada kendiliğinden çalar.
-    // Kat oda oda yeniden döşeniyor (1. kattaki gibi); zincir, kapılar ve görev parçaları odalar
-    // bitince seçilecek. Kural: katlarda aynı model eşya kullanılmaz; ipucu notu yok (Nuri'nin
-    // "şifre radyonun istasyonu" notu kaldırıldı); bir odada en fazla bir görev parçası.
-    // Eski tasarım (radyo 102.7 -> kiler asma kilidi -> alet çantasında kat anahtarı) git geçmişinde.
+    // Katın imza mekaniği sesle bulma (#62): radyo kilitli yatak odasında kendiliğinden çalar, kapalı
+    // kapının ardından boğuk duyulur. Kurallar: katlarda aynı model yok; ipucu notu yok; bir odada en
+    // fazla bir görev parçası.
+    //
+    // Kapı sırası ve görev parçaları:
+    //   1. Salon (kilitsiz): dikiş makinesinin çekmecesinde Oda A'nın anahtarı.
+    //   2. Oda A (anahtar): komodinin üstündeki radyonun kadranında 102.7.
+    //   3. Kiler (şifreli asma kilit 1027): tamir tezgâhındaki bisküvi tenekesinde katın anahtarı.
+    //   Antre, hol ve mutfak kilitsiz ve görev parçasız; banyo ve Oda B kapalı.
     static KatZinciriVarligi Kat2Kur()
     {
         string yol = $"{ZincirKlasoru}/Kat_2.asset";
@@ -894,19 +999,43 @@ public static partial class GrayboxKurucu
             v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
             AssetDatabase.CreateAsset(v, yol);
         }
-        v.aciklama = "2. kat, daire 3, yaşlı Nuri Bey (hastanede). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
-                     "(antre, hol, salon ve mutfak bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
-        v.tasarimda = true;
+        v.aciklama = "2. kat, daire 3, yaşlı Nuri Bey (hastanede; sesle bulma). Salonda dikiş makinesinin çekmecesinde Oda A'nın " +
+                     "anahtarı; Oda A'da radyo kendiliğinden çalar, kadranında 102.7; kilerin asma kilidi 1027, tamir tezgâhındaki " +
+                     "tenekede katın anahtarı. Banyo ve Oda B kapalı. Oda oda döşendi (#83).";
+        v.tasarimda = false;
         v.yalnizSecilenEsyalar = true;
-        v.zincir = new KilitZinciri();
-        v.sesler = new List<KatSesi>();
+        var z = new KilitZinciri();
+        z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_B" });
+        // Yerler adı verilmiş süslerin parçaları (#83): dikiş makinesinin çekmecesi, teneke kutu.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "dikis", Yol = "Dikis_Nuri/Cekmece_1", Oda = "Salon" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "radyo", Yol = "Esyalar/Radyo", Oda = "Oda_A" });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "teneke", Yol = "Teneke_Nuri", Oda = "Oda_C", KilitYolu = "Teneke_Nuri/Kapak" });
+        // Çekmecenin ve tenekenin pivotu iç tabanları: eşya birkaç milimetre üstünde yatar.
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "dikis", Y = 0.004f, Donus = 25f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "teneke", Y = 0.008f, Donus = 15f });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_A", Gerekli = "odaA_anahtari" });
+        // Radyonun kadranı (radyo.py): 102.7 kadran camının üstünde yazılı (eski zincirden, #62).
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "kiler", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_C", Gerekli = "radyo",
+                                          Sifre = "1027", IpucuMetni = "102.7", IpucuX = -0.085f, IpucuY = 0.137f, IpucuZ = 0.0705f,
+                                          IpucuOlcek = 0.7f });
+        v.zincir = z;
         v.parcalar = new List<KatParcasi>();
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;
+        // Radyo dairenin kalıcı eşyası (Esyalar/Radyo); zincir ona başvurduğu için görünür.
         v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Tezgah" };
+        v.sesler = new List<KatSesi>
+        {
+            new KatSesi { Yol = "Esyalar/Radyo", Oda = "Oda_A", Gecikme = 4f, Ses = 0.8f,
+                          Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Daire/Radyo_Istasyon.wav") },
+        };
+        if (v.sesler[0].Klip == null) Debug.LogError("[ZINCIR] Radyo_Istasyon.wav bulunamadı (Art/Ses/scripts/kayit_isle.py radyo).");
 
         KatSusu Sus(GameObject sablon, float u, float y, float vv, float onU, float onV)
         { return new KatSusu { Sablon = sablon, X = u, Y = y, Z = vv, OnU = onU, OnV = onV }; }
+        // Adı verilmiş süs: zincir ona bu adla başvurur ("Dikis_Nuri/Cekmece_1").
+        KatSusu SusA(string ad, GameObject sablon, float u, float y, float vv, float onU, float onV)
+        { return new KatSusu { Ad = ad, Sablon = sablon, X = u, Y = y, Z = vv, OnU = onU, OnV = onV }; }
 
         // ---------- ANTRE (Şahan'ın seçimi: 1, 2, 3, 4, 7, 8, 9, 10, 11) ----------
         // Antre u 0-2,6, v -0,8-2,85. Bu dairede giriş kapısı içeri ve +v tarafına açılır: açık kanat
@@ -985,7 +1114,7 @@ public static partial class GrayboxKurucu
             // Kristal avize: halının ortasının üstünde.
             M("Chandelier_02", 2.60f, Tavan, 6.45f, 0f, 1f),
             // Eşinden kalma dikiş makinesi: balkon kapısının yanındaki köşede, üstü dantel örtülü.
-            Sus(Sablon("Dikis_Makinesi"), 4.50f, 0f, 8.10f - 0.225f, 0f, -1f),
+            SusA("Dikis_Nuri", Sablon("Dikis_Makinesi"), 4.50f, 0f, 8.10f - 0.225f, 0f, -1f),
 
             // ---------- MUTFAK (Şahan'ın seçimi: 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12) ----------
             // Mutfak u 6,8-10,5, v -0,8-2,85. Kapı hol duvarında (u 7,0-7,8). Dip duvarda (u = 10,6) pencere ve
@@ -1004,7 +1133,43 @@ public static partial class GrayboxKurucu
             // Muşambalı masa ortada, üstünde yarım kahvaltı; tek sandalye.
             Sus(Sablon("Mutfak_Masasi"), 8.45f, 0f, 1.50f, 0f, 1f),
             Sus(Sablon("Mutfak_Sandalyesi"), 8.45f, 0f, 2.10f, 0f, -1f),
+
+            // ---------- ODA A (yatak odası; görev: radyonun kadranı) ----------
+            // Oda A u 7,7-10,5, v 4,75-8,1. Kapı hol duvarında (u 8,7-9,5), içeri açılır; açık kanat u 8,57-8,72,
+            // v 4,75-5,5 boyunca durur, o köşe boş. Karşı duvarda (v = 8,1) pencere (u 8,5-9,7, denizlik 0,9).
+            // Karyola başı pencerenin altında, duvara dayalı (başlık 0,86: denizliğin altında kalır); solunda
+            // komodin ve üstünde dairenin radyosu (Esyalar/Radyo, u 8,1 v 7,94, komodinin üstü 0,55).
+            Sus(Sablon("Karyola_Nuri"), 9.10f, 0f, 8.10f - 1.00f, 0f, -1f),
+            SusA("Komodin_Nuri", Sablon("Komodin_Nuri"), 8.10f, 0f, 8.10f - 0.205f, 0f, -1f),
+            Sus(Sablon("Perde_Cicekli"), 9.10f, 2.30f, 8.10f, 0f, -1f),
+            // Elbise dolabı Oda B duvarında (u = 7,7), yüzü odaya; kapakları boş askılığa açılır.
+            SusA("Gardirop_Nuri", Sablon("Gardirop_Nuri"), 7.70f + 0.29f, 0f, 6.20f, 1f, 0f),
+            // Eşinin aynalı tuvalet masası dip duvarda (u = 10,5); önündeki sandalyede Nuri Bey'in ceketi.
+            Sus(Sablon("Tuvalet_Masasi"), 10.50f - 0.215f, 0f, 5.45f, -1f, 0f),
+            Sus(Sablon("Elbise_Sandalyesi"), 9.85f, 0f, 5.45f, 1f, 0f),
+            // Karyolanın ayak ucunda çizgili kilim; hol duvarında, köşede yaldızlı hat levhası.
+            Sus(Sablon("Kilim_Nuri"), 9.25f, 0f, 5.78f, 0f, 1f),
+            Sus(Sablon("Hat_Levha"), 10.00f, 1.70f, 4.75f, 0f, 1f),
+
+            // ---------- KİLER (Oda C; görev: tenekede katın anahtarı) ----------
+            // Kiler u 4,6-6,7, v -0,8-2,85. Kapı hol duvarında (u 5,25-6,05), içeri açılır; kapının önü
+            // (v 1,95'ten sonrası) boş kalır. Nuri Bey'in radyo tamir köşesi: dip duvarda tezgâh, banyo
+            // duvarında erzak rafı.
+            Sus(Sablon("Kiler_Rafi"), 4.60f + 0.215f, 0f, 0.30f, 1f, 0f),
+            Sus(Sablon("Radyo_Tezgahi"), 5.85f, 0f, -0.80f + 0.31f, 0f, 1f),
+            // Bisküvi tenekesi tezgâhın önünde, şasinin önünde (tezgâhın üstü 0,78).
+            SusA("Teneke_Nuri", Sablon("Teneke_Nuri"), 5.85f, 0.78f, -0.32f, 0f, 1f),
+            Sus(Sablon("Kiler_Cuvallari"), 6.33f, 0f, 0.60f, -1f, 0f),
+            Sus(Sablon("Supurge_Faras"), 6.70f, 0f, 1.55f, -1f, 0f),
+            Sus(Sablon("Damacana"), 4.85f, 0f, 1.50f, 1f, 0f),
+            Sus(Sablon("Sogan_Sepeti"), 4.86f, 0f, 1.95f, 1f, 0f),
         };
+
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
+        KilitZinciri.Sonuc s2 = z.Cozumle(odalar);
+        if (!s2.Cozulebilir) Debug.LogError("[ZINCIR] 2. kat zinciri çözülemiyor: " + string.Join("; ", s2.Hatalar));
+        else Debug.Log("[ZINCIR] 2. kat zinciri çözülebilir: " + string.Join(" -> ", s2.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
     }
