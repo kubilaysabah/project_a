@@ -60,6 +60,16 @@ FOTOGRAFLAR = {
                           "mustache, 1990s vesikalik ID photos, faded"),
 }
 
+# Duvar portreleri (#83): aile fotoğrafı değil, süs; kendi ön metinleri var (renkli amatör fotoğraf değil).
+# ad: (en, boy, ön metin, açıklama). Çıktı yine aday klasörüne; foto_isle.py PORTRELER ile işler.
+PORTRE_ORTAK = ("1970s black and white studio portrait photograph, formal pose, soft studio lighting, "
+                "fine film grain, slightly faded silver gelatin print, authentic vintage photo, ")
+PORTRELER = {
+    "kat2_es": (896, 1152, PORTRE_ORTAK, "head and shoulders portrait of a kind Turkish woman in her fifties, "
+                                         "hair neatly combed back, pearl earrings, modest blouse with a brooch, gentle "
+                                         "smile, plain grey studio background"),
+}
+
 
 def istek(yol, veri=None):
     r = urllib.request.Request(SUNUCU + yol, data=json.dumps(veri).encode() if veri is not None else None,
@@ -68,11 +78,11 @@ def istek(yol, veri=None):
         return json.loads(c.read())
 
 
-def akis(aciklama, en, boy, tohum, onek):
+def akis(aciklama, en, boy, tohum, onek, on_metin=ORTAK):
     """ComfyUI'nin API biçiminde en basit metinden görüntü akışı."""
     return {
         "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "sd_xl_base_1.0.safetensors"}},
-        "2": {"class_type": "CLIPTextEncode", "inputs": {"text": ORTAK + aciklama, "clip": ["1", 1]}},
+        "2": {"class_type": "CLIPTextEncode", "inputs": {"text": on_metin + aciklama, "clip": ["1", 1]}},
         "3": {"class_type": "CLIPTextEncode", "inputs": {"text": OLUMSUZ, "clip": ["1", 1]}},
         "4": {"class_type": "EmptyLatentImage", "inputs": {"width": en, "height": boy, "batch_size": 1}},
         "5": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["2", 0], "negative": ["3", 0],
@@ -84,10 +94,14 @@ def akis(aciklama, en, boy, tohum, onek):
 
 
 def uret(ad):
-    en, boy, aciklama = FOTOGRAFLAR[ad]
+    if ad in PORTRELER:
+        en, boy, on_metin, aciklama = PORTRELER[ad]
+    else:
+        en, boy, aciklama = FOTOGRAFLAR[ad]
+        on_metin = ORTAK
     os.makedirs(ADAY, exist_ok=True)
     for tohum in TOHUMLAR:
-        kimlik = istek("/prompt", {"prompt": akis(aciklama, en, boy, tohum, f"huzur_{ad}_{tohum}")})["prompt_id"]
+        kimlik = istek("/prompt", {"prompt": akis(aciklama, en, boy, tohum, f"huzur_{ad}_{tohum}", on_metin)})["prompt_id"]
         while True:
             gecmis = istek(f"/history/{kimlik}")
             if kimlik in gecmis and gecmis[kimlik].get("outputs"):

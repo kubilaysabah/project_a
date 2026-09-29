@@ -119,6 +119,12 @@ public static partial class GrayboxKurucu
         ParcaSablonuKur("Sacilmis_Ilaclar", "Sacilmis_Ilaclar");
         ParcaSablonuKur("Devrik_Sandalye", "Devrik_Sandalye");
         ParcaSablonuKur("Kirik_Gozluk", "Kirik_Gozluk");
+        // 2. kat salon dekoru (#83).
+        HaliDuzSablonuKur("Hali_Nuri", "Assets/Textures/Hali_Nuri.png");
+        PerdeKadifeSablonuKur();
+        PortreSablonuKur("Portre_Kat2_Es", "Assets/Textures/Portreler/kat2_es.png");
+        foreach (string ad in new[] { "Orgu_Battaniye", "Cay_Takimi", "Gazete_Kilif", "Kuru_Sardunya", "Dikis_Makinesi", "Koltuk_Danteli" })
+            ParcaSablonuKur(ad, ad);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
@@ -734,6 +740,62 @@ public static partial class GrayboxKurucu
         return g;
     }
 
+    // 2. kat salonunun ölçüleri (oyunda aşağı ışın atılarak ölçüldü): sehpanın üst yüzü, sallanan
+    // sandalyenin oturağı, kanepe sırtının üst ön kenarı (plan u) ve yüksekliği.
+    const float SehpaUstu = 0.52f;
+    const float SandalyeOturagi = 0.43f;
+    const float KanepeSirtU = 0.17f;    // sırtın tepesi u 0,12'de (0,80), öne doğru yuvarlanır
+    const float KanepeSirtY = 0.80f;
+
+    // Düz halı şablonu (#83): halı (Blender hali_duz.py, adı <ad>) ve yününe o katın desen dokusu.
+    static GameObject HaliDuzSablonuKur(string ad, string doku)
+    {
+        Material m = DokuluMalzeme(ad, doku, new Color(0.8f, 0.8f, 0.8f), 0.02f);
+        GameObject gecici = new GameObject(ad);
+        GameObject h = Model("Hali", gecici.transform, ad, ad, Vector3.zero, 0f, carpisma: false);
+        if (h == null) { Object.DestroyImmediate(gecici); Debug.LogWarning($"[ZINCIR] {ad}.fbx yok."); return null; }
+        MeshRenderer r = h.GetComponent<MeshRenderer>();
+        Material[] mats = r.sharedMaterials;
+        for (int i = 0; i < mats.Length; i++) if (mats[i] != null && mats[i].name.StartsWith(ad + "_Yun")) mats[i] = m;
+        r.sharedMaterials = mats;
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/{ad}.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // Kadife perde şablonu (#83, 2. kat): korniş, fon perde ve tül; tüle 1. kattaki yarı saydam malzeme.
+    static GameObject PerdeKadifeSablonuKur()
+    {
+        GameObject gecici = new GameObject("Perde_Kadife");
+        GameObject kornis = Model("Kornis", gecici.transform, "Perde_Kadife", "Kornis", Vector3.zero, 0f, carpisma: false);
+        GameObject fon = Model("Fon", gecici.transform, "Perde_Kadife", "Fon", Vector3.zero, 0f, carpisma: false);
+        GameObject tul = Model("Tul", gecici.transform, "Perde_Kadife", "Tul", Vector3.zero, 0f, carpisma: false);
+        if (kornis == null || fon == null || tul == null) { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Perde_Kadife.fbx yok."); return null; }
+        Material t = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Tul.mat");
+        if (t != null) tul.GetComponent<MeshRenderer>().sharedMaterial = t;
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Perde_Kadife.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // Duvar portresi şablonu (#83): çerçeve ve fotoğraf yüzeyi (Portre_Cercevesi.fbx); fotoğraf dokusu
+    // yerel SDXL ile üretilip eskitilir (Art/Fotograflar/scripts: foto_uret.py PORTRELER, foto_isle.py).
+    static GameObject PortreSablonuKur(string ad, string doku)
+    {
+        Material m = DokuluMalzeme(ad, doku, new Color(0.9f, 0.9f, 0.9f), 0.15f);
+        GameObject gecici = new GameObject(ad);
+        GameObject c = Model("Cerceve", gecici.transform, "Portre_Cercevesi", "Cerceve", Vector3.zero, 0f, carpisma: false);
+        GameObject r = Model("Resim", gecici.transform, "Portre_Cercevesi", "Resim", Vector3.zero, 0f, carpisma: false);
+        if (c == null || r == null) { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Portre_Cercevesi.fbx yok."); return null; }
+        r.GetComponent<MeshRenderer>().sharedMaterial = m;
+        BoxCollider bc = gecici.AddComponent<BoxCollider>();
+        bc.center = new Vector3(0f, 0f, 0.02f);
+        bc.size = new Vector3(0.59f, 0.71f, 0.04f);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/{ad}.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
     // Yolluk şablonu (#83, 2. kat holü): halı ve uç kenarları (Yolluk.fbx); yüne desenli doku takılır.
     // Doku 1,6 m'lik bir tekrar birimi; UV'si boy boyunca tekrar eder (dokunun sarma kipi Repeat).
     static GameObject YollukSablonuKur()
@@ -829,7 +891,7 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(v, yol);
         }
         v.aciklama = "2. kat, daire 3, yaşlı Nuri Bey (hastanede). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
-                     "(antre ve hol bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
+                     "(antre, hol ve salon bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
         v.tasarimda = true;
         v.yalnizSecilenEsyalar = true;
         v.zincir = new KilitZinciri();
@@ -886,6 +948,40 @@ public static partial class GrayboxKurucu
             Sus(Sablon("Sacilmis_Ilaclar"), 4.65f, 0.004f, 3.45f, 0f, 1f),
             Sus(Sablon("Devrik_Sandalye"), 4.05f, 0f, 3.72f, 0.4f, 1f),
             Sus(Sablon("Kirik_Gozluk"), 5.05f, 0.008f, 3.95f, 0.3f, 1f),
+
+            // ---------- SALON (Şahan'ın seçimi: 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14) ----------
+            // Salon u 0-5,0, v 4,75-8,1. Kapı hol duvarında (u 0,85-1,75); bu dairede içeri, kanepe tarafına
+            // açılır, açık kanat u 0,7-0,9, v 4,7-5,6'da durur. Karşı duvarda pencere (u 0,7-2,1, denizlik
+            // 0,87-0,90 m, v 8,04-8,20) ve hep kilitli balkon kapısı (u 3,2-4,0). Dolu, yaşanmış bir salon.
+            // Pencere: kadife fon perde ve tül; denizlikte kurumuş sardunyalar; altında petek.
+            Sus(Sablon("Perde_Kadife"), 1.40f, 2.32f, 8.10f, 0f, -1f),
+            Sus(Sablon("Kuru_Sardunya"), 1.40f, 0.90f, 8.12f, 0f, -1f),
+            Sus(Sablon("Petek"), 1.40f, 0f, 8.10f, 0f, -1f),
+            // Rahmetli eşinin portresi: pencere ile balkon kapısının arasında, köşesinde yas kurdelesi.
+            Sus(Sablon("Portre_Kat2_Es"), 2.66f, 1.60f, 8.10f, 0f, -1f),
+            // Lacivert halı ortada; üstünde kanepe, sehpa ve berjer.
+            Sus(Sablon("Hali_Nuri"), 2.60f, 0f, 6.45f, 0f, 1f),
+            M("Sofa_01", 0.03f + 0.40f, 0f, 6.50f, 1f, 0f),
+            M("CoffeeTable_01", 1.50f, 0f, 6.50f, 1f, 0f),
+            M("ArmChair_01", 2.35f, 0f, 5.30f, 1f, 0.6f),
+            // Sehpada soğumuş çay ve çaydanlık, açık gazete ve boş gözlük kılıfı (gözlüğü holde kırık).
+            Sus(Sablon("Cay_Takimi"), 1.55f, SehpaUstu, 6.00f, 1f, 0f),
+            Sus(Sablon("Gazete_Kilif"), 1.45f, SehpaUstu, 6.80f, 1f, 0.15f),
+            // Pencere köşesinde sallanan sandalye ve üstünde katlı örgü battaniye: Nuri Bey'in radyo köşesi.
+            M("Rockingchair_01", 0.62f, 0f, 7.68f, 1f, -0.5f),
+            Sus(Sablon("Orgu_Battaniye"), 0.62f + 0.02f, SandalyeOturagi, 7.68f - 0.01f, 1f, -0.5f),
+            // Koltuk dantelleri: kanepenin sırtında üç, berjerin sırtında bir.
+            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 6.00f, 1f, 0f),
+            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 6.50f, 1f, 0f),
+            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 7.00f, 1f, 0f),
+            Sus(Sablon("Koltuk_Danteli"), 2.10f, 1.06f, 5.16f, 1f, 0.6f),   // berjerin sırtının tepesi
+            // TV konsolu ve ahşap kasalı televizyon: Oda B duvarında, kanepeye bakar.
+            M("ClassicConsole_01", 5.00f - 0.295f, 0f, 6.40f, -1f, 0f),
+            M("Television_01", 4.75f, 0.95f, 6.40f, -1f, 0f),
+            // Kristal avize: halının ortasının üstünde.
+            M("Chandelier_02", 2.60f, Tavan, 6.45f, 0f, 1f),
+            // Eşinden kalma dikiş makinesi: balkon kapısının yanındaki köşede, üstü dantel örtülü.
+            Sus(Sablon("Dikis_Makinesi"), 4.50f, 0f, 8.10f - 0.225f, 0f, -1f),
         };
         EditorUtility.SetDirty(v);
         return v;

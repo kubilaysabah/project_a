@@ -32,3 +32,7 @@ gerçek kişinin fotoğrafı kullanılmadı; yüzler modelin ürettiği hayalî 
 | kat7 | kat7_9 | Cemal'in yüzü karalanmış |
 | kat8 | kat8_1994 | arka planda beşinci, yüzsüz adam (eklendi) |
 | kapici | kapici_1994 | yok |
+
+## Duvar portreleri (#83)
+
+- `Assets/Textures/Portreler/kat2_es.png`: 2. kattaki Nuri Bey'in rahmetli eşinin portresi. Aynı yerel SDXL 1.0 base ile üretildi (`foto_uret.py` PORTRELER, tohum 1994), `foto_isle.py` ile eskitildi. Lisans yukarıdaki gibi (CreativeML Open RAIL++-M; üretilen görüntü ticari kullanıma uygun). Adaylar: `aday/kat2_es_*.png`.

@@ -34,6 +34,13 @@ SECIMLER = {
     "kapici": ("kapici_1994.png", 0.35, [], []),
 }
 
+# Duvar portreleri (#83): aile albümüne girmez, süs olarak duvarda asılır; ayrı klasöre yazılır.
+# ad: (aday dosyası, sararma). Siyah-beyaz baskı olduğu için renk solmasından çok sararma alır.
+PORTRE_HEDEF = os.path.normpath(os.path.join(BURASI, "..", "..", "..", "Assets", "Textures", "Portreler"))
+PORTRELER = {
+    "kat2_es": ("kat2_es_1994.png", 0.55),   # Nuri Bey'in rahmetli eşi (2. katın salonu)
+}
+
 rng = np.random.default_rng(1994)
 
 
@@ -135,3 +142,9 @@ if __name__ == "__main__":
         p = eskit(p, w, h, sararma)
         yaz(p, w, h, os.path.join(HEDEF, ad + ".png"))
         print(f"[FOTO] {ad}: {w}x{h} -> {os.path.join(HEDEF, ad + '.png')}")
+    os.makedirs(PORTRE_HEDEF, exist_ok=True)
+    for ad, (dosya, sararma) in PORTRELER.items():
+        p, w, h = oku(os.path.join(ADAY, dosya))
+        p = eskit(p, w, h, sararma)
+        yaz(p, w, h, os.path.join(PORTRE_HEDEF, ad + ".png"))
+        print(f"[PORTRE] {ad}: {w}x{h} -> {os.path.join(PORTRE_HEDEF, ad + '.png')}")
