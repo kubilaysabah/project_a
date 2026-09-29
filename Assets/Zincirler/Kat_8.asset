@@ -19,6 +19,8 @@ MonoBehaviour:
     komodinde), asans\xF6r (sigorta dolapta; panoya tak\u0131l\u0131r, \xE7a\u011Fr\u0131l\u0131r,
     g\xF6sterge 9 der) -> kabinde \xE7at\u0131 anahtar\u0131."
   tasarimda: 0
+  yalnizSecilenEsyalar: 0
+  gorunenEsyalar: []
   zincir:
     KapaliOdalar: []
     Yerler:

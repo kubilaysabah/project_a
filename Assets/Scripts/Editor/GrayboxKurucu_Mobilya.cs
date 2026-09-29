@@ -70,7 +70,6 @@ public static partial class GrayboxKurucu
     static void MobilyalariEkle(KatZinciriVarligi v, int kat)
     {
         if (v == null) return;
-        if (v.tasarimda) return;   // yeniden tasarlanan kat boş kalır (Şahan, 2026-09-29)
         var m = new List<KatSusu>();
         switch (kat)
         {
@@ -171,6 +170,8 @@ public static partial class GrayboxKurucu
                 m.Add(Foto("kat8", true, 3.80f, 1.60f, 4.65f, 0f, -1f));       // 1974 iskân töreni
                 break;
         }
+        // Oda oda döşenen katın (#83) mobilyası kendi kurucusunda seçilir; ortak mutfak eklenmez.
+        if (v.yalnizSecilenEsyalar) { v.suslar.AddRange(m); EditorUtility.SetDirty(v); return; }
         // MUTFAK (#81, Şahan): her dairede fırınlı beyaz ocak, buzdolabının yanında dış duvara (v = -0,8)
         // yaslı; yaşanan evlerde üstünde eski çaydanlık. Taşınan aile (1) ve boş daire (4) çaydanlığı götürmüş.
         m.Add(M("electric_stove", 8.30f, 0f, -0.8f + 0.34f, 0f, 1f));

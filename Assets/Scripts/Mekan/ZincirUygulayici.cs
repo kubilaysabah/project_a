@@ -236,8 +236,6 @@ public class ZincirUygulayici
         if (varlik == null) return;
         BulmacaEsyalariniAyarla(daire, varlik, "");
         if (IkinciDaire != null) BulmacaEsyalariniAyarla(IkinciDaire, varlik, KilitZinciri.IkinciOnek);
-        // Tasarımdaki kat (Şahan, 2026-09-29): daire boş kalır; not, süs, ses, parça konmaz.
-        if (varlik.tasarimda) return;
         DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
         // Elektriksiz kat (#67): sigorta kilidi olmadan da daire karanlık; fosforlu yazı görünür.
         if (varlik.elektrikYok) Elektrik(daire).Ayarla(false);
@@ -613,17 +611,19 @@ public class ZincirUygulayici
         foreach (KatSusu s in varlik.suslar) Ekle(s.Yol);
         foreach (KatSesi s in varlik.sesler) Ekle(s.Yol);
 
-        // Dairenin bütün eşyaları: bulmaca eşyası ise kat dosyası başvuruyorsa görünür; öbürleri
-        // (komodin, tezgâh, sofra...) her katta görünür. Tasarımdaki katta hiçbiri görünmez. Her
-        // eşyaya her açılışta açıkça karar verilir: aynı daire başka bir katta yeniden açılınca
-        // (1. katın dairesi 5. katta da açılır) önceki katın gizledikleri geri gelir.
+        // Dairenin bütün eşyaları. Oda oda döşenen katta (yalnizSecilenEsyalar, #83) yalnızca katın
+        // seçtiği ya da başvurduğu eşya görünür. Öbür katlarda bulmaca eşyası başvuruluyorsa görünür,
+        // geri kalanı (komodin, tezgâh, sofra...) her zaman görünür. Her eşyaya her açılışta açıkça
+        // karar verilir: aynı daire başka bir katta yeniden açılınca (1. katın dairesi 5. katta da
+        // açılır) önceki katın gizledikleri geri gelir.
         Transform esyalar = daire.Find("Esyalar");
         if (esyalar == null) return;
         foreach (Transform t in esyalar)
         {
             bool gorunur;
-            if (varlik.tasarimda) gorunur = false;
-            else if (System.Array.IndexOf(BulmacaEsyalari, t.name) < 0) gorunur = true;
+            bool secimli = varlik.yalnizSecilenEsyalar;
+            if (secimli && varlik.gorunenEsyalar.Contains(t.name)) gorunur = true;
+            else if (!secimli && System.Array.IndexOf(BulmacaEsyalari, t.name) < 0) gorunur = true;
             else
             {
                 string kok = "Esyalar/" + t.name;

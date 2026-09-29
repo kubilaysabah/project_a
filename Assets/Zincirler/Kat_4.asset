@@ -18,6 +18,8 @@ MonoBehaviour:
     lambalar yanar ve buzdolab\u0131 a\xE7\u0131l\u0131r, i\xE7inde Hasan'\u0131n
     notu ve kat\u0131n anahtar\u0131. Yaln\u0131zca salon ve mutfak a\xE7\u0131k."
   tasarimda: 0
+  yalnizSecilenEsyalar: 0
+  gorunenEsyalar: []
   zincir:
     KapaliOdalar:
     - Banyo

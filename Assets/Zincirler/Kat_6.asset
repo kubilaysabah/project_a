@@ -19,6 +19,8 @@ MonoBehaviour:
     anahtar, iki dairede), 4'\xFCn banyosu (mente\u015Fe), 4'\xFCn yatak odas\u0131
     (3'\xFCn kilerindeki kol), b\xFCfe (sofra)."
   tasarimda: 0
+  yalnizSecilenEsyalar: 0
+  gorunenEsyalar: []
   zincir:
     KapaliOdalar:
     - Banyo

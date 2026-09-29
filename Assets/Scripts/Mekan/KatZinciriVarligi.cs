@@ -93,11 +93,18 @@ public class KatParcasi
 public class KatZinciriVarligi : ScriptableObject
 {
     [TextArea] public string aciklama;
-    // TASARIMDA (Şahan, 2026-09-29): kat yeniden tasarlanırken işaretlenir. İşaretliyken dairede
-    // hiçbir eşya görünmez (Esyalar altındakilerin hepsi gizlenir), zincir, notlar ve süsler
-    // uygulanmaz, odaların hepsi kilitsizdir ve katın anahtarı sahanlıkta durur (kat geçilebilir
-    // kalır). Zincir testleri bu dosyayı atlar. Tasarım bitince işaret kaldırılır.
+    // TASARIMDA (Şahan, 2026-09-29): kat yeniden tasarlanırken işaretlenir. İşaretliyken zincir
+    // uygulanmaz: odaların hepsi kilitsizdir ve katın anahtarı sahanlıkta durur (kat geçilebilir
+    // kalır). Notlar ve süsler (seçilen mobilyalar) konur, böylece oda oda döşenen daire oyunda
+    // görülebilir. Zincir testleri bu dosyayı atlar. Kapılar ve görev parçaları seçilince kalkar.
     public bool tasarimda;
+    // YALNIZ SEÇİLEN EŞYALAR (#83): işaretliyse dairenin kalıcı eşyalarından (Esyalar altındakiler:
+    // sigorta kutusu, tezgâh, komodin, sofra...) yalnızca bu katın seçtikleri görünür: aşağıdaki
+    // listede adı yazanlar ve kat dosyasının başvurdukları (zincir yeri, notun çapası). Oda oda
+    // yeniden döşenen katlar böyle kurulur; işaretsiz katlarda eski kural geçerli (hepsi görünür,
+    // bulmaca eşyaları yalnızca gerektiği katta).
+    public bool yalnizSecilenEsyalar;
+    public List<string> gorunenEsyalar = new List<string>();
     public KilitZinciri zincir = new KilitZinciri();
     public List<KatNotu> notlar = new List<KatNotu>();
     public List<KatSusu> suslar = new List<KatSusu>();

@@ -67,7 +67,14 @@ public static partial class GrayboxKurucu
         GameObject koliBuyuk = ParcaSablonuKur("Koli_Buyuk", "Koli_Buyuk");
         GameObject koliKucuk = ParcaSablonuKur("Koli_Kucuk", "Koli_Kucuk");
         GameObject koliAcik = ParcaSablonuKur("Koli_Acik", "Koli_Acik");
-        KatZinciriVarligi kat1 = Kat1Kur();
+        // Antre dekoru (#83): yeni Blender modelleri ve bileşik şablonlar.
+        ParcaSablonuKur("Portmanto", "Portmanto");
+        ParcaSablonuKur("Anahtar_Askiligi", "Anahtar_Askiligi");
+        ParcaSablonuKur("Nazar_Boncugu", "Nazar_Boncugu");
+        TelefonTakimiSablonuKur();
+        TerlikCiftiSablonuKur("Kadin");
+        TerlikCiftiSablonuKur("Cocuk");
+        KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
@@ -269,17 +276,22 @@ public static partial class GrayboxKurucu
         return sablon;
     }
 
-    // ---------- 1. KAT: YENİDEN TASARLANIYOR (Şahan, 2026-09-29) ----------
-    // Şahan 1. kattan başlayarak katları oda oda yeniden döşemeye karar verdi: önce dairedeki bütün
-    // eşyalar ve görev parçaları kaldırıldı, sonra her oda için mobilya ve görev parçaları birlikte
-    // seçilecek. Kat "tasarımda" işaretli: daire boş ve kilitsiz, kat anahtarı sahanlıkta.
-    // Eski tasarım (tornavida -> kavanoz -> Oda A anahtarı -> komodin, koliler) git geçmişinde
-    // (bu dosyanın 2026-09-29 öncesi hâli).
-    // Şahan'ın onayladığı iki not yeni tasarımda yeniden kullanılmak üzere bekliyor; metin
-    // tablosundaki satırları silinmesin diye adları burada duruyor.
-    static readonly string[] Kat1BekleyenNotlar = { "not.kat1_tahliye", "not.kat1_kavanoz" };
+    // ---------- 1. KAT: YENİDEN TASARLANIYOR (#83, Şahan, 2026-09-29) ----------
+    // Şahan 1. kattan başlayarak katları oda oda yeniden döşüyor: önce dairedeki bütün eşyalar ve
+    // görev parçaları kaldırıldı, sonra her oda için eşyalar birlikte seçiliyor; kapılar ve görev
+    // parçaları odalar bitince seçilecek. Kat "tasarımda": zincir yok, odalar kilitsiz, kat anahtarı
+    // sahanlıkta. Eski tasarım (tornavida -> kavanoz -> Oda A anahtarı -> komodin) git geçmişinde.
+    //
+    // Onaylanan kapı sırası: antre ve hol açık -> salon (kilitsiz) -> mutfak (kilitsiz) ->
+    // Oda A (anahtarla). Banyo, kiler, Oda B ve balkon bu katta kapalı.
+    //
+    // Hikâye: Yıldız ailesi (2 numara) borç yüzünden tahliye ediliyor; ev yarı toplanmış.
+    //
+    // Şahan'ın onayladığı Nermin'in notu yeni tasarımda kullanılmak üzere bekliyor; metin
+    // tablosundaki satırı silinmesin diye adı burada duruyor.
+    static readonly string[] Kat1BekleyenNotlar = { "not.kat1_kavanoz" };
 
-    static KatZinciriVarligi Kat1Kur()
+    static KatZinciriVarligi Kat1Kur(GameObject koliBuyuk, GameObject koliKucuk, GameObject koliAcik)
     {
         string yol = $"{ZincirKlasoru}/Kat_1.asset";
         KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
@@ -288,16 +300,104 @@ public static partial class GrayboxKurucu
             v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
             AssetDatabase.CreateAsset(v, yol);
         }
-        v.aciklama = "1. kat, daire 2. YENİDEN TASARLANIYOR: daire boş ve kilitsiz, kat anahtarı sahanlıkta. " +
-                     "Odalar ve görev parçaları Şahan'la oda oda seçilecek.";
+        v.aciklama = "1. kat, daire 2, Yıldız ailesi (tahliye). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
+                     "(antre bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
         v.tasarimda = true;
+        v.yalnizSecilenEsyalar = true;
         v.zincir = new KilitZinciri();
-        v.notlar = new List<KatNotu>();
-        v.suslar = new List<KatSusu>();
         v.sesler = new List<KatSesi>();
         v.parcalar = new List<KatParcasi>();
+
+        // Dairenin kalıcı eşyalarından bu katta görünenler (oda oda seçildikçe eklenir).
+        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu" };
+
+        // Yerel fonksiyon: bu fonksiyonun içinde kullanılan kısa bir yardımcı (bir süsü plan noktasına koyar).
+        // u: landing duvarından içeri, y: yükseklik, vv: giriş kapısından boyuna; (onU, onV): modelin
+        // baktığı plan yönü (DairePlani).
+        KatSusu Sus(GameObject sablon, float u, float y, float vv, float onU, float onV)
+        { return new KatSusu { Sablon = sablon, X = u, Y = y, Z = vv, OnU = onU, OnV = onV }; }
+
+        // ---------- ANTRE (Şahan'ın seçimi: 1, 2, 4, 5, 6, 8, 12, 13, 15) ----------
+        // Antre u 0-2,6, v -0,8-2,85; üç duvarı var: landing duvarı (u = 0,03, giriş kapısı v = 0'da),
+        // dış duvar (v = -0,8, sigorta kutusu u = 1,6'da) ve banyo duvarı (u = 2,6). Hol tarafı (v = 2,9)
+        // boydan boya açık. Giriş kapısı içeri, -v tarafına açılır: açık kanat u 0-0,8, v -0,4 boyunca
+        // durur; o köşe boş bırakılır. Kapıdan hole giden çapraz yol ortada, 1,8 m genişliğinde boş.
+        v.notlar = new List<KatNotu>
+        {
+            // Tahliye yazısı: sigorta kutusunun yanında duvarda (Yönetim kapıcıya bıraktırmış).
+            new KatNotu { Metin = "not.kat1_tahliye", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
+        };
+        v.suslar = new List<KatSusu>
+        {
+            // Portmanto: banyo duvarında, girene karşıdan bakar. Ağır olduğu için geride kalmış; askıları boş.
+            Sus(Sablon("Portmanto"), 2.60f - 0.18f, 0f, 1.25f, -1f, 0f),
+            // Telefon sehpası (boyalı komodin) portmantonun yanında, hol ağzına yakın; üstünde dantel,
+            // telefon ve rehber. Hat borç yüzünden kesilmiş: kablo duvardan sökülmüş, fişi rehberin üstünde.
+            M("painted_wooden_nightstand", 2.60f - 0.255f, 0f, 2.35f, -1f, 0f),
+            Sus(Sablon("Telefon_Takimi"), 2.60f - 0.255f, 0.616f, 2.35f, -1f, 0f),
+            // Anahtar askılığı: kapının hemen yanında, göz hizasında. Kancalar boş (anahtarlar
+            // kapıcıya teslim edilecek); birinde anahtarı sökülmüş bir halka.
+            Sus(Sablon("Anahtar_Askiligi"), 0.03f, 1.55f, 0.85f, 1f, 0f),
+            // Nazar boncuğu: giriş kapısının üstünde (kapı 2,05 m).
+            Sus(Sablon("Nazar_Boncugu"), 0.03f, 2.20f, 0f, 1f, 0f),
+            // İki eski bavul: landing duvarının dibinde, kapının yanında; götürülmeyi bekliyor.
+            M("vintage_suitcase", 0.03f + 0.125f, 0f, 1.40f, 1f, 0f),
+            // Terlikler: kapının içinde, burunları eve dönük. Nermin'in pembe terliği ve çocuğun terliği.
+            Sus(Sablon("Terlik_Cifti_Kadin"), 0.70f, 0f, 0.10f, -1f, 0f),
+            Sus(Sablon("Terlik_Cifti_Cocuk"), 0.70f, 0f, 0.42f, -1f, 0f),
+            // Koliler: dış duvar ile banyo duvarının köşesinde üst üste; sigorta kutusunun altında açık koli.
+            Sus(koliBuyuk, 2.20f, 0f, -0.52f, -1f, 0.3f),
+            Sus(koliKucuk, 2.20f, 0.40f, -0.52f, -1f, 0.1f),
+            Sus(koliAcik, 1.35f, 0f, -0.50f, 0f, 1f),
+        };
         EditorUtility.SetDirty(v);
         return v;
+    }
+
+    // Dekor şablonunu adıyla bulur (Assets/Prefabs/Esyalar/<ad>.prefab); ZincirleriKur önce kurar.
+    static GameObject Sablon(string ad)
+    {
+        GameObject g = AssetDatabase.LoadAssetAtPath<GameObject>($"{SablonKlasoru}/{ad}.prefab");
+        if (g == null) Debug.LogWarning($"[ZINCIR] {ad}.prefab yok.");
+        return g;
+    }
+
+    // Telefon takımı şablonu (#83): dantel + rehber + sökülmüş kablo (Telefon_Takimi.fbx) ve üstünde
+    // kapıcı odasının telefonu (Telefon.fbx: gövde ve ahize). Telefonun pivotu arka kenarının ortası;
+    // telefon_takimi.py dantelin merkezini Blender'da (x -0,05, y 0) koyduğu için telefon Unity'de
+    // (0,05, 0,11) noktasına oturur (Blender (x, y, z) -> Unity (-x, z, -y)).
+    static GameObject TelefonTakimiSablonuKur()
+    {
+        GameObject gecici = new GameObject("Telefon_Takimi");
+        GameObject takim = Model("Takim", gecici.transform, "Telefon_Takimi", null, Vector3.zero, 0f, carpisma: false);
+        GameObject telefon = Model("Telefon", gecici.transform, "Telefon", "Telefon", new Vector3(0.05f, 0.002f, -0.11f), 0f, carpisma: false);
+        if (takim == null || telefon == null) { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Telefon_Takimi.fbx ya da Telefon.fbx yok."); return null; }
+        Model("Ahize", telefon.transform, "Telefon", "Ahize", Vector3.zero, 0f, carpisma: false);
+        // Tek kutu çarpıştırıcı: sehpanın üstündeki takımın hepsini kaplar.
+        BoxCollider c = gecici.AddComponent<BoxCollider>();
+        c.center = new Vector3(0f, 0.08f, 0f);
+        c.size = new Vector3(0.44f, 0.16f, 0.34f);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Telefon_Takimi.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // Bir çift terlik şablonu (#83): terlik modelleri tek terlik (sol); sağ terlik x ölçeği -1 ile aynası
+    // (sahanlıktaki terliklerle aynı yol). Burunlar modelin -Z'sinde.
+    static GameObject TerlikCiftiSablonuKur(string tur)
+    {
+        GameObject gecici = new GameObject("Terlik_Cifti_" + tur);
+        GameObject sol = Model("Sol", gecici.transform, "Terlik_" + tur, null, new Vector3(-0.055f, 0f, 0f), 0f, carpisma: false);
+        GameObject sag = Model("Sag", gecici.transform, "Terlik_" + tur, null, new Vector3(0.055f, 0f, 0.02f), 0f, carpisma: false);
+        if (sol == null || sag == null) { Object.DestroyImmediate(gecici); Debug.LogWarning($"[ZINCIR] Terlik_{tur}.fbx yok."); return null; }
+        sag.transform.localScale = new Vector3(-1f, 1f, 1f);
+        // İnce kutu çarpıştırıcı: oyuncu üstünden geçer (basamak yüksekliğinin çok altında).
+        BoxCollider c = gecici.AddComponent<BoxCollider>();
+        c.center = new Vector3(0f, 0.03f, 0f);
+        c.size = new Vector3(0.24f, 0.06f, 0.28f);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Terlik_Cifti_{tur}.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
     }
 
     // ---------- 2. KAT: SESLE BULMA (#62, Docs/hikaye.md §7) ----------

@@ -20,6 +20,8 @@ MonoBehaviour:
     arkas\u0131nda ana vana; \xE7ark \xE7evrilince su kesilir, damla susar, lavabonun
     sifonu s\xF6k\xFCl\xFCr, i\xE7inde kat\u0131n anahtar\u0131. Oda A ve Oda B kapal\u0131."
   tasarimda: 0
+  yalnizSecilenEsyalar: 0
+  gorunenEsyalar: []
   zincir:
     KapaliOdalar:
     - Oda_A
