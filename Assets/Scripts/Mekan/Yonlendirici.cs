@@ -8,12 +8,43 @@
 //      zincir uygulayıcısı oyun sırasında ekler).
 //   2. Kurucunun verdiği açılır parçalar (kapak, çekmece, kapı).
 // Şu an yapılabilir olan ilki seçilir: kapak kapalıyken "AÇ", açıkken elde buşon varsa "TAK".
+//
+// NİŞANIN DEĞDİĞİ NOKTA (#83, Şahan'ın 1. kat testi, 2026-09-29): portmantonun alttaki ayakkabı dolabı
+// kapaklarına basınca üstteki çekmece açılıyordu, o kapaklar açılmadığı hâlde nişangâh kırmızı
+// doluyordu. Etkilesimci artık nişanın gövdeye değdiği noktayı bildirir; açılır parçalardan o noktaya
+// en yakın olanı seçilir ve yalnızca 10 cm içindeyse. Yakında açılır parça yoksa (açılmayan bir
+// kapağa bakılıyorsa) etkileşim yok, nişangâh dolmaz.
 
 using UnityEngine;
 
 public class Yonlendirici : MonoBehaviour, IEtkilesimli
 {
     [SerializeField] private MonoBehaviour[] parcalar;   // IEtkilesimli imzalayan açılır parçalar
+
+    // Nişanın gövdeye değdiği son nokta (dünya koordinatı) ve bilinip bilinmediği. Bilinmiyorsa
+    // (nişan gövdenin içinden başladı) eski kural: yapılabilir ilk parça.
+    private Vector3 nokta;
+    private bool noktaVar;
+
+    // Bir parçanın bakılan noktaya en fazla bu kadar uzak olması gerekir (metre).
+    private const float EnFazlaUzaklik = 0.10f;
+
+    /// <summary>Etkilesimci her karede, nişanın bu gövdeye değdiği noktayı bildirir.</summary>
+    public void NoktaAyarla(Vector3 dunyaNoktasi, bool biliniyor)
+    {
+        nokta = dunyaNoktasi;
+        noktaVar = biliniyor;
+    }
+
+    // Parçanın çarpışma kutularından bakılan noktaya en kısa uzaklık. SqrDistance: noktanın kutuya
+    // olan uzaklığının karesi (kutunun içindeyse 0); karekökü alınınca metre olur.
+    private float Uzaklik(MonoBehaviour parca)
+    {
+        float enKisa = float.MaxValue;
+        foreach (Collider c in parca.GetComponentsInChildren<Collider>())
+            if (c.enabled) enKisa = Mathf.Min(enKisa, Mathf.Sqrt(c.bounds.SqrDistance(nokta)));
+        return enKisa;
+    }
 
     private IEtkilesimli Hedef
     {
@@ -24,10 +55,23 @@ public class Yonlendirici : MonoBehaviour, IEtkilesimli
             // Önce gövdenin kendi üstündeki öbür etkileşimler (kendisi hariç).
             foreach (MonoBehaviour m in GetComponents<MonoBehaviour>())
                 if (m != this && m is IEtkilesimli e && m.enabled && e.EtkilesimeAcik) return e;
-            if (parcalar != null)
+            if (parcalar == null) return null;
+            if (!noktaVar)
+            {
                 foreach (MonoBehaviour m in parcalar)
                     if (m != null && m.gameObject.activeInHierarchy && m is IEtkilesimli e && e.EtkilesimeAcik) return e;
-            return null;
+                return null;
+            }
+            // Bakılan noktaya en yakın yapılabilir parça, en fazla 10 cm uzakta.
+            IEtkilesimli enIyi = null;
+            float enYakin = EnFazlaUzaklik;
+            foreach (MonoBehaviour m in parcalar)
+            {
+                if (m == null || !m.gameObject.activeInHierarchy || !(m is IEtkilesimli e) || !e.EtkilesimeAcik) continue;
+                float d = Uzaklik(m);
+                if (d <= enYakin) { enYakin = d; enIyi = e; }
+            }
+            return enIyi;
         }
     }
 

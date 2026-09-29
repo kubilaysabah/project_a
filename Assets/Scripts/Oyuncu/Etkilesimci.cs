@@ -150,6 +150,10 @@ public class Etkilesimci : MonoBehaviour
             for (int i = 0; i < sirali.Count && bulunan == null; i++)
             {
                 Collider c = sirali[i].collider;
+                // Gövdeden parçaya yönlendiren bileşenlere nişanın değdiği noktayı bildir (#83): en yakın
+                // parçayı seçsinler. Uzaklık 0 ise küre gövdenin içinden başladı, nokta anlamsız.
+                foreach (Yonlendirici yon in c.GetComponentsInParent<Yonlendirici>())
+                    yon.NoktaAyarla(sirali[i].point, sirali[i].distance > 0f);
                 bulunan = Kullanilabilir(c);
                 if (bulunan != null) break;
                 bool icindeBirSeyVar = false;

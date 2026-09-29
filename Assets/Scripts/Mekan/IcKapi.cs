@@ -60,7 +60,18 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
     }
 
     // Kapı dönerken ikinci bir basış yok sayılır; dönüş bitince yeniden etkileşilebilir.
-    public bool EtkilesimeAcik { get { return hareket == null && !devrik; } }
+    // Bu katta hiçbir şeyle açılmayan kapı (#83, Şahan: "açılmayacak kapakta kırmızı nokta olmasın"):
+    // balkon kapısı ve kat dosyasının kapalı saydığı odalar (kilitli ama üstünde zincir kilidi yok).
+    // Anahtar ya da şifre bekleyen kapı (üstünde Kilit var) etkileşime açık kalır: oyuncu denesin.
+    public bool EtkilesimeAcik
+    {
+        get
+        {
+            if (hareket != null || devrik || hepKilitli) return false;
+            if (kilitli && GetComponent<Kilit>() == null) return false;
+            return true;
+        }
+    }
 
     public void Etkilesim(GameObject oyuncu)
     {
