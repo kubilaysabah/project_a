@@ -864,6 +864,11 @@ public class KatYoneticisi : MonoBehaviour
         // Karanlık hol yalnızca gerçek dairenin önünden kalkar; kapalı kapılarda ve B'de durur.
         Transform hol = kapi.Find("Daire_Ici");
         if (hol != null) hol.gameObject.SetActive(!(acik && gercekDaire));
+        // Kapalı daire kapısı zorlanabilir (#83): kilitli sesi ve kanat biraz esner, açılmaz.
+        // Açık dairenin kapısında bileşen kapanır.
+        ZorlananKapi zorlanan = kapi.GetComponent<ZorlananKapi>();
+        if (zorlanan == null) zorlanan = kapi.gameObject.AddComponent<ZorlananKapi>();
+        zorlanan.enabled = !acik;
     }
 
     // ---------- ÇATI MODU ----------
