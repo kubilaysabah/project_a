@@ -97,6 +97,12 @@ public static partial class GrayboxKurucu
         KavanozSusSablonuKur("Salca", false, camKirik);
         KavanozSusSablonuKur("Recel", true, camKirik);
         KavanozSusSablonuKur("Bakliyat", false, camKirik);
+        // Oda A dekoru (#83).
+        ParcaSablonuKur("Silte", "Silte");
+        ParcaSablonuKur("Sokuk_Karyola", "Sokuk_Karyola");
+        ParcaSablonuKur("Acik_Gardirop", "Acik_Gardirop");
+        ParcaSablonuKur("Acik_Bavul", "Acik_Bavul");
+        ParcaSablonuKur("Abajur", "Abajur");
         KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
@@ -324,7 +330,7 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(v, yol);
         }
         v.aciklama = "1. kat, daire 2, Yıldız ailesi (tahliye). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
-                     "(antre, hol, salon ve mutfak bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
+                     "(antre, hol, salon, mutfak ve Oda A bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
         v.tasarimda = true;
         v.yalnizSecilenEsyalar = true;
         v.zincir = new KilitZinciri();
@@ -332,7 +338,7 @@ public static partial class GrayboxKurucu
         v.parcalar = new List<KatParcasi>();
 
         // Dairenin kalıcı eşyalarından bu katta görünenler (oda oda seçildikçe eklenir).
-        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Portmanto", "Tezgah", "Buzdolabi" };
+        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Portmanto", "Tezgah", "Buzdolabi", "Komodin" };
 
         // Yerel fonksiyon: bu fonksiyonun içinde kullanılan kısa bir yardımcı (bir süsü plan noktasına koyar).
         // u: landing duvarından içeri, y: yükseklik, vv: giriş kapısından boyuna; (onU, onV): modelin
@@ -442,6 +448,25 @@ public static partial class GrayboxKurucu
             // Masanın yerinde gazeteye sarılı tabaklarla dolu açık koli.
             Sus(koliAcik, 8.80f, 0f, 1.60f, -1f, 0.3f),
             Sus(Sablon("Gazeteli_Tabaklar"), 8.80f, 0f, 1.60f, -1f, 0.3f),
+
+            // ---------- ODA A (Şahan'ın seçimi: 2, 10, 11, 12, 13, 14, 15) ----------
+            // Oda A u 7,7-10,5, v 4,75-8,1. Kapı hol duvarında (u 8,7-9,5); içeri açılır, açık kanat u 8,6-8,7
+            // boyunca v 4,7-5,5'te durur. Karşı duvarda (v = 8,1) perdesi indirilmiş çıplak pencere (u 8,5-9,7).
+            // Dairenin komodini pencerenin solunda (u 8,1, v 7,9); görev parçası (zincir aşamasında): kat
+            // anahtarı onun kapalı çekmecesinde. Radyo bu katta yok.
+            // Komodinin üstünde fişi çekili abajur.
+            Sus(Sablon("Abajur"), 8.10f, 0.55f, 7.85f, 0f, -1f),
+            // Şilte: pencere duvarının önünde yerde, başı komodine dönük; üstünde yarım toplanmış açık bavul.
+            Sus(Sablon("Silte"), 9.45f, 0f, 7.38f, 1f, 0f),
+            Sus(Sablon("Acik_Bavul"), 9.25f, 0.165f, 7.40f, 0f, -1f),
+            // Açık gardırop: Oda B duvarında, kapakları ardına kadar açık, içinde yalnızca tel askılar.
+            Sus(Sablon("Acik_Gardirop"), 7.70f + 0.275f, 0f, 6.05f, 1f, 0f),
+            // Sökülmüş karyola: başlık, ayak ucu ve yan tahtalar dip duvara (u = 10,5) dayalı.
+            Sus(Sablon("Sokuk_Karyola"), 10.50f, 0f, 5.77f, -1f, 0f),
+            // Koliler: hol duvarında, kapının solunda; üstlerinde düğün fotoğrafının izi ve boş çivisi.
+            Sus(koliBuyuk, 8.12f, 0f, 4.75f + 0.21f, 0f, 1f),
+            Sus(koliKucuk, 8.10f, 0.40f, 4.75f + 0.21f, 0.15f, 1f),
+            Sus(Sablon("Tablo_Izi_Genis"), 8.12f, 1.65f, 4.75f, 0f, 1f),
         };
         // Boşaltılmış buzdolabı: fişi çekilmiş, kapısı aralık.
         v.acikParcalar = new List<AcikParca> { new AcikParca { Yol = "Esyalar/Buzdolabi/Kapi", Oran = 0.35f } };
