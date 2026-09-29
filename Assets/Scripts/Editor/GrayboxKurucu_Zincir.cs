@@ -104,6 +104,13 @@ public static partial class GrayboxKurucu
         ParcaSablonuKur("Acik_Bavul", "Acik_Bavul");
         ParcaSablonuKur("Abajur", "Abajur");
         KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
+        // 2. kat antre dekoru (#83): katlarda aynı model kullanılmaz (Şahan), yeni modeller.
+        ParcaSablonuKur("Portmanto_Tik", "Portmanto_Tik");
+        ParcaSablonuKur("Telefon_Oturagi", "Telefon_Oturagi");
+        ParcaSablonuKur("Posta_Yigini", "Posta_Yigini");
+        ParcaSablonuKur("Yaprak_Takvim", "Yaprak_Takvim");
+        SaatSablonuKur();
+        TerlikCiftiSablonuKur("Yasli");
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
@@ -719,6 +726,27 @@ public static partial class GrayboxKurucu
         return g;
     }
 
+    // Sarkaçlı duvar saati şablonu (#83, 2. kat): kasa (Saat) ve sarkaç (Sarkac, SarkacSallanir ile sallanır).
+    // Kasanın alt camı saydam malzemeyle değiştirilir: sarkaç camın arkasından görünsün.
+    static GameObject SaatSablonuKur()
+    {
+        GameObject gecici = new GameObject("Sarkacli_Saat");
+        GameObject saat = Model("Saat", gecici.transform, "Sarkacli_Saat", "Saat", Vector3.zero, 0f, carpisma: false);
+        if (saat == null) { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Sarkacli_Saat.fbx yok."); return null; }
+        GameObject sarkac = Model("Sarkac", saat.transform, "Sarkacli_Saat", "Sarkac", Vector3.zero, 0f, carpisma: false);
+        if (sarkac != null) sarkac.AddComponent<SarkacSallanir>();
+        MeshRenderer r = saat.GetComponent<MeshRenderer>();
+        Material[] mats = r.sharedMaterials;
+        for (int i = 0; i < mats.Length; i++) if (mats[i] != null && mats[i].name.StartsWith("Saat_Cam")) mats[i] = KavanozCami();
+        r.sharedMaterials = mats;
+        BoxCollider c = gecici.AddComponent<BoxCollider>();
+        c.center = new Vector3(0f, 0.05f, 0.07f);
+        c.size = new Vector3(0.38f, 1.04f, 0.14f);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Sarkacli_Saat.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
     // Telefon takımı şablonu (#83): dantel + rehber + sökülmüş kablo (Telefon_Takimi.fbx) ve üstünde
     // kapıcı odasının telefonu (Telefon.fbx: gövde ve ahize). Telefonun pivotu arka kenarının ortası;
     // telefon_takimi.py dantelin merkezini Blender'da (x -0,05, y 0) koyduğu için telefon Unity'de
@@ -757,15 +785,14 @@ public static partial class GrayboxKurucu
         return sablon;
     }
 
-    // ---------- 2. KAT: SESLE BULMA (#62, Docs/hikaye.md §7) ----------
-    // Daire 3, yaşlı Nuri'nin dairesi; Nuri hastanede. Banyo ve Oda B kapalı; salon, mutfak ve
-    // Oda A'nın kapıları kapalı ama kilitsiz; kiler (Oda C) şifreli asma kilitli.
-    //   1. Antrede Yönetim'in notu: Nuri Bey hastaneye kaldırıldı (hikâye).
-    //   2. Koridorda kilerin kapısının yanında Nuri'nin notu: kilidin numarası radyonun istasyonu.
-    //   3. Oyuncu daireye girdikten 4 sn sonra radyo kendiliğinden çalar. Oda A'nın kapısı kapalı:
-    //      ses boğuk gelir, oyuncu hangi kapı olduğunu kulağıyla bulur (CalanEsya).
-    //   4. Oda A'da komodinin üstünde radyo; kadranında "102.7" -> kilerin şifresi 1027.
-    //   5. Kilerde alet çantasının içinde katın anahtarı.
+    // ---------- 2. KAT: YENİDEN TASARLANIYOR (#83, Şahan, 2026-09-29) ----------
+    // Daire 3 (kapıda 7), yaşlı Nuri Bey'in evi: eşini kaybetmiş, yalnız yaşayan, radyo meraklısı emekli.
+    // Birkaç gün önce hastaneye kaldırılmış (Yönetim'in notu); ev dolu ve yaşanmış, aniden bırakılmış.
+    // Katın imza mekaniği sesle bulma (#62): radyo kapalı bir odada kendiliğinden çalar.
+    // Kat oda oda yeniden döşeniyor (1. kattaki gibi); zincir, kapılar ve görev parçaları odalar
+    // bitince seçilecek. Kural: katlarda aynı model eşya kullanılmaz; ipucu notu yok (Nuri'nin
+    // "şifre radyonun istasyonu" notu kaldırıldı); bir odada en fazla bir görev parçası.
+    // Eski tasarım (radyo 102.7 -> kiler asma kilidi -> alet çantasında kat anahtarı) git geçmişinde.
     static KatZinciriVarligi Kat2Kur()
     {
         string yol = $"{ZincirKlasoru}/Kat_2.asset";
@@ -775,44 +802,44 @@ public static partial class GrayboxKurucu
             v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
             AssetDatabase.CreateAsset(v, yol);
         }
-        v.aciklama = "2. kat, daire 3, yaşlı Nuri (sesle bulma). Radyo Oda A'da kendiliğinden çalar, kapalı kapının " +
-                     "arkasından boğuk duyulur; kadranındaki istasyon (102.7) kilerin şifresi; kilerde alet çantasında " +
-                     "katın anahtarı. Banyo ve Oda B kapalı. Notlar: Yönetim'in hastane notu, Nuri'nin şifre notu.";
-        var z = new KilitZinciri();
-        z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_B" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "radyo", Yol = "Esyalar/Radyo", Oda = "Oda_A" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "alet_cantasi", Yol = "Esyalar/Alet_Cantasi", Oda = "Oda_C" });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "alet_cantasi", Y = 0.03f, Donus = 20f });
-        // İpucu radyonun kadran camına yazılır: camın ortası radyonun ekseninde x = -0,085,
-        // y = 0,137; ön yüzü z = 0,069 (radyo.py'nin yazdırdığı KADRAN_MERKEZ, Unity eksenine
-        // çevrilmiş). Yazı takvimdekinin %70'i: %40'ı ("FM 102.7") 1,3 m'den okunmuyordu.
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "kiler", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_C", Gerekli = "radyo",
-                                          Sifre = "1027", IpucuMetni = "102.7", IpucuX = -0.085f, IpucuY = 0.137f, IpucuZ = 0.0705f,
-                                          IpucuOlcek = 0.7f });
-        v.zincir = z;
+        v.aciklama = "2. kat, daire 3, yaşlı Nuri Bey (hastanede). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
+                     "(antre bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
+        v.tasarimda = true;
+        v.yalnizSecilenEsyalar = true;
+        v.zincir = new KilitZinciri();
+        v.sesler = new List<KatSesi>();
+        v.parcalar = new List<KatParcasi>();
+        v.acikParcalar = new List<AcikParca>();
+        v.buzdolabiFisiCekili = false;
+        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu" };
 
+        KatSusu Sus(GameObject sablon, float u, float y, float vv, float onU, float onV)
+        { return new KatSusu { Sablon = sablon, X = u, Y = y, Z = vv, OnU = onU, OnV = onV }; }
+
+        // ---------- ANTRE (Şahan'ın seçimi: 1, 2, 3, 4, 7, 8, 9, 10, 11) ----------
+        // Antre u 0-2,6, v -0,8-2,85. Bu dairede giriş kapısı içeri ve +v tarafına açılır: açık kanat
+        // u 0-0,8, v 0,26-0,48 boyunca durur (1. kattaki dairenin aynası). Kapıdan hole giden yol ortada boş.
         v.notlar = new List<KatNotu>
         {
-            // Yönetim'in notu antrede, sigorta kutusunun yanında (1. kattaki tahliye yazısının yeri).
+            // Yönetim'in notu: sigorta kutusunun yanında (hikâye: Nuri Bey hastaneye kaldırıldı).
             new KatNotu { Metin = "not.kat2_hastane", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
-            // Nuri'nin notu koridor duvarında, kilerin kapısının solunda (kapı u = 5,25-6,05).
-            // Koridorun duvar yüzü v = 2,95; not ön yüzüyle koridora (+v) bakar.
-            new KatNotu { Metin = "not.kat2_kiler", X = 4.95f, Y = 1.40f, Z = 2.952f, OnU = 0f, OnV = 1f },
         };
-        v.suslar = new List<KatSusu>();
-
-        v.sesler = new List<KatSesi>
+        v.suslar = new List<KatSusu>
         {
-            new KatSesi { Yol = "Esyalar/Radyo", Oda = "Oda_A", Gecikme = 4f, Ses = 0.8f,
-                          Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Daire/Radyo_Istasyon.wav") },
+            // Tik portmanto: landing duvarında, kapının yanında; üstünde paltosu ve fötr şapkası,
+            // yanında bastonu (ambulansla giderken hiçbirini alamamış).
+            Sus(Sablon("Portmanto_Tik"), 0.03f + 0.17f, 0f, 1.75f, 1f, 0f),
+            // Telefon oturağı: banyo duvarında, portmantonun karşısında; bakalit telefon prize takılı.
+            Sus(Sablon("Telefon_Oturagi"), 2.60f - 0.19f, 0f, 1.20f, -1f, 0f),
+            // Sarkaçlı saat: telefon oturağının yanında, hâlâ çalışıyor.
+            Sus(Sablon("Sarkacli_Saat"), 2.60f, 1.55f, 2.25f, -1f, 0f),
+            // Yaprak takvim: kapının yanındaki dış duvarda; hastaneye kaldırıldığı günde (12) kalmış.
+            Sus(Sablon("Yaprak_Takvim"), 0.90f, 1.45f, -0.80f, 0f, 1f),
+            // Kapının altından atılıp içeride biriken gazeteler ve zarflar.
+            Sus(Sablon("Posta_Yigini"), 0.45f, 0f, -0.12f, 1f, 0f),
+            // Terlikleri: kapının içinde, burunları eve dönük.
+            Sus(Sablon("Terlik_Cifti_Yasli"), 1.05f, 0f, -0.58f, -1f, 0f),
         };
-        if (v.sesler[0].Klip == null) Debug.LogError("[ZINCIR] Radyo_Istasyon.wav bulunamadı (Art/Ses/scripts/kayit_isle.py radyo).");
-
-        var odalar = new List<string>();
-        foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);
-        KilitZinciri.Sonuc s2 = z.Cozumle(odalar);
-        if (!s2.Cozulebilir) Debug.LogError("[ZINCIR] 2. kat zinciri çözülemiyor: " + string.Join("; ", s2.Hatalar));
-        else Debug.Log("[ZINCIR] 2. kat zinciri çözülebilir: " + string.Join(" -> ", s2.AcilanKilitler));
         EditorUtility.SetDirty(v);
         return v;
     }

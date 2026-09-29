@@ -73,23 +73,6 @@ public static partial class GrayboxKurucu
         var m = new List<KatSusu>();
         switch (kat)
         {
-            case 2:   // Nuri: yaşlı bir adamın klasik evi.
-                m.Add(Kanepe("sofa_02", 0.82f));
-                m.Add(M("throw_pillows_01", 4.55f, 0.42f, 6.50f, -1f, 0f));
-                m.Add(Berjer("GreenChair_01"));
-                m.Add(TvDolabi("ClassicConsole_01", 0.59f));
-                m.Add(TvUstu("Television_01", 0.95f));
-                m.Add(M("mantel_clock_01", 3.45f, 0.95f, 4.98f, 0f, 1f));   // konsol 2,18-3,72; TV 2,65-3,25
-                m.Add(Avize("Chandelier_02"));
-                m.Add(SalonCercevesi("fancy_picture_frame_01"));
-                m.Add(AntreSehpasi());
-                m.Add(Foto("kat2", false, 2.35f, 0.62f, 1.60f, -1f, 0f));      // Nuri Bey ve Rıza Efendi
-                m.Add(HolCercevesi("hanging_picture_frame_02"));
-                m.Add(YatakA("GothicBed_01", 2.04f));
-                m.Add(SifonyerA("GothicCommode_01", 0.58f));
-                m.Add(M("Rockingchair_01", 6.30f, 0f, 6.60f, -0.3f, -1f));      // Oda B
-                break;
-
             case 3:   // Çocuklu aile: kalabalık, renkli. Çizim parçası kanepenin altında (#79).
                 m.Add(Kanepe("Sofa_01", 0.66f));
                 m.Add(Berjer("ArmChair_01"));

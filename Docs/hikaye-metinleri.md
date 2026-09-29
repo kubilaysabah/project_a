@@ -232,23 +232,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > — The Management
 
-### `not.kat2_kiler`
+### `not.kat2_kiler` (kaldırıldı)
 
-**TR**
-
-> Kilerin şifresini yine unuttum.
-> Her akşam aynı yerden dinlediğim sesi seçmiştim;
-> kulağım hatırlar, aklım tutmaz.
->
-> Nuri
-
-**EN**
-
-> I forgot the pantry code again.
-> I chose the voice I listen to every evening, always from the same place;
-> my ears remember, my head doesn't.
->
-> Nuri
+Şahan 2026-09-29'da ipucu notlarını kaldırdı (#83): kilerin şifresini radyoya bağlayan not oyuncuya ne yapacağını söylüyordu.
 
 ### `foto.kat2`
 
