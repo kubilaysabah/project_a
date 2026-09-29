@@ -236,6 +236,16 @@ public class ZincirUygulayici
         if (varlik == null) return;
         BulmacaEsyalariniAyarla(daire, varlik, "");
         if (IkinciDaire != null) BulmacaEsyalariniAyarla(IkinciDaire, varlik, KilitZinciri.IkinciOnek);
+        // Buzdolabının fişi (#83): her açılışta kat dosyasına göre yazılır (başka katta eski hâline döner).
+        foreach (BuzdolabiIsigi bi in daire.GetComponentsInChildren<BuzdolabiIsigi>(true)) bi.FisCekili = varlik.buzdolabiFisiCekili;
+        // Aralık başlayan parçalar (#83): dolap kapakları, boşaltılmış buzdolabının kapısı.
+        foreach (AcikParca ap in varlik.acikParcalar)
+        {
+            Transform t = daire.Find(ap.Yol);
+            AcilirParca parca = t != null ? t.GetComponent<AcilirParca>() : null;
+            if (parca != null) parca.Aralik(ap.Oran);
+            else Debug.LogWarning($"[ZINCIR] Açık başlayacak parça '{ap.Yol}' bulunamadı.");
+        }
         DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
         // Elektriksiz kat (#67): sigorta kilidi olmadan da daire karanlık; fosforlu yazı görünür.
         if (varlik.elektrikYok) Elektrik(daire).Ayarla(false);
@@ -610,6 +620,7 @@ public class ZincirUygulayici
         foreach (KatNotu n in varlik.notlar) Ekle(n.Yol);
         foreach (KatSusu s in varlik.suslar) Ekle(s.Yol);
         foreach (KatSesi s in varlik.sesler) Ekle(s.Yol);
+        foreach (AcikParca a in varlik.acikParcalar) Ekle(a.Yol);
 
         // Dairenin bütün eşyaları. Oda oda döşenen katta (yalnizSecilenEsyalar, #83) yalnızca katın
         // seçtiği ya da başvurduğu eşya görünür. Öbür katlarda bulmaca eşyası başvuruluyorsa görünür,

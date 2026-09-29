@@ -88,6 +88,15 @@ public static partial class GrayboxKurucu
         HaliYariSablonuKur();
         PerdeSablonuKur();
         TabloIziSablonuKur("Hali_Izi", 2.40f, 1.70f, yatay: true);
+        // Mutfak dekoru (#83).
+        ParcaSablonuKur("Ust_Dolap", "Ust_Dolap");
+        ParcaSablonuKur("Gazeteli_Tabaklar", "Gazeteli_Tabaklar");
+        ParcaSablonuKur("Tup", "Tup");
+        ParcaSablonuKur("Tup_Hortumu", "Tup_Hortumu");
+        KavanozSusSablonuKur("Tursu", false, camKirik);
+        KavanozSusSablonuKur("Salca", false, camKirik);
+        KavanozSusSablonuKur("Recel", true, camKirik);
+        KavanozSusSablonuKur("Bakliyat", false, camKirik);
         KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
@@ -315,7 +324,7 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(v, yol);
         }
         v.aciklama = "1. kat, daire 2, Yıldız ailesi (tahliye). YENİDEN TASARLANIYOR: odalar oda oda döşeniyor " +
-                     "(antre, hol ve salon bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
+                     "(antre, hol, salon ve mutfak bitti); zincir yok, odalar kilitsiz, kat anahtarı sahanlıkta.";
         v.tasarimda = true;
         v.yalnizSecilenEsyalar = true;
         v.zincir = new KilitZinciri();
@@ -323,7 +332,7 @@ public static partial class GrayboxKurucu
         v.parcalar = new List<KatParcasi>();
 
         // Dairenin kalıcı eşyalarından bu katta görünenler (oda oda seçildikçe eklenir).
-        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Portmanto" };
+        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Portmanto", "Tezgah", "Buzdolabi" };
 
         // Yerel fonksiyon: bu fonksiyonun içinde kullanılan kısa bir yardımcı (bir süsü plan noktasına koyar).
         // u: landing duvarından içeri, y: yükseklik, vv: giriş kapısından boyuna; (onU, onV): modelin
@@ -412,7 +421,31 @@ public static partial class GrayboxKurucu
             // Halı: ortada, bir ucundan yarıya kadar sarılmış; sarılan kısmın altında parkede halının izi.
             Sus(Sablon("Hali_Izi"), 2.55f, 0f, 6.55f, 0f, 1f),
             Sus(Sablon("Hali_Yari"), 2.55f, 0f, 6.55f, 0f, 1f),
+
+            // ---------- MUTFAK (Şahan'ın seçimi: 1, 2, 3, 4, 6, 12, 13, 14, 15) ----------
+            // Mutfak u 6,8-10,5, v -0,8-2,85. Kapı hol duvarında (v = 2,9, u 7,0-7,8, içeri açılır); dip
+            // duvarda (u = 10,6) pencere ve altında dairenin tezgâhı (u 9,88-10,5, v 0,09-1,91, üstü 0,90);
+            // köşede buzdolabı (u 6,96-7,54, v -0,8..-0,19). Tezgâh ve buzdolabı dairenin kalıcı eşyaları.
+            // Görev parçası (zincir aşamasında): tezgâhtaki kavanozlardan biri (dairenin Kavanoz'u, u 10,35
+            // v 1,60) içinde Oda A'nın anahtarı. Beş kavanozun hepsi tornavidayla kırılır; cam saydam,
+            // anahtar kafa lambasıyla görünür. Süs kavanozları zincir kavanozunun iki yanında.
+            Sus(Sablon("Kavanoz_Tursu"), 10.35f, 0.90f, 1.77f, -1f, 0f),
+            Sus(Sablon("Kavanoz_Salca"), 10.35f, 0.90f, 1.43f, -1f, 0f),
+            Sus(Sablon("Kavanoz_Recel"), 10.19f, 0.90f, 1.69f, -1f, 0f),
+            Sus(Sablon("Kavanoz_Bakliyat"), 10.19f, 0.90f, 1.51f, -1f, 0f),
+            // Ocak dış duvarda; yanında hortumu sökülmüş tüp.
+            M("electric_stove", 8.30f, 0f, -0.8f + 0.34f, 0f, 1f),
+            Sus(Sablon("Tup"), 8.95f, 0f, -0.52f, 0f, 1f),
+            Sus(Sablon("Tup_Hortumu"), 8.95f, 0f, -0.52f, 0f, 1f),
+            // Üst dolap: ocağın ve tüpün üstünde, kapakları açık, rafları boş.
+            Sus(Sablon("Ust_Dolap"), 8.75f, 1.45f, -0.80f, 0f, 1f),
+            // Masanın yerinde gazeteye sarılı tabaklarla dolu açık koli.
+            Sus(koliAcik, 8.80f, 0f, 1.60f, -1f, 0.3f),
+            Sus(Sablon("Gazeteli_Tabaklar"), 8.80f, 0f, 1.60f, -1f, 0.3f),
         };
+        // Boşaltılmış buzdolabı: fişi çekilmiş, kapısı aralık.
+        v.acikParcalar = new List<AcikParca> { new AcikParca { Yol = "Esyalar/Buzdolabi/Kapi", Oran = 0.35f } };
+        v.buzdolabiFisiCekili = true;
         EditorUtility.SetDirty(v);
         return v;
     }
@@ -434,6 +467,53 @@ public static partial class GrayboxKurucu
         c.center = new Vector3(0f, 0f, 0.015f);
         c.size = new Vector3(0.58f, 0.46f, 0.03f);
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Goblen.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
+    // Kavanoz camı (#83): saydam, hafif yeşilimsi, parlak. Dairenin zincir kavanozu ve mutfaktaki süs
+    // kavanozları aynı malzemeyi kullanır; içleri (anahtar, turşu...) camın arkasından görünür.
+    public static Material KavanozCami()
+    {
+        const string Yol = "Assets/Materials/Kavanoz_Cam.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            AssetDatabase.CreateAsset(m, Yol);
+        }
+        m.SetFloat("_Surface", 1f);
+        m.SetFloat("_Blend", 0f);
+        m.SetColor("_BaseColor", new Color(0.60f, 0.72f, 0.64f, 0.22f));
+        m.SetFloat("_Smoothness", 0.92f);
+        m.SetOverrideTag("RenderType", "Transparent");
+        m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+        m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        m.SetInt("_ZWrite", 0);
+        m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        EditorUtility.SetDirty(m);
+        return m;
+    }
+
+    // Süs kavanozu şablonu (#83): dairenin kavanoz modeli (gövde + kapak, saydam cam), içindekiler
+    // (Kavanoz_Icerik.fbx'ten bir parça), istenirse kapağın üstünde kareli bez; kökünde KirilanKavanoz
+    // (tornavidayla kırılır). Pivot tabanın ortası.
+    static GameObject KavanozSusSablonuKur(string icerik, bool bezli, GameObject kirik)
+    {
+        GameObject gecici = new GameObject("Kavanoz_" + icerik);
+        GameObject govde = Model("Govde", gecici.transform, "Kavanoz", "Kavanoz", Vector3.zero, 0f, carpisma: false);
+        GameObject kapak = Model("Kapak", gecici.transform, "Kavanoz", "Kapak", Vector3.zero, 0f, carpisma: false);
+        GameObject ic = Model("Icerik", gecici.transform, "Kavanoz_Icerik", icerik, Vector3.zero, 0f, carpisma: false);
+        if (govde == null || kapak == null || ic == null) { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Kavanoz.fbx ya da Kavanoz_Icerik.fbx yok."); return null; }
+        govde.GetComponent<MeshRenderer>().sharedMaterial = KavanozCami();
+        if (bezli) Model("Bez", gecici.transform, "Kavanoz_Icerik", "Bez", Vector3.zero, 0f, carpisma: false);
+        // Tek kutu çarpıştırıcı: kavanozun tamamı (nişan küçük bir hedefi de yakalasın).
+        BoxCollider c = gecici.AddComponent<BoxCollider>();
+        c.center = new Vector3(0f, 0.08f, 0f);
+        c.size = new Vector3(0.12f, 0.16f, 0.12f);
+        gecici.AddComponent<KirilanKavanoz>().Hazirla(kirik);
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Kavanoz_{icerik}.prefab");
         Object.DestroyImmediate(gecici);
         return sablon;
     }

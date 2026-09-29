@@ -12,6 +12,10 @@ public class BuzdolabiIsigi : MonoBehaviour
     [SerializeField] private AcilirParca kapi;
     private DaireElektrigi elektrik;
 
+    // Fişi çekilmiş buzdolabı (#83, 1. kat: taşınan ailenin boşalttığı buzdolabı): elektrik olsa da
+    // ışığı yanmaz. Zincir uygulayıcısı her kat açılışında kat dosyasına göre yazar.
+    public bool FisCekili { get; set; }
+
     private void Start()
     {
         // Dairenin kökünde duran elektrik bileşeni (yukarı doğru aranır).
@@ -21,7 +25,7 @@ public class BuzdolabiIsigi : MonoBehaviour
     private void Update()
     {
         if (isik == null) return;
-        bool yansin = kapi != null && kapi.Acik && (elektrik == null || elektrik.Var);
+        bool yansin = !FisCekili && kapi != null && kapi.Acik && (elektrik == null || elektrik.Var);
         if (isik.enabled != yansin) isik.enabled = yansin;
     }
 }

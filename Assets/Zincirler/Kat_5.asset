@@ -22,6 +22,8 @@ MonoBehaviour:
   tasarimda: 0
   yalnizSecilenEsyalar: 0
   gorunenEsyalar: []
+  acikParcalar: []
+  buzdolabiFisiCekili: 0
   zincir:
     KapaliOdalar:
     - Oda_A

@@ -534,6 +534,8 @@ public static partial class GrayboxKurucu
         if (tezgah != null)
         {
             GameObject kavanoz = Model("Kavanoz", tezgah.transform, "Kavanoz", "Kavanoz", new Vector3(0.6f, 0.90f, -0.15f), 0f, carpisma: true);
+            // #83: cam saydam (içindeki anahtar kafa lambasıyla görünsün); mutfaktaki süs kavanozlarıyla aynı malzeme.
+            if (kavanoz != null) kavanoz.GetComponent<MeshRenderer>().sharedMaterial = KavanozCami();
             if (kavanoz != null)
             {
                 Model("Kapak", kavanoz.transform, "Kavanoz", "Kapak", Vector3.zero, 0f, carpisma: true);

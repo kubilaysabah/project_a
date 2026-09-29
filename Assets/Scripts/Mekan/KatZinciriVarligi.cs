@@ -88,6 +88,14 @@ public class KatParcasi
     public Rect Bolge;
 }
 
+/// <summary>Kat açılınca aralık ya da açık başlayan bir parça (#83: boşaltılmış buzdolabının kapısı).</summary>
+[System.Serializable]
+public class AcikParca
+{
+    public string Yol;            // dairedeki AcilirParca'nın yolu ("Esyalar/Buzdolabi/Kapi")
+    public float Oran = 1f;       // 0 kapalı, 1 tam açık
+}
+
 // CreateAssetMenu: Project penceresinde sağ tık → Create menüsüne "Huzur/Kat Zinciri" ekler.
 [CreateAssetMenu(fileName = "Zincir_Yeni", menuName = "Huzur/Kat Zinciri")]
 public class KatZinciriVarligi : ScriptableObject
@@ -105,6 +113,10 @@ public class KatZinciriVarligi : ScriptableObject
     // bulmaca eşyaları yalnızca gerektiği katta).
     public bool yalnizSecilenEsyalar;
     public List<string> gorunenEsyalar = new List<string>();
+    // Kat açılınca aralık ya da açık başlayan parçalar (dolap kapakları, buzdolabı kapısı).
+    public List<AcikParca> acikParcalar = new List<AcikParca>();
+    // Buzdolabının fişi çekili mi (#83): işaretliyse kapısı açılsa da iç ışığı yanmaz.
+    public bool buzdolabiFisiCekili;
     public KilitZinciri zincir = new KilitZinciri();
     public List<KatNotu> notlar = new List<KatNotu>();
     public List<KatSusu> suslar = new List<KatSusu>();

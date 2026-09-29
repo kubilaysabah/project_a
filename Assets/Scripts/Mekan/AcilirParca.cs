@@ -93,6 +93,16 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
         if (kilitli && acik) Ayarla(false);
     }
 
+    /// <summary>Parçayı sessizce aralık bırakır (kat hazırlanırken, #83: boşaltılmış buzdolabının
+    /// kapısı). oran 0 kapalı, 1 tam açık. Parça "açık" sayılır: oyuncu dokununca kapanır.</summary>
+    public void Aralik(float oran)
+    {
+        if (hareketEden != null) { StopCoroutine(hareketEden); hareketEden = null; }
+        if (kilitli) return;
+        acik = oran > 0f;
+        Uygula(Mathf.Clamp01(oran));
+    }
+
     /// <summary>Parçayı sessizce, bir anda açık ya da kapalı yapar (kat hazırlanırken).</summary>
     public void Ayarla(bool yeniAcik)
     {
