@@ -251,6 +251,7 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
     - Glow codes (floors 4, 7): looking straight at the code wall within 3.5 m with the lamp on and no power makes the headlamp die for 1.8 s, so the digits glimmer (`KaranliktaParlayan.IpucuVer`, at most every 30 s).
     - Floor 7's real door leaks light under it (`Kapi_N/Mentese/Kapi_Alti_Isik`, built inactive on every landing door and shown by the real-door card; `SahanlikKapisi` hides it when the door opens).
     - Knocking a wrong door makes `GezenGolge.Belir()` appear.
+  - **Retest round (a9a7a99, be0c279):** `KatDenetimi` gained a save/restore check (`KayitHazirla` → reopen → `KayitDenetle`) and a collision check (`Cakismalar`, collider bounds sunk > 6 cm). Fixed six intersecting props and floor 6 Oda A (the chest blocked the door; only 0.3 m² was walkable). 200/200 tests ×3, save test 8 floors with 0 errors, bot ×4 with 0 problems, release 391.1 MB.
   - **Waiting for Şahan's test of all floors.** The floor-8 plan frame shows nine floors (matches the ninth-floor plan and Cemal's research wall); change `KAT_SAYISI` in `kat8_esyalar.py` if he objects.
 
 - 2026-09-29 (Lesson 56, later): **#83 opened** (floor-by-floor redesign).
