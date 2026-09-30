@@ -632,9 +632,9 @@ MonoBehaviour:
     Metin: 
     Ad: Anahtar_Dolabi_Arsiv
   - Yol: 
-    X: 6.35
+    X: 5.75
     Y: 0
-    Z: 6.55
+    Z: 7
     Donus: 0
     OnU: 1
     OnV: 0
@@ -643,20 +643,9 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 5.62
+    X: 6.7
     Y: 0
-    Z: 6.1
-    Donus: 0
-    OnU: 1
-    OnV: 0
-    Yatik: 0
-    Sablon: {fileID: 4762026507324259, guid: 516440ee9903e9a4abe6446a05daa331, type: 3}
-    Metin: 
-    Ad: 
-  - Yol: 
-    X: 7.1
-    Y: 0
-    Z: 6.1
+    Z: 6.75
     Donus: 0
     OnU: -1
     OnV: 0
@@ -665,23 +654,12 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 7.1
+    X: 7.36
     Y: 0
-    Z: 7
+    Z: 7.6
     Donus: 0
     OnU: -1
     OnV: 0
-    Yatik: 0
-    Sablon: {fileID: 4762026507324259, guid: 516440ee9903e9a4abe6446a05daa331, type: 3}
-    Metin: 
-    Ad: 
-  - Yol: 
-    X: 5.5
-    Y: 0
-    Z: 7.8700004
-    Donus: 0
-    OnU: 0
-    OnV: -1
     Yatik: 0
     Sablon: {fileID: 6228994878438383758, guid: ccc8d654f33808a47875824bc2023473, type: 3}
     Metin: 
@@ -698,11 +676,11 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 7.6
-    Y: 1.5
-    Z: 6.55
+    X: 5.1
+    Y: 1.55
+    Z: 7
     Donus: 0
-    OnU: -1
+    OnU: 1
     OnV: 0
     Yatik: 0
     Sablon: {fileID: 1696167004626240269, guid: 7fde69a4259d1144a97dd367487fc0be, type: 3}

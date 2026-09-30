@@ -6,7 +6,6 @@
 #   karyola   Karyola_Nuri     : ceviz başlıklı çift kişilik karyola, tığ işi yatak örtüsü; bir yanı
 #                                bozulmamış (eşinin yanı), öbür yanında buruşuk yorgan ve çukur yastık.
 #   komodin   Komodin_Nuri     : alçak ceviz komodin, üstü 0,55 m (radyo üstünde durur); tek çekmecesi boş.
-#   gardirop  Gardirop_Nuri    : iki kapılı, taçlı koyu ceviz elbise dolabı; içi boş askılık.
 #   tuvalet   Tuvalet_Masasi   : eşinin aynalı tuvalet masası; kolonya şişesi, tarak, pudra kutusu.
 #   sandalye  Elbise_Sandalyesi: hasır oturaklı sandalye, arkalığında ceketi, oturağında katlı pantolonu.
 #   kilim     Kilim_Nuri       : yatağın ayak ucunda küçük, çizgili kilim.
@@ -113,28 +112,6 @@ elif hangi == "komodin":
     p = govde
     parcalar.append(ac.cekmece("Cekmece_1", 0, 0.325, EN - 0.04, 0.18, DER - 0.06, -DER / 2, ceviz_ac, ceviz, pirinc, "topuz"))
     ad, h = "Komodin_Nuri", 0.4
-
-elif hangi == "gardirop":
-    acik = True
-    EN, DER, H = 1.04, 0.56, 1.86
-    govde = ac.govde_levhalari(EN, DER, H, ceviz, taban=0.10, raflar=(1.55,))
-    for x in (-EN / 2 + 0.05, EN / 2 - 0.05):
-        govde.append(ortak.kutu("Ayak", (0.07, 0.07, 0.10), (x, -DER / 2 + 0.06, 0.05), ceviz, 0.01))
-        govde.append(ortak.kutu("Ayak", (0.07, 0.07, 0.10), (x, DER / 2 - 0.06, 0.05), ceviz, 0.01))
-    govde.append(ortak.kutu("Tac", (EN + 0.08, DER + 0.04, 0.07), (0, 0, H + 0.035), ceviz, 0.012))
-    govde.append(ortak.kutu("TacOyma", (0.40, 0.02, 0.10), (0, -DER / 2 - 0.02, H + 0.05), ceviz_ac, 0.005))
-    # Askı borusu ve iki boş tel askı.
-    tel = ortak.malzeme("Gardirop_Tel", (0.5, 0.5, 0.5), puruz=0.3, metal=0.9)
-    b = cubuk((-EN / 2 + 0.02, 0.02, 1.45), (EN / 2 - 0.02, 0.02, 1.45), 0.012, tel)
-    govde.append(p.pop())
-    for x in (-0.15, 0.1):
-        govde.append(ortak.kutu("Aski", (0.38, 0.004, 0.004), (x, 0.02, 1.38), tel))
-        govde.append(ortak.kutu("AskiK", (0.004, 0.004, 0.07), (x, 0.02, 1.415), tel))
-    p = govde
-    y_on = -DER / 2
-    parcalar.append(ac.kapi("Kapi_1", -EN / 2 + 0.005, -0.004, 0.105, H - 0.01, y_on - ac.KAL, ceviz, pirinc))
-    parcalar.append(ac.kapi("Kapi_2", EN / 2 - 0.005, 0.004, 0.105, H - 0.01, y_on - ac.KAL, ceviz, pirinc))
-    ad, h = "Gardirop_Nuri", 1.8
 
 elif hangi == "tuvalet":
     cam = ortak.malzeme("Tuvalet_Ayna", (0.55, 0.58, 0.60), puruz=0.03, metal=1.0)
@@ -370,7 +347,7 @@ if acik:
     govde = ortak.birlestir(p, "Govde")
     ortak.yumusat(govde, 35)
     ortak.pivotu_tasi(govde, (0, 0, 0))
-    ortak.calistir_ve_bitir(ad, [govde] + parcalar, h, 2.2 if hangi == "gardirop" else 1.2)
+    ortak.calistir_ve_bitir(ad, [govde] + parcalar, h, 1.2)
 else:
     nesne = ortak.birlestir(p, ad)
     ortak.yumusat(nesne, 35)

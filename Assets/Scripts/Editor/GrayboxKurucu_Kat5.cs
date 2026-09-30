@@ -107,7 +107,9 @@ public static partial class GrayboxKurucu
             // Yolluk holün başında; ortada tavandan damlayan suyu toplayan kova; Oda B ile Oda A kapıları
             // arasında konsol, üstünde saat ve ailenin fotoğrafı.
             D("Yolluk_K5", 3.90f, 0f, 3.80f, 0f, 1f),
-            D("Su_Kovasi_K5", 6.60f, 0f, 3.80f, 0f, 1f),
+            // Kova holün kuzey kenarında, salon ile Oda B kapılarının arasında: ortadayken koridoru, Oda B'nin
+            // önündeyken kapıyı kapatıyordu (yürünebilirlik denetimi).
+            D("Su_Kovasi_K5", 4.60f, 0f, 4.25f, 0f, 1f),
             D("Konsol_K5", 7.70f, 0f, 4.65f - 0.16f, 0f, -1f),
             M("mantel_clock_01", 7.50f, 0.80f, 4.52f, 0f, -1f),
             Foto("kat5", false, 7.92f, 0.80f, 4.52f, 0f, -1f),

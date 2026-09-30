@@ -262,7 +262,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AcilirParca
   hareket: 0
   eksen: {x: 0, y: 0, z: 1}
-  miktar: 0.27365
+  miktar: 0.35785002
   sure: 0.45
   kilitli: 0
   ipucuAc: ipucu.ac
@@ -431,7 +431,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AcilirParca
   hareket: 0
   eksen: {x: 0, y: 0, z: 1}
-  miktar: 0.27365
+  miktar: 0.35785002
   sure: 0.45
   kilitli: 0
   ipucuAc: ipucu.ac

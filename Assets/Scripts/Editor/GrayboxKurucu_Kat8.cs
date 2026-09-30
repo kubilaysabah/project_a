@@ -165,14 +165,15 @@ public static partial class GrayboxKurucu
             DA("Anahtar_Dolabi_Arsiv", "Anahtar_Dolabi_K8", 10.05f, 1.50f, 4.75f, 0f, 1f),
 
             // ---------- ODA B (toplantı odası) ---------- (u 5,1-7,6, v 4,75-8,1; kapının önü u 5,82-6,81, v 4,75-5,5 boş)
-            D("Toplanti_Masasi_K8", 6.35f, 0f, 6.55f, 1f, 0f),
-            D("Toplanti_Sandalyesi_K8", 5.62f, 0f, 6.10f, 1f, 0f),
-            D("Toplanti_Sandalyesi_K8", 7.10f, 0f, 6.10f, -1f, 0f),
-            D("Toplanti_Sandalyesi_K8", 7.10f, 0f, 7.00f, -1f, 0f),
-            // Evrak dolabı pencere duvarında, masanın ucunun yanında: çekmecesi masaya çarpmadan açılır.
-            DA("Evrak_Dolabi_Toplanti", "Evrak_Dolabi_K8", 5.50f, 0f, 8.10f - 0.23f, 0f, -1f),
+            // Masa batı duvarına yakın, boyuna; doğu yanında tek sandalye; doğuda 66 cm yürüme yolu. (Ortadayken
+            // masa, sandalyeler ve tepegöz odanın girişini kapatıyordu: yürünebilirlik denetimi.)
+            D("Toplanti_Masasi_K8", 5.75f, 0f, 7.00f, 1f, 0f),
+            D("Toplanti_Sandalyesi_K8", 6.70f, 0f, 6.75f, -1f, 0f),
+            // Evrak dolabı doğu duvarında, sandalyelerin kuzeyinde: önünde durulacak yer var.
+            DA("Evrak_Dolabi_Toplanti", "Evrak_Dolabi_K8", 7.60f - 0.24f, 0f, 7.60f, -1f, 0f),
             D("Tepegoz_K8", 7.20f, 0f, 5.25f, -1f, 0.3f),
-            D("Kara_Tahta_K8", 7.60f, 1.50f, 6.55f, -1f, 0f),
+            // Tahta batı duvarında, masanın üstünde (doğu duvarında yürüme yolunu daraltıyordu).
+            D("Kara_Tahta_K8", 5.10f, 1.55f, 7.00f, 1f, 0f),
         };
 
         var odalar = new List<string>();

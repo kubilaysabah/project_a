@@ -140,36 +140,40 @@ public static partial class GrayboxKurucu
             D("Buzdolabi_K3", 7.20f, 0f, -0.80f + 0.33f, 0f, 1f),
             D("Ocak_K3", 8.00f, 0f, -0.80f + 0.33f, 0f, 1f),
             D("Camasir_Makinesi_K3", 8.75f, 0f, -0.80f + 0.30f, 0f, 1f),
-            D("Masa_K3", 8.40f, 0f, 1.30f, 0f, 1f),
-            D("Sandalye_K3", 8.40f, 0f, 2.00f, 0f, -1f),
-            D("Sandalye_K3", 7.70f, 0f, 1.30f, 1f, 0f),
-            D("Sandalye_K3", 9.10f, 0f, 1.30f, -1f, 0f),
-            D("Mama_Sandalyesi_K3", 8.40f, 0f, 0.55f, 0f, 1f),
+            // Masa kiler duvarına yakın (ortadayken üç sandalye ve mama sandalyesiyle mutfak yürünemiyordu,
+            // tezgâhın çekmecesine ulaşılamıyordu: yürünebilirlik denetimi). Bir sandalye ve masanın yanında mama sandalyesi.
+            D("Masa_K3", 7.45f, 0f, 1.00f, 0f, 1f),
+            D("Sandalye_K3", 7.45f, 0f, 1.75f, 0f, -1f),
+            D("Mama_Sandalyesi_K3", 8.20f, 0f, 1.00f, -1f, 0f),
             D("Biberon_Takimi_K3", 10.20f, 0.90f, 1.72f, -1f, 0f),
 
             // ---------- ODA B (Kerem'in odası) ----------
             // Oda B u 5,1-7,6, v 4,75-8,1. Kapının önü (u 5,82-6,81, v 4,75-5,5) boş; pencere v = 8,1 (u 5,75-6,95).
             // Oyuncak sandığı dairenin kalıcı eşyası (u 5,3 v 7,3). Yatak Oda A duvarında, başı pencere tarafında.
-            D("Cocuk_Yatagi_K3", 7.60f - 0.48f, 0f, 8.10f - 0.98f, 0f, -1f),
+            // Yatak pencere duvarı boyunca, başı Oda A duvarında: masa, sandalye ve oyuncak sandığının önünde
+            // yürüme yolu kalsın diye (yürünebilirlik denetimi; eski yerinde oda 2 m²'ye iniyordu).
+            D("Cocuk_Yatagi_K3", 7.60f - 0.98f, 0f, 8.10f - 0.48f, -1f, 0f),
             D("Calisma_Masasi_K3", 5.10f + 0.27f, 0f, 6.10f, 1f, 0f),
-            M("SchoolChair_01", 5.90f, 0f, 6.10f, -1f, 0f),
+            M("SchoolChair_01", 5.95f, 0f, 6.10f, -1f, 0f),
             M("alarm_clock_01", 5.28f, 0.72f, 6.45f, 1f, 0f),
             D("Poster_K3", 5.10f, 1.55f, 6.10f, 1f, 0f),
-            D("Yerdeki_Cizimler_K3", 6.10f, 0.002f, 7.00f, 0f, 1f),
-            D("Gece_Lambasi_K3", 6.45f, 0f, 7.85f, 0f, -1f),
+            D("Yerdeki_Cizimler_K3", 6.55f, 0.002f, 6.40f, 0f, 1f),
+            D("Gece_Lambasi_K3", 7.35f, 0f, 6.95f, -1f, 0f),
             D("Perde_Cocuk_K3", 6.35f, 2.30f, 8.10f, 0f, -1f),
-            M("painted_wooden_chair_02", 5.45f, 0f, 5.20f, 1f, 0.3f),
 
             // ---------- ODA A (anne-babanın odası) ----------
             // Oda A u 7,7-10,5, v 4,75-8,1. Kapının önü (u 8,57-9,56, v 4,75-5,5) boş; pencere v = 8,1 (u 8,5-9,7).
             // Karyolanın başı dip duvarda (u = 10,5); başucunda komodin (katın anahtarı çekmecesinde), öbür
             // yanında boş beşik. Karşı duvarda aynalı şifonyer.
-            D("Karyola_K3", 10.50f - 1.00f, 0f, 6.80f, -1f, 0f),
-            DA("Komodin_Ayla", "Komodin_K3", 10.50f - 0.23f, 0f, 7.85f, -1f, 0f),
-            D("Besik_K3", 10.50f - 0.26f, 0f, 5.50f, -1f, 0f),
-            D("Sifonyer_K3", 7.70f + 0.26f, 0f, 6.60f, 1f, 0f),
+            // Yerleşim yürünebilirlik denetimine göre: karyolanın başı dip duvarda (u = 10,5), komodin başucunun
+            // güneyinde, önü odaya dönük (kapıdan girince 90 cm'lik şeritten ulaşılır); beşik kapının batısında,
+            // şifonyer Oda B duvarında. Önceki iki yerleşimde odaya ya da komodinin önüne girilemiyordu.
+            D("Karyola_K3", 10.50f - 1.005f, 0f, 7.20f, -1f, 0f),
+            DA("Komodin_Ayla", "Komodin_K3", 10.50f - 0.23f, 0f, 6.17f, -1f, 0f),
+            D("Besik_K3", 7.70f + 0.26f, 0f, 5.40f, 1f, 0f),
+            D("Sifonyer_K3", 7.70f + 0.26f, 0f, 6.90f, 1f, 0f),
             D("Perde_OdaA_K3", 9.10f, 2.30f, 8.10f, 0f, -1f),
-            D("Kilim_K3", 9.35f, 0f, 5.72f, 0f, 1f),
+            D("Kilim_K3", 9.30f, 0f, 5.95f, 0f, 1f),
         };
 
         var odalar = new List<string>();

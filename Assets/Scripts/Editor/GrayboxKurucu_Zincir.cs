@@ -135,7 +135,7 @@ public static partial class GrayboxKurucu
         foreach (string ad in new[] { "Karyola_Nuri", "Tuvalet_Masasi", "Elbise_Sandalyesi", "Kilim_Nuri", "Perde_Cicekli", "Hat_Levha",
                                       "Kiler_Rafi", "Radyo_Tezgahi", "Kiler_Cuvallari", "Supurge_Faras", "Damacana", "Sogan_Sepeti" })
             ParcaSablonuKur(ad, ad);
-        foreach (string ad in new[] { "Komodin_Nuri", "Gardirop_Nuri", "Teneke_Nuri" })
+        foreach (string ad in new[] { "Komodin_Nuri", "Teneke_Nuri" })
             AcilirSablonKur(ad);
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
@@ -322,7 +322,9 @@ public static partial class GrayboxKurucu
             {
                 seri.FindProperty("hareket").enumValueIndex = (int)AcilirParca.Hareket.Kaydir;
                 seri.FindProperty("eksen").vector3Value = cekmece ? Vector3.forward : Vector3.right;
-                seri.FindProperty("miktar").floatValue = cekmece ? b.size.z * 0.65f : b.size.x * 0.9f;
+                // Çekmece derinliğinin %85'i kadar çıkar: %65'te dikiş makinesinin çekmecesindeki anahtar tablanın altında
+                // kalıyor, ayaktaki oyuncu onu göremiyordu (yürünebilirlik denetimi, 2026-09-30).
+                seri.FindProperty("miktar").floatValue = cekmece ? b.size.z * 0.85f : b.size.x * 0.9f;
                 seri.FindProperty("sure").floatValue = 0.45f;
             }
             else if (kapi)
@@ -1111,13 +1113,16 @@ public static partial class GrayboxKurucu
             Sus(Sablon("Kitaplik"), 2.60f, 0f, 4.65f - 0.15f, 0f, -1f),
             M("hanging_picture_frame_02", 2.60f, 1.72f, 4.65f, 0f, -1f),
             Foto("kat2", false, 2.88f, 1.10f, 4.52f, 0f, -1f),
-            // Kuş kafesi: askılı ayağıyla Oda B kapısının yanında; yem kabı boş.
-            Sus(Sablon("Kus_Kafesi"), 5.25f, 0f, 4.40f, 0f, -1f),
+            // Kuş kafesi: askılı ayağıyla Oda B ile Oda A kapılarının arasında; yem kabı boş. (Olay yerinin
+            // yanındayken devrik sandalyeyle birlikte holü kapatıyordu: yürünebilirlik denetimi.)
+            Sus(Sablon("Kus_Kafesi"), 7.70f, 0f, 4.40f, 0f, -1f),
             // Olay yeri: kiler kapısının yanında kapağı açık ilaç dolabı; altında saçılmış ilaçlar,
             // yan yatmış hasır sandalye ve kırık gözlük.
             Sus(Sablon("Ilac_Dolabi"), 4.60f, 1.45f, 2.95f, 0f, 1f),
             Sus(Sablon("Sacilmis_Ilaclar"), 4.65f, 0.004f, 3.45f, 0f, 1f),
-            Sus(Sablon("Devrik_Sandalye"), 4.05f, 0f, 3.72f, 0.4f, 1f),
+            // Devrik sandalye güney duvarına yaslı: koridorun ortasında yatarken holü boydan boya kapatıyordu
+            // (yürünebilirlik denetimi); şimdi kuzey tarafta 75 cm geçit kalıyor.
+            Sus(Sablon("Devrik_Sandalye"), 4.05f, 0f, 3.45f, 0f, 1f),
             Sus(Sablon("Kirik_Gozluk"), 5.05f, 0.008f, 3.95f, 0.3f, 1f),
 
             // ---------- SALON (Şahan'ın seçimi: 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14) ----------
@@ -1177,11 +1182,11 @@ public static partial class GrayboxKurucu
             // v 4,75-5,5 boyunca durur, o köşe boş. Karşı duvarda (v = 8,1) pencere (u 8,5-9,7, denizlik 0,9).
             // Karyola başı pencerenin altında, duvara dayalı (başlık 0,86: denizliğin altında kalır); solunda
             // komodin ve üstünde dairenin radyosu (Esyalar/Radyo, u 8,1 v 7,94, komodinin üstü 0,55).
-            Sus(Sablon("Karyola_Nuri"), 9.10f, 0f, 8.10f - 1.00f, 0f, -1f),
+            Sus(Sablon("Karyola_Nuri"), 9.20f, 0f, 8.10f - 1.00f, 0f, -1f),
             SusA("Komodin_Nuri", Sablon("Komodin_Nuri"), 8.10f, 0f, 8.10f - 0.205f, 0f, -1f),
             Sus(Sablon("Perde_Cicekli"), 9.10f, 2.30f, 8.10f, 0f, -1f),
-            // Elbise dolabı Oda B duvarında (u = 7,7), yüzü odaya; kapakları boş askılığa açılır.
-            SusA("Gardirop_Nuri", Sablon("Gardirop_Nuri"), 7.70f + 0.29f, 0f, 6.20f, 1f, 0f),
+            // Elbise dolabı bu odaya sığmadı: hangi duvara konsa radyonun önüne giden yol oyuncunun kapsülüne dar
+            // kalıyordu (yürünebilirlik denetimi). Karyola 10 cm doğuda; batısında radyoya 69 cm'lik yol.
             // Eşinin aynalı tuvalet masası dip duvarda (u = 10,5); önündeki sandalyede Nuri Bey'in ceketi.
             Sus(Sablon("Tuvalet_Masasi"), 10.50f - 0.215f, 0f, 5.45f, -1f, 0f),
             Sus(Sablon("Elbise_Sandalyesi"), 9.85f, 0f, 5.45f, 1f, 0f),

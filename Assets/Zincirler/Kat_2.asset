@@ -243,7 +243,7 @@ MonoBehaviour:
     Metin: kat2
     Ad: 
   - Yol: 
-    X: 5.25
+    X: 7.7
     Y: 0
     Z: 4.4
     Donus: 0
@@ -278,9 +278,9 @@ MonoBehaviour:
   - Yol: 
     X: 4.05
     Y: 0
-    Z: 3.72
+    Z: 3.45
     Donus: 0
-    OnU: 0.4
+    OnU: 0
     OnV: 1
     Yatik: 0
     Sablon: {fileID: 780232136294210226, guid: a0d160cf0bd26f348b7bc5b82ac04a15, type: 3}
@@ -606,7 +606,7 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 9.1
+    X: 9.2
     Y: 0
     Z: 7.1000004
     Donus: 0
@@ -638,17 +638,6 @@ MonoBehaviour:
     Sablon: {fileID: 3166708110319493333, guid: 7f37c5a7b7f3e5344a95bde8535b86e4, type: 3}
     Metin: 
     Ad: 
-  - Yol: 
-    X: 7.99
-    Y: 0
-    Z: 6.2
-    Donus: 0
-    OnU: 1
-    OnV: 0
-    Yatik: 0
-    Sablon: {fileID: 1123672207950353964, guid: b6e51987096b87e41aee8a3e09e81641, type: 3}
-    Metin: 
-    Ad: Gardirop_Nuri
   - Yol: 
     X: 10.285
     Y: 0
