@@ -131,7 +131,7 @@ public class Etkilesimci : MonoBehaviour
             foreach (RaycastHit o in carpmalar)
             {
                 if (o.collider.transform.IsChildOf(transform) || o.distance >= h.distance) continue;
-                if (!esya.transform.IsChildOf(o.collider.transform)) { onundekilerKap = false; break; }
+                if (!esya.transform.IsChildOf(o.collider.transform) && !IcindeMi(h.collider, o.collider)) { onundekilerKap = false; break; }
             }
             if (onundekilerKap) { icteki = h.collider; icMesafe = h.distance; }
         }
@@ -158,7 +158,7 @@ public class Etkilesimci : MonoBehaviour
                 if (bulunan != null) break;
                 bool icindeBirSeyVar = false;
                 for (int j = i + 1; j < sirali.Count; j++)
-                    if (sirali[j].collider.transform.IsChildOf(c.transform)) { icindeBirSeyVar = true; break; }
+                    if (sirali[j].collider.transform.IsChildOf(c.transform) || IcindeMi(sirali[j].collider, c)) { icindeBirSeyVar = true; break; }
                 if (!icindeBirSeyVar) break;   // duvar gibi: arkasına bakılmaz
             }
         }
@@ -174,6 +174,17 @@ public class Etkilesimci : MonoBehaviour
         if (bulunan is Yonlendirici y) govde = y.HedefGovdesi;
 
         return bulunan;
+    }
+
+    // İÇİNDE Mİ (#83): "ic" çarpışmasının ortası "kab" çarpışmasının kutusunun (bounds) içinde mi? Eşya bir
+    // mobilyanın çocuğu olmadan da onun çarpışma kutusunun içinde durabilir: tamir tezgâhının kutusu arkadaki pano ve
+    // radyo yüzünden üstündeki tenekeyi, çalışma masasının kutusu lamba yüzünden masadaki anahtarı içine alıyordu
+    // ve nişan tezgâhta takılıp kalıyordu (görüş testi, 2026-09-30). Böyle bir kutu da kap sayılır. Duvar ve kapı
+    // kanadı ince olduğu için arkalarındaki eşyayı içine almaz; kapalı kapak ve kapı eskisi gibi nişanı durdurur.
+    // bounds: çarpışmanın dünya eksenlerindeki sınır kutusu; Contains bir noktanın onun içinde olup olmadığını söyler.
+    private static bool IcindeMi(Collider ic, Collider kab)
+    {
+        return kab.bounds.Contains(ic.bounds.center);
     }
 
     // Bir çarpışmanın şu an yapılabilir etkileşimi. GetComponentsInParent: nesne birkaç

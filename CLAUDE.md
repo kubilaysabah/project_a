@@ -241,6 +241,7 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
     - 7: Cemal's own flat; the chest is pried with the screwdriver.
     - 8: the Yönetim office; the iskân ruhsatı hangs in the corridor, and the filing-cabinet key is in the archive's key cabinet.
   - **Verification:** 200/200 tests; the full playthrough bot passed with 0 problems and no new errors; every room captured from four corners and above; containers opened and checked; release build 391.2 MB.
+  - **Line-of-sight test (same lesson, later):** a new check places the player camera at every standable point within 2.7 m of each chain item (eye 1.65 and crouched 0.6) and calls `Etkilesimci.HedefBul`. It found two items the player could never pick: floor 2's tin on the repair bench and floor 5's key on the desk. Both lie inside the box collider of a decor model they are not children of. Fix: `Etkilesimci.IcindeMi` treats a collider whose bounds contain the item as a container too. Now 39/39 items are pickable, 200/200 tests, the bot passed 3/3 runs, release build rebuilt. Scratchpad `gorus_testi.cs`; rerun it after moving items or decor.
   - **Waiting for Şahan's test of all floors.** The floor-8 plan frame shows nine floors (matches the ninth-floor plan and Cemal's research wall); change `KAT_SAYISI` in `kat8_esyalar.py` if he objects.
 
 - 2026-09-29 (Lesson 56, later): **#83 opened** (floor-by-floor redesign).
