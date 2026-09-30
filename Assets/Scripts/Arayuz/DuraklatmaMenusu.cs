@@ -56,13 +56,24 @@ public class DuraklatmaMenusu : MonoBehaviour
     // Kontroller sayfası (#80): Ayarlar'ın altında, oyundaki bütün tuşların listesi. Şahan'ın kararı
     // (2026-09-28): oyun içinde tuş ipucu çıkmaz; oyuncu tuşları oyunlarda alışık olduğu yerde bulur.
     private const int SayfaKontrol = 4;
+    // Katlar sayfası (#85): ulaşılan katlar listelenir, birine basınca oyun o katın başından sürer.
+    private const int SayfaKatlar = 5;
     private int sayfa = SayfaAna;
 
     // ---------- KLAVYE / KOL İLE GEZİNME (#29) ----------
     // Öğelerin sırası (yukarıdan aşağı). Numara, gezginin "Secili" değeriyle eşleşir.
     // (Katı Sıfırla düğmesi #83'te kalktı, Şahan'ın kararı: kat artık her oturumun başında kendiliğinden
     // baştan başlıyor; bkz. Kayit.KatBasinaDon.)
-    private const int AnaDevam = 0, AnaAyarlar = 1, AnaGoruntu = 2, AnaFoto = 3, AnaDil = 4, AnaCik = 5, AnaOgeSayisi = 6;
+    private const int AnaDevam = 0, AnaKatlar = 1, AnaAyarlar = 2, AnaGoruntu = 3, AnaFoto = 4, AnaDil = 5, AnaCik = 6, AnaOgeSayisi = 7;
+    // Katlar sayfası: 1..8. kat, sonra Geri.
+    private const int KatOgeSayisi = KatSayaci.CatiKati + 1;
+
+    // ---------- KATLAR (#85) ----------
+    // Bir kata basmak iki adımlı: ilk basış "Emin misin?" sorar (o katın ve üstündekilerin kat içi ilerlemesi
+    // silinecek), ikincisi ekranı karartır, kaydı o kata göre yazar (Kayit.KatSec) ve sahneyi yeniden yükler.
+    // Yeniden yüklenen sahnede başlık ekranı atlanır (dogrudanBasla), oyun kararmadan açılarak başlar.
+    private int katOnay;                  // sorusu gösterilen kat (0 = yok)
+    private static bool dogrudanBasla;    // sahne menüden kat seçilerek yüklendi: başlık ekranı gösterilmesin
     private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3,
                       AyarKontroller = 4, AyarVarsayilan = 5, AyarGeri = 6, AyarOgeSayisi = 7;
 
@@ -157,7 +168,49 @@ public class DuraklatmaMenusu : MonoBehaviour
         gezinEylemi?.Enable();
         onayEylemi?.Enable();
 
-        if (baslikEkraniGoster) BaslikEkraniniAc();
+        if (dogrudanBasla)
+        {
+            dogrudanBasla = false;
+            StartCoroutine(AcilarakBasla());
+        }
+        else if (baslikEkraniGoster) BaslikEkraniniAc();
+    }
+
+    // Katlar sayfasından gelindi: ekran simsiyah başlar ve açılır; başlık ekranı yok, oyuncu hemen oynar.
+    private System.Collections.IEnumerator AcilarakBasla()
+    {
+        geciste = true;
+        karartma = 1f;
+        // BaslikEkraninda static: sahne yeniden yüklenince sıfırlanmaz. Başlık ekranından kat seçildiyse hâlâ
+        // true'dur; kapatılmazsa kafa lambası tuşu, test göstergesi gibi "başlıkta mıyız" diye soranlar susar.
+        BaslikEkraninda = false;
+        yield return null;   // bir kare simsiyah: kat kurulsun, oyuncunun kamerası yerine otursun
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        for (float t = 1f; t > 0f; t -= Time.unscaledDeltaTime / 0.8f) { karartma = t; yield return null; }
+        karartma = 0f;
+        geciste = false;
+    }
+
+    private void KatSecildi(int kat)
+    {
+        if (!KatSecimi.Acik(kat, Kayit.EnYuksekKat, KatSayaci.CatiKati)) return;   // kilitli kat
+        if (katOnay != kat) { katOnay = kat; return; }                             // ilk basış: yalnızca sor
+        katOnay = 0;
+        Kayit.KatSec(kat);
+        dogrudanBasla = true;
+        StartCoroutine(KarartVeYukle());
+    }
+
+    // Ekran kararır, sonra sahne baştan yüklenir. Kat yöneticisi yeni kaydı okuyup oyuncuyu o katın başına koyar.
+    private System.Collections.IEnumerator KarartVeYukle()
+    {
+        geciste = true;
+        for (float t = 0f; t < 1f; t += Time.unscaledDeltaTime / 0.6f) { karartma = t; yield return null; }
+        karartma = 1f;
+        Time.timeScale = 1f;            // menü saati durdurmuştu; yeni sahne akarak başlasın
+        AudioListener.pause = false;
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
     }
 
     private void Update()
@@ -211,6 +264,8 @@ public class DuraklatmaMenusu : MonoBehaviour
             int adim = yon.y > 0f ? -1 : +1;   // yukarı = listede geri
             gezgin.Tasi(adim);
         }
+        // Seçim sorulan kattan ayrılınca "Emin misin?" sorusu geri alınır.
+        if (sayfa != SayfaKatlar || gezgin.Secili != katOnay - 1) katOnay = 0;
         if (yatayTekrar.Guncelle(yatay, Time.unscaledTime)) Kaydir(yon.x > 0f ? +1 : -1);
 
         bool onay = (onayEylemi != null && onayEylemi.WasPressedThisFrame())
@@ -356,6 +411,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     private static void Sifirla()
     {
         BaslikEkraninda = false;
+        dogrudanBasla = false;
     }
 
     // Bir yön bu karede basıldı mı: oyun kolunun d-pad yönü ya da iki klavye tuşundan biri.
@@ -378,12 +434,21 @@ public class DuraklatmaMenusu : MonoBehaviour
             switch (gezgin.Secili)
             {
                 case AnaDevam: if (baslikta) Basla(); else DevamIste(); break;
+                case AnaKatlar: SayfaAc(SayfaKatlar); break;
                 case AnaAyarlar: SayfaAc(SayfaAyarlar); break;
                 case AnaGoruntu: SayfaAc(SayfaGoruntu); break;
                 case AnaFoto: SayfaAc(SayfaFoto); break;
                 case AnaDil: Dil.Sonraki(); break;
                 case AnaCik: OyundanCik(); break;
             }
+            return;
+        }
+
+        // Katlar: son öğe Geri, öncekiler 1..8. kat.
+        if (sayfa == SayfaKatlar)
+        {
+            if (gezgin.Secili == KatOgeSayisi - 1) SayfaAc(SayfaAna);
+            else KatSecildi(gezgin.Secili + 1);
             return;
         }
 
@@ -465,11 +530,15 @@ public class DuraklatmaMenusu : MonoBehaviour
         int onceki = sayfa;
         sayfa = yeni;
         gezgin.OgeSayisiniAyarla(yeni == SayfaAyarlar ? AyarOgeSayisi : yeni == SayfaGoruntu ? GorOgeSayisi
+                                 : yeni == SayfaKatlar ? KatOgeSayisi
                                  : yeni == SayfaFoto || yeni == SayfaKontrol ? 1 : AnaOgeSayisi);
+        katOnay = 0;
 
         // Bir sayfaya girince ilk öğe seçili. Ana sayfaya dönünce geldiği sayfanın düğmesi
         // seçili kalsın (oyuncu nereden geldiğini görür, tekrar girmek isterse tek tuş yeter).
-        if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : onceki == SayfaFoto ? AnaFoto : AnaAyarlar);
+        if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : onceki == SayfaFoto ? AnaFoto
+                                         : onceki == SayfaKatlar ? AnaKatlar : AnaAyarlar);
+        else if (yeni == SayfaKatlar) gezgin.Sec(Kayit.Kat - 1);   // kaldığı kat seçili açılır
         else if (yeni == SayfaAyarlar && onceki == SayfaKontrol) gezgin.Sec(AyarKontroller);   // geldiği düğme seçili
         else gezgin.Sec(0);
 
@@ -697,6 +766,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (sayfa == SayfaGoruntu) { GoruntuCiz(); return; }
         if (sayfa == SayfaFoto) { FotograflariCiz(); return; }
         if (sayfa == SayfaKontrol) { KontrolleriCiz(); return; }
+        if (sayfa == SayfaKatlar) { KatlariCiz(); return; }
 
         float en = 360f, boy = 56f, ara = 16f;
         float x = (ArayuzOlcegi.Genislik - en) / 2f;
@@ -712,8 +782,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         }
         else
         {
-            // Altı düğme (#69'da Fotoğraflar eklendi; #83'te Katı Sıfırla kalktı).
-            y = ArayuzOlcegi.Yukseklik / 2f - 260f;
+            // Yedi düğme (#69'da Fotoğraflar, #85'te Katlar eklendi).
+            y = ArayuzOlcegi.Yukseklik / 2f - 296f;
             GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.baslik"), baslikStili);
             y += 60f + 2f * ara;
         }
@@ -725,6 +795,11 @@ public class DuraklatmaMenusu : MonoBehaviour
         {
             if (baslikta) Basla(); else DevamIste();
         }
+        y += boy + ara;
+
+        r = new Rect(x, y, en, boy);
+        Vurgula(AnaKatlar, r);
+        if (GUI.Button(r, Dil.Getir("menu.katlar"), dugmeStili)) SayfaAc(SayfaKatlar);
         y += boy + ara;
 
         r = new Rect(x, y, en, boy);
@@ -774,6 +849,37 @@ public class DuraklatmaMenusu : MonoBehaviour
     // GUI.HorizontalSlider: bir kaydırıcı çizer ve o karedeki değerini döndürür;
     // oyuncu sürüklemediyse verdiğimiz değerin aynısı döner. Değer değiştiyse Ayarlar'a
     // yazıyoruz; Ayarlar onu sınırlar, kaydeder ve uygular (anında, menüden çıkmadan).
+    // ---------- KATLAR SAYFASI (#85) ----------
+    // 1..8. kat alt alta; ulaşılmayan katlar sönük ve basılmaz. Kaldığı kat işaretli. Sorulan katın düğmesinde
+    // "Emin misin?" yazar. En altta Geri.
+    private void KatlariCiz()
+    {
+        float en = 420f, boy = 46f, ara = 10f;
+        float x = (ArayuzOlcegi.Genislik - en) / 2f;
+        float y = ArayuzOlcegi.Yukseklik / 2f - (KatOgeSayisi * (boy + ara) + 70f) / 2f;
+        GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.katlar_baslik"), baslikStili);
+        y += 70f;
+
+        int enYuksek = Kayit.EnYuksekKat, kaldigi = Kayit.Kat;
+        for (int kat = 1; kat <= KatSayaci.CatiKati; kat++)
+        {
+            bool acikKat = KatSecimi.Acik(kat, enYuksek, KatSayaci.CatiKati);
+            string yazi = !acikKat ? string.Format(Dil.Getir("menu.kat_kilitli"), kat)
+                        : katOnay == kat ? string.Format(Dil.Getir("menu.kat_onay"), kat)
+                        : kat == kaldigi ? string.Format(Dil.Getir("menu.kat_kayitli"), kat)
+                        : string.Format(Dil.Getir("menu.kat"), kat);
+            Rect r = new Rect(x, y, en, boy);
+            Vurgula(kat - 1, r);
+            GUI.enabled = acikKat;                 // kilitli kat sönük çizilir ve basılmaz
+            if (GUI.Button(r, yazi, dugmeStili)) { gezgin.Sec(kat - 1); KatSecildi(kat); }
+            GUI.enabled = true;
+            y += boy + ara;
+        }
+        Rect g = new Rect(x, y + 8f, en, boy);
+        Vurgula(KatOgeSayisi - 1, g);
+        if (GUI.Button(g, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAna);
+    }
+
     private void AyarlariCiz()
     {
         float en = 480f, ara = 14f;

@@ -159,4 +159,10 @@ menu.kontrol_egil	Eğil|Ctrl  (basılı tut)|Sağ çubuğa bas	Crouch|Ctrl  (hol
 menu.kontrol_menu	Menü|Esc|Start	Menu|Esc|Start
 menu.kontrol_geri	Menüde geri|Esc|B	Back in menus|Esc|B
 
-# ---- Esc menüsü: Katı Sıfırla (Şahan, 2026-09-28): katta bir hata oyuncuyu sıkıştırırsa katı baştan oynar ----
+# ---- Katlar sayfası (#85): ulaşılan katlar; birine basınca oyun o katın başından sürer. {0} = kat numarası.
+menu.katlar	Katlar	Floors
+menu.katlar_baslik	KATLAR	FLOORS
+menu.kat	{0}. Kat	Floor {0}
+menu.kat_kayitli	{0}. Kat  (kaldığın yer)	Floor {0}  (you are here)
+menu.kat_kilitli	{0}. Kat  (kilitli)	Floor {0}  (locked)
+menu.kat_onay	{0}. kattan başlansın mı? Tekrar bas	Start from floor {0}? Press again
