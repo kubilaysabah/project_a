@@ -143,7 +143,7 @@ public static partial class GrayboxKurucu
             // SALON (u 0-5,0, v 4,75-8,1): ortada dairenin sofrası, landing duvarında büfe (ikisi de kalıcı eşya);
             // üstte avize; Oda B duvarında pikap ve üstünde çerçeve; balkon kapısının yanında ayaklı eski TV.
             D("Avize_K6", 2.80f, Tavan, 6.30f, 0f, 1f),
-            D("Perde_K6", 1.40f, 2.30f, 8.10f, 0f, -1f),
+            D("Perde_K6", 1.40f, 2.30f, PetekOnuPerde, 0f, -1f),
             D("Petek", 1.40f, 0f, 8.10f, 0f, -1f),
             D("Pikap_K6", 5.00f - 0.28f, 0f, 6.30f, -1f, 0f),
             M("fancy_picture_frame_01", 5.00f, 1.60f, 6.30f, -1f, 0f),
@@ -169,14 +169,14 @@ public static partial class GrayboxKurucu
             D("Petek", 10.50f, 0f, 3.80f, -1f, 0f, B),
             // SALON (atölye): pencerenin önünde sanayi makinesi, ortada kesim masası (üstünde dikiş kutusu),
             // Oda B duvarında elbise askısı, köşelerde mankenler ve kumaş topları.
-            D("Endustriyel_Makine_K6", 1.60f, 0f, 8.10f - 0.28f, 0f, -1f, B),
-            D("Terzi_Masasi_K6", 2.80f, 0f, 6.30f, 0f, 1f, B),
-            DA("Dikis_Kutusu_Sabri", "Dikis_Kutusu_K6", 3.25f, TerziMasasi6Ustu, 6.20f, 0f, 1f, B),
+            D("Endustriyel_Makine_K6", 1.60f, 0f, 8.10f - 0.28f - 0.13f, 0f, -1f, B),   // kısa perde arkasından sarksın (çakışma testi)
+            D("Terzi_Masasi_K6", 2.80f, 0f, 6.20f, 0f, 1f, B),   // makineyle arasında yol kalsın (yürünebilirlik)
+            DA("Dikis_Kutusu_Sabri", "Dikis_Kutusu_K6", 3.25f, TerziMasasi6Ustu, 6.10f, 0f, 1f, B),
             D("Elbise_Askisi_K6", 5.00f - 0.26f, 0f, 5.85f, -1f, 0f, B),
             D("Manken_K6", 0.75f, 0f, 6.25f, 1f, 0f, B),
             D("Manken_K6", 3.60f, 0f, 7.30f, -0.3f, -1f, B),
             D("Kumas_Toplari_K6", 4.45f, 0f, 7.50f, -1f, 0f, B),   // duvara ve mankene gömülüyordu (çakışma testi)
-            D("Perde_Terzi_K6", 1.40f, 2.30f, 8.10f, 0f, -1f, B),
+            D("Perde_Terzi_K6", 1.40f, 2.30f, 8.10f, 0f, -1f, B),   // atölyede petek yok: perde duvarda
             // MUTFAK: köşede buzdolabı (A'nın mutfak anahtarı), ortada küçük masa.
             DA("Buzdolabi_Sabri", "Buzdolabi_K6", 7.20f, 0f, -0.80f + 0.30f, 0f, 1f, B),
             M("small_wooden_table_01", 8.50f, 0f, 1.30f, 0f, 1f, B),

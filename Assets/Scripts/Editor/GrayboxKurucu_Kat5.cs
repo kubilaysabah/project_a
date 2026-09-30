@@ -123,7 +123,7 @@ public static partial class GrayboxKurucu
             M("GreenChair_01", 2.30f, 0f, 7.50f, 0.3f, -1f),
             D("TV_Unitesi_K5", 3.00f, 0f, 4.75f + 0.25f, 0f, 1f),
             D("Hali_K5", 2.80f, 0f, 6.45f, 0f, 1f),
-            D("Perde_K5", 1.40f, 2.46f, 8.10f, 0f, -1f),
+            D("Perde_K5", 1.40f, 2.46f, PetekOnuPerde, 0f, -1f),
             D("Petek", 1.40f, 0f, 8.10f, 0f, -1f),
 
             // ---------- MUTFAK ---------- (u 6,8-10,5, v -0,8-2,85; kapının önü boş; tezgâh dip duvarda)
@@ -157,8 +157,8 @@ public static partial class GrayboxKurucu
             D("Perde_OdaA_K5", 9.10f, 2.30f, 8.10f, 0f, -1f),
 
             // ---------- ODA B (çalışma odası) ---------- (u 5,1-7,6, v 4,75-8,1; kapının önü boş)
-            D("Calisma_Masasi_K5", 6.35f, 0f, 8.10f - 0.33f, 0f, -1f),
-            D("Sandalye_K5", 6.35f, 0f, 7.20f, 0f, 1f),
+            D("Calisma_Masasi_K5", 6.35f, 0f, 8.10f - 0.41f, 0f, -1f),   // perde arkasından sarkabilsin (çakışma testi)
+            D("Sandalye_K5", 6.35f, 0f, 7.12f, 0f, 1f),
             D("Kitaplik_K5", 5.10f + 0.18f, 0f, 6.30f, 1f, 0f),
             D("Perde_OdaB_K5", 6.35f, 2.30f, 8.10f, 0f, -1f),
         };

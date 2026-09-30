@@ -1135,18 +1135,19 @@ elif hangi == "toplantimasa":
     kul = ortak.malzeme("K8_Kul", (0.25, 0.25, 0.24), puruz=1.0)
     filtre = ortak.malzeme("K8_Filtre", (0.50, 0.28, 0.08), puruz=0.8)
     T = 0.75
-    K("Tabla", (2.0, 0.9, 0.04), (0, 0, T - 0.02), maun, 0.008)
-    K("TablaAlt", (1.96, 0.86, 0.015), (0, 0, T - 0.0475), maun_koyu, 0.003)
-    for y in (-0.40, 0.40):
-        K("Etek", (1.80, 0.02, 0.08), (0, y, T - 0.095), maun, 0.004)
-    for x in (-0.90, 0.90):
-        K("EtekYan", (0.02, 0.76, 0.08), (x, 0, T - 0.095), maun, 0.004)
-    for x in (-0.78, 0.78):
-        K("Ayak", (0.05, 0.62, 0.63), (x, 0, 0.355), maun, 0.006)
-        K("Kizak", (0.08, 0.80, 0.04), (x, 0, 0.02), maun_koyu, 0.006)
-    K("Gergi", (1.50, 0.04, 0.10), (0, 0, 0.30), maun, 0.004)
+    # 1,6 x 0,8 (2,0 x 0,9 iken 2,5 m genişliğindeki toplantı odasında yürünecek yer kalmıyordu).
+    K("Tabla", (1.6, 0.8, 0.04), (0, 0, T - 0.02), maun, 0.008)
+    K("TablaAlt", (1.56, 0.76, 0.015), (0, 0, T - 0.0475), maun_koyu, 0.003)
+    for y in (-0.35, 0.35):
+        K("Etek", (1.40, 0.02, 0.08), (0, y, T - 0.095), maun, 0.004)
+    for x in (-0.70, 0.70):
+        K("EtekYan", (0.02, 0.66, 0.08), (x, 0, T - 0.095), maun, 0.004)
+    for x in (-0.60, 0.60):
+        K("Ayak", (0.05, 0.54, 0.63), (x, 0, 0.355), maun, 0.006)
+        K("Kizak", (0.08, 0.70, 0.04), (x, 0, 0.02), maun_koyu, 0.006)
+    K("Gergi", (1.14, 0.04, 0.10), (0, 0, 0.30), maun, 0.004)
     # Dosyalar: ikisi kapalı (lastikli), biri açık ve kâğıtları kaymış.
-    for i, (x, y, a) in enumerate(((-0.55, -0.25, 0.1), (0.60, 0.22, -0.15))):
+    for i, (x, y, a) in enumerate(((-0.45, -0.20, 0.1), (0.50, 0.18, -0.15))):
         b = len(p)
         K("Dosya", (0.25, 0.33, 0.008), (0, 0, 0.004), dosya_m[i])
         K("DLastik", (0.006, 0.334, 0.010), (0.08, 0, 0.004), lastik)
@@ -1157,7 +1158,7 @@ elif hangi == "toplantimasa":
         K("Kagit", (0.21, 0.297, 0.002), (0.13 + j * 0.015, j * 0.01, 0.004 + j * 0.002), kagit, rot=(0, 0, j * 0.06))
     for j in range(6):
         K("Satir", (0.14, 0.003, 0.0006), (0.17, 0.10 - j * 0.02, 0.0115), murekkep, rot=(0, 0, 0.18))
-    grup(b, rot=(0, 0, -0.08), kaydir=(0.05, -0.22, T))
+    grup(b, rot=(0, 0, -0.08), kaydir=(0.05, -0.18, T))
     # Cam kül tablası: oyuk, üç sigara yuvası, kül ve izmaritler.
     kt = S("KulTablasi", 0.07, 0.03, (-0.10, 0.12, T + 0.015), kul_cam, kose=32)
     ortak.oy(kt, ortak.silindir("Oyuk", 0.055, 0.03, (-0.10, 0.12, T + 0.021), kul_cam, 32))

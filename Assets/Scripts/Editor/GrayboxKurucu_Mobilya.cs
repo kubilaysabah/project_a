@@ -17,6 +17,10 @@ using UnityEngine;
 public static partial class GrayboxKurucu
 {
     const float Tavan = DairePlani.TavanYuk;
+    // Salon penceresinin altında petek var (20 cm derin). Perde duvara asılınca peteğin içinden geçiyordu
+    // (çakışma testi); korniş duvardan 22 cm açıkta, perde peteğin önünden sarkar (90'larda korniş
+    // uzun ayaklarla ya da tavana takılırdı). Pencere duvarı v = 8,10.
+    const float PetekOnuPerde = 8.10f - 0.22f;
 
     static GameObject Mob(string ad)
     {

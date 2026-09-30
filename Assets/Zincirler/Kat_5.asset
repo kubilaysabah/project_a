@@ -416,7 +416,7 @@ MonoBehaviour:
   - Yol: 
     X: 1.4
     Y: 2.46
-    Z: 8.1
+    Z: 7.8800006
     Donus: 0
     OnU: 0
     OnV: -1
@@ -647,7 +647,7 @@ MonoBehaviour:
   - Yol: 
     X: 6.35
     Y: 0
-    Z: 7.7700005
+    Z: 7.6900005
     Donus: 0
     OnU: 0
     OnV: -1
@@ -658,7 +658,7 @@ MonoBehaviour:
   - Yol: 
     X: 6.35
     Y: 0
-    Z: 7.2
+    Z: 7.12
     Donus: 0
     OnU: 0
     OnV: 1

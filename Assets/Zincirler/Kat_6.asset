@@ -506,7 +506,7 @@ MonoBehaviour:
   - Yol: 
     X: 1.4
     Y: 2.3
-    Z: 8.1
+    Z: 7.8800006
     Donus: 0
     OnU: 0
     OnV: -1
@@ -649,7 +649,7 @@ MonoBehaviour:
   - Yol: 'B:'
     X: 1.6
     Y: 0
-    Z: 7.82
+    Z: 7.69
     Donus: 0
     OnU: 0
     OnV: -1
@@ -660,7 +660,7 @@ MonoBehaviour:
   - Yol: 'B:'
     X: 2.8
     Y: 0
-    Z: 6.3
+    Z: 6.2
     Donus: 0
     OnU: 0
     OnV: 1
@@ -671,7 +671,7 @@ MonoBehaviour:
   - Yol: 'B:'
     X: 3.25
     Y: 0.855
-    Z: 6.2
+    Z: 6.1
     Donus: 0
     OnU: 0
     OnV: 1

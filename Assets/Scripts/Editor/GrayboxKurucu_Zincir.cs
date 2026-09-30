@@ -581,7 +581,7 @@ public static partial class GrayboxKurucu
             // salon hikâyenin odası (kilitsiz ilk oda, aile fotoğrafı, boşaltılan ev).
             // Pencerenin altında petek; pencerede yarısı indirilmiş tül (korniş bir ucundan sökülmüş).
             Sus(Sablon("Petek"), 1.40f, 0f, 8.10f, 0f, -1f),
-            Sus(Sablon("Perde"), 1.40f, 2.30f, 8.10f, 0f, -1f),
+            Sus(Sablon("Perde"), 1.40f, 2.30f, PetekOnuPerde, 0f, -1f),
             // Aile fotoğrafı: pencere ile balkon kapısının arasında; girene karşıdan bakar.
             Foto("kat1", true, 2.65f, 1.55f, 8.10f, 0f, -1f),
             // Çarşafla örtülü kanepe: landing duvarı boyunca, kapının açılan kanadından uzakta.
@@ -1130,7 +1130,7 @@ public static partial class GrayboxKurucu
             // açılır, açık kanat u 0,7-0,9, v 4,7-5,6'da durur. Karşı duvarda pencere (u 0,7-2,1, denizlik
             // 0,87-0,90 m, v 8,04-8,20) ve hep kilitli balkon kapısı (u 3,2-4,0). Dolu, yaşanmış bir salon.
             // Pencere: kadife fon perde ve tül; denizlikte kurumuş sardunyalar; altında petek.
-            Sus(Sablon("Perde_Kadife"), 1.40f, 2.32f, 8.10f, 0f, -1f),
+            Sus(Sablon("Perde_Kadife"), 1.40f, 2.32f, PetekOnuPerde, 0f, -1f),
             Sus(Sablon("Kuru_Sardunya"), 1.40f, 0.90f, 8.12f, 0f, -1f),
             Sus(Sablon("Petek"), 1.40f, 0f, 8.10f, 0f, -1f),
             // Rahmetli eşinin portresi: pencere ile balkon kapısının arasında, köşesinde yas kurdelesi.
@@ -1187,9 +1187,9 @@ public static partial class GrayboxKurucu
             Sus(Sablon("Perde_Cicekli"), 9.10f, 2.30f, 8.10f, 0f, -1f),
             // Elbise dolabı bu odaya sığmadı: hangi duvara konsa radyonun önüne giden yol oyuncunun kapsülüne dar
             // kalıyordu (yürünebilirlik denetimi). Karyola 10 cm doğuda; batısında radyoya 69 cm'lik yol.
-            // Eşinin aynalı tuvalet masası dip duvarda (u = 10,5); önündeki sandalyede Nuri Bey'in ceketi.
+            // Eşinin aynalı tuvalet masası dip duvarda (u = 10,5). Önündeki ceketli sandalye kaldırıldı: odada
+            // kapının önünden başka yürünecek yer bırakmıyordu (yürünebilirlik denetimi, 0,9 m²).
             Sus(Sablon("Tuvalet_Masasi"), 10.50f - 0.215f, 0f, 5.45f, -1f, 0f),
-            Sus(Sablon("Elbise_Sandalyesi"), 9.85f, 0f, 5.45f, 1f, 0f),
             // Karyolanın ayak ucunda çizgili kilim; hol duvarında, köşede yaldızlı hat levhası.
             Sus(Sablon("Kilim_Nuri"), 9.25f, 0f, 5.78f, 0f, 1f),
             Sus(Sablon("Hat_Levha"), 10.00f, 1.70f, 4.75f, 0f, 1f),
