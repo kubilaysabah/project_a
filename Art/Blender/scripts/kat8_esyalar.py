@@ -1090,7 +1090,11 @@ elif hangi == "haritamasa":
 elif hangi == "plan":
     zemin = ortak.malzeme("K8_PlanKagit", (0.72, 0.70, 0.62), puruz=0.9)
     pencere = ortak.malzeme("K8_PlanPencere", (0.10, 0.10, 0.11), puruz=0.9)
-    KAT_SAYISI = 9       # zemin kat + 9 kat: finaldeki "dokuzuncu kat" sırrını önceden fısıldar (değiştirilebilir)
+    # Zemin + 8 kat: bu, yönetimin duvarındaki RESMÎ cephe çizimi; iskân ruhsatıyla (not.kat8_ruhsat,
+    # "Zemin + 8 kat") ve 1974 fotoğrafının arkasındaki "Ruhsatta sekiz kat yazıyor" satırıyla aynı
+    # olmalı. Dokuzuncu kat yalnızca gizli planda (not.kat8_plan: "Ruhsatta yok"), notlarda ve asansörde
+    # var: "kâğıtta olmayan kat" fikri resmî belgelerin sekiz kat demesiyle işler (#83, 9 idi).
+    KAT_SAYISI = 8
     EN, BOY = 0.70, 0.50
     K("Arka", (EN, 0.006, BOY), (0, -0.003, 0), maun_koyu)
     K("Kagit", (EN - 0.07, 0.002, BOY - 0.07), (0, -0.012, 0), zemin)        # önü y = -0.013
