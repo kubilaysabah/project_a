@@ -757,15 +757,16 @@ public static partial class GrayboxKurucu
         altIsik.transform.SetParent(m, false);
         GameObject cizgi = Kutu("Cizgi", altIsik.transform, new Vector3(-yon * 0.03f, 0.006f, kanatZ), new Vector3(0.02f, 0.012f, 0.80f));
         Object.DestroyImmediate(cizgi.GetComponent<Collider>());   // nişanı ve adımı engellemesin
-        cizgi.GetComponent<MeshRenderer>().sharedMaterial = CamMalzeme();
+        // Ampul camı (6 kat parlak) burada fazla göze batıyordu (Şahan: "biraz kıs"); çizginin kendi sönük malzemesi var.
+        cizgi.GetComponent<MeshRenderer>().sharedMaterial = KapiAltiMalzeme();
         GameObject leke = new GameObject("Leke");
         leke.transform.SetParent(altIsik.transform, false);
         leke.transform.localPosition = new Vector3(-yon * 0.30f, 0.05f, kanatZ);
         Light ll = leke.AddComponent<Light>();
         ll.type = LightType.Point;
         ll.color = new Color(1f, 0.78f, 0.45f);
-        ll.intensity = 0.35f;
-        ll.range = 1.1f;
+        ll.intensity = 0.18f;   // 0,35 iken kapı uzaktan hemen seçiliyordu; şimdi yakına gelince fark edilir
+        ll.range = 0.9f;
         ll.shadows = LightShadows.None;
         altIsik.SetActive(false);
 
@@ -2219,6 +2220,23 @@ public static partial class GrayboxKurucu
         AssetDatabase.CreateAsset(yeni, Yol);
         AssetDatabase.SaveAssets();
         return yeni;
+    }
+
+    // Kapının altından sızan ışık çizgisi (7. kat): ampul camının rengi, 6 değil 1,5 kat parlak.
+    // Dosya zaten varsa rengi yeniden yazılır, böylece bu satırdaki ayar her kurulumda geçerli olur.
+    static Material KapiAltiMalzeme()
+    {
+        const string Yol = "Assets/Materials/Kapi_Alti_Isik.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            AssetDatabase.CreateAsset(m, Yol);
+        }
+        m.SetColor("_BaseColor", AkkorRengi * 1.5f);
+        EditorUtility.SetDirty(m);
+        AssetDatabase.SaveAssets();
+        return m;
     }
 
     // Daire holü, asansör kuyusu ve kuyu dibi için koyu malzeme.
