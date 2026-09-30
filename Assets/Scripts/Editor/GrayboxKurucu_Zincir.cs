@@ -1188,7 +1188,8 @@ public static partial class GrayboxKurucu
             // Elbise dolabı bu odaya sığmadı: hangi duvara konsa radyonun önüne giden yol oyuncunun kapsülüne dar
             // kalıyordu (yürünebilirlik denetimi). Karyola 10 cm doğuda; batısında radyoya 69 cm'lik yol.
             // Eşinin aynalı tuvalet masası dip duvarda (u = 10,5). Önündeki ceketli sandalye kaldırıldı: odada
-            // kapının önünden başka yürünecek yer bırakmıyordu (yürünebilirlik denetimi, 0,9 m²).
+            // kapının önünden başka yürünecek yer bırakmıyordu (yürünebilirlik denetimi, 0,9 m²). Nuri Bey'in
+            // ceketi ve pantolonu artık karyola modelinde, ayak ucunda eşinin boş yanına atılmış.
             Sus(Sablon("Tuvalet_Masasi"), 10.50f - 0.215f, 0f, 5.45f, -1f, 0f),
             // Karyolanın ayak ucunda çizgili kilim; hol duvarında, köşede yaldızlı hat levhası.
             Sus(Sablon("Kilim_Nuri"), 9.25f, 0f, 5.78f, 0f, 1f),

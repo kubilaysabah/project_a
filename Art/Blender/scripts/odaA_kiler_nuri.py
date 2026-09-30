@@ -97,6 +97,18 @@ if hangi == "karyola":
     p.append(ortak.kutu("Yastik", (0.55, 0.36, 0.08), (0.33, BOY / 2 - 0.32, 0.56), yastik, 0.035))
     for i in range(5):
         p.append(ortak.kutu("Yorgan", (0.62, 0.30, 0.07 + 0.02 * (i % 2)), (0.36 + rnd.uniform(-0.02, 0.02), 0.25 - i * 0.26, 0.565 + 0.01 * (i % 3)), yorgan, 0.03))
+    # Nuri Bey'in ceketi ve pantolonu ayak ucuna, eşinin boş yanına atılmış (elbise sandalyesi odayı
+    # daralttığı için kaldırıldı, #83). Şiltenin üstü z = 0,53; yorgan x > 0,05'te, ona değmez.
+    ceket = ortak.malzeme("Karyola_Ceket", (0.07, 0.07, 0.09), puruz=0.85)
+    pant = ortak.malzeme("Karyola_Pantolon", (0.12, 0.10, 0.08), puruz=0.85)
+    yA = -BOY / 2 + 0.34                     # ceketin ortası: ayak panosundan 30 cm içeride
+    p.append(ortak.kutu("Ceket", (0.62, 0.44, 0.035), (-0.32, yA, 0.548), ceket, 0.012))
+    p.append(ortak.kutu("CeketYaka", (0.62, 0.07, 0.05), (-0.32, yA + 0.20, 0.555), ceket, 0.02))
+    p.append(ortak.kutu("CeketKol", (0.36, 0.11, 0.03), (-0.20, yA - 0.14, 0.58), ceket, 0.01))
+    # Öbür kolu yatağın kenarından sarkar (örtünün sarkan kenarının 2 cm dışında).
+    p.append(ortak.kutu("CeketKolUst", (0.14, 0.11, 0.03), (-EN / 2 + 0.02, yA + 0.06, 0.55), ceket, 0.01))
+    p.append(ortak.kutu("CeketKolSarkan", (0.03, 0.11, 0.36), (-EN / 2 - 0.035, yA + 0.06, 0.37), ceket, 0.01))
+    p.append(ortak.kutu("Pantolon", (0.30, 0.26, 0.03), (-0.30, yA + 0.40, 0.545), pant, 0.012))
     ad, h = "Karyola_Nuri", 1.0
 
 elif hangi == "komodin":
