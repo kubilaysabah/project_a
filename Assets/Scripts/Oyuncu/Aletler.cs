@@ -28,6 +28,18 @@ public static class Aletler
 
     public static System.Collections.Generic.List<string> Liste() { return Canta.Liste(); }
 
+    /// <summary>Çantanın kayıt metni ("tornavida;levye"): kat başı anı için (Kayit.KatBasiniKaydet).</summary>
+    public static string Metin() { return Canta.Metin(); }
+
+    /// <summary>Çantayı verilen metindeki hâline döndürür ve kaydeder (Kayit.KatBasinaDon, #83).</summary>
+    public static void GeriYukle(string metin)
+    {
+        canta = AletCantasi.Oku(metin ?? "");
+        PlayerPrefs.SetString(KayitAnahtari, canta.Metin());
+        PlayerPrefs.Save();
+        Degisti?.Invoke();
+    }
+
     /// <summary>Bulunan aleti çantaya koyar ve kaydeder.</summary>
     public static void Ekle(string kimlik)
     {

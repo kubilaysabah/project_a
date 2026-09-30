@@ -19,6 +19,7 @@ public static class Kayit
     private static string ParcaAnahtari { get { return KayitYuvasi.Anahtar("kayit_parcalar"); } }   // bulunan çizim parçaları (#63)
 
     private static string FotografAnahtari { get { return KayitYuvasi.Anahtar("kayit_fotograflar"); } }   // bakılan aile fotoğrafları (#69)
+    private static string KatBasiAletAnahtari { get { return KayitYuvasi.Anahtar("kayit_katbasi_aletler"); } }   // kat başındaki alet çantası (#83)
 
     // ---------- AİLE FOTOĞRAFLARI (#69) ----------
     // Oyuncunun baktığı fotoğraflar bir koleksiyon: menüdeki Fotoğraflar sayfası onları gösterir.
@@ -140,6 +141,33 @@ public static class Kayit
         Debug.Log($"[KAYIT] {kat}. kat baştan: {kilit} kilit ve {parca} parça silindi.");
     }
 
+    // ---------- KAT BAŞI KAYDI (#83, Şahan'ın kararı) ----------
+    // "Her katı otomatik kaydetsin; katta birkaç eşya bulunmuşken oyuncu oyundan çıkarsa kat sıfırlansın,
+    // sanki ilk defa çıkıyormuş gibi olsun." Oyun açıkken kat içindeki ilerleme eskisi gibi kayda yazılır
+    // (aşağı inip dönünce, kovalamacada yakalanınca daire kayda bakarak kurulur). Oyun kayıttan AÇILDIĞINDA
+    // ise o katın kilitleri, parçaları ve anları silinir, alet çantası kata varıldığı andaki hâline döner:
+    // o katta bulunan levye gider, önceki katlardan gelen tornavida kalır.
+
+    /// <summary>Yeni bir kata varıldı: o anki alet çantası kat başı anı olarak saklanır.</summary>
+    public static void KatBasiniKaydet()
+    {
+        PlayerPrefs.SetString(KatBasiAletAnahtari, Aletler.Metin());
+        PlayerPrefs.Save();
+        Debug.Log($"[KAYIT] {Kat}. katın başı kaydedildi (aletler: '{Aletler.Metin()}').");
+    }
+
+    /// <summary>
+    /// Oyun kayıttan açıldı: kat ilk kez giriliyormuş gibi başlar. Katın kilitleri ve parçaları silinir
+    /// (KatiSifirla), alet çantası kat başındaki hâline döner. Kat başı anı hiç saklanmamışsa (bu kural
+    /// gelmeden önceki bir kayıt) aletlere dokunulmaz.
+    /// </summary>
+    public static void KatBasinaDon(int kat)
+    {
+        KatiSifirla(kat);
+        if (PlayerPrefs.HasKey(KatBasiAletAnahtari)) Aletler.GeriYukle(PlayerPrefs.GetString(KatBasiAletAnahtari));
+        Debug.Log($"[KAYIT] {kat}. kat baştan başlıyor (kat başı kaydı).");
+    }
+
     /// <summary>Oyuncunun ulaştığı kat; 1 = başlangıç (kayıt yok).</summary>
     public static int Kat
     {
@@ -161,6 +189,7 @@ public static class Kayit
         PlayerPrefs.DeleteKey(KatAnahtari);
         PlayerPrefs.DeleteKey(KilitAnahtari);
         PlayerPrefs.DeleteKey(ParcaAnahtari);
+        PlayerPrefs.DeleteKey(KatBasiAletAnahtari);
         kilitler = null;
         parcalar = null;
         Aletler.Bosalt();   // yeni oyun: bulunan aletler de gider (#61)

@@ -354,7 +354,17 @@ public class KatYoneticisi : MonoBehaviour
         if (kayittanDevam)
         {
             sayac.Yukle(Kayit.Kat);
-            Debug.Log($"[KAYIT] Kaldığı yerden: {sayac.MevcutKat}. kat");
+            // Her kat kendi başında kaydedilir (#83, Şahan): oyuncu kattayken birkaç eşya bulup oyundan
+            // çıktıysa, kat ilk kez giriliyormuş gibi baştan başlar. Daire aşağıda kurulmadan önce yapılır
+            // ki zincir uygulayıcısı kayıtta bu katın hiçbir kilidini, parçasını bulmasın.
+            Kayit.KatBasinaDon(sayac.MevcutKat);
+            Debug.Log($"[KAYIT] Kaldığı yerden: {sayac.MevcutKat}. kat (kat başından)");
+        }
+        else
+        {
+            // Kayıt yok (oyuncu henüz 2. kata varmadı): yeni oyun açılıştan başlar. 1. katta yarım kalan
+            // bir oturumun kilitleri, parçaları ve aletleri de silinir; 1. kat da ilk kez giriliyormuş gibi olsun.
+            Kayit.Sil();
         }
 
         referansDongu = merdiven != null ? merdiven.NetDongu : 0;
@@ -546,8 +556,12 @@ public class KatYoneticisi : MonoBehaviour
         // Sahanlık burada yenilenmiyor; hemen ardından SahanliklariGuncelle ölçüm noktasının
         // değiştiğini görüp yeniliyor.
         Debug.Log($"[KAT] Yukarı çıkıldı: {eskiKat} -> {sayac.MevcutKat}");
-        // Otomatik kayıt (#52): yeni bir kata ulaşıldı.
-        if (sayac.MevcutKat > Kayit.Kat) Kayit.Kat = sayac.MevcutKat;
+        // Otomatik kayıt (#52): yeni bir kata ulaşıldı. Kat başı anı da (o anki alet çantası) saklanır (#83).
+        if (sayac.MevcutKat > Kayit.Kat)
+        {
+            Kayit.Kat = sayac.MevcutKat;
+            Kayit.KatBasiniKaydet();
+        }
     }
 
     // ---------- SAHANLIKLARIN GÖSTERDİĞİ KAT ----------
@@ -1151,24 +1165,6 @@ public class KatYoneticisi : MonoBehaviour
     /// <summary>Kaçışta yakalanıldı: katı baştan kurar (KacisAni çağırır).</summary>
     public void KacistaYakalandi(int kat) { StartCoroutine(KatiBastanKur(kat, kilitleriSil: true)); }
 
-    // ---------- KATI SIFIRLA (Esc menüsü, Şahan 2026-09-28) ----------
-    // Bir katta bir hata oyuncuyu sıkıştırırsa (bir eşya ulaşılmaz yere düştü, bir kapı takıldı) oyuncu
-    // katı baştan oynayabilsin. Kovalamacada yakalanmakla aynı yol: karartma, el boşalır, katın kilitleri ve
-    // parçaları kayıttan silinir, oyuncu katın başına alınır, daire yeniden kurulur. Bulunan aletler kalır.
-    private bool sifirlaniyor;
-
-    /// <summary>Menü "Katı Sıfırla"yı gösterebilir mi: açılışta (kapıcı odası), finalde ve bir sıfırlama
-    /// sürerken hayır.</summary>
-    public bool KatSifirlanabilir { get { return sayac != null && oyuncu != null && !acilisModu && !catiAcildi && !sifirlaniyor; } }
-
-    /// <summary>Oyuncunun ulaştığı katı baştan kurar (Esc → Katı Sıfırla).</summary>
-    public void KatiSifirla()
-    {
-        if (!KatSifirlanabilir) return;
-        Debug.Log($"[KAT] Oyuncu {MevcutKat}. katı menüden sıfırladı.");
-        StartCoroutine(KatiBastanKur(MevcutKat, kilitleriSil: true));
-    }
-
     /// <summary>
     /// 6. katın saklanma anında görüldü (#58, SaklanmaAni): karanlık, oyuncu katın başında uyanır;
     /// ama kovalamacadan farklı olarak çözülmüş kilitler çözülmüş kalır (#58'in ilk kuralı). Elindeki
@@ -1178,7 +1174,6 @@ public class KatYoneticisi : MonoBehaviour
 
     private IEnumerator KatiBastanKur(int kat, bool kilitleriSil)
     {
-        sifirlaniyor = true;
         // Karanlıkta oyuncu yürüyemesin.
         BirinciSahisKontrolcu kontrol = oyuncu != null ? oyuncu.GetComponent<BirinciSahisKontrolcu>() : null;
         if (kontrol != null) kontrol.enabled = false;
@@ -1206,7 +1201,6 @@ public class KatYoneticisi : MonoBehaviour
         // 1,2 sn'de ekran açılır.
         for (float t = 1f; t > 0f; t -= Time.deltaTime / 1.2f) { yakalanmaKarartmasi = t; yield return null; }
         yakalanmaKarartmasi = 0f;
-        sifirlaniyor = false;
     }
 
     private void OyuncuyuBasaAl()

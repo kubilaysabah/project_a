@@ -233,14 +233,20 @@ public static class KatDenetimi
         return rapor.ToString();
     }
 
-    // ---------- KAYIT TESTİ ----------
-    // 1. adım (oyun modunda, kat açıkken): zincirin çözülme sırasındaki ilk yarısını kayda "çözüldü" diye yazar.
+    // ---------- KAYIT TESTİ (kat başı kaydı, #83) ----------
+    // Kural: kat, kata varıldığı an kaydedilir; kat içindeki ilerleme oyun kapatılıp açılınca SİLİNİR, kat ilk kez
+    // giriliyormuş gibi başlar (Kayit.KatBasinaDon). 1. adım (oyun modunda, kat açıkken): kat başı anı alınır,
+    // zincirin ilk yarısı kayda "çözüldü" diye yazılır ve çantaya sahte bir alet konur (o katta bulunmuş gibi).
     // Sonra oyun kapatılıp aynı test kaydıyla yeniden açılır ve KayitDenetle çağrılır.
+    const string DenemeAleti = "deneme_aleti";
+
     public static string KayitHazirla(int kat)
     {
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>();
         KilitZinciri zincir = yonetici != null ? yonetici.KatinZinciri(kat) : null;
         if (zincir == null) return "zincir yok";
+        Kayit.KatBasiniKaydet();          // kata varış anı (bu testte kat_gir.cs katı doğrudan açtı)
+        Aletler.Ekle(DenemeAleti);        // kat içinde bulunan bir alet: yeniden açılışta gitmeli
         var odalar = new List<string>();
         foreach (DairePlani.Oda o in DairePlani.Odalar) { odalar.Add(o.Ad); odalar.Add(KilitZinciri.IkinciOnek + o.Ad); }
         KilitZinciri.Sonuc sonuc = zincir.Cozumle(odalar);
@@ -251,8 +257,9 @@ public static class KatDenetimi
         return "kayda çözüldü yazılan: " + string.Join(",", yazilan);
     }
 
-    // 2. adım (yeniden açılan oyunda): her kilidin durumu kayıtla aynı mı? Kapı ya da parça kilidi çözükse kapı/parça
-    // serbest, değilse kilitli olmalı; çözülmüş anahtar ve sigorta kilitlerinin eşyası (kullanıldı) sahnede olmamalı.
+    // 2. adım (yeniden açılan oyunda): kat baştan başlamış mı? Katın hiçbir kilidi çözük olmamalı (kapılar ve
+    // parçalar kilitli), kat içinde bulunan alet çantadan gitmiş olmalı. Ayrıca her kilidin sahnedeki durumu
+    // kayıtla aynı olmalı (eski denetim).
     public static string KayitDenetle(int kat)
     {
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>();
@@ -281,6 +288,8 @@ public static class KatDenetimi
             foreach (Esya es in Object.FindObjectsByType<Esya>())
                 if (es.Kimlik == e.Kimlik && es.gameObject.activeInHierarchy) { hata++; rapor.Append($"HATA:kullanılmış {e.Kimlik} yeniden konmuş "); }
         }
+        if (cozuk > 0) { hata++; rapor.Append($"HATA:kat baştan başlamadı ({cozuk} kilit çözük kaldı) "); }
+        if (Aletler.Var(DenemeAleti)) { hata++; rapor.Append("HATA:kat içinde bulunan alet çantada kaldı "); }
         return $"{cozuk} çözük, {kilitli} kilitli, {hata} hata " + rapor;
     }
 

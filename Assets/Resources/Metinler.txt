@@ -160,5 +160,3 @@ menu.kontrol_menu	Menü|Esc|Start	Menu|Esc|Start
 menu.kontrol_geri	Menüde geri|Esc|B	Back in menus|Esc|B
 
 # ---- Esc menüsü: Katı Sıfırla (Şahan, 2026-09-28): katta bir hata oyuncuyu sıkıştırırsa katı baştan oynar ----
-menu.kati_sifirla	Katı Sıfırla	Restart Floor
-menu.kati_sifirla_onay	Emin misin? Tekrar bas	Sure? Press again
