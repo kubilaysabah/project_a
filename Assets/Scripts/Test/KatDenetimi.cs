@@ -324,6 +324,140 @@ public static class KatDenetimi
         return eslesmeler.Count + " çakışma | " + rapor;
     }
 
+    // ---------- EKSİKLER TESTİ (#83) ----------
+    // Öteki testlerin görmediği dört tür kusuru arar (oyun modunda, kat açıkken):
+    //   HAVADA:       ne yere, ne bir eşyanın üstüne, ne duvara değen süs (kat dosyasında yanlış yükseklik).
+    //   CARPISMASIZ:  yerde duran, boyu 35 cm'yi aşan ama çarpışması olmayan eşya: oyuncu içinden geçer.
+    //   MALZEME:      boş malzeme yuvası ya da pembe hata gölgelendiricisi (kırık malzeme).
+    //   KAPI:         oda kapısının kanadı açılırken (0°'den açık açıya) bir eşyanın içine 3 cm'den fazla giriyor.
+    // Perdeler CARPISMASIZ'da ayrı sayılır: kumaş, içinden geçilmesi kusur sayılmaz.
+    public static string Eksikler()
+    {
+        const BindingFlags Gizli = BindingFlags.NonPublic | BindingFlags.Instance;
+        var rapor = new StringBuilder();
+        int havada = 0, carpismasiz = 0, malzeme = 0, kapi = 0;
+        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>())
+        {
+            if (!d.gameObject.activeInHierarchy) continue;
+            float taban = d.transform.position.y;                     // dairenin döşemesi
+            float tavan = taban + DairePlani.TavanYuk;
+
+            // Süslerin ve kalıcı eşyaların kökleri: dairenin (ya da Esyalar'ın) doğrudan çocukları.
+            var kokler = new List<Transform>();
+            foreach (Transform c in d.transform)
+            {
+                if (!c.gameObject.activeInHierarchy) continue;
+                if (c.name == "Esyalar") { foreach (Transform e2 in c) if (e2.gameObject.activeInHierarchy) kokler.Add(e2); }
+                else if (!YapiMi(c.name)) kokler.Add(c);
+            }
+            foreach (Transform kok in kokler)
+            {
+                // Yalnızca görünen çiziciler: kapalı olanın (eşyanın parıltı dörtgeni) sınırı anlamsızdır.
+                var rs = new List<Renderer>();
+                foreach (Renderer r0 in kok.GetComponentsInChildren<Renderer>()) if (r0.enabled) rs.Add(r0);
+                if (rs.Count == 0) continue;
+                // MALZEME: her çizicinin her yuvası dolu ve hata gölgelendiricisi değil mi?
+                foreach (Renderer r in rs)
+                    foreach (Material m in r.sharedMaterials)
+                        if (m == null || m.shader == null || m.shader.name == "Hidden/InternalErrorShader")
+                        { malzeme++; rapor.Append($"MALZEME:{kok.name}/{r.name} "); }
+                Bounds b = rs[0].bounds;
+                foreach (Renderer r in rs) b.Encapsulate(r.bounds);
+                if (b.size.y < 0.005f) continue;                       // kâğıt, halı gibi yassı şeyler
+
+                bool yerde = b.min.y < taban + 0.03f;
+                bool tavanda = b.max.y > tavan - 0.10f;
+                // Duvara değiyor mu: kutunun 4 cm büyüğü bir yapı çarpışmasına (duvar, kapı kasası) değer mi?
+                bool duvarda = false;
+                foreach (Collider c in Physics.OverlapBox(b.center, b.extents + Vector3.one * 0.04f, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore))
+                    if (!c.transform.IsChildOf(kok) && YapiKokuMu(c.transform, d.transform)) { duvarda = true; break; }
+                // Bir şeyin üstünde mi: altının beş noktasından aşağı 6 cm bak (kendi parçaları sayılmaz).
+                bool ustunde = false;
+                foreach (Vector2 o in new[] { Vector2.zero, new Vector2(0.4f, 0.4f), new Vector2(-0.4f, 0.4f), new Vector2(0.4f, -0.4f), new Vector2(-0.4f, -0.4f) })
+                {
+                    Vector3 bas = new Vector3(b.center.x + o.x * b.extents.x, b.min.y + 0.02f, b.center.z + o.y * b.extents.z);
+                    foreach (RaycastHit h in Physics.RaycastAll(bas, Vector3.down, 0.08f, ~0, QueryTriggerInteraction.Ignore))
+                        if (!h.collider.transform.IsChildOf(kok)) { ustunde = true; break; }
+                    if (ustunde) break;
+                }
+                // Görüntüsüyle destek: başka bir kökün çizicisinin üst yüzü bu eşyanın altına 3 cm yakınsa ve
+                // yatayda altında kalıyorsa (ışın, çarpışması olmayan desteği ya da kutusunun içini göremez).
+                if (!ustunde)
+                    foreach (Transform o2 in kokler)
+                    {
+                        if (o2 == kok) continue;
+                        foreach (Renderer r2 in o2.GetComponentsInChildren<Renderer>())
+                        {
+                            if (!r2.enabled) continue;
+                            Bounds b2 = r2.bounds;
+                            // Başka bir eşyaya 1 cm yakından değiyorsa ona asılı ya da dayalıdır (perde → korniş dirseği).
+                            Bounds genis = b; genis.Expand(0.02f);
+                            if (genis.Intersects(b2)) { ustunde = true; break; }
+                            if (b2.max.y < b.min.y - 0.03f || b2.min.y > b.min.y + 0.01f) continue;
+                            if (b.center.x < b2.min.x || b.center.x > b2.max.x || b.center.z < b2.min.z || b.center.z > b2.max.z) continue;
+                            ustunde = true; break;
+                        }
+                        if (ustunde) break;
+                    }
+                if (!yerde && !tavanda && !duvarda && !ustunde)
+                { havada++; rapor.Append($"HAVADA:{kok.name}(alt {b.min.y - taban:0.00}m) "); }
+
+                // CARPISMASIZ: yerde, 35 cm'den uzun, tabanı 15 x 15 cm'den geniş, hiç çarpışması yok.
+                if (yerde && b.size.y > 0.35f && b.size.x > 0.15f && b.size.z > 0.15f && kok.GetComponentInChildren<Collider>() == null)
+                {
+                    bool perde = kok.name.Contains("Perde");
+                    if (!perde) carpismasiz++;
+                    rapor.Append(perde ? $"(perde çarpışmasız:{kok.name}) " : $"CARPISMASIZ:{kok.name} ");
+                }
+            }
+
+            // KAPI: her oda kapısını 0°'den açık açıya 15°'lik adımlarla döndür, kanadın çarpışmasının bir
+            // eşyaya ne kadar girdiğini ölç (ComputePenetration: iki çarpışmanın iç içe geçme derinliği).
+            foreach (IcKapi k in d.GetComponentsInChildren<IcKapi>())
+            {
+                if (k.name.StartsWith("Balkon")) continue;   // balkon kapısı hep kilitli, hiç açılmaz
+                float acikAci = (float)typeof(IcKapi).GetField("acikAci", Gizli).GetValue(k);
+                MethodInfo uygula = typeof(IcKapi).GetMethod("AciyiUygula", Gizli);
+                Transform kanat = (Transform)typeof(IcKapi).GetField("kanat", Gizli).GetValue(k);
+                if (kanat == null) continue;
+                bool eskiAcik = k.Acik;
+                string enKotu = null; float enDerin = 0.03f; float enAci = 0f;
+                for (int adim = 1; adim <= 6; adim++)
+                {
+                    float a = acikAci * adim / 6f;
+                    uygula.Invoke(k, new object[] { a });
+                    Physics.SyncTransforms();
+                    foreach (Collider kc in kanat.GetComponentsInChildren<Collider>())
+                        foreach (Collider c in Physics.OverlapBox(kc.bounds.center, kc.bounds.extents, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore))
+                        {
+                            if (c.transform.IsChildOf(k.transform) || YapiKokuMu(c.transform, d.transform)) continue;
+                            if (c.GetComponentInParent<Esya>() != null) continue;
+                            if (Physics.ComputePenetration(kc, kc.transform.position, kc.transform.rotation, c, c.transform.position, c.transform.rotation, out Vector3 _, out float derin) && derin > enDerin)
+                            { enDerin = derin; enKotu = KokAdi(c.transform, d.transform); enAci = a; }
+                        }
+                }
+                uygula.Invoke(k, new object[] { eskiAcik ? acikAci : 0f });
+                if (enKotu != null) { kapi++; rapor.Append($"KAPI:{k.name}<>{enKotu}({enDerin:0.00}m, {enAci:0}°) "); }
+            }
+            Physics.SyncTransforms();
+        }
+        return $"havada {havada}, çarpışmasız {carpismasiz}, malzeme {malzeme}, kapı {kapi} | " + rapor;
+    }
+
+    // Bir çarpışmanın, dairenin altındaki kökünün adı (Esyalar'ın içindeyse onun çocuğu).
+    static string KokAdi(Transform t, Transform daire)
+    {
+        while (t.parent != null && t.parent != daire && t.parent.name != "Esyalar") t = t.parent;
+        return t.name;
+    }
+
+    // Çarpışma yapıya mı ait (duvar, döşeme, kapı kasası)? Dairenin dışındaki her şey (sahanlık) de yapıdır.
+    static bool YapiKokuMu(Transform t, Transform daire)
+    {
+        if (!t.IsChildOf(daire)) return true;
+        return YapiMi(KokAdi(t, daire));
+    }
+
     // Yürünebilir alanı başlangıç noktasından doldurur (genişlik öncelikli arama). Sınır: sahanlığın (ve onun
     // çocukları olan dairelerin) dünya kutusu, başlangıcın katından ±0,4 m (merdivene inip çıkmasın).
     static void Dolas(Vector3 basla, Transform sahanlik, Transform oyuncu, Dictionary<Vector2Int, Hucre> hucreler, Dictionary<string, int> engeller)
