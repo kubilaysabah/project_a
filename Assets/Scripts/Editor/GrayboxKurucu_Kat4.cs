@@ -52,8 +52,9 @@ public static partial class GrayboxKurucu
         v.yalnizSecilenEsyalar = true;
         var z = new KilitZinciri();
         z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_A", "Oda_C" });
-        // Salonla Oda B arasındaki duvar (u = 5,0); yazı duvarın 4,5 cm önünde, ön yüzü salona (-u) bakar.
-        z.Yerler.Add(new ZincirYeri { Kimlik = "duvar", PlandaNokta = true, Oda = "Salon", U = 4.955f, Y = 1.60f, V = 7.2f, OnU = -1f, OnV = 0f });
+        // Salonla Oda B arasındaki duvar: duvarlar odanın dışına örülür, salon tarafındaki yüzü u = 5,0.
+        // Yazı yüzün yarım santim önünde (4,5 cm öndeyken havada duruyordu: eksikler testi), salona (-u) bakar.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "duvar", PlandaNokta = true, Oda = "Salon", U = 4.995f, Y = 1.60f, V = 7.2f, OnU = -1f, OnV = 0f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "kutu", Yol = "Alet_Kutusu_Hasan", Oda = "Oda_B", KilitYolu = "Alet_Kutusu_Hasan/Kapak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "buzdolabi", Yol = "Buzdolabi_Hasan", Oda = "Mutfak", KilitYolu = "Buzdolabi_Hasan/Kapi_1" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "sigorta", Tur = EsyaTuru.Sigorta, Yer = "kutu", Y = AletKutusu4Taban, Donus = 20f });

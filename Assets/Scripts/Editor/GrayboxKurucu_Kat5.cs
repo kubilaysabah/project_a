@@ -56,7 +56,7 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "cekmece", Yol = "Esyalar/Tezgah/Cekmece_2", Oda = "Mutfak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "masa_yer", PlandaNokta = true, Oda = "Oda_B", U = 6.05f, Y = Masa5Ustu + 0.005f, V = 7.72f, Donus = 30f });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "levye_yer", PlandaNokta = true, Oda = "Oda_A", U = 8.85f, Y = 0.004f, V = 7.65f, Donus = 60f });
+        z.Yerler.Add(new ZincirYeri { Kimlik = "levye_yer", PlandaNokta = true, Oda = "Oda_A", U = 9.05f, Y = 0.004f, V = 6.22f, Donus = 80f });
         // Vananın kilidi gardırobun kendisinde (KilitYolu): gardırop itilmeden vanaya ulaşılmaz.
         z.Yerler.Add(new ZincirYeri { Kimlik = "vana", Yol = "Esyalar/Vana/Cark", Oda = "Salon", KilitYolu = "Esyalar/Gardirop" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "sifon", Yol = "Esyalar/Lavabo/Sifon", Oda = "Banyo" });
@@ -120,10 +120,12 @@ public static partial class GrayboxKurucu
             // o şerit boş kalır). Kanepe Oda B duvarında; önünde uzun sehpa; TV ünitesi hol duvarında.
             D("Kanepe_K5", 5.00f - 0.45f - 0.02f, 0f, 6.45f, -1f, 0f),
             M("WoodenTable_01", 3.60f, 0f, 6.45f, 1f, 0f),
-            M("GreenChair_01", 2.30f, 0f, 7.50f, 0.3f, -1f),
+            M("GreenChair_01", 2.30f, 0f, 7.33f, 0.3f, -1f),   // öne alınan perdeye girmesin (çakışma testi)
             D("TV_Unitesi_K5", 3.00f, 0f, 4.75f + 0.25f, 0f, 1f),
             D("Hali_K5", 2.80f, 0f, 6.45f, 0f, 1f),
             D("Perde_K5", 1.40f, 2.46f, PetekOnuPerde, 0f, -1f),
+            D("Kornis_Dirsegi", 1.40f - 0.92f, 2.448f, 8.10f, 0f, -1f),   // korniş dirsekleri (perde duvardan 22 cm önde)
+            D("Kornis_Dirsegi", 1.40f + 0.92f, 2.448f, 8.10f, 0f, -1f),
             D("Petek", 1.40f, 0f, 8.10f, 0f, -1f),
 
             // ---------- MUTFAK ---------- (u 6,8-10,5, v -0,8-2,85; kapının önü boş; tezgâh dip duvarda)
@@ -151,9 +153,14 @@ public static partial class GrayboxKurucu
             D("Boya_Kovalari_K5", 6.30f, 0f, -0.50f, 0f, 1f),
 
             // ---------- ODA A ---------- (u 7,7-10,5, v 4,75-8,1; kapının önü boş)
-            M("GothicBed_01", 10.50f - 1.02f - 0.02f, 0f, 6.60f, -1f, 0f),
-            D("Komodin_K5", 10.50f - 0.20f, 0f, 7.62f, -1f, 0f),
-            D("Sifonyer_K5", 7.70f + 0.23f, 0f, 6.60f, 1f, 0f),
+            // Gotik karyola (1,49 x 2,04 m) başı doğu duvarında, odanın kuzey şeridinde; komodin güneyinde,
+            // şifonyer batı duvarında kapıya yakın. Levye karyolanın güney kenarının dibinde, açık alanda yerde
+            // (karyolanın batısında kalan 74 cm'lik şerit oyuncunun gövdesine dar geliyordu). Karyola ortadayken
+            // kapının önünü, şifonyerle arasındaki geçidi ve levyeyi kapatıyordu; hazır mobilyaya çarpışma
+            // takılınca odada 0,7 m² kaldığı görüldü (eksikler testi).
+            M("GothicBed_01", 10.50f - 1.02f - 0.02f, 0f, 7.20f, -1f, 0f),
+            D("Komodin_K5", 10.50f - 0.20f, 0f, 6.20f, -1f, 0f),
+            D("Sifonyer_K5", 7.70f + 0.23f, 0f, 5.65f, 1f, 0f),
             D("Perde_OdaA_K5", 9.10f, 2.30f, 8.10f, 0f, -1f),
 
             // ---------- ODA B (çalışma odası) ---------- (u 5,1-7,6, v 4,75-8,1; kapının önü boş)

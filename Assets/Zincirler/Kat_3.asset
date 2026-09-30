@@ -398,6 +398,28 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
+    X: 0.53999996
+    Y: 2.288
+    Z: 8.1
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 3238460192669132241, guid: 21b9e203e7d56634aa4aa5cc6ecc9673, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 2.26
+    Y: 2.288
+    Z: 8.1
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 3238460192669132241, guid: 21b9e203e7d56634aa4aa5cc6ecc9673, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
     X: 1.4
     Y: 0
     Z: 8.1

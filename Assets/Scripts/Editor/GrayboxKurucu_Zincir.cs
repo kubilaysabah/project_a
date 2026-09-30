@@ -75,6 +75,7 @@ public static partial class GrayboxKurucu
         TerlikCiftiSablonuKur("Cocuk");
         // Hol dekoru (#83).
         ParcaSablonuKur("Petek", "Petek");
+        KornisDirsegiSablonuKur();
         ParcaSablonuKur("Hali_Rulolari", "Hali_Rulolari");
         GoblenSablonuKur();
         TabloIziSablonuKur("Tablo_Izi_Genis", 0.55f, 0.42f);
@@ -645,6 +646,9 @@ public static partial class GrayboxKurucu
             // Pencerenin altında petek; pencerede yarısı indirilmiş tül (korniş bir ucundan sökülmüş).
             Sus(Sablon("Petek"), 1.40f, 0f, 8.10f, 0f, -1f),
             Sus(Sablon("Perde"), 1.40f, 2.30f, PetekOnuPerde, 0f, -1f),
+            // Korniş dirsekleri: duvardan öne alınan kornişi duvara bağlar (korniş ucundan 10 cm içeride).
+            Sus(Sablon("Kornis_Dirsegi"), 1.40f - 0.85f, 2.288f, 8.10f, 0f, -1f),
+            Sus(Sablon("Kornis_Dirsegi"), 1.40f + 0.85f, 2.288f, 8.10f, 0f, -1f),
             // Aile fotoğrafı: pencere ile balkon kapısının arasında; girene karşıdan bakar.
             Foto("kat1", true, 2.65f, 1.55f, 8.10f, 0f, -1f),
             // Çarşafla örtülü kanepe: landing duvarı boyunca, kapının açılan kanadından uzakta.
@@ -863,6 +867,42 @@ public static partial class GrayboxKurucu
     // boşta kalan çivi. İz, duvarın rengini biraz açan yarı saydam beyaz bir dörtgen (Unity'nin hazır
     // Quad'ı): böylece her kattaki duvar kaplamasında çalışır. en = 0 ise yalnızca çivi. Çarpıştırıcı
     // yok: oyuncunun nişanını engellemesin. yatay: yere yatık iz (kaldırılan halının parkede bıraktığı), çivisiz.
+    // Korniş dirseği (#83): petekli salonlarda perde peteğin önüne, duvardan 22 cm açığa alındı
+    // (PetekOnuPerde); perdenin kendi korniş ayakları da onunla birlikte duvardan kopup havada kaldı
+    // (eksikler testi). Bu dirsek duvara vidalı küçük bir taban ve ondan korniş borusuna uzanan koldur;
+    // her korniş ucuna bir tane konur. Kapı, petek gibi binanın ortak donanımı: her katta aynısı.
+    // Ön yüzü +Z (odaya), pivotu duvarda, kolun ekseni pivotun yüksekliğinde. Çarpışması yok (2,3 m yukarıda).
+    static GameObject KornisDirsegiSablonuKur()
+    {
+        const string Yol = "Assets/Materials/Kornis_Metal.mat";
+        Material metal = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (metal == null)
+        {
+            metal = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            AssetDatabase.CreateAsset(metal, Yol);
+        }
+        metal.SetColor("_BaseColor", new Color(0.20f, 0.16f, 0.10f));   // eskimiş pirinç
+        metal.SetFloat("_Metallic", 0.7f);
+        metal.SetFloat("_Smoothness", 0.35f);
+        EditorUtility.SetDirty(metal);
+
+        GameObject gecici = new GameObject("Kornis_Dirsegi");
+        // Duvar tabanı: 5 x 8 cm, 1,2 cm kalın; arka yüzü duvarda (z = 0).
+        GameObject taban = Kutu("Taban", gecici.transform, new Vector3(0f, 0f, 0.006f), new Vector3(0.05f, 0.08f, 0.012f));
+        // Kol: tabandan korniş borusuna (22 cm, PetekOnuPerde), 1,4 cm kalın.
+        GameObject kol = Kutu("Kol", gecici.transform, new Vector3(0f, 0f, 0.012f + 0.105f), new Vector3(0.014f, 0.014f, 0.21f));
+        foreach (GameObject g in new[] { taban, kol })
+        {
+            Object.DestroyImmediate(g.GetComponent<Collider>());
+            MeshRenderer mr = g.GetComponent<MeshRenderer>();
+            mr.sharedMaterial = metal;
+            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
+        GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Kornis_Dirsegi.prefab");
+        Object.DestroyImmediate(gecici);
+        return sablon;
+    }
+
     static GameObject TabloIziSablonuKur(string ad, float en, float boy, bool yatay = false)
     {
         const string IzYolu = "Assets/Materials/Tablo_Izi.mat";
@@ -1194,26 +1234,33 @@ public static partial class GrayboxKurucu
             // 0,87-0,90 m, v 8,04-8,20) ve hep kilitli balkon kapısı (u 3,2-4,0). Dolu, yaşanmış bir salon.
             // Pencere: kadife fon perde ve tül; denizlikte kurumuş sardunyalar; altında petek.
             Sus(Sablon("Perde_Kadife"), 1.40f, 2.32f, PetekOnuPerde, 0f, -1f),
+            Sus(Sablon("Kornis_Dirsegi"), 1.40f - 1.01f, 2.308f, 8.10f, 0f, -1f),   // korniş dirsekleri
+            Sus(Sablon("Kornis_Dirsegi"), 1.40f + 1.01f, 2.308f, 8.10f, 0f, -1f),
             Sus(Sablon("Kuru_Sardunya"), 1.40f, 0.90f, 8.12f, 0f, -1f),
             Sus(Sablon("Petek"), 1.40f, 0f, 8.10f, 0f, -1f),
             // Rahmetli eşinin portresi: pencere ile balkon kapısının arasında, köşesinde yas kurdelesi.
             Sus(Sablon("Portre_Kat2_Es"), 2.66f, 1.60f, 8.10f, 0f, -1f),
             // Lacivert halı ortada; üstünde kanepe, sehpa ve berjer.
+            // Yerleşim eksikler testine göre (#83): hazır mobilyalar #73'ten beri çarpışmasızdı; çarpışma
+            // takılınca berjerin kapının dibinde, sallanan sandalyenin kanepeyle peteğin içinde olduğu ve
+            // salonda yalnızca 0,3 m² yürünebildiği görüldü. Kanepe ile sehpa 35 cm kuzeye (girişin önü boş
+            // kalsın, perdenin önünde dursunlar), berjer girişin doğusuna, sallanan sandalye pencere ile balkon
+            // kapısının arasına alındı; üstlerindeki süsler onlarla birlikte taşındı.
             Sus(Sablon("Hali_Nuri"), 2.60f, 0f, 6.45f, 0f, 1f),
-            M("Sofa_01", 0.03f + 0.40f, 0f, 6.50f, 1f, 0f),
-            M("CoffeeTable_01", 1.50f, 0f, 6.50f, 1f, 0f),
-            M("ArmChair_01", 2.35f, 0f, 5.30f, 1f, 0.6f),
+            M("Sofa_01", 0.03f + 0.40f, 0f, 6.85f, 1f, 0f),
+            M("CoffeeTable_01", 1.55f, 0f, 6.85f, 1f, 0f),
+            M("ArmChair_01", 3.10f, 0f, 5.32f, 1f, 0f),
             // Sehpada soğumuş çay ve çaydanlık, açık gazete ve boş gözlük kılıfı (gözlüğü holde kırık).
-            Sus(Sablon("Cay_Takimi"), 1.55f, SehpaUstu, 6.00f, 1f, 0f),
-            Sus(Sablon("Gazete_Kilif"), 1.45f, SehpaUstu, 6.80f, 1f, 0.15f),
-            // Pencere köşesinde sallanan sandalye ve üstünde katlı örgü battaniye: Nuri Bey'in radyo köşesi.
-            M("Rockingchair_01", 0.62f, 0f, 7.68f, 1f, -0.5f),
-            Sus(Sablon("Orgu_Battaniye"), 0.62f + 0.02f, SandalyeOturagi, 7.68f - 0.01f, 1f, -0.5f),
+            Sus(Sablon("Cay_Takimi"), 1.60f, SehpaUstu, 6.35f, 1f, 0f),
+            Sus(Sablon("Gazete_Kilif"), 1.50f, SehpaUstu, 7.15f, 1f, 0.15f),
+            // Pencere ile balkon kapısının arasında sallanan sandalye, üstünde katlı örgü battaniye.
+            M("Rockingchair_01", 2.85f, 0f, 7.35f, -0.3f, -1f),
+            Sus(Sablon("Orgu_Battaniye"), 2.85f, SandalyeOturagi, 7.35f, -0.3f, -1f),
             // Koltuk dantelleri: kanepenin sırtında üç, berjerin sırtında bir.
-            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 6.00f, 1f, 0f),
-            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 6.50f, 1f, 0f),
-            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 7.00f, 1f, 0f),
-            Sus(Sablon("Koltuk_Danteli"), 2.10f, 1.06f, 5.16f, 1f, 0.6f),   // berjerin sırtının tepesi
+            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 6.35f, 1f, 0f),
+            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 6.85f, 1f, 0f),
+            Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 7.35f, 1f, 0f),
+            Sus(Sablon("Koltuk_Danteli"), 3.10f - 0.30f, 1.06f, 5.32f, 1f, 0f),   // berjerin sırtının tepesi
             // TV konsolu ve ahşap kasalı televizyon: Oda B duvarında, kanepeye bakar.
             M("ClassicConsole_01", 5.00f - 0.295f, 0f, 6.40f, -1f, 0f),
             M("Television_01", 4.75f, 0.95f, 6.40f, -1f, 0f),

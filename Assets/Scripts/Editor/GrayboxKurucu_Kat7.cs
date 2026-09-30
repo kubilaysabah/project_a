@@ -87,8 +87,9 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "mutfak_cekmece", Yol = "Esyalar/Tezgah/Cekmece_1", Oda = "Mutfak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "hol_konsol", Yol = "Hol_Konsolu_Cemal/Cekmece_1", Oda = "Hol" });
-        // Yatak odasının dip duvarı (u = 10,5); yazı 5 cm önünde, göz hizasının üstünde, odaya (-u) bakar.
-        z.Yerler.Add(new ZincirYeri { Kimlik = "odaA_duvar", PlandaNokta = true, Oda = "Oda_A", U = 10.45f, Y = 1.60f, V = 6.4f, OnU = -1f, OnV = 0f });
+        // Yatak odasının dip duvarı: dış duvar odanın dışına örülür, iç yüzü u = 10,5. Yazı yüzün yarım
+        // santim önünde (5 cm öndeyken havada duruyordu: eksikler testi), göz hizasının üstünde, odaya (-u) bakar.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "odaA_duvar", PlandaNokta = true, Oda = "Oda_A", U = 10.495f, Y = 1.60f, V = 6.4f, OnU = -1f, OnV = 0f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "sandik", Yol = "Sandik_Cemal", Oda = "Oda_B", KilitYolu = "Sandik_Cemal/Kapak" });
 
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "antre_yer" });

@@ -226,6 +226,23 @@ public static class MobilyaKurucu
             }
         }
 
+        // TEK PARÇALI MODELLER (#83, eksikler testi): kanepe, sehpa, karyola, televizyon gibi açılır parçası
+        // olmayan modellerin FBX'inde tek nesne vardır ve mesh kökün KENDİSİNDE durur. Yukarıdaki döngü
+        // yalnızca çocuklara baktığı için bunlar #73'ten beri çarpışmasızdı: oyuncu kanepenin içinden
+        // yürüyebiliyordu. Kökteki meshe de gövde çarpıştırıcısı takılır. En büyük ölçüsü 35 cm'nin altındaki
+        // küçük süsler (masa saati, su ısıtıcısı) hariç: yürümeyi etkilemezler, yanlarındaki görev eşyasına
+        // nişan almayı ise zorlaştırabilirler.
+        MeshFilter kokMesh = kok.GetComponent<MeshFilter>();
+        if (kokMesh != null && kokMesh.sharedMesh != null && kok.GetComponent<Collider>() == null && !CarpistiriciYok.Contains(kimlik))
+        {
+            Vector3 olcu = kokMesh.sharedMesh.bounds.size;
+            if (Mathf.Max(olcu.x, Mathf.Max(olcu.y, olcu.z)) >= 0.35f)
+            {
+                MeshCollider mc = kok.AddComponent<MeshCollider>();
+                mc.sharedMesh = kokMesh.sharedMesh;
+            }
+        }
+
         if (govde != null && parcalar.Count > 0)
         {
             Yonlendirici y = govde.gameObject.AddComponent<Yonlendirici>();

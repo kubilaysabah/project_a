@@ -144,6 +144,8 @@ public static partial class GrayboxKurucu
             // üstte avize; Oda B duvarında pikap ve üstünde çerçeve; balkon kapısının yanında ayaklı eski TV.
             D("Avize_K6", 2.80f, Tavan, 6.30f, 0f, 1f),
             D("Perde_K6", 1.40f, 2.30f, PetekOnuPerde, 0f, -1f),
+            D("Kornis_Dirsegi", 1.40f - 0.92f, 2.288f, 8.10f, 0f, -1f),   // korniş dirsekleri (perde duvardan 22 cm önde)
+            D("Kornis_Dirsegi", 1.40f + 0.92f, 2.288f, 8.10f, 0f, -1f),
             D("Petek", 1.40f, 0f, 8.10f, 0f, -1f),
             D("Pikap_K6", 5.00f - 0.28f, 0f, 6.30f, -1f, 0f),
             M("fancy_picture_frame_01", 5.00f, 1.60f, 6.30f, -1f, 0f),
@@ -189,7 +191,7 @@ public static partial class GrayboxKurucu
             // ODA A: dip duvarda gündüz yatağı, karşısında prova aynası ve puf.
             M("vintage_day_bed", 10.50f - 0.43f - 0.02f, 0f, 6.60f, -1f, 0f, B),
             D("Boy_Aynasi_K6", 7.70f + 0.21f, 0f, 6.50f, 1f, 0f, B),
-            M("Ottoman_01", 8.80f, 0f, 7.45f, 0f, -1f, B),
+            M("Ottoman_01", 7.70f + 0.32f, 0f, 7.60f, 1f, 0f, B),   // köşede: odanın ortasındaki geçidi daraltıyordu (eksikler testi)
             D("Perde_Terzi_K6", 9.10f, 2.30f, 8.10f, 0f, -1f, B),
         };
         v.notlar = new List<KatNotu>

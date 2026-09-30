@@ -92,10 +92,10 @@ MonoBehaviour:
       Oda: Oda_A
       KilitYolu: 
       PlandaNokta: 1
-      U: 8.85
+      U: 9.05
       Y: 0.004
-      V: 7.65
-      Donus: 60
+      V: 6.22
+      Donus: 80
       OnU: 0
       OnV: 0
     - Kimlik: vana
@@ -383,7 +383,7 @@ MonoBehaviour:
   - Yol: 
     X: 2.3
     Y: 0
-    Z: 7.5
+    Z: 7.33
     Donus: 0
     OnU: 0.3
     OnV: -1
@@ -422,6 +422,28 @@ MonoBehaviour:
     OnV: -1
     Yatik: 0
     Sablon: {fileID: 5763735893143760662, guid: 8d8bab4b9270157439a69238845787f8, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 0.47999996
+    Y: 2.448
+    Z: 8.1
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 3238460192669132241, guid: 21b9e203e7d56634aa4aa5cc6ecc9673, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 2.32
+    Y: 2.448
+    Z: 8.1
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 3238460192669132241, guid: 21b9e203e7d56634aa4aa5cc6ecc9673, type: 3}
     Metin: 
     Ad: 
   - Yol: 
@@ -603,7 +625,7 @@ MonoBehaviour:
   - Yol: 
     X: 9.459999
     Y: 0
-    Z: 6.6
+    Z: 7.2
     Donus: 0
     OnU: -1
     OnV: 0
@@ -614,7 +636,7 @@ MonoBehaviour:
   - Yol: 
     X: 10.3
     Y: 0
-    Z: 7.62
+    Z: 6.2
     Donus: 0
     OnU: -1
     OnV: 0
@@ -625,7 +647,7 @@ MonoBehaviour:
   - Yol: 
     X: 7.93
     Y: 0
-    Z: 6.6
+    Z: 5.65
     Donus: 0
     OnU: 1
     OnV: 0
