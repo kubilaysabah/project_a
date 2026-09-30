@@ -11,7 +11,7 @@
 #                                        sarı yağmurluğu ve asılı bir şemsiye (duvar eşyası).
 #   ayakkabi       Ayakkabi_Yigini_K3  : kapı dibinde aile ayakkabıları: erkek, kadın, çocuk spor ayakkabısı, çizme.
 #   canta          Okul_Cantasi_K3     : sırtüstü yatık 90'lar okul çantası, kapağı açık; defter ve kalem kutusu kaymış.
-#   bebek_arabasi  Bebek_Arabasi_K3    : duvara dayalı, katlanmış baston tipi bebek arabası.
+#   bebek_arabasi  Bebek_Arabasi_K3    : duvara dayalı, gerçek boyda körüklü bebek arabası.
 #   terlik         Terlikler_K3        : iki yetişkin çifti ve pembe, kulaklı bir çocuk terliği.
 # HOL
 #   cizimler       Cocuk_Cizimleri_K3  : duvara bantlanmış altı boya kalemi resmi (biri simsiyah karalama,
@@ -1142,18 +1142,19 @@ def bebek_arabasi():
     """
     90'ların başının körüklü bebek arabası: derin bir sepet (gövde), katlanır körük, dört büyük telli
     tekerlek, yaylı şasi ve itme kolu. Antrede duvarın dibine park edilmiş: burnu duvarda (y = 0),
-    kolu odaya (-y) bakıyor. Yerleşim ölçüsü dar (yaklaşık 0,35 x 0,45 m), bu yüzden araba gerçeğinden
-    kısa, "şehir tipi" kompakt bir model.
+    kolu odaya (-y) bakıyor. Gerçek boyda (Şahan'ın isteği, #83): yaklaşık 0,50 m geniş, 0,96 m uzun,
+    sapıyla 1,08 m yüksek; sepet 0,76 x 0,40 m. (İlk sürüm eski yerleşim ölçüsüne sığsın diye 0,34 x 0,45 m'ydi.)
     """
     krom, siyah = mt("krom"), mt("siyah_plastik")
     kumas = M("Araba_Kumas", (0.03, 0.05, 0.16), 0.8)
     serit = M("Araba_Serit", (0.40, 0.04, 0.03), 0.8)
     lastik = M("Araba_Lastik", (0.30, 0.30, 0.29), 0.7)
     beyaz = mt("kumas_beyaz")
-    # Ölçüler: gövde y -0,03 (burun) .. -0,39 (baş); tekerlek yarıçapı 0,085; tekerlek izi x ±0,155.
-    GY0, GY1, GZ0, GZ1, GX = -0.030, -0.390, 0.36, 0.60, 0.135
+    # Ölçüler: gövde y -0,10 (burun) .. -0,86 (baş), yükseklik 0,46-0,72; tekerlek yarıçapı 0,13;
+    # tekerlek izi x ±0,25. Öndeki tekerleklerin önü duvara (y = 0) değer.
+    GY0, GY1, GZ0, GZ1, GX = -0.100, -0.860, 0.46, 0.72, 0.200
     gy = (GY0 + GY1) / 2
-    R, IZ, ON_AKS, ARKA_AKS = 0.085, 0.155, -0.085, -0.345
+    R, IZ, ON_AKS, ARKA_AKS = 0.130, 0.250, -0.140, -0.800
 
     # Gövde (sepet): tabana doğru daralan, tekne gibi yuvarlak bir kutu.
     def gbicim(px, py, pz):
@@ -1166,17 +1167,18 @@ def bebek_arabasi():
     supur(oval_halka(0, gy, GX * 0.95, (GY0 - GY1) / 2 * 0.955, GZ0 + 0.10, n=20, us=5.0),
           daire_kesit(0.004, 4), serit, kapali=True)                                        # yan süs şeridi
     # Önlük: sepetin ayak yarısını örten kumaş; ucunda katlanmış beyaz battaniye kenarı, çıtçıtlar.
-    yastik((2 * GX * 0.96, 0.20, 0.022), (0, 0, 0), kumas,
-           lambda px, py, pz: (px, py - 0.135, pz + GZ1 + 0.006 + 0.012 * (1 - (px / GX) ** 2)), bol=(3, 2, 1))
-    yastik((2 * GX * 0.92, 0.035, 0.026), (0, 0, 0), beyaz,
-           lambda px, py, pz: (px, py - 0.235, pz + GZ1 + 0.012 + 0.010 * (1 - (px / GX) ** 2)), bol=(3, 1, 1))
+    # Önlük sepetin burnundan başlayıp boyunun yarısını örter (0,40 m); battaniye kenarı önlüğün ucunda.
+    yastik((2 * GX * 0.96, 0.40, 0.024), (0, 0, 0), kumas,
+           lambda px, py, pz: (px, py + GY0 - 0.20, pz + GZ1 + 0.006 + 0.016 * (1 - (px / GX) ** 2)), bol=(3, 3, 1))
+    yastik((2 * GX * 0.92, 0.05, 0.030), (0, 0, 0), beyaz,
+           lambda px, py, pz: (px, py + GY0 - 0.405, pz + GZ1 + 0.014 + 0.013 * (1 - (px / GX) ** 2)), bol=(3, 1, 1))
     for s in (-1, 1):
-        for yy in (-0.07, -0.18):
-            kure(0.006, (s * GX * 0.93, yy, GZ1 + 0.01), krom, seg=8, halka=5)
-    yastik((2 * GX * 0.88, 0.14, 0.01), (0, -0.315, GZ1 - 0.004), mt("ic_koyu"), bol=(2, 2, 1))   # körüğün altındaki karanlık iç
+        for yy in (GY0 - 0.08, GY0 - 0.32):
+            kure(0.008, (s * GX * 0.93, yy, GZ1 + 0.012), krom, seg=8, halka=5)
+    yastik((2 * GX * 0.88, 0.30, 0.01), (0, GY1 + 0.17, GZ1 - 0.004), mt("ic_koyu"), bol=(2, 2, 1))   # körüğün altındaki karanlık iç
 
     # Körük: iki yandaki menteşeden açılan, pileli yarım kubbe. Menteşe ekseni x boyunca, ağız yüksekliğinde.
-    yh, Rx, Ry, Rz, A1 = -0.252, 0.142, 0.14, 0.23, 1.80
+    yh, Rx, Ry, Rz, A1 = GY1 + 0.26, 0.208, 0.25, 0.32, 1.80   # menteşe başa 26 cm; körük sepetten biraz geniş
 
     def korukte(u, v):
         s, a = math.pi * u, A1 * v                         # s: yay boyunca (bir yandan öbür yana), a: açılma açısı
@@ -1195,55 +1197,57 @@ def bebek_arabasi():
     kor = bpy.data.objects.new("Koruk", me)
     bpy.context.collection.objects.link(kor)
     kal = kor.modifiers.new("Kalinlik", "SOLIDIFY")        # tek katlı yüzeye kumaş kalınlığı ver
-    kal.thickness = 0.008
+    kal.thickness = 0.010
     kal.offset = 0.0                                       # kalınlık yüzeyin iki yanına eşit dağılsın
     ortak.ata(kor, kumas)
     ekle(kor)
-    supur([korukte(i / 12, 1.0) for i in range(13)], daire_kesit(0.007, 5), serit, kapak=True)   # körük ağzı biyesi
+    supur([korukte(i / 12, 1.0) for i in range(13)], daire_kesit(0.009, 5), serit, kapak=True)   # körük ağzı biyesi
     for j in (0.45, 0.72):                                                                     # iki krom körük teli
-        supur([korukte(i / 12, j) for i in range(13)], daire_kesit(0.003, 4), krom)
+        supur([korukte(i / 12, j) for i in range(13)], daire_kesit(0.004, 4), krom)
     for s in (-1, 1):
-        yatik_sil(0.020, 0.010, (s * (Rx + 0.005), yh, GZ1), "x", krom, 14)                   # körük menteşesi
-        cubuk((s * (Rx + 0.006), yh, GZ1), (s * (Rx + 0.006), yh + 0.10, GZ1 + 0.02), 0.004, krom)   # katlama kolu
+        yatik_sil(0.028, 0.012, (s * (Rx + 0.006), yh, GZ1), "x", krom, 14)                   # körük menteşesi
+        cubuk((s * (Rx + 0.008), yh, GZ1), (s * (Rx + 0.008), yh + 0.16, GZ1 + 0.03), 0.005, krom)   # katlama kolu
 
     # Tekerlekler: beyaz-gri lastik, krom jant ve sekiz tel.
     for yy in (ON_AKS, ARKA_AKS):
         for s in (-1, 1):
             xx = s * IZ
-            supur([(xx, yy + (R - 0.009) * math.cos(q), R + (R - 0.009) * math.sin(q)) for q in (2 * math.pi * i / 16 for i in range(16))],
-                  daire_kesit(0.009, 5), lastik, yukari=(1, 0, 0), kapali=True)
-            supur([(xx, yy + (R - 0.02) * math.cos(q), R + (R - 0.02) * math.sin(q)) for q in (2 * math.pi * i / 12 for i in range(12))],
-                  daire_kesit(0.003, 4), krom, yukari=(1, 0, 0), kapali=True)
-            for i in range(8):
-                q = 2 * math.pi * i / 8
-                cubuk((xx, yy, R), (xx, yy + (R - 0.02) * math.cos(q), R + (R - 0.02) * math.sin(q)), 0.0018, krom, 4)
-            yatik_sil(0.016, 0.028, (xx, yy, R), "x", krom, 10)                                # göbek
-        cubuk((-IZ, yy, R), (IZ, yy, R), 0.006, krom, 8)                                       # dingil
+            supur([(xx, yy + (R - 0.013) * math.cos(q), R + (R - 0.013) * math.sin(q)) for q in (2 * math.pi * i / 20 for i in range(20))],
+                  daire_kesit(0.013, 6), lastik, yukari=(1, 0, 0), kapali=True)
+            supur([(xx, yy + (R - 0.03) * math.cos(q), R + (R - 0.03) * math.sin(q)) for q in (2 * math.pi * i / 16 for i in range(16))],
+                  daire_kesit(0.004, 4), krom, yukari=(1, 0, 0), kapali=True)
+            for i in range(10):
+                q = 2 * math.pi * i / 10
+                cubuk((xx, yy, R), (xx, yy + (R - 0.03) * math.cos(q), R + (R - 0.03) * math.sin(q)), 0.0022, krom, 4)
+            yatik_sil(0.022, 0.034, (xx, yy, R), "x", krom, 10)                                # göbek
+        cubuk((-IZ, yy, R), (IZ, yy, R), 0.008, krom, 8)                                       # dingil
 
     # Şasi: iki yanda tekerleklerden dik kalkıp gövdenin altında düz uzanan boru; bu düz kısmın üstünde
     # gövdeyi taşıyan dört helezon yay (yaylar raya oturur, tepesi gövdenin dibine girer; havada durmasın).
-    RAY = 0.225                                            # rayın düz kısmının yüksekliği
+    RAY = 0.330                                            # rayın düz kısmının yüksekliği
     for s in (-1, 1):
-        xx = s * 0.115
-        supur(egri([(xx, ON_AKS, R), (xx, ON_AKS - 0.028, 0.19), (xx, -0.125, RAY), (xx, gy, RAY + 0.004),
-                    (xx, -0.305, RAY), (xx, ARKA_AKS + 0.028, 0.19), (xx, ARKA_AKS, R)], 2),
-              daire_kesit(0.008, 6), krom)
-        for yy in (-0.135, -0.295):
-            xy = s * 0.106                                 # yay rayın hemen içinde
-            yay = [(xy + 0.014 * math.cos(q), yy + 0.014 * math.sin(q), RAY + 0.006 + (GZ0 + 0.02 - RAY - 0.006) * q / (2 * math.pi * 3))
-                   for q in (2 * math.pi * 3 * i / 18 for i in range(19))]
-            supur(yay, daire_kesit(0.003, 4), krom)
+        xx = s * 0.170
+        supur(egri([(xx, ON_AKS, R), (xx, ON_AKS - 0.04, 0.27), (xx, ON_AKS - 0.11, RAY), (xx, gy, RAY + 0.006),
+                    (xx, ARKA_AKS + 0.11, RAY), (xx, ARKA_AKS + 0.04, 0.27), (xx, ARKA_AKS, R)], 2),
+              daire_kesit(0.011, 6), krom)
+        for yy in (ON_AKS - 0.13, ARKA_AKS + 0.13):
+            xy = s * 0.157                                 # yay rayın hemen içinde
+            yay = [(xy + 0.02 * math.cos(q), yy + 0.02 * math.sin(q), RAY + 0.008 + (GZ0 + 0.02 - RAY - 0.008) * q / (2 * math.pi * 4))
+                   for q in (2 * math.pi * 4 * i / 24 for i in range(25))]
+            supur(yay, daire_kesit(0.004, 4), krom)
         cubuk((xx, ON_AKS, R), (IZ * s, ON_AKS, R), 0.007, krom, 8)
         cubuk((xx, ARKA_AKS, R), (IZ * s, ARKA_AKS, R), 0.007, krom, 8)
     # İtme kolu: arka şasiden kalkıp gövdenin dışından geçer; tepede siyah köpük tutamaklı yay biçimli sap.
+    # Sepetin baş ucunun (GY1) arkasından yükselir; x ±0,215 sepetin 1,5 cm dışı.
     for s in (-1, 1):
-        supur(egri([(s * 0.115, ARKA_AKS + 0.035, 0.205), (s * 0.150, -0.370, 0.40), (s * 0.150, -0.410, 0.70),
-                    (s * 0.140, -0.426, 0.95)], 3), daire_kesit(0.010, 6), krom)
-    sap = egri([(-0.140, -0.426, 0.95), (-0.12, -0.430, 0.992), (0.0, -0.432, 1.004), (0.12, -0.430, 0.992), (0.140, -0.426, 0.95)], 3)
-    supur(sap, daire_kesit(0.010, 6), krom)
-    supur(sap[2:-2], daire_kesit(0.016, 8), siyah)                                             # köpük tutamak
+        supur(egri([(s * 0.170, ARKA_AKS + 0.05, 0.29), (s * 0.215, GY1 + 0.02, 0.55), (s * 0.215, GY1 - 0.04, 0.82),
+                    (s * 0.205, GY1 - 0.09, 1.03)], 3), daire_kesit(0.012, 6), krom)
+    sap = egri([(-0.205, GY1 - 0.09, 1.03), (-0.17, GY1 - 0.095, 1.068), (0.0, GY1 - 0.10, 1.082),
+                (0.17, GY1 - 0.095, 1.068), (0.205, GY1 - 0.09, 1.03)], 3)
+    supur(sap, daire_kesit(0.012, 6), krom)
+    supur(sap[2:-2], daire_kesit(0.019, 8), siyah)                                             # köpük tutamak
     for s in (-1, 1):
-        yatik_sil(0.014, 0.022, (s * 0.150, -0.395, 0.60), "x", siyah, 12)                     # katlama mafsalı
+        yatik_sil(0.018, 0.026, (s * 0.215, GY1 - 0.01, 0.70), "x", siyah, 12)                 # katlama mafsalı
     return bitir("Bebek_Arabasi_K3", "dayali")
 
 
