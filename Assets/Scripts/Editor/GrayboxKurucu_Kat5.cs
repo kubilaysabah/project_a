@@ -141,11 +141,13 @@ public static partial class GrayboxKurucu
             D("Camasir_Makinesi_K5", 4.50f - 0.23f, 0f, 0.10f, -1f, 0f),
             D("Havlu_Askisi_K5", 2.70f, 1.30f, 1.10f, 1f, 0f),
             D("Banyo_Dolabi_K5", 3.60f, 1.50f, -0.80f, 0f, 1f),
-            D("Legen_Kova_K5", 4.20f, 0f, 0.72f, -1f, 0f),
+            // Leğen klozetin yanında, antre duvarına yaslı: çamaşır makinesinin içine giriyordu (çakışma testi);
+            // menteşesi sökülen kapının düştüğü şeridin (u 3,25-3,95) batısında kalır.
+            D("Legen_Kova_K5", 2.70f + 0.28f, 0f, 1.45f, 1f, 0f),
 
             // ---------- KİLER ---------- (u 4,6-6,7, v -0,8-2,85; kapının önü boş; duvar kolu u 6,7 v 1,2)
             D("Raf_K5", 4.60f + 0.21f, 0f, 0.30f, 1f, 0f),
-            D("Is_Lambasi_K5", 5.60f, 0f, -0.30f, 0f, 1f),
+            D("Is_Lambasi_K5", 5.80f, 0f, 1.20f, 0f, 1f),   // boya kovalarının içine giriyordu (çakışma testi)
             D("Boya_Kovalari_K5", 6.30f, 0f, -0.50f, 0f, 1f),
 
             // ---------- ODA A ---------- (u 7,7-10,5, v 4,75-8,1; kapının önü boş)

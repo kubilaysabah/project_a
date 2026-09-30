@@ -148,18 +148,20 @@ public static partial class GrayboxKurucu
             D("Pikap_K6", 5.00f - 0.28f, 0f, 6.30f, -1f, 0f),
             M("fancy_picture_frame_01", 5.00f, 1.60f, 6.30f, -1f, 0f),
             D("Eski_TV_K6", 4.40f, 0f, 7.62f, -0.5f, -1f),
-            M("standing_picture_frame_01", 4.62f, 0.70f, 6.10f, -1f, 0f),
+            // (Pikabın üstündeki ayaklı çerçeve kaldırıldı: açık kapaklı pikabın gövdesine gömülüyordu, çakışma testi.)
             // MUTFAK (u 6,8-10,5, v -0,8-2,85; kapının önü boş): tel dolap, emaye ocak, küçük masa.
             D("Tel_Dolap_K6", 6.80f + 0.21f, 0f, 0.90f, 1f, 0f),
             D("Ocak_K6", 8.00f, 0f, -0.80f + 0.24f, 0f, 1f),
             D("Mutfak_Masasi_K6", 8.60f, 0f, 1.30f, 0f, 1f),
             // KİLER (u 4,6-6,7): banyo duvarında boş raf; mutfak duvarında dairenin kolu (u 6,7 v 1,2).
             D("Bos_Raf_K6", 4.60f + 0.18f, 0f, 0.30f, 1f, 0f),
-            // ODA A (u 7,7-10,5, v 4,75-8,1; kapının önü boş): demir karyola, ayak ucunda çeyiz sandığı.
-            // Karyolanın başı pencere duvarında, sandık ayak ucunda, önü kapıya dönük (başı dip duvardayken
-            // kapı kanadıyla karyola arasında 36 cm kalıyordu, odaya girilemiyordu: yürünebilirlik denetimi).
-            D("Karyola_K6", 9.40f, 0f, 8.10f - 1.02f, 0f, -1f),
-            DA("Ceyiz_Sandigi_A", "Ceyiz_Sandigi_K6", 9.40f, 0f, 5.76f, 0f, -1f),
+            // ODA A (u 7,7-10,5, v 4,75-8,1; kapının önü boş): demir karyola, batı duvarında çeyiz sandığı.
+            // Yürünebilirlik denetimine göre: karyola (1,48 m geniş) başı doğu duvarında, boyuna pencere
+            // duvarı boyunca yatar; güneyinde kapıdan 1,9 m derin boş alan kalır. Sandık batı duvarında, önü
+            // odaya dönük. (Başı pencere duvarındayken açık kapı kanadının ucuyla karyolanın köşesi arasından
+            // geçilemiyordu; sandık ayak ucundayken kapının önünü kapatıyordu, odada 0,3 m² yürünüyordu.)
+            D("Karyola_K6", 10.50f - 1.02f, 0f, 8.10f - 0.76f, -1f, 0f),
+            DA("Ceyiz_Sandigi_A", "Ceyiz_Sandigi_K6", 7.70f + 0.25f, 0f, 6.00f, 1f, 0f),
 
             // ================= B: DAİRE 4 (terzi Sabri Usta) =================
             // HOL: koridorun dibinde, girene dönük bir manken.
@@ -172,8 +174,8 @@ public static partial class GrayboxKurucu
             DA("Dikis_Kutusu_Sabri", "Dikis_Kutusu_K6", 3.25f, TerziMasasi6Ustu, 6.20f, 0f, 1f, B),
             D("Elbise_Askisi_K6", 5.00f - 0.26f, 0f, 5.85f, -1f, 0f, B),
             D("Manken_K6", 0.75f, 0f, 6.25f, 1f, 0f, B),
-            D("Manken_K6", 3.95f, 0f, 7.55f, -0.3f, -1f, B),
-            D("Kumas_Toplari_K6", 4.55f, 0f, 7.65f, -1f, 0f, B),
+            D("Manken_K6", 3.60f, 0f, 7.30f, -0.3f, -1f, B),
+            D("Kumas_Toplari_K6", 4.45f, 0f, 7.50f, -1f, 0f, B),   // duvara ve mankene gömülüyordu (çakışma testi)
             D("Perde_Terzi_K6", 1.40f, 2.30f, 8.10f, 0f, -1f, B),
             // MUTFAK: köşede buzdolabı (A'nın mutfak anahtarı), ortada küçük masa.
             DA("Buzdolabi_Sabri", "Buzdolabi_K6", 7.20f, 0f, -0.80f + 0.30f, 0f, 1f, B),

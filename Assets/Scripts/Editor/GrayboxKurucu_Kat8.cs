@@ -136,7 +136,7 @@ public static partial class GrayboxKurucu
             // Hol duvarında dairenin dosya dolabı (kalıcı eşya, u 4,4). Pencerenin önünde makam masası ve koltuğu,
             // karşısında iki misafir koltuğu; landing duvarında klasör rafı; köşede kasa.
             D("Mudur_Masasi_K8", 2.60f, 0f, 7.10f, 0f, -1f),
-            D("Makam_Koltugu_K8", 2.60f, 0f, 7.78f, 0f, -1f),
+            D("Makam_Koltugu_K8", 2.60f, 0f, 7.70f, 0f, -1f),   // pencere duvarına giriyordu (çakışma testi)
             D("Misafir_Koltugu_K8", 2.15f, 0f, 6.25f, 0.2f, 1f),
             D("Misafir_Koltugu_K8", 3.05f, 0f, 6.25f, -0.2f, 1f),
             D("Dosya_Rafi_K8", 0.03f + 0.19f, 0f, 6.60f, 1f, 0f),

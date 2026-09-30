@@ -129,7 +129,7 @@ public static partial class GrayboxKurucu
             M("Chandelier_01", 2.50f, Tavan, 6.45f, 0f, 1f),
             D("Hali_K3", 2.80f, 0f, 6.45f, 0f, 1f),
             D("Boyama_Sehpasi_K3", 3.40f, 0f, 6.45f, 1f, 0f),
-            D("Oyun_Parki_K3", 2.65f, 0f, 7.55f, 0f, -1f),
+            D("Oyun_Parki_K3", 2.85f, 0f, 7.40f, 0f, -1f),   // perdenin kenarına girmesin (çakışma testi)
             D("Perde_K3", 1.40f, 2.30f, 8.10f, 0f, -1f),
             D("Petek", 1.40f, 0f, 8.10f, 0f, -1f),
             D("Duvar_Rafi_K3", 3.00f, 1.60f, 4.75f, 0f, 1f),
