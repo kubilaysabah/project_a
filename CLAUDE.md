@@ -252,6 +252,7 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
     - Floor 7's real door leaks light under it (`Kapi_N/Mentese/Kapi_Alti_Isik`, built inactive on every landing door and shown by the real-door card; `SahanlikKapisi` hides it when the door opens).
     - Knocking a wrong door makes `GezenGolge.Belir()` appear.
   - **Retest round (a9a7a99, be0c279):** `KatDenetimi` gained a save/restore check (`KayitHazirla` → reopen → `KayitDenetle`) and a collision check (`Cakismalar`, collider bounds sunk > 6 cm). Fixed six intersecting props and floor 6 Oda A (the chest blocked the door; only 0.3 m² was walkable). 200/200 tests ×3, save test 8 floors with 0 errors, bot ×4 with 0 problems, release 391.1 MB.
+  - **Curtains and cramped rooms (`f2e3fa7`):** salon curtains over a radiator hang 22 cm off the wall (`PetekOnuPerde`, floors 1, 2, 3, 5, 6A; the floor-6 workshop has no radiator). Floor 2 Oda A lost the jacket chair (0.9 → 1.2 m²). Floor 8 Oda B: meeting table 1.6 × 0.8 (Blender), filing cabinet under the window (0.9 → 1.9 m²). The floor-6 salons stay as they are.
   - **Waiting for Şahan's test of all floors.** The floor-8 plan frame shows nine floors (matches the ninth-floor plan and Cemal's research wall); change `KAT_SAYISI` in `kat8_esyalar.py` if he objects.
 
 - 2026-09-29 (Lesson 56, later): **#83 opened** (floor-by-floor redesign).
