@@ -168,8 +168,8 @@ public static partial class GrayboxKurucu
             // Yerleşim yürünebilirlik denetimine göre: karyolanın başı dip duvarda (u = 10,5), komodin başucunun
             // güneyinde, önü odaya dönük (kapıdan girince 90 cm'lik şeritten ulaşılır); beşik kapının batısında,
             // şifonyer Oda B duvarında. Önceki iki yerleşimde odaya ya da komodinin önüne girilemiyordu.
-            D("Karyola_K3", 10.50f - 1.005f, 0f, 7.20f, -1f, 0f),
-            DA("Komodin_Ayla", "Komodin_K3", 10.50f - 0.23f, 0f, 6.17f, -1f, 0f),
+            D("Karyola_K3", 10.50f - 1.005f, 0f, 7.12f, -1f, 0f),   // pencere perdesinin fırfırına değmesin (çakışma testi)
+            DA("Komodin_Ayla", "Komodin_K3", 10.50f - 0.23f, 0f, 6.08f, -1f, 0f),   // karyolayla birlikte kaydı (çakışma testi)
             D("Besik_K3", 7.70f + 0.26f, 0f, 5.40f, 1f, 0f),
             D("Sifonyer_K3", 7.70f + 0.26f, 0f, 6.90f, 1f, 0f),
             D("Perde_OdaA_K3", 9.10f, 2.30f, 8.10f, 0f, -1f),

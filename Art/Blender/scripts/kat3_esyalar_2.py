@@ -189,30 +189,176 @@ def gece_lambasi():
     return bitir("Gece_Lambasi_K3")
 
 
+# ---------- PİLİLİ KUMAŞ (iki perdenin ortak yardımcıları) ----------
+# Eskiden perde kanatları yan yana dizilmiş ince kutulardı; aralarındaki boşluk yüzünden kumaş değil,
+# jaluzi çıtası gibi görünüyordu. Şimdi her kanat TEK PARÇA bir yüzey: genişliği boyunca yumuşak bir
+# dalga (sinüs) çizer, yani kumaşın öne-arkaya kıvrılması gibi. Yaklaşım perde_kadife.py'deki
+# pilili_yuzey ve kat5_esyalar.py'deki pilili ile aynı (noktaları ızgara gibi dizip from_pydata ile
+# yüzey kurmak); fark, zikzak yerine yuvarlak sinüs kıvrımları ve alta doğru açılan, derinleşen pililer.
+
+def perde_yuzeyi(x0, x1, ust, alt, y_orta, kivrim, genlik_ust, genlik_alt, acilma=1.0, tohum=0.0):
+    """
+    Bir perde kanadının "şekil kuralını" kurar ve bir fonksiyon olarak geri verir.
+    Dönen nokta(tx, s) fonksiyonu kumaş üzerindeki bir noktanın (x, y, z) konumunu hesaplar:
+      tx: kanadın genişliği boyunca 0 (sol kenar) ile 1 (sağ kenar) arası oran,
+      s : yukarıdan aşağı 0 (üst kenar) ile 1 (etek) arası oran.
+    Fonksiyon döndürmenin sebebi: aynı kuralı hem kumaşın kendisi, hem etek şeridi, hem de kumaşın
+    üstündeki bulut desenleri kullansın; hepsi kıvrımları birebir takip etsin.
+    ust / alt: üst ve alt kenarın z'si; sayı ya da tx alan bir fonksiyon (fırfır eteği gibi dalgalı kenar için).
+    kivrim: kanattaki tam dalga sayısı. genlik_ust/alt: kıvrımın öne-arkaya genliği (metre), üstte ve altta.
+    acilma: etekte genişliğin üst genişliğe oranı (1,25 = altta %25 açılır).
+    tohum: kıvrımlara küçük düzensizlik veren sabit sayı; her kanat biraz farklı dökülsün.
+    """
+    orta = (x0 + x1) / 2                                          # kanadın ortası: açılma bunun etrafında olur
+    ust_f = ust if callable(ust) else (lambda tx: ust)             # sayı verildiyse her tx için aynı z'yi veren fonksiyona çevir
+    alt_f = alt if callable(alt) else (lambda tx: alt)             # alt kenar için de aynısı
+
+    def oran(s):
+        """s yüksekliğinde genişliğin üst genişliğe oranı. s**1,5: açılma çoğunlukla aşağıda olur."""
+        return 1.0 + (acilma - 1.0) * s ** 1.5
+
+    def nokta(tx, s):
+        x = orta + (x0 + (x1 - x0) * tx - orta) * oran(s)         # üstteki x'i ortadan dışa doğru açarak etekteki x'i bul
+        zu, za = ust_f(tx), alt_f(tx)                             # bu dikey çizginin üst ve alt ucu
+        z = zu + (za - zu) * s                                    # aradaki yükseklik: doğrusal geçiş
+        A = genlik_ust + (genlik_alt - genlik_ust) * s            # kıvrım aşağı indikçe derinleşir (kumaş ağırlığıyla açılır)
+        A *= 1.0 + 0.18 * math.sin(2 * math.pi * kivrim * tx / 2.3 + tohum)     # her kıvrım aynı derinlikte olmasın
+        faz = 2 * math.pi * kivrim * tx                           # sinüsün açısı: tx 0→1 giderken "kivrim" kez tam tur
+        faz += 0.35 * s * math.sin(2 * math.pi * 1.3 * tx + tohum)   # aşağıda kıvrımlar hafifçe yana kayar, cetvel gibi durmaz
+        y = y_orta - A * math.sin(faz)                            # öne (-y) ve arkaya dalgalanan kumaş
+        return (x, y, z)
+
+    def en(s):
+        """s yüksekliğinde kanadın genişliği (metre); bulut desenini doğru boyda çizmek için."""
+        return (x1 - x0) * oran(s)
+
+    def boy(tx):
+        """tx çizgisinde kanadın yüksekliği (metre)."""
+        return ust_f(tx) - alt_f(tx)
+
+    return nokta, en, boy                                         # üç fonksiyonu birlikte ver
+
+
+def kumas_orgusu(nokta, sutun, satirlar, mat, kal=0.003, y_kaydir=0.0, s0=0.0, s1=1.0):
+    """
+    nokta(tx, s) kuralından tek parça bir kumaş yüzeyi örer (sutun x satır dörtgen).
+    satirlar: 0-1 arası dikey oranlar listesi (s0-s1 aralığına yayılır; etek şeridi yalnızca altı alır).
+    kal: kumaş kalınlığı (Solidify); 0 verilirse tek yüz kalır (kumaşa dikili şerit gibi).
+    y_kaydir: bütün yüzeyi öne (-) ya da arkaya (+) kaydırır; şerit kumaşın hemen önünde dursun diye.
+    """
+    noktalar, yuzler = [], []                                     # köşe listesi ve yüz listesi (from_pydata ister)
+    ss = [s0 + (s1 - s0) * q for q in satirlar]                   # satır oranlarını istenen aralığa ölçekle
+    for s in ss:                                                  # her satır (yukarıdan aşağı)
+        for i in range(sutun + 1):                                # her sütun (soldan sağa); n dörtgen için n+1 köşe
+            x, y, z = nokta(i / sutun, s)
+            noktalar.append((x, y + y_kaydir, z))
+    n = sutun + 1                                                 # bir satırdaki köşe sayısı
+    for r in range(len(ss) - 1):
+        for i in range(sutun):
+            a = r * n + i                                         # dörtgenin sol üst köşesinin sırası
+            # Sol üst → sol alt → sağ alt → sağ üst: bu sıra yüzün önünü odaya (-y) çevirir.
+            yuzler.append((a, a + n, a + n + 1, a + 1))
+    me = bpy.data.meshes.new("Kumas")
+    me.from_pydata(noktalar, [], yuzler)                          # köşelerden ve yüzlerden mesh kur
+    me.update()
+    uv = me.uv_layers.new(name="UVMap")                           # doku koordinatı: diğer parçalarla aynı adda olsun ki birleşince kaybolmasın
+    for d in me.loops:                                            # her yüz köşesine (loop) metre cinsinden (x, z) ver
+        v = me.vertices[d.vertex_index].co
+        uv.data[d.index].uv = (v.x, v.z)
+    o = bpy.data.objects.new("Kumas", me)                         # mesh'i taşıyan nesne
+    bpy.context.collection.objects.link(o)                        # sahneye ekle (yoksa birleştirilemez)
+    ortak.ata(o, mat)
+    if kal > 0:
+        # Solidify kumaşa kalınlık verir; kalınlık yüzün ARKASINA (duvara doğru) eklenir, ön yüz yerinde kalır.
+        # Böylece kenardan ve etekten bakınca kâğıt inceliğinde değil, kumaş gibi görünür. bitir() uygular.
+        o.modifiers.new("Kalinlik", "SOLIDIFY").thickness = kal
+    return ekle(o)
+
+
+def bulut_deseni(nokta, en, boy, sutun, tx, s, mat, one=0.003):
+    """
+    Kumaşın üstüne basılı gibi duran beyaz bulut: eski bulutla aynı biçim (üç daire + düz taban),
+    ama düz bir levha değil; kumaşın kıvrımlarıyla birlikte dalgalanır.
+    Bulut, kumaşın SÜTUNLARIYLA aynı dikey çizgilerden örülür (sutun: kumaşın sütun sayısı). Böylece
+    bulutun her yüzü altındaki kumaş yüzüne paralel olur: ışığı kumaşla aynı alır ve kıvrım tepelerinde
+    kumaş bulutun içinden dışarı taşmaz (ilk denemedeki dairesel ızgara lekeli görünüyordu).
+    tx, s: bulutun merkezinin kanat üzerindeki yeri (oran). one: kumaşın kaç metre önünde durduğu.
+    """
+    daireler = [(-0.035, 0.0, 0.035), (0.0, 0.018, 0.045), (0.04, 0.0, 0.035)]   # (u, w, yarıçap), u yatay, w dikey
+
+    def icinde(u, w):
+        """(u, w) noktası bulutun içinde mi?"""
+        for (cu, cw, r) in daireler:
+            if (u - cu) ** 2 + (w - cw) ** 2 <= r * r:
+                return True
+        return -0.055 <= u <= 0.055 and -0.033 <= w <= -0.003        # alttaki düz taban
+
+    def aralik(u):
+        """u dikey çizgisinde bulutun alt ve üst kenarı (w); çizgi bulutu kesmiyorsa None."""
+        ws = [w * 0.0005 for w in range(-80, 140) if icinde(u, w * 0.0005)]   # yarım milimetrelik adımlarla tara
+        return (ws[0], ws[-1]) if ws else None
+
+    W = en(s)                                                     # bulut hizasında kanadın genişliği (metre)
+    U0, U1 = -0.0695, 0.0745                                      # bulutun en sol ve en sağ noktası (u)
+    # Dikey çizgiler: bulutun iki ucu + aradaki bütün kumaş sütunları (kumaşla aynı x'ler).
+    us = [U0] + [(i / sutun - tx) * W for i in range(sutun + 1) if U0 < (i / sutun - tx) * W < U1] + [U1]
+    SATIR = 3                                                     # her dikey çizgide alttan üste 3 aralık
+    noktalar, yuzler = [], []
+    for u in us:
+        w0, w1 = aralik(u)
+        for k in range(SATIR + 1):
+            w = w0 + (w1 - w0) * k / SATIR                        # alt kenardan üst kenara eşit adımlar
+            x, y, z = nokta(tx + u / W, s - w / boy(tx))          # yatay metreyi orana, yukarıyı küçülen s'ye çevir
+            noktalar.append((x, y - one, z))                      # kumaşın biraz önüne
+    n = SATIR + 1                                                 # bir dikey çizgideki köşe sayısı
+    for c in range(len(us) - 1):
+        for k in range(SATIR):
+            a = c * n + k                                         # sol alt köşe
+            # Sol alt → sağ alt → sağ üst → sol üst: yüz odaya (-y) bakar.
+            yuzler.append((a, a + n, a + n + 1, a + 1))
+    me = bpy.data.meshes.new("Bulut")
+    me.from_pydata(noktalar, [], yuzler)
+    me.update()
+    me.uv_layers.new(name="UVMap")                                # birleştirmede UV katmanı eşleşsin
+    o = bpy.data.objects.new("Bulut", me)
+    bpy.context.collection.objects.link(o)
+    ortak.ata(o, mat)
+    return ekle(o)
+
+
 def perde_cocuk():
     mavi, bulut = M("Perde_Bulut_Mavi", (0.30, 0.50, 0.75), 0.95), mt("kumas_beyaz")
     bey, mk = M("Cubuk_Beyaz", (0.78, 0.78, 0.75), 0.4), M("Topuz_Mavi", (0.05, 0.15, 0.45), 0.4)
-    Y = -0.09
-    cubuk((-0.76, Y, 0), (0.76, Y, 0), 0.014, bey, 12)
+    Y = -0.09                                                     # çubuğun duvardan uzaklığı (değişmedi)
+    cubuk((-0.76, Y, 0), (0.76, Y, 0), 0.014, bey, 12)            # beyaz çubuk, z = 0'da (pivot yüksekliği)
     for s in (-1, 1):
-        kure(0.03, (s * 0.79, Y, 0), mk)
-        kutu((0.02, 0.09, 0.02), (s * 0.68, -0.045, 0), bey, 0.004)
-        dik_disk(0.02, 0.006, (s * 0.68, -0.003, 0), bey)
-    yc = Y - 0.018 - 0.006 - 0.002
-    for (x0, x1, n) in ((-0.74, -0.26, 8), (0.30, 0.74, 7)):
-        w = (x1 - x0) / n
-        for i in range(n):
-            x = x0 + (i + 0.5) * w
-            kutu((w + 0.012, 0.01, 1.30), (x, Y - 0.012 + (0.006 if i % 2 else -0.006), -0.68), mavi)
-            bpy.ops.mesh.primitive_torus_add(major_radius=0.02, minor_radius=0.004, location=(x, Y, 0), rotation=(0, math.pi / 2, 0), major_segments=12, minor_segments=6)
-            bpy.ops.object.transform_apply(rotation=True)
+        kure(0.03, (s * 0.79, Y, 0), mk)                          # uçlarda mavi topuzlar
+        kutu((0.02, 0.09, 0.02), (s * 0.68, -0.045, 0), bey, 0.004)   # duvar tutucuları
+        dik_disk(0.02, 0.006, (s * 0.68, -0.003, 0), bey)         # tutucunun duvardaki rozeti
+    # İki kanat: (sol x, sağ x, kıvrım sayısı, tohum). Eskisi gibi sol kanat biraz daha geniş.
+    SATIR = [0.0, 0.10, 0.25, 0.45, 0.65, 0.85, 1.0]              # yukarıdan aşağı satırlar (kıvrımlar boyca yavaş değişir, 6 aralık yeter)
+    UST, ALT, SARKMA = -0.018, -1.33, 0.012                        # kumaş halkaların içinden başlar, etek eskisiyle aynı
+    for (x0, x1, kv, th) in ((-0.74, -0.26, 6, 0.4), (0.30, 0.74, 5, 2.1)):
+        # Üst kenar: halkaların tuttuğu noktalarda yüksek, iki halka arasında 1,2 cm sarkar (kumaş halkaya asılı).
+        ust = (lambda tx, kv=kv: UST - SARKMA * (1 - math.cos(2 * math.pi * kv * tx)) / 2)
+        nokta, en, boy = perde_yuzeyi(x0, x1, ust, ALT, Y, kv, 0.008, 0.011, acilma=1.06, tohum=th)
+        kumas_orgusu(nokta, kv * 10, SATIR, mavi)                 # kıvrım başına 10 sütun: tepeler yuvarlak kalsın
+        kumas_orgusu(nokta, kv * 10, [0.0, 1.0], bulut, kal=0.0, y_kaydir=-0.002, s0=1 - 0.04 / 1.31)   # beyaz etek şeridi
+        for j in range(kv + 1):                                   # her kıvrımın başında bir halka (kumaş orada çubuk hizasında)
+            x = nokta(j / kv, 0.0)[0]
+            for xt in (-0.68, 0.68):                              # halka duvar tutucusuna çarpmasın: 1,6 cm yana it
+                if abs(x - xt) < 0.016:
+                    x = xt + math.copysign(0.016, x - xt)
+            bpy.ops.mesh.primitive_torus_add(major_radius=0.02, minor_radius=0.004, location=(x, Y, 0), rotation=(0, math.pi / 2, 0), major_segments=10, minor_segments=4)
+            bpy.ops.object.transform_apply(rotation=True)         # dönüşü meshe işle (birleştirince bozulmasın)
             ortak.ata(bpy.context.active_object, bey)
             ekle(bpy.context.active_object)
-    for (u, z) in ((-0.62, -0.25), (-0.40, -0.55), (-0.60, -0.85), (-0.38, -1.12), (0.42, -0.30), (0.62, -0.62), (0.45, -0.95), (0.62, -1.20)):
-        dik_disk(0.035, 0.002, (u - 0.035, yc, z), bulut, 16)
-        dik_disk(0.045, 0.002, (u, yc, z + 0.018), bulut, 16)
-        dik_disk(0.035, 0.002, (u + 0.04, yc, z), bulut, 16)
-        kutu((0.11, 0.002, 0.03), (u, yc, z - 0.018), bulut)
+        # Bulutlar: eskisiyle aynı yerlerde; yer artık kanadın içindeki oran (tx) ve yükseklik oranı (s).
+        for (u, z) in ((-0.62, -0.25), (-0.40, -0.55), (-0.60, -0.85), (-0.38, -1.12), (0.42, -0.30), (0.62, -0.62), (0.45, -0.95), (0.62, -1.20)):
+            if x0 <= u <= x1:                                     # yalnızca bu kanada düşen bulutlar
+                s = (UST - z) / (UST - ALT)
+                tx = ((u - (x0 + x1) / 2) / (en(s) / (x1 - x0)) + (x0 + x1) / 2 - x0) / (x1 - x0)   # açılmayı geri alıp orana çevir
+                bulut_deseni(nokta, en, boy, kv * 10, tx, s, bulut)
     return bitir("Perde_Cocuk_K3", "perde")
 
 
@@ -359,19 +505,29 @@ def perde_odaA():
         koni(0.018, 0.004, 0.04, (s * 0.78, Y, 0), pr, 12, rot=(0, s * math.pi / 2, 0))
         kutu((0.02, 0.15, 0.02), (s * 0.70, -0.075, 0.02), pr, 0.004)
         dik_disk(0.02, 0.006, (s * 0.70, -0.003, 0.02), pr)
-    for (x0, x1, n) in ((-0.74, -0.34, 8), (0.34, 0.74, 8)):              # iki kanat, altta hafif açılan pililer
-        c, w = (x0 + x1) / 2, (x1 - x0) / n
-        for i in range(n):
-            xt = x0 + (i + 0.5) * w
-            xb = c + (xt - c) * 1.25
-            serit_kumas(xt, -0.02, xb, -1.38, w + 0.014, 0.012, Y - 0.014 + (0.007 if i % 2 else -0.007), lila)
-    kutu((1.58, 0.02, 0.04), (0, Y - 0.05, 0.02), lila_k, 0.006)           # fırfırlı korniş bandı
-    for i in range(26):
-        x = -0.78 + (i + 0.5) * 1.56 / 26
-        L = 0.20 if i % 2 else 0.24
-        kutu((0.066, 0.012, L), (x, Y - 0.052 + (0.006 if i % 2 else -0.006), 0.03 - L / 2), lila_k)
-    for i in range(13):                                                    # alt kenarda ponponlar
-        kure(0.009, (-0.72 + i * 0.12, Y - 0.06, -0.22), lila, seg=8, halka=6)
+    # İki kanat: üstte korniş fırfırının arkasında toplanmış, aşağı indikçe açılan (%25) ve derinleşen
+    # tek parça pilili kumaş; eteğinde aynı kumaştan kıvrık bir baskı şeridi.
+    SATIR = [0.0, 0.10, 0.25, 0.45, 0.65, 0.85, 1.0]                     # 6 dikey aralık
+    UST, ALT = -0.02, -1.38                                                # eski şeritlerin üst ve alt ucu
+    for (x0, x1, th) in ((-0.74, -0.34, 1.1), (0.34, 0.74, 3.7)):
+        nokta, en, boy = perde_yuzeyi(x0, x1, UST, ALT, Y - 0.01, 5, 0.006, 0.012, acilma=1.25, tohum=th)
+        kumas_orgusu(nokta, 50, SATIR, lila)                               # 5 kıvrım x 10 sütun
+        kumas_orgusu(nokta, 50, [0.0, 1.0], lila, kal=0.0, y_kaydir=-0.0025, s0=1 - 0.045 / (UST - ALT))   # etek baskısı
+    # Fırfırlı korniş: tek parça, sık büzgülü koyu lila fırfır; eteği ponponların altında sarkan kavislerle
+    # (13 kavis, her birinin en alçak noktasında bir ponpon). Üstünde düz büzgü bandı.
+    PX = [-0.72 + i * 0.12 for i in range(13)]                             # ponponların x'i (eskisiyle aynı)
+    # Kavisli alt kenar: tx'ten x'e geçilir (x = -0,78 + 1,56 tx). cos² ponpon hizalarında 1 (kenar 3,5 cm
+    # aşağı sarkar, z = -0,22), iki ponpon arasında 0'dır (kenar z = -0,185'te kalkar); 12 cm'de bir tekrarlar.
+    etek = (lambda tx: -0.185 - 0.035 * math.cos(math.pi * (-0.78 + 1.56 * tx + 0.72) / 0.12) ** 2)
+    firfir, _, _ = perde_yuzeyi(-0.78, 0.78, 0.035, etek, Y - 0.05, 16, 0.010, 0.010, tohum=0.7)
+    kumas_orgusu(firfir, 16 * 8, [0.0, 0.5, 1.0], lila_k)                  # bandın arkasından başlar; kavisli etek için kıvrım başına 8 sütun
+    # Büzgü bandı: çok sığ kıvrımlı, tutucuların ucunun (y = -0,15) önünde; eski bant gibi z 0,00-0,04.
+    bant, _, _ = perde_yuzeyi(-0.785, 0.785, 0.04, 0.0, Y - 0.065, 16, 0.003, 0.003, tohum=0.7)
+    kumas_orgusu(bant, 16 * 4, [0.0, 1.0], lila_k)                         # sığ kıvrım: kıvrım başına 4 sütun yeter
+    for x in PX:                                                           # ponponlar: kavisin dibinde, kumaşın önünde
+        tx = (x + 0.78) / 1.56
+        _, y, z = firfir(tx, 1.0)
+        kure(0.009, (x, y - 0.007, z - 0.006), lila, seg=8, halka=5)
     return bitir("Perde_OdaA_K3", "perde")
 
 

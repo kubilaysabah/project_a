@@ -608,24 +608,93 @@ def uret(hangi):
         cubuk((-EN / 2, -0.05, 0), (EN / 2, -0.05, 0), 0.007, cubuk_m, 10)
         for x in (-EN / 2 + 0.02, EN / 2 - 0.02):
             kutu("Tutucu", (0.012, 0.05, 0.02), (x, -0.025, 0), cubuk_m)
-        L = 1.50
+        L = 1.50                     # halkanın altından etek ucuna kumaşın boyu
+        UST = -0.013                 # kumaşın üst kenarı: halkanın en alt noktasına (z = -0.014) değiyor
 
-        def kanat(x0, x1, dalga, genlik, sarkma=None):
-            """Kanat: x0..x1 arasında dalgalı ince kumaş; sarkma=(x, derinlik) orada bir halka kopmuş."""
-            def f(u, v):
-                x = x0 + (x1 - x0) * u
-                y = -0.05 + genlik * math.sin(2 * math.pi * (x - x0) / dalga) * (0.7 + 0.3 * v)
-                ust = -0.012
-                if sarkma:
-                    ust -= sarkma[1] * math.exp(-((x - sarkma[0]) / 0.09) ** 2)
-                z = ust - (L + ust + 0.012) * v - 0.01 * math.sin(7 * x) * v
+        # Satırlar: kumaşın yukarıdan aşağı hangi oranlarda bölüneceği. Üstte sık (büzgülü başlık
+        # orada şekil değiştiriyor), aşağıda seyrek (kumaş düz iniyor, fazla köşe boşa gider).
+        SATIR = [0.0, 0.03, 0.08, 0.30, 0.65, 0.95, 1.0]
+
+        def kanat(x0, x1, dalga, genlik, ilk_halka, sarkma=None, yayilma=0.0):
+            """
+            TEK PARÇA pilili kanat. Eski sürüm dar şeritler gibi okunuyordu; burada kumaş tek bir yüzey:
+            enine yumuşak sinüs kıvrımları (pililer), üstte halkalara tutturulmuş büzgülü başlık,
+            altta kalın bir etek (baskı). Parametreler:
+              x0, x1  : kanadın çubuktaki sol ve sağ ucu
+              dalga   : bir pilinin genişliği (iki halka arası); küçüldükçe kumaş daha sıkı toplanır
+              genlik  : pilinin öne-arkaya derinliği
+              ilk_halka: ilk halkanın x'i; kumaş orta çizgiyi (y = -0.05) tam halkaların altında keser
+              sarkma  : (x, derinlik) orada bir halka kopmuş, üst kenar sarkıyor ve öne düşüyor
+              yayilma : etekte kanadın ne kadar açıldığı (toplanmış kanat aşağıda yelpaze gibi açılır)
+            Döndürdüğü f(u, zf): u enine 0..1, zf yukarıdan aşağı 0..1 → (x, y, z).
+            """
+            xm = (x0 + x1) / 2                                   # yayılmanın merkezi: kanadın ortası
+
+            def sark(x):                                         # kopuk halkanın çevresindeki çan eğrisi (0..1)
+                return math.exp(-((x - sarkma[0]) / 0.09) ** 2) if sarkma else 0.0
+
+            def f(u, zf):
+                xu = x0 + (x1 - x0) * u                          # bu sütunun çubuktaki yeri (eşit aralıklı)
+                # KÖŞELERİ PİLİ TEPELERİNE TOPLA: sinüsün en çok büküldüğü yer tepeleri, ortası neredeyse düz.
+                # Köşeler eşit aralıklı olunca tepede iki yüz arasındaki açı 35°'yi geçiyor, yumuşatma orayı
+                # "keskin kenar" sayıyor ve kumaş jaluzi çıtaları gibi görünüyordu. w pilinin evresi (1 = bir
+                # pili); w + 0,6·sin(4πw)/4π dönüşümü köşeleri tepelerde 2,5 kat sıklaştırır, ortada seyreltir.
+                # Aynı köşe sayısıyla kıvrım yumuşar; köşe sayısını artırmaktan çok daha ucuz.
+                w = (xu - ilk_halka) / dalga
+                w += 0.6 * math.sin(4 * math.pi * w) / (4 * math.pi)
+                xu = ilk_halka + w * dalga
+                x = xm + (xu - xm) * (1 + yayilma * zf)          # aşağı indikçe merkezden dışa doğru açıl
+                x += 0.006 * math.sin(4.0 * xu + 1.0) * zf       # kumaş aşağıda hafifçe yana kayar (dümdüz inmez)
+                ust = UST - (sarkma[1] if sarkma else 0) * sark(xu)   # üst kenar: kopuk halkada aşağı sarkar
+                alt = -L - 0.010 * math.sin(7 * xu)              # etek ucu: dümdüz değil, hafif dalgalı
+                z = ust + (alt - ust) * zf                       # yukarıdan aşağı doğrusal iniş
+                # Pili derinliği: başlıkta halkalar kumaşı sıkıştırır (0,6 kat), 12 cm aşağıda tam açılır,
+                # etekte biraz yorulur (0,9 kat). Her pilinin derinliği de biraz farklı olsun diye yavaş bir
+                # ikinci sinüsle oynatılır; hepsi aynı olunca kumaş değil oluklu sac gibi görünür.
+                acilma = 0.6 + 0.4 * min(1.0, zf / 0.08)
+                oynama = 1.0 + 0.25 * math.sin(11.0 * xu + 1.3 + 2.0 * zf)   # derinlik boyunca da değişir
+                derin = genlik * acilma * (1.0 - 0.1 * zf) * oynama
+                # KIVRIMLAR GEZİNSİN: bütün pililer dimdik ve eş olunca göz onları kumaş değil çıta sayıyor.
+                # "kayma" pilinin evresine eklenen küçük bir açı: üstte 0 (halkalar yerinde kalsın), aşağı
+                # indikçe büyür ve her pilide farklıdır; böylece kıvrımlar hafifçe eğilir, birleşir, açılır.
+                kayma = min(1.0, zf * 1.6) * (0.9 * math.sin(5.3 * xu + 0.7) + 0.5 * math.sin(13.1 * xu))
+                # Sinüs: halkalar kumaşın orta çizgiden (y = -0.05) geçtiği yerlerde durur.
+                y = -0.05 + derin * math.sin(2 * math.pi * (xu - ilk_halka) / dalga + kayma)
+                y -= 0.012 * sark(xu) * (1 - zf)                 # kopuk halkanın altında kumaş öne düşer
                 return (x, y, z)
-            return yuzey("Kanat", f, max(8, int((x1 - x0) / dalga * 8)), 6, kumas, 0.002)
+            return f
 
-        kanat(-0.78, 0.08, 0.13, 0.014, sarkma=(-0.36, 0.06))    # çekilmiş kanat, bir halkası kopuk
-        kanat(0.56, 0.78, 0.045, 0.03)                           # toplanmış kanat
-        for x in [(-0.76 + i * 0.09) for i in range(10) if abs(-0.76 + i * 0.09 + 0.36) > 0.05] + [0.58, 0.64, 0.70, 0.76]:
-            simit(0.012, 0.0022, (x, -0.05, -0.002), cubuk_m, rot=(0, math.pi / 2, 0), seg=(12, 4))
+        def dik(f, a, b):
+            """f'nin yalnızca zf = a..b dilimini yuzey'e veren sarmalayıcı (başlık ve etek bandı için)."""
+            return lambda u, v: f(u, a + (b - a) * v)
+
+        def serit(f, sutun, kal):
+            """Ana kumaş: SATIR listesindeki yükseklikleri kullanır (yuzey v'yi j/nv diye verir)."""
+            son = len(SATIR) - 1
+            return yuzey("Kanat", lambda u, v: f(u, SATIR[int(round(v * son))]), sutun, son, kumas, kal)
+
+        # Çekilmiş kanat: 86 cm, 13 cm'lik pililer, bir halkası kopuk.
+        # Sütun sayısı: pili başına ~9 köşe; tepelere toplandıkları için kıvrım yine yumuşak kalır.
+        sol = kanat(-0.78, 0.08, 0.13, 0.019, -0.76, sarkma=(-0.37, 0.06))
+        serit(sol, 60, 0.002)
+        # Toplanmış kanat: 22 cm'ye sıkışmış, 7 cm'lik sık pililer; aşağıda %12 açılır.
+        # Pili daha dar ve daha derin olduğu için pili başına ~13 köşe gerekiyor (aynı yumuşaklık için).
+        sag = kanat(0.56, 0.78, 0.07, 0.020, 0.575, yayilma=0.12)
+        serit(sag, 40, 0.002)
+        # Başlık bandı ve etek baskısı: aynı yüzeyin üst 5 cm'si ve alt 4,5 cm'si, daha KALIN (6-7 mm) bir
+        # kabukla bir kez daha çizilir. İnce kumaş bu kalın kabuğun içinde kalır; dışarıdan bakınca
+        # başlıkta ve etekte kumaş katlanıp dikilmiş gibi bir basamak görünür.
+        for f, sutun in ((sol, 60), (sag, 40)):
+            yuzey("Baslik", dik(f, 0.0, 0.033), sutun, 1, kumas, 0.007)
+            yuzey("Etek", dik(f, 0.97, 1.0), sutun, 1, kumas, 0.006)
+
+        # Halkalar: kumaşın orta çizgiden geçtiği yerlerde. Çekilmiş kanatta her pilide bir halka (13 cm),
+        # kopuk halka (x ≈ -0.37) atlanır; toplanmış kanatta yarım pilide bir, yani halkalar sıkış sıkış.
+        halkalar = [-0.76 + i * 0.13 for i in range(7)]
+        halkalar = [x for x in halkalar if abs(x + 0.37) > 0.05]
+        halkalar += [0.575 + i * 0.035 for i in range(6)]
+        for x in halkalar:
+            simit(0.012, 0.0022, (x, -0.05, -0.002), cubuk_m, rot=(0, math.pi / 2, 0), seg=(10, 4))
         bitir("Perde_K7", 0.3, 2.0, kip=None, kaldir=1.6)
 
     elif hangi == "ocak":

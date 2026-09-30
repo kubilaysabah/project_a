@@ -230,6 +230,150 @@ def pilili(ad, x0, x1, z_ust, boy, y, genlik, adim, mat, alt_oran=1.0, kal=0.004
     return o
 
 
+def halka_loft(ad, halkalar, mat, kose=20, us=3.0, kivrim=None, alt=True, ust=True):
+    """
+    LOFT (halkalardan örme): üstten alta sıralı YATAY halkaları yüzlerle birbirine bağlar; mont gövdesi, kol.
+    halkalar: (cx, cy, z, yarı_en_x, yarı_derinlik_y) listesi, z yukarıdan aşağı.
+    Her halka bir SÜPER ELİPS: |x/en|^us + |y/der|^us = 1. us = 2 düz elips; us büyüdükçe köşeleri
+    yuvarlatılmış dikdörtgene yaklaşır (boş asılı bir mont yassı ama köşesiz durur).
+    kivrim(xr, z): halka merkezine göre x'teki (xr) noktayı y'de ne kadar kaydıracağımız; kumaşın
+    dikey kıvrımları. Ön ve arka yüz BİRLİKTE kayar, çünkü kıvrılan kumaşın iki yüzü de birlikte kıvrılır.
+    """
+    import bmesh                                   # yüz yönlerini düzeltmek için Blender'ın mesh aracı
+    v, f = [], []                                  # köşe noktaları ve yüzler
+    e = 2.0 / us                                   # süper elipsin açı üssü (us = 2 ise 1: düz çember)
+    for (cx, cy, z, w, d) in halkalar:
+        for i in range(kose):
+            a = 2 * math.pi * i / kose             # halkanın etrafında eşit açılı adımlar
+            c, s = math.cos(a), math.sin(a)
+            x = cx + w * math.copysign(abs(c) ** e, c)   # işareti koruyarak üs al: köşe yuvarlaklığı
+            y = cy + d * math.copysign(abs(s) ** e, s)
+            if kivrim:
+                y += kivrim(x - cx, z)             # kumaş kıvrımı: aynı x'teki ön ve arka nokta birlikte kayar
+            v.append((x, y, z))
+    for j in range(len(halkalar) - 1):             # her iki komşu halka arasına dörtgen şerit
+        for i in range(kose):
+            a0, a1 = j * kose + i, j * kose + (i + 1) % kose
+            f.append((a0, a1, a1 + kose, a0 + kose))
+    if ust:
+        f.append(tuple(range(kose)))               # en üst halkayı kapat
+    if alt:
+        s0 = (len(halkalar) - 1) * kose
+        f.append(tuple(reversed(range(s0, s0 + kose))))   # en alt halkayı kapat (ters sıra: dışa baksın)
+    m = bpy.data.meshes.new(ad)
+    m.from_pydata(v, [], f)
+    m.update()
+    bm = bmesh.new()                               # yüz yönlerini tutarlı biçimde DIŞA çevir:
+    bm.from_mesh(m)                                # Unity arka yüzleri çizmez, içe bakan yüz görünmez olur
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(m)
+    bm.free()
+    o = bpy.data.objects.new(ad, m)
+    bpy.context.collection.objects.link(o)
+    ortak.ata(o, mat)
+    p.append(o)
+    return o
+
+
+def ara_halka(halkalar, z):
+    """Loft halkaları arasında z yüksekliğindeki kesiti doğrusal ara değerle bulur: (cx, cy, en, der)."""
+    for h0, h1 in zip(halkalar, halkalar[1:]):
+        if h1[2] <= z <= h0[2]:                    # z bu iki halkanın arasında mı (liste yukarıdan aşağı)
+            t = (h0[2] - z) / max(1e-6, h0[2] - h1[2])
+            return tuple(h0[k] + (h1[k] - h0[k]) * t for k in (0, 1, 3, 4))
+    h = halkalar[0] if z > halkalar[0][2] else halkalar[-1]   # aralık dışı: en yakın uçtaki halka
+    return (h[0], h[1], h[3], h[4])
+
+
+def on_y(halkalar, xr, z, us=3.0, kivrim=None):
+    """Loft gövdenin ÖN yüzünün (−y) o noktadaki y değeri: cep, fermuar, yaka ucu bu yüzeye oturur."""
+    cx, cy, w, d = ara_halka(halkalar, z)
+    oran = max(0.0, 1 - abs(xr / w) ** us) ** (1 / us)   # süper elipste merkezden xr uzaktaki derinlik oranı
+    return cy - d * oran + (kivrim(xr, z) if kivrim else 0.0)
+
+
+def perde_kanadi(ad, x0, x1, z_ust, boy, y0, genlik, dalga, mat, kal=0.004, bas=0.5, etek=1.12, tohum=0.0, sutun=16):
+    """
+    TEK PARÇA pileli perde kanadı. Eski 'pilili' zikzak yaptığı için keskin kırışıklar ayrı ayrı çıtalar gibi
+    görünüyordu; burada kıvrımlar yumuşak bir SİNÜS dalgası ve bütün kanat tek bir kesintisiz yüzey.
+      x0-x1 : kanadın genişliği (x), z_ust: üst kenarı, boy: aşağı sarkma, y0: kıvrımların ortalama düzlemi.
+      genlik: kıvrımın öne-arkaya yarı derinliği; dalga: bir kıvrımın genişliği (m).
+      bas   : üst şeritte (büzgülü başlık) kıvrım genliğinin oranı: kumaş rayda sıkı toplanır.
+      etek  : alt kenarda genlik oranı: ağırlıkla hafif açılır.
+      tohum : kanattan kanada kıvrımların düzensizliği farklı olsun diye faz kaydırması.
+      sutun : bir dalgadaki köşe sayısı. Az olursa (ör. 8) komşu yüzler arası açı yumuşatma sınırını
+              (35°) aşar ve kıvrımın tepesi yine keskin kırık gibi görünür; çok olursa üçgen sayısı şişer.
+    Üstte başlık bandı, altta etek bandı ayrı ince şeritler: kumaşın 2,5 mm önünde, aynı kıvrımı izler;
+    kenar çizgileri dikiş gibi okunur. Döndürdüğü liste: rayın makara/halka takılacak x konumları.
+    """
+    genislik = x1 - x0
+    nd = max(1, round(genislik / dalga))           # TAM SAYI kıvrım: iki kenar aynı fazda biter
+    k = 2 * math.pi * nd / genislik                # sinüsün açısal sıklığı (radyan / metre)
+
+    def genl(u, d):
+        """u: kanat solundan uzaklık, d: üst kenardan aşağı uzaklık; o noktadaki kıvrım genliği."""
+        t = min(1.0, d / 0.30)
+        yumusak = t * t * (3 - 2 * t)              # 'smoothstep': 0'dan 1'e kırıksız geçiş
+        ust_kisim = bas + (1 - bas) * yumusak      # başlıkta sıkı, 30 cm aşağıda tam genlik
+        alt_kisim = 1 + (etek - 1) * (d / boy) ** 2   # aşağı indikçe hafif açılma
+        duzensiz = 1 + 0.12 * math.sin(k * u / 3.7 + tohum) + 0.05 * math.sin(k * u / 1.9 + 2 * tohum)
+        return genlik * ust_kisim * alt_kisim * duzensiz   # her kıvrım biraz farklı derin: el yapımı kumaş
+
+    def yy(x, d):
+        """Kumaş yüzeyinin y değeri. Kıvrımlar aşağı indikçe fazı hafifçe kayar (kumaş dimdik inmez)."""
+        u = x - x0
+        kayma = 0.35 * (d / boy) * math.sin(k * u / 5.3 + 1.3 * tohum)
+        return y0 - genl(u, d) * math.sin(k * u + kayma)
+
+    def etek_d(u):
+        """Alt kenar dümdüz değil: 0-6 mm arası yukarı dalgalanır (yalnız yukarı: ölçü kutusu büyümesin)."""
+        return boy - 0.006 * (1 + math.sin(k * u / 2.3 + tohum)) / 2
+
+    ns = nd * sutun                                 # x boyunca aralık sayısı
+    # Köşeler eşit aralıklı değil: kıvrımın TEPESİNDE (eğrilik en büyük) sık, yan yüzlerinde (düz iniş) seyrek.
+    # θ = φ + 0.2·sin(2φ): φ eşit adımlı, θ tepelerde (π/2, 3π/2 ...) yavaşlar. Aynı yumuşaklık daha az üçgenle.
+    xs = []
+    for i in range(ns + 1):
+        fi = 2 * math.pi * nd * i / ns
+        xs.append(x0 + (fi + 0.2 * math.sin(2 * fi)) / k)
+
+    def yuzey(ad_, dler, ofset, kalinlik):
+        """dler: üstten aşağı satır derinlikleri (None = etek kenarı). ofset: kumaşın önüne kaydırma (m)."""
+        n = len(xs)
+        nokta, yuz = [], []
+        for dd in dler:
+            for x in xs:
+                d = etek_d(x - x0) if dd is None else dd
+                y = yy(x, d)
+                # Yüzeyin odaya bakan normali (xy düzleminde): eğim türevden bulunur, (eğim, −1) yönü.
+                egim = (yy(x + 0.001, d) - yy(x - 0.001, d)) / 0.002
+                boy_n = math.sqrt(1 + egim * egim)
+                nokta.append((x + ofset * egim / boy_n, y - ofset / boy_n, z_ust - d))
+        for r_ in range(len(dler) - 1):
+            for i in range(n - 1):
+                a = r_ * n + i
+                yuz.append((a, a + n, a + n + 1, a + 1))   # bu köşe sırası yüzün normalini odaya (−y) çevirir
+        m = bpy.data.meshes.new(ad_)
+        m.from_pydata(nokta, [], yuz)
+        m.update()
+        o = bpy.data.objects.new(ad_, m)
+        bpy.context.collection.objects.link(o)
+        ortak.ata(o, mat)
+        if kalinlik > 0:
+            sol = o.modifiers.new("Kalinlik", "SOLIDIFY")   # kalınlık arkaya (+y) doğru eklenir
+            sol.thickness = kalinlik
+        p.append(o)
+        return o
+
+    # Ana kumaş: satırlar başlıkta sık (orada genlik hızla değişiyor), gövdede seyrek (kumaş düz iniyor);
+    # etek bandının hizasında (boy − 5 cm) bir satır daha: band kumaşı birebir izlesin, içine girmesin.
+    yuzey(ad, [0.0, 0.08, 0.30, 0.55 * boy, boy - 0.05, None], 0.0, kal)
+    yuzey(ad + "_Baslik", [0.0, 0.06], 0.0025, 0.0)             # büzgülü başlık bandı
+    yuzey(ad + "_Etek", [boy - 0.045, None], 0.0025, 0.0)       # kıvrılıp dikilmiş etek bandı
+    # Makara/halka yerleri: her kıvrımın duvara en yakın (arka) tepesi ve iki kenar.
+    return [x0] + [x0 + (2 * math.pi * j + 1.5 * math.pi) / k for j in range(nd)] + [x1]
+
+
 # ---------- ORTAK MALZEMELER ----------
 ceviz = ortak.malzeme("K5_Ceviz", (0.075, 0.038, 0.016), puruz=0.45)        # evin klasik orta ceviz tonu
 ceviz_ac = ortak.malzeme("K5_CevizAcik", (0.12, 0.065, 0.028), puruz=0.5)
@@ -323,18 +467,90 @@ elif hangi == "aski":
         cubuk((x, -0.022, 0.0), (x, -0.07, -0.025), 0.006, pirinc)                             # kanca kolu
         cubuk((x, -0.07, -0.025), (x, -0.085, 0.015), 0.006, pirinc)                           # kanca ucu
         kure(0.009, (x, -0.085, 0.015), pirinc)
-    # Sol kancada lacivert iş montu: askı ilmeğinden asılı, omuzları düşük, kolları iki yanda sarkık.
-    mx, my = -0.20, -0.085
-    cubuk((mx, -0.075, -0.02), (mx, -0.075, -0.06), 0.004, lacivert)                           # askı ilmeği
-    K((0.16, 0.08, 0.06), (mx, my, -0.07), lacivert, 0.02)                                     # yaka
-    K((0.36, 0.11, 0.24), (mx, my, -0.20), lacivert, 0.03)                                     # omuz ve göğüs
-    K((0.46, 0.13, 0.52), (mx, my, -0.56), lacivert, 0.03)                                     # gövde
+    reflektor = ortak.malzeme("K5_Reflektor", (0.45, 0.45, 0.40), puruz=0.3)
+    # Sol kancada lacivert iş montu, ENSESİNDEKİ askı ilmeğinden asılı. Boş bir mont kancaya asılınca:
+    # yaka kancanın hemen altında toplanır, omuzlar dik bir eğimle düşer, gövde aşağıda genişler,
+    # kollar iki yanda hafif öne düşerek sarkar, etek duvara doğru yaslanır.
+    # Gövde yatay halkalardan örülür (halka_loft): her satır (z, yarı en, arka yüz y, ön yüz y).
+    mx = -0.20                                   # kancanın x'i: montun ortası
+    GOVDE = [(-0.050, 0.075, -0.060, -0.110),    # boyun: yakanın içinde kalır
+             (-0.075, 0.120, -0.050, -0.120),    # omuz başlangıcı: dik eğim
+             (-0.110, 0.175, -0.042, -0.128),
+             (-0.150, 0.205, -0.036, -0.135),    # omuz ucu (kolun başladığı yer)
+             (-0.200, 0.215, -0.032, -0.140),
+             (-0.320, 0.215, -0.027, -0.143),    # göğüs: en dolgun yer
+             (-0.450, 0.210, -0.024, -0.139),
+             (-0.600, 0.212, -0.021, -0.133),
+             (-0.775, 0.222, -0.020, -0.124),    # etek bandının üstü (hafif açılır)
+             (-0.790, 0.221, -0.020, -0.122),
+             (-0.808, 0.216, -0.021, -0.119)]    # etek kenarı biraz içe kıvrık
+
+    def kivrim(xr, z):
+        """Göğüsten aşağı giderek belirginleşen dikey kumaş kıvrımları (en fazla 6 mm)."""
+        g = min(1.0, max(0.0, (-z - 0.28) / 0.45))
+        return 0.006 * g * math.sin(xr * 2 * math.pi / 0.15 + 0.7)
+
+    # Satırları loft halkalarına çevir: merkez y ön ile arkanın ortası, yarı derinlik farkın yarısı.
+    # Etek hafifçe sağa kaçar (cx aşağı indikçe 1 cm kayar): hiçbir mont kancada tam simetrik durmaz.
+    hg = [(mx + 0.01 * (z / -0.8) ** 2, (arka + on) / 2, z, w, (arka - on) / 2) for (z, w, arka, on) in GOVDE]
+    halka_loft("Mont", hg, lacivert, kose=20, us=3.0, kivrim=kivrim)
+    # Yaka: boynun etrafında gövdeden biraz büyük, yatık bir bant; tepesi kancanın koluna değer.
+    halka_loft("Yaka", [(mx, -0.085, -0.030, 0.080, 0.030), (mx, -0.086, -0.045, 0.096, 0.036),
+                        (mx, -0.087, -0.068, 0.114, 0.043)], lacivert, kose=20, us=2.6)
+    # Askı ilmeği: yakanın içinden kancaya çıkan V biçimli şerit.
     for s in (-1, 1):
-        KR((0.10, 0.10, 0.56), (mx + s * 0.225, my, -0.45), lacivert, (0, s * 0.10, 0), 0.03)   # kollar
-    K((0.012, 0.004, 0.70), (mx, my - 0.066, -0.47), fermuar)                                  # fermuar
+        cubuk((mx + s * 0.008, -0.066, -0.040), (mx, -0.071, -0.022), 0.003, lacivert, 6)
+    # Yaka uçları: göğsün üstüne yatan iki sivri kanat, dışa doğru eğik.
     for s in (-1, 1):
-        K((0.13, 0.008, 0.05), (mx + s * 0.11, my - 0.068, -0.52), lacivert, 0.004)            # cep kapakları
-    K((0.46, 0.006, 0.03), (mx, my - 0.066, -0.40), ortak.malzeme("K5_Reflektor", (0.45, 0.45, 0.40), puruz=0.3))
+        KR((0.06, 0.008, 0.05), (mx + s * 0.048, on_y(hg, s * 0.048, -0.090) - 0.006, -0.090), lacivert,
+           (math.radians(8), s * 0.45, 0), 0.002)
+    # Kollar: omuz ucundan başlar (ilk halka gövdenin içinde), dirseğe doğru hafif dışa, bileğe doğru öne düşer.
+    # Bilekte lastikli manşet: kısa, biraz daha dar bir bölüm; en alttaki küçük halka kolun ağzını kapatır.
+    kollar = []
+    for s in (-1, 1):
+        kol = [(mx + s * 0.170, -0.087, -0.130, 0.045, 0.045),
+               (mx + s * 0.205, -0.090, -0.180, 0.052, 0.050),
+               (mx + s * 0.228, -0.095, -0.300, 0.050, 0.047),
+               (mx + s * 0.240, -0.100, -0.450, 0.047, 0.045),
+               (mx + s * 0.242, -0.106, -0.600, 0.044, 0.042),
+               (mx + s * 0.239, -0.110, -0.690, 0.042, 0.040),
+               (mx + s * 0.238, -0.111, -0.697, 0.039, 0.037),   # manşet başlangıcı: kumaş içe büzülür
+               (mx + s * 0.237, -0.112, -0.735, 0.038, 0.036),
+               (mx + s * 0.237, -0.112, -0.740, 0.030, 0.028)]
+        halka_loft("Kol", kol, lacivert, kose=12, us=2.4)
+        kollar.append(kol)
+    # Reflektör şerit: gövdeyi ve iki kolu aynı yükseklikte saran gri bant. Gövdeden 3 mm büyük halkalar,
+    # aynı kıvrım fonksiyonuyla: şerit kumaşın üstüne yapışık durur, havada kalmaz.
+    SZ = (-0.385, -0.415)
+    halka_loft("Serit", [(*ara_halka(hg, z)[:2], z, ara_halka(hg, z)[2] + 0.003, ara_halka(hg, z)[3] + 0.003)
+                         for z in SZ], reflektor, kose=20, us=3.0, kivrim=kivrim)
+    for kol in kollar:
+        halka_loft("KolSerit", [(*ara_halka(kol, z)[:2], z, ara_halka(kol, z)[2] + 0.003, ara_halka(kol, z)[3] + 0.003)
+                                for z in SZ], reflektor, kose=12, us=2.4)
+    # Fermuar: ön ortada, yakadan eteğe; ön yüzeyi izleyen kısa çubuklardan bir zincir, üstte çekme dili.
+    zler = [-0.075 - i * 0.06 for i in range(13)]
+    for za, zb in zip(zler, zler[1:]):
+        xa, xb = ara_halka(hg, za)[0], ara_halka(hg, zb)[0]
+        cubuk((xa, on_y(hg, 0.0, za, 3.0, kivrim) - 0.002, za), (xb, on_y(hg, 0.0, zb, 3.0, kivrim) - 0.002, zb), 0.0035, fermuar, 6)
+    K((0.012, 0.005, 0.03), (mx, on_y(hg, 0.0, -0.10, 3.0, kivrim) - 0.007, -0.10), fermuar, 0.001)
+
+    def on_plaka(xr, z, en, boy, mat, ek=0.003):
+        """Ön yüzeye oturan düz plaka (cep, kapak). Yüzey kıvrımlı olduğu için plakanın arka yüzü yüzeyin
+        en geride kalan noktasına, ön yüzü en önde kalan noktasının ek kadar önüne konur: hiç gömülmez, havada kalmaz."""
+        cx = ara_halka(hg, z)[0]
+        ys = [on_y(hg, xr + en * (t / 4 - 0.5), z + boy * (q - 0.5), 3.0, kivrim) for t in range(5) for q in (0, 0.5, 1)]
+        arka, on = max(ys) + 0.001, min(ys) - ek
+        K((en, arka - on, boy), (cx + xr, (arka + on) / 2, z), mat, 0.002)
+        return on                                 # plakanın ön yüzü: üstüne düğme/çıtçıt oturtmak için
+
+    # Cepler: altta iki büyük yama cep ve kapakları (çıtçıtlı), göğüste solda küçük bir cep.
+    for s in (-1, 1):
+        on_plaka(s * 0.105, -0.615, 0.13, 0.14, lacivert, 0.004)
+        kap_on = on_plaka(s * 0.105, -0.535, 0.145, 0.05, lacivert, 0.009)
+        dik_disk(0.005, 0.003, (ara_halka(hg, -0.54)[0] + s * 0.105, kap_on - 0.001, -0.54), fermuar, 10)   # çıtçıt
+    on_plaka(0.095, -0.285, 0.10, 0.11, lacivert, 0.004)
+    kap_on = on_plaka(0.095, -0.222, 0.11, 0.04, lacivert, 0.009)
+    dik_disk(0.0045, 0.003, (ara_halka(hg, -0.226)[0] + 0.095, kap_on - 0.001, -0.226), fermuar, 10)
     # Sağ kancada el feneri: bilek ipinden sarkıyor, kafası aşağıda.
     fx = 0.20
     simit(0.03, 0.0025, (fx, -0.085, -0.03), siyah, olcek=(0.5, 1, 1.6), rot=(0, math.pi / 2, 0), seg=16)
@@ -1197,12 +1413,15 @@ else:   # perdeB
     for s in (-1, 1):
         K((0.012, 0.04, 0.03), (s * (EN / 2 + 0.006), -ARA, 0.005), plastik, 0.003)
         K((0.03, ARA - 0.015, 0.015), (s * (EN / 2 - 0.15), -(ARA - 0.015) / 2, 0.01), plastik, 0.002)
-    # Kanatlar: soldaki geniş (yarı kapalı), sağdaki toplanmış; raydan küçük makaralarla sarkıyor.
-    for (x0, x1, genlik, adim) in ((-EN / 2 + 0.01, -0.05, 0.022, 0.05), (EN / 2 - 0.30, EN / 2 - 0.01, 0.03, 0.035)):
-        pilili("PerdeB", x0, x1, -0.015, BOY, -ARA, genlik, adim, yesil, 1.0, 0.004)
-        n = int((x1 - x0) / (adim * 2)) + 1
-        for i in range(n):
-            K((0.008, 0.012, 0.012), (x0 + i * (x1 - x0) / max(1, n - 1), -ARA, -0.012), plastik)
+    # Kanatlar: soldaki geniş (yarı kapalı, kıvrımları gevşek), sağdaki toplanmış (dar ve sık kıvrımlı).
+    # Her kanat TEK PARÇA kumaş (perde_kanadi): yumuşak sinüs kıvrımları, büzgülü başlık, dikişli etek.
+    # Raydaki küçük makaralar her kıvrımın duvara yakın tepesinde: kumaş gerçekten oradan asılı.
+    for (x0, x1, genlik, dalga, tohum, sutun) in ((-EN / 2 + 0.01, -0.05, 0.020, 0.12, 0.4, 12),
+                                                  (EN / 2 - 0.30, EN / 2 - 0.01, 0.018, 0.072, 2.1, 14)):
+        makaralar = perde_kanadi("PerdeB", x0, x1, -0.015, BOY, -ARA, genlik, dalga, yesil, 0.004,
+                                 tohum=tohum, sutun=sutun)
+        for xm in makaralar:
+            K((0.008, 0.012, 0.012), (xm, -ARA, -0.012), plastik)
     ad, h, uzak = "Perde_OdaB_K5", 1.6, 2.4
     kaldir = 1.58
 

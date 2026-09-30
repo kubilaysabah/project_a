@@ -71,8 +71,8 @@ MeshRenderer:
   - {fileID: 1092679419561535206, guid: fa642f50120ce3240afcc8608de37092, type: 3}
   - {fileID: 4094858651658035420, guid: fa642f50120ce3240afcc8608de37092, type: 3}
   - {fileID: -6795357501210634125, guid: fa642f50120ce3240afcc8608de37092, type: 3}
-  - {fileID: -4071910774568772771, guid: fa642f50120ce3240afcc8608de37092, type: 3}
   - {fileID: -2870917655812761370, guid: fa642f50120ce3240afcc8608de37092, type: 3}
+  - {fileID: -4071910774568772771, guid: fa642f50120ce3240afcc8608de37092, type: 3}
   - {fileID: -1349295291697144719, guid: fa642f50120ce3240afcc8608de37092, type: 3}
   - {fileID: -6715574688057214329, guid: fa642f50120ce3240afcc8608de37092, type: 3}
   m_StaticBatchInfo:
@@ -150,5 +150,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.3336023, y: 0.142, z: 0.61300004}
-  m_Center: {x: 0, y: 0.071, z: 0.000000014901161}
+  m_Size: {x: 0.36003378, y: 0.145, z: 0.618525}
+  m_Center: {x: 0, y: 0.0725, z: 0}

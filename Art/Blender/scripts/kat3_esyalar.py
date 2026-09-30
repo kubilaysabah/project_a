@@ -556,20 +556,295 @@ def bitir_acilir(ad, govde_parcalari, ayri, h, uzak):
 # EŞYALAR
 # =====================================================================================
 
-def palto(x, ust, omuz, alt, boy, y0, y1, mat, ust_z=0.02, kapson=False):
-    """Kancadan asılı palto: omuzları kancada toplanmış, aşağı genişleyen gövde, iki yanda sarkan kollar."""
-    prizma([(x - ust / 2, ust_z), (x + ust / 2, ust_z), (x + omuz / 2, ust_z - 0.16), (x + alt / 2, ust_z - boy),
-            (x - alt / 2, ust_z - boy), (x - omuz / 2, ust_z - 0.16)], "xz", y0, y1, mat)
-    for s in (-1, 1):                                            # kollar: yanlarda, öne doğru sarkık
-        kol = kutu((0.085, 0.075, boy * 0.62), (x + s * (omuz / 2 - 0.02), y1 + 0.02, ust_z - 0.16 - boy * 0.31), mat, 0.025)
-        don(kol, ry=s * 0.05)
-    kutu((ust + 0.06, 0.035, 0.09), (x, y1 + 0.012, ust_z - 0.05), mat, 0.02)      # yaka
-    for i in range(4 if boy > 0.7 else 3):                       # düğmeler
-        dik_disk(0.009, 0.006, (x, y1 - 0.001, ust_z - 0.22 - i * boy * 0.18), mt("ic_koyu"), 12)
-    for s in (-1, 1):                                            # cep kapakları
-        kutu((0.10, 0.01, 0.025), (x + s * alt * 0.24, y1 - 0.004, ust_z - boy * 0.62), mat, 0.004)
+# ---------- YUMUŞAK ŞEKİLLER (askılıktaki giysiler, ayakkabılar, okul çantası, bebek arabası) ----------
+# İlk sürümde bu dört eşya kutu ve silindirlerden kuruluydu: paltolar tahta levha, ayakkabılar tuğla,
+# çanta kitap, bebek arabası el arabası gibi görünüyordu. Kumaş, deri ve lastik "yumuşak" malzemelerdir;
+# kenarları yuvarlak, yüzeyleri hafif şişkin ya da sarkıktır. Aşağıdaki dört yardımcı bunu sağlar:
+#   egri    : birkaç kontrol noktasından geçen yumuşak bir yol (sarkan kol, kayış, sap);
+#   supur   : bir kesiti (daire, yassı şerit) bu yol boyunca sürükleyip boru ya da kayış yapar;
+#   yastik  : köşeleri yuvarlak, içi sık noktalı bir kutu; her noktası bir "biçim" fonksiyonuyla
+#             istenen yere itilir (paltonun omzu, ayakkabının burnu, çantanın sarkması);
+#   oval_halka: köşeleri yuvarlatılmış dikdörtgen bir halkanın noktaları (kenar biyesi, ağız kenarı).
+
+def egri(kontrol, n=4):
+    """
+    Catmull-Rom eğrisi: verilen kontrol noktalarının HEPSİNDEN geçen yumuşak bir yol.
+    n: iki kontrol noktası arasına kaç ara nokta düşeceği (çok olursa üçgen sayısı artar).
+    Her ara nokta, çevresindeki dört kontrol noktasının ağırlıklı ortalamasıdır; ağırlıklar t ile
+    yumuşakça değiştiği için yolda kırık köşe oluşmaz.
+    """
+    K = [Vector(p) for p in kontrol]                      # hesaplanabilsin diye her noktayı vektöre çevir
+    if len(K) < 3:                                        # iki noktada eğilecek bir şey yok: düz çizgi
+        return K
+    yol = []
+    for i in range(len(K) - 1):                           # her ardışık nokta çifti bir aralık
+        p1, p2 = K[i], K[i + 1]                           # aralığın iki ucu
+        p0 = K[i - 1] if i > 0 else p1 * 2 - p2           # öncesi yoksa uzantısını uydur
+        p3 = K[i + 2] if i + 2 < len(K) else p2 * 2 - p1  # sonrası yoksa uzantısını uydur
+        for k in range(n):
+            t = k / n                                     # aralık içindeki konum (0 başta, 1 sonda)
+            yol.append(0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t
+                              + (3 * p1 - p0 - 3 * p2 + p3) * t ** 3))
+    yol.append(K[-1])                                     # son noktayı da ekle, yol tam orada bitsin
+    return yol
+
+
+def daire_kesit(r, n=8):
+    """supur için dairesel kesit: yarıçapı r, n köşeli (boru, kol, lastik)."""
+    return [(r * math.cos(2 * math.pi * i / n), r * math.sin(2 * math.pi * i / n)) for i in range(n)]
+
+
+def serit_kesit(en, kal):
+    """supur için yassı dikdörtgen kesit (kayış, bant): en yanlara, kal kalınlık yönüne."""
+    return [(-en / 2, -kal / 2), (en / 2, -kal / 2), (en / 2, kal / 2), (-en / 2, kal / 2)]
+
+
+def supur(noktalar, kesit, mat, yukari=(0, 0, 1), olcek=None, kapali=False, kapak=True):
+    """
+    Kesiti yol boyunca sürükleyerek boru/kayış yapar (Blender'daki "sweep" işleminin elle yapılışı).
+    Yolun her noktasında üç yön hesaplanır: T yolun gidiş yönü, N "yukari"nın T'ye dik kalan kısmı
+    (kesitin ikinci ekseni, yassı kayışta kalınlık yönü), W ikisine dik yan yön (kesitin birinci ekseni).
+    olcek: her nokta için kesit çarpanı (tek sayı ya da (yan, kalınlık) çifti): kol bileğe doğru incelir.
+    kapali: yol kendi üstüne kapanır (lastik, halka); kapak: açık yolun iki ucu kapatılsın mı.
+    """
+    pts = [Vector(p) for p in noktalar]                   # yol noktaları
+    m, k = len(pts), len(kesit)
+    up = Vector(yukari).normalized()                      # referans "yukarı" yön
+    bm = bmesh.new()                                      # boş bir mesh taslağı
+    halkalar = []                                         # her yol noktasındaki kesit köşeleri
+    for i, p in enumerate(pts):
+        if kapali:                                        # kapalı yolda komşular baştan sona dolanır
+            T = pts[(i + 1) % m] - pts[i - 1]
+        else:                                             # açık yolda uçlarda tek komşu kullanılır
+            T = pts[min(i + 1, m - 1)] - pts[max(i - 1, 0)]
+        T.normalize()
+        N = up - T * up.dot(T)                            # yukarının, gidişe dik kalan parçası
+        if N.length < 1e-6:                               # yol tam "yukarı"ya gidiyorsa başka bir dik seç
+            N = Vector((1, 0, 0)) - T * T.x
+        N.normalize()
+        W = N.cross(T)                                    # üçüncü yön: ikisine de dik
+        s = olcek[i] if olcek else 1.0                    # bu noktadaki kesit çarpanı
+        sa, sb = (s[0], s[1]) if isinstance(s, (tuple, list)) else (s, s)
+        halkalar.append([bm.verts.new(p + W * (a * sa) + N * (b * sb)) for a, b in kesit])
+    for i in range(m if kapali else m - 1):               # ardışık iki halkayı dörtgenlerle bağla
+        r0, r1 = halkalar[i], halkalar[(i + 1) % m]
+        for j in range(k):
+            bm.faces.new((r0[j], r0[(j + 1) % k], r1[(j + 1) % k], r1[j]))
+    if kapak and not kapali:                              # açık borunun iki ağzını kapat
+        bm.faces.new(halkalar[0])
+        bm.faces.new(halkalar[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)     # bütün yüzler dışa baksın
+    me = bpy.data.meshes.new("Supur")
+    bm.to_mesh(me)
+    bm.free()
+    n = bpy.data.objects.new("Supur", me)                 # mesh'i sahnede bir nesneye bağla
+    bpy.context.collection.objects.link(n)
+    ortak.ata(n, mat)
+    return ekle(n)
+
+
+def _kafes(bol):
+    """
+    Her yüzü ızgara gibi bölünmüş 1 m'lik küp (bmesh). bol = (x, y, z) yönünde kaç parça.
+    Neden: yuvarlatma ve biçimlendirme ancak nokta olan yerde yapılabilir; düz bir küpün yalnız
+    sekiz köşesi vardır. Bir yöne daha çok bölme vermek, o yönde daha çok eğilebilmek demek.
+    """
+    bm = bmesh.new()
+
+    def izgara(sabit, deger, a, na, b, nb):
+        """sabit eksende deger konumunda, a ve b eksenleri boyunca na x nb parçalı bir yüz ızgarası."""
+        vs = {}
+        for i in range(na + 1):
+            for j in range(nb + 1):
+                p = [0.0, 0.0, 0.0]
+                p[sabit], p[a], p[b] = deger, -0.5 + i / na, -0.5 + j / nb
+                vs[i, j] = bm.verts.new(p)
+        for i in range(na):
+            for j in range(nb):
+                bm.faces.new((vs[i, j], vs[i + 1, j], vs[i + 1, j + 1], vs[i, j + 1]))
+
+    nx, ny, nz = bol
+    for d in (-0.5, 0.5):                                 # karşılıklı iki yüz: alt/üst, ön/arka, sol/sağ
+        izgara(2, d, 0, nx, 1, ny)
+        izgara(1, d, 0, nx, 2, nz)
+        izgara(0, d, 1, ny, 2, nz)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)   # yüzlerin kenarda çakışan noktalarını kaynat
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bm
+
+
+def yastik(olcu, konum, mat, bicim=None, bol=(2, 2, 2), seviye=1):
+    """
+    Köşeleri yuvarlak, yumuşak kutu. olcu: son sınır kutusu (x, y, z); konum: merkezi.
+    1) Izgaralı küp kurulur, 2) "Subdivision Surface" (alt bölümleme) ile köşeleri yuvarlatılır:
+       Blender her dörtgeni dörde böler ve köşeleri komşularının ortalamasına çeker, kutu yastık olur;
+    3) sınır kutusu tam olcu'ya getirilir (yuvarlatma küçülttüğü için yeniden ölçeklenir);
+    4) bicim(x, y, z) verilmişse her nokta (merkeze göre, konum eklenmeden) oraya itilir.
+       bicim mutlak konum döndürüyorsa konum (0, 0, 0) verilir.
+    """
+    bm = _kafes(bol)
+    me = bpy.data.meshes.new("Yastik")
+    bm.to_mesh(me)
+    bm.free()
+    n = bpy.data.objects.new("Yastik", me)
+    bpy.context.collection.objects.link(n)
+    if seviye:
+        mod = n.modifiers.new("Yuvarla", "SUBSURF")       # alt bölümleme değiştiricisi
+        mod.levels = seviye                               # kaç kez bölünsün (1: yumuşak, 2: daha yumuşak)
+        mod.render_levels = seviye
+        sec(n)                                            # modifier_apply etkin nesneye uygulanır
+        bpy.ops.object.modifier_apply(modifier=mod.name)  # sonucu kalıcı meshe işle
+    vs = n.data.vertices
+    lo = [min(v.co[i] for v in vs) for i in range(3)]     # şu anki sınır kutusu
+    hi = [max(v.co[i] for v in vs) for i in range(3)]
+    for v in vs:
+        p = [(v.co[i] - (lo[i] + hi[i]) / 2) / (hi[i] - lo[i]) * olcu[i] for i in range(3)]   # tam olcu'ya getir
+        if bicim:
+            p = bicim(p[0], p[1], p[2])                   # şekillendir
+        v.co = Vector(p) + Vector(konum)                  # yerine koy
+    n.data.update()
+    ortak.ata(n, mat)
+    return ekle(n)
+
+
+def oval_halka(cx, cy, a, b, z, n=24, us=4.0):
+    """
+    (cx, cy) merkezli, a x b yarı ölçülü, köşeleri yuvarlak dikdörtgen halka noktaları (süperelips).
+    us büyüdükçe köşeler keskinleşir (2: elips). z bir sayı ya da z(x, y) fonksiyonu olabilir.
+    """
+    pts = []
+    for i in range(n):
+        q = 2 * math.pi * i / n
+        c, s = math.cos(q), math.sin(q)
+        x = cx + a * math.copysign(abs(c) ** (2 / us), c)
+        y = cy + b * math.copysign(abs(s) ** (2 / us), s)
+        pts.append((x, y, z(x, y) if callable(z) else z))
+    return pts
+
+
+# =====================================================================================
+# ANTRE: ASKILIK
+# =====================================================================================
+
+def palto(x, ust, omuz, alt, boy, y0, y1, mat, ust_z=0.02, kapson=False, serit=None, geri=(False, False)):
+    """
+    Kancadan asılı giysi. x: kancanın x'i; ust: kancadaki (yaka) eni; omuz: omuz eni; alt: etek eni;
+    boy: kancadan eteğe; y0: sırtın (duvar tarafı) y'si, y1: önün y'si; ust_z: tepe yüksekliği.
+    Kancaya asılan palto askıdaki gibi dik durmaz: yakası kancada toplanır, omuzları kolların ağırlığıyla
+    aşağı düşer (çadır gibi), kollar yanlarda sarkar, etek hafif dalgalanır. kapson: yağmurluk kapşonundan
+    asılır, gövde kapşonun altından başlar. serit: kolların bilek üstüne reflektör bandı malzemesi.
+    geri: (sol kol, sağ kol); True olan kol öndeki paltonun arkasına sıkışmış: sırta yakın ve yassı
+    sarkar. Yoksa öndeki paltonun içinden sivri bir kama gibi dışarı taşıyordu.
+    """
+    kal = y0 - y1                                         # gövdenin en kalın yerdeki kalınlığı
+    ic = mt("ic_koyu")
+    z_alt = ust_z - boy                                   # eteğin yüksekliği
+    z_ust = ust_z - (0.10 if kapson else 0.0)             # gövdenin tepesi (kapşonluda kapşonun altı)
+    gboy = z_ust - z_alt                                  # gövdenin kendi boyu
+
+    def yarim_en(t):
+        """t: 0 etek, 1 yaka. Etekten omza hafif daralır; omuzdan yakaya yuvarlak bir eğimle toplanır."""
+        if t < 0.80:
+            return alt / 2 + (omuz / 2 - alt / 2) * (t / 0.80)
+        u = (t - 0.80) / 0.20
+        return ust / 2 + (omuz / 2 - ust / 2) * math.cos(u * math.pi / 2) ** 0.7
+
+    def derinlik(t):
+        """Gövdenin kalınlığı: göğüste en kalın, etekte ve kancada incelir (kumaş orada yassılaşır)."""
+        if t < 0.80:
+            return kal * (0.62 + 0.38 * math.sin(t / 0.80 * math.pi / 2))
+        return kal * (1.0 - 0.35 * (t - 0.80) / 0.20)
+
+    def bicim(px, py, pz):
+        """Yastığın her noktasını palto biçimine iter (mutlak konum döner)."""
+        t = pz / gboy + 0.5                               # 0 etek, 1 tepe
+        xn = px / (alt / 2)                               # -1 sol kenar, +1 sağ kenar
+        on = (kal / 2 - py) / kal                         # 0 sırt (duvara yaslı, düz), 1 ön yüz
+        yy = y0 - on * derinlik(t)                        # sırt y0'da sabit, ön yüz derinlik kadar önde
+        yy -= 0.010 * math.sin(xn * 2.5 * math.pi + 0.7) * (1 - t) ** 1.5 * on   # etekte dikey kumaş kıvrımları
+        zz = z_alt + t * gboy
+        zz += 0.008 * math.cos(xn * 2.0 * math.pi) * max(0.0, 0.08 - t) / 0.08   # etek ucu hafif dalgalı
+        return (x + xn * yarim_en(t), yy, zz)
+
+    yastik((alt, kal, gboy), (0, 0, 0), mat, bicim, bol=(5, 1, 6))
+    on_nokta = lambda xx, t: Vector(bicim(xx, -kal / 2, (t - 0.5) * gboy))   # ön yüzeyde, gövdeye yapışık nokta
+
+    # Kollar: omuzdan sarkan, bileğe doğru incelen, hafif öne kıvrılmış borular.
+    # Kesit 11 köşeli: bitir() 35°'den keskin kenarları sert bırakır; 8 köşede yüzler arası 45° olduğu
+    # için kol köşeli görünüyordu, 11 köşede 33° kalır ve yumuşak gölgelenir.
+    to = 0.80                                             # omuzun gövdedeki yüksekliği (t)
+    zs = z_alt + to * gboy
+    kr = min(0.05, derinlik(to) * 0.55)                   # kolun kalınlığı
+    kl = boy * 0.60                                       # kol boyu
+    kesit = daire_kesit(1.0, 11)
+    for s in (-1, 1):
+        sikis = geri[0 if s < 0 else 1]                   # bu kol öndeki paltonun arkasında mı
+        ym = (y0 - kr * 0.45) if sikis else (y0 - derinlik(to) * 0.5 - 0.01)   # kolun ekseni
+        one = 0.0 if sikis else 1.0                       # sıkışan kol öne kıvrılmaz
+        xs = x + s * (yarim_en(to) - 0.035)               # omuz ucunun biraz içi
+        yol = egri([(xs - s * 0.012, ym, zs + 0.035),     # omuz başı (dikişin üstü)
+                    (xs + s * 0.020, ym - 0.008 * one, zs - 0.03),
+                    (xs + s * 0.030, ym - 0.018 * one, zs - kl * 0.40),
+                    (xs + s * 0.022, ym - 0.026 * one, zs - kl * 0.75),
+                    (xs + s * 0.012, ym - 0.030 * one, zs - kl)], 2)
+        m = len(yol)
+        yas = 0.45 if sikis else 1.0                      # sıkışan kol y'de yassı
+        olc = [(kr * 0.9 * (1 - 0.22 * i / (m - 1)), kr * yas * (1 - 0.22 * i / (m - 1))) for i in range(m)]   # bileğe doğru incel
+        supur(yol, kesit, mat, yukari=(0, -1, 0), olcek=olc)
+        # Kol ağzı: bilekte az kalın bir manşet, içinde koyu boşluk (kol içi boş görünsün).
+        supur(yol[-2:], kesit, mat, yukari=(0, -1, 0), olcek=[(o[0] * 1.08, o[1] * 1.08) for o in olc[-2:]])
+        uc = yol[-1] + (yol[-1] - yol[-2]).normalized() * 0.004
+        supur([yol[-2], uc], kesit, ic, yukari=(0, -1, 0), olcek=[(o[0] * 0.8, o[1] * 0.8) for o in olc[-2:]])
+        if serit is not None:                             # reflektör bandı: kolun dörtte üçünde halka
+            i0 = int(m * 0.70)
+            supur(yol[i0:i0 + 2], kesit, serit, yukari=(0, -1, 0),
+                  olcek=[(o[0] * 1.06, o[1] * 1.06) for o in olc[i0:i0 + 2]])
+
+    # Ön pat (düğmelerin dikildiği şerit): ön yüzeyin tam ortasını izleyen ince bant.
+    pat = [on_nokta(0.0, t) + Vector((0, -0.002, 0)) for t in (0.02, 0.25, 0.5, 0.7)]
+    supur(pat, serit_kesit(0.016, 0.004), mat, yukari=(0, -1, 0))
+    for i, t in enumerate((0.66, 0.50, 0.34, 0.18)[:4 if boy > 0.7 else 3]):   # düğmeler (kapşonluda geçme)
+        p = on_nokta(0.0, t) + Vector((0, -0.004, 0))
+        if kapson:
+            kutu((0.026, 0.008, 0.008), tuple(p), ic, 0.002)          # yağmurluğun siyah geçme tokaları
+        else:
+            dik_disk(0.010, 0.006, tuple(p), ic, 8)
+    for s in (-1, 1):                                     # cep kapakları (ön yüzeye oturur)
+        p = on_nokta(s * alt * 0.24, 0.30) + Vector((0, -0.004, 0))
+        kutu((0.10, 0.008, 0.028), tuple(p), mat, 0.004)
+
     if kapson:
-        kutu((0.20, 0.07, 0.17), (x, (y0 + y1) / 2 + 0.012, ust_z - 0.07), mat, 0.05)
+        # Kapşon: kancada tepesi toplanmış, aşağıda genişleyen bir kese; önünde yüzün gireceği koyu ağız.
+        kb = 0.17                                         # kapşonun boyu
+        kd = kal * 1.35                                   # kapşon gövdeden kalın (içi hava dolu)
+
+        def kbicim(px, py, pz):
+            tt = pz / kb + 0.5                            # 0 alt, 1 kanca
+            on2 = (kal / 2 - py) / kal
+            return (x + px * (1 - 0.55 * tt * tt),        # tepeye doğru daralır
+                    y0 - 0.005 - on2 * kd * (0.75 + 0.25 * math.sin(math.pi * (1 - tt))),
+                    ust_z - kb + tt * kb)
+
+        yastik((0.19, kal, kb), (0, 0, 0), mat, kbicim, bol=(3, 1, 3))
+        agiz = [(x + 0.055 * math.cos(q), y0 - 0.005 - kd * 0.98, ust_z - 0.11 + 0.042 * math.sin(q))
+                for q in (2 * math.pi * i / 12 for i in range(12))]
+        yastik((0.10, 0.006, 0.075), (x, y0 - 0.005 - kd * 0.97, ust_z - 0.11), ic, bol=(2, 1, 2))   # yüz ağzı
+        supur(agiz, daire_kesit(0.007, 5), mat, yukari=(0, -1, 0), kapali=True)                        # ağız kenarı
+    else:
+        # Yaka: iki yana açılmış klapa ve ense tarafında yuvarlak katlanmış yaka.
+        yf = on_nokta(0.0, 0.92).y                        # yakanın oturduğu ön yüzey
+        for s in (-1, 1):
+            prizma([(x - s * 0.012, z_ust - 0.27), (x - s * ust * 0.72, z_ust - 0.10),
+                    (x - s * ust * 0.55, z_ust - 0.03), (x - s * ust * 0.22, z_ust - 0.05)],
+                   "xz", yf + 0.004, yf - 0.010, mat)
+        yaka = egri([(x - ust * 0.55, yf - 0.006, z_ust - 0.035), (x - ust * 0.35, (y0 + yf) / 2, z_ust + 0.004),
+                     (x, y0 - kal * 0.35, z_ust + 0.012), (x + ust * 0.35, (y0 + yf) / 2, z_ust + 0.004),
+                     (x + ust * 0.55, yf - 0.006, z_ust - 0.035)], 2)
+        supur(yaka, daire_kesit(1.0, 8), mat, olcek=[(0.022, 0.014)] * len(yaka), yukari=(0, 0, 1))
+        # Askı ilmeği: yakanın içinden kancaya geçen küçük kumaş halka.
+        ilmek = [(x + 0.012 * math.cos(q), -0.058, ust_z + 0.004 + 0.012 * math.sin(q))
+                 for q in (2 * math.pi * i / 10 for i in range(10))]
+        supur(ilmek, daire_kesit(0.003, 4), ic, yukari=(0, 1, 0), kapali=True)
 
 
 def askilik():
@@ -584,12 +859,12 @@ def askilik():
         cubuk((x, -0.025, 0.0), (x, -uzun, 0.035), 0.005, pr)
         kure(0.009, (x, -uzun, 0.035), pr)
         cubuk((x, -0.025, -0.006), (x, -0.058, -0.026), 0.004, pr)
-    palto(-0.30, 0.20, 0.40, 0.46, 1.00, -0.030, -0.125, M("Palto_Bej", (0.42, 0.33, 0.21), 0.9))
+    # Annenin bej yün paltosu, babanın koyu lacivert paltosu (bej olanın önünde), Kerem'in sarı yağmurluğu
+    # kapşonundan en öne asılmış; kollarında gri reflektör bandı.
+    palto(-0.30, 0.20, 0.40, 0.46, 1.00, -0.030, -0.125, M("Palto_Bej", (0.42, 0.33, 0.21), 0.9), geri=(False, True))
     palto(0.02, 0.20, 0.42, 0.48, 0.98, -0.050, -0.150, M("Palto_Koyu", (0.025, 0.03, 0.045), 0.9))
-    sari = M("Yagmurluk_Sari", (0.75, 0.50, 0.02), 0.35)
-    palto(0.22, 0.14, 0.26, 0.30, 0.58, -0.155, -0.215, sari, kapson=True)
-    for s in (-1, 1):                                                      # kollarda gri reflektör şerit
-        kutu((0.088, 0.078, 0.02), (0.22 + s * 0.11, -0.195, 0.02 - 0.16 - 0.58 * 0.55), M("Reflektor", (0.45, 0.45, 0.45), 0.3))
+    palto(0.22, 0.14, 0.26, 0.30, 0.58, -0.160, -0.215, M("Yagmurluk_Sari", (0.75, 0.50, 0.02), 0.35),
+          kapson=True, serit=M("Reflektor", (0.45, 0.45, 0.45), 0.3))
     # Şemsiye: bordo, kapalı, J biçimli sapı uzun kancada.
     sem, sap = M("Semsiye", (0.12, 0.015, 0.04), 0.5), mt("ahsap_orta")
     cx, cz, r = 0.40, 0.022, 0.03
@@ -602,53 +877,166 @@ def askilik():
     return bitir("Askilik_K3", "duvar")
 
 
+# =====================================================================================
+# ANTRE: AYAKKABILAR
+# =====================================================================================
+
 def ayakkabi(tur, konum, aci=0.0, yan=False):
-    """Tek ayakkabı; burnu -y'de kurulur, sonra çevrilip yerleştirilir. yan: yan yatmış."""
+    """
+    Tek ayakkabı; burnu -y'de, tabanı z = 0'da kurulur, sonra çevrilip yerleştirilir. yan: yan yatmış.
+    Her ayakkabı aynı dört parçadan yapılır: taban (tabanın ayak izi biçimi), saya (üst deri; burunda alçak,
+    bileğe doğru yükselir), ağız (ayağın girdiği koyu boşluk ve çevresindeki dolgulu kenar) ve türüne özgü
+    ayrıntı (bağcık, topuk, cırt bant, konç). Burun ucu yerden hafif kalkar ("burun kalkışı"): gerçek
+    ayakkabının en tanıdık çizgisi budur, dümdüz oturan ayakkabı tuğla gibi görünür.
+    """
     bas = len(P)
-    tb, ic = M("Taban_Koyu", (0.03, 0.025, 0.02), 0.7), mt("ic_koyu")
+    ic = mt("ic_koyu")
+    # L, W: boy ve en; th: taban kalınlığı; yay: burnun kalkışı; topuk: topuğun yerden yüksekliği;
+    # hb, hs, hk: sayanın burunda, bağcık bölgesinde ve topukta tabandan yüksekliği;
+    # a0, a1: ağzın boyuna başı ve sonu (t: -0,5 burun ucu, +0,5 topuk ucu); ae: ağzın eni (tabana oranla).
     if tur == "erkek":
-        L, W = 0.29, 0.105
-        deri = M("Deri_Kahve", (0.07, 0.03, 0.012), 0.35)
-        kutu((W, L, 0.022), (0, 0, 0.011), tb, 0.008)
-        kutu((W * 0.8, 0.07, 0.014), (0, L / 2 - 0.04, 0.028), tb, 0.003)
-        kutu((W - 0.008, L * 0.62, 0.065), (0, L * 0.14, 0.0545), deri, 0.025)
-        kure(W / 2 - 0.006, (0, -L / 2 + 0.072, 0.045), deri, (1.0, 1.55, 0.62))
-        kutu((W - 0.035, L * 0.28, 0.006), (0, L * 0.21, 0.085), ic)
-        for i in range(3):
-            kutu((W * 0.5, 0.006, 0.004), (0, -0.03 - i * 0.02, 0.083 - i * 0.004), M("Bagcik", (0.02, 0.015, 0.01), 0.8))
+        L, W, th, yay, topuk = 0.29, 0.105, 0.012, 0.014, 0.016
+        hb, hs, hk, a0, a1, ae = 0.040, 0.070, 0.064, 0.14, 0.47, 0.62
+        taban_m, yuz_m = M("Taban_Koyu", (0.03, 0.025, 0.02), 0.7), M("Deri_Kahve", (0.07, 0.03, 0.012), 0.35)
     elif tur == "kadin":
-        L, W = 0.245, 0.078
-        deri = M("Deri_Siyah", (0.022, 0.018, 0.02), 0.22)
-        kutu((0.03, 0.03, 0.055), (0, L / 2 - 0.025, 0.0275), tb, 0.004)       # topuk
-        kutu((W, 0.10, 0.008), (0, -L / 2 + 0.05, 0.004), tb, 0.003)
-        ic_t = kutu((W - 0.006, 0.163, 0.006), (0, 0.035, 0.033), ic)          # eğik iç taban
-        don(ic_t, rx=math.radians(17.9))
-        kure(0.036, (0, -L / 2 + 0.055, 0.0235), deri, (1.05, 1.75, 0.62))      # burun
-        kutu((W - 0.004, 0.05, 0.032), (0, L / 2 - 0.03, 0.072), deri, 0.012)  # topuk kavrayıcı
-        for s in (-1, 1):
-            ktk = kutu((0.005, 0.13, 0.022), (s * (W / 2 - 0.004), 0.04, 0.05), deri, 0.002)
-            don(ktk, rx=math.radians(17.9))
+        L, W, th, yay, topuk = 0.245, 0.078, 0.006, 0.006, 0.055
+        hb, hs, hk, a0, a1, ae = 0.030, 0.016, 0.040, -0.10, 0.47, 0.74
+        taban_m, yuz_m = M("Taban_Koyu", (0.03, 0.025, 0.02), 0.7), M("Deri_Siyah", (0.022, 0.018, 0.02), 0.22)
     elif tur == "spor":
-        L, W = 0.19, 0.072
-        mavi = M("Spor_Mavi", (0.04, 0.10, 0.35), 0.6)
-        beyaz = mt("beyaz_plastik")
-        kutu((W, L, 0.02), (0, 0, 0.01), beyaz, 0.007)
-        kutu((W - 0.006, L * 0.64, 0.05), (0, L * 0.15, 0.045), mavi, 0.02)
-        kure(W / 2 - 0.005, (0, -L / 2 + 0.046, 0.035), mavi, (1.0, 1.5, 0.6))
+        L, W, th, yay, topuk = 0.19, 0.072, 0.018, 0.010, 0.0
+        hb, hs, hk, a0, a1, ae = 0.034, 0.054, 0.052, 0.13, 0.46, 0.60
+        taban_m, yuz_m = mt("beyaz_plastik"), M("Spor_Mavi", (0.04, 0.10, 0.35), 0.6)
+    else:  # cizme: çocuk yağmur çizmesi; ağzı konçun tepesinde
+        L, W, th, yay, topuk = 0.18, 0.07, 0.014, 0.008, 0.004
+        hb, hs, hk, a0, a1, ae = 0.040, 0.066, 0.068, 0.0, 0.0, 0.0
+        taban_m, yuz_m = M("Cizme_Taban", (0.55, 0.40, 0.03), 0.5), M("Cizme_Yesil", (0.04, 0.22, 0.05), 0.35)
+
+    def eni(t):
+        """Tabanın t noktasındaki yarı eni (W/2'ye oranla): yuvarlak burun, geniş parmak kökü, dar bel, topuk."""
+        if t < -0.2:
+            return 0.42 + 0.58 * math.sqrt(max(0.0, 1 - ((t + 0.2) / 0.3) ** 2))
+        if t < 0.15:
+            return 1.0 - 0.24 * (t + 0.2) / 0.35
+        if t < 0.38:
+            return 0.76 + 0.10 * (t - 0.15) / 0.23
+        return 0.86 * (0.55 + 0.45 * math.sqrt(max(0.0, 1 - ((t - 0.38) / 0.12) ** 2)))
+
+    def kalk(t):
+        """O noktanın yerden kalkışı: burun ucu yukarı kıvrılır, topuklu ayakkabıda topuk yükselir."""
+        k = yay * max(0.0, (-t - 0.18) / 0.32) ** 2
+        u = min(1.0, max(0.0, (t + 0.05) / 0.35))
+        return k + topuk * u * u * (3 - 2 * u)             # yumuşak geçiş (smoothstep)
+
+    def yuz(t):
+        """Sayanın tabandan yüksekliği: burun ucunda alçak, burun kutusu, sonra bileğe doğru yükselir."""
+        if t < -0.25:
+            return hb * (0.30 + 0.70 * math.sqrt(max(0.0, 1 - ((t + 0.25) / 0.25) ** 2)))
+        if t < 0.10:
+            return hb + (hs - hb) * (t + 0.25) / 0.35
+        return hs + (hk - hs) * (t - 0.10) / 0.40
+
+    def tepe(t):
+        """Sayanın ortasındaki tepe yüksekliği (bağcık, ağız, cırt bant buna oturur)."""
+        return th * 0.7 + yuz(t) + kalk(t)
+
+    def ic_disk(kenar, mat):
+        """
+        Kenar noktalarından ince, kapalı bir levha (ağzın koyu içi): üst yüz noktaların kendi
+        yüksekliğinde, alt yüz 2 mm aşağıda; ortadaki bir noktadan yelpaze gibi üçgenlenir.
+        Noktalar farklı yükseklikte olabilir: iskarpinin ağzı topuğa doğru yükselir, levha da onu izler.
+        """
+        bm = bmesh.new()
+        ust_h = [bm.verts.new(p) for p in kenar]                                  # üst kenar
+        alt_h = [bm.verts.new((p[0], p[1], p[2] - 0.002)) for p in kenar]         # alt kenar
+        orta = Vector([sum(p[i] for p in kenar) / len(kenar) for i in range(3)])  # kenarın ortası
+        m0, m1 = bm.verts.new(orta), bm.verts.new(orta - Vector((0, 0, 0.002)))
+        for i in range(len(kenar)):
+            j = (i + 1) % len(kenar)
+            bm.faces.new((m0, ust_h[i], ust_h[j]))
+            bm.faces.new((m1, alt_h[j], alt_h[i]))
+            bm.faces.new((ust_h[i], alt_h[i], alt_h[j], ust_h[j]))
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        me = bpy.data.meshes.new("IcDisk")
+        bm.to_mesh(me)
+        bm.free()
+        n = bpy.data.objects.new("IcDisk", me)
+        bpy.context.collection.objects.link(n)
+        ortak.ata(n, mat)
+        return ekle(n)
+
+    # Taban ve saya: aynı ayak izi biçimi, taban altta ince, saya üstünde yüksek. Izgara az bölmeli
+    # tutuluyor: sekiz ayakkabı tek modelde, her biri birkaç yüz üçgeni geçmemeli.
+    yastik((W, L, th), (0, 0, 0), taban_m,
+           lambda px, py, pz: (px * eni(py / L), py, pz + th / 2 + kalk(py / L)), bol=(1, 4, 1))
+    yastik((W * 0.95, L * 0.975, 1.0), (0, 0, 0), yuz_m,
+           lambda px, py, pz: (px * eni(py / L), py, th * 0.7 + (pz + 0.5) * yuz(py / L) + kalk(py / L)), bol=(2, 4, 2))
+
+    if a1 > a0:
+        # Ağız: sayanın üstüne oturan koyu iç (astar ve iç taban) ve çevresinde dolgulu yaka kenarı.
+        tc, tl = (a0 + a1) / 2, (a1 - a0) / 2
+        kenar, ic_kenar = [], []
+        for i in range(12):
+            q = 2 * math.pi * i / 12
+            t = tc + tl * math.cos(q)
+            kenar.append((math.sin(q) * ae * eni(t) * W * 0.46, t * L, tepe(t) + 0.002))
+            ic_kenar.append((math.sin(q) * ae * eni(t) * W * 0.44, (tc + tl * 0.96 * math.cos(q)) * L, tepe(t) + 0.003))
+        ic_disk(ic_kenar, ic)
+        supur(kenar, daire_kesit(0.0045 if tur != "kadin" else 0.0025, 4), yuz_m, kapali=True)
+
+    if tur == "erkek":
+        # Topuk: tabanın altında ayrı, koyu bir blok (ayakkabı topukla parmak kökü üstünde durur).
+        yastik((W * 0.78, L * 0.22, topuk + th), (0, 0, 0), taban_m,
+               lambda px, py, pz: (px * eni(0.39), py + L * 0.385, pz + (topuk + th) / 2), bol=(1, 1, 1))
+        # Dil ve çapraz bağcıklar (bağcık bölgesi t = -0,20 .. +0,10).
+        dil = yastik((W * 0.42, L * 0.16, 0.008), (0, 0.09 * L, tepe(0.10) + 0.006), yuz_m, bol=(1, 1, 1))
+        don(dil, rx=-0.35)
+        bag = M("Bagcik", (0.02, 0.015, 0.01), 0.8)
+        ts = [-0.20 + 0.075 * i for i in range(5)]
+        for i in range(4):
+            e = W * 0.16
+            for s in (-1, 1):
+                cubuk((s * e, ts[i] * L, tepe(ts[i]) + 0.002), (-s * e, ts[i + 1] * L, tepe(ts[i + 1]) + 0.002), 0.0022, bag, 4)
+        for s in (-1, 1):                                  # fiyonk: iki ilmek, iki sarkan uç
+            supur([(0, ts[-1] * L, tepe(ts[-1]) + 0.003), (s * 0.02, ts[-1] * L + 0.008, tepe(ts[-1]) + 0.012),
+                   (s * 0.03, ts[-1] * L - 0.004, tepe(ts[-1]) + 0.006), (0, ts[-1] * L, tepe(ts[-1]) + 0.003)],
+                  daire_kesit(0.0022, 4), bag, kapali=True)
+            cubuk((0, ts[-1] * L, tepe(ts[-1]) + 0.003), (s * 0.028, ts[-1] * L - 0.03, tepe(ts[-1] - 0.1) - 0.004), 0.0022, bag, 4)
+    elif tur == "kadin":
+        # İnce topuk: yukarıda geniş, aşağı incelen bir takoz; ucunda kauçuk kapak.
+        tp = kalk(0.42)                                    # topuğun taban altındaki yüksekliği
+        yastik((0.028, 0.032, tp), (0, 0, 0), taban_m,
+               lambda px, py, pz: (px * (0.55 + 0.45 * (pz / tp + 0.5)), py * (0.6 + 0.4 * (pz / tp + 0.5)) + L * 0.42,
+                                   pz + tp / 2), bol=(1, 1, 2))
+        kutu((0.016, 0.02, 0.006), (0, L * 0.42, 0.003), mt("siyah_plastik"), 0.002)
+        # Burunda küçük, parlak bir toka (80-90'ların iskarpini).
+        kutu((0.02, 0.006, 0.012), (0, -0.14 * L, tepe(-0.14) - 0.004), mt("krom"), 0.002)
+    elif tur == "spor":
+        # Beyaz kauçuk burun kapağı, iki cırt bant ve yanlarda kırmızı çizgiler (90'ların çocuk spor ayakkabısı).
+        yastik((W * 0.98, L * 0.20, 0.028), (0, 0, 0), taban_m,
+               lambda px, py, pz: (px * eni(py / L - 0.40), py - L * 0.40, pz + th + 0.004 + kalk(py / L - 0.40)), bol=(1, 2, 1))
+        for t in (-0.14, 0.00):
+            hw = eni(t) * W * 0.48
+            yol = [(-hw * 1.02, t * L, th + 0.004), (-hw * 0.8, t * L, tepe(t) - 0.010), (0, t * L, tepe(t) + 0.002),
+                   (hw * 0.8, t * L, tepe(t) - 0.010), (hw * 1.02, t * L, th + 0.004)]
+            supur(egri(yol, 2), serit_kesit(0.020, 0.004), mt("beyaz_plastik"), yukari=(0, 0, 1))
+        kir = M("Spor_Kirmizi", (0.45, 0.03, 0.02), 0.6)
         for s in (-1, 1):
-            k = kutu((0.004, 0.075, 0.012), (s * (W / 2 - 0.001), 0.005, 0.045), M("Spor_Kirmizi", (0.45, 0.03, 0.02), 0.6))
-            don(k, rx=0.45)
-        kutu((W + 0.002, 0.026, 0.008), (0, -0.012, 0.068), beyaz, 0.003)     # cırt bant
-        kutu((W - 0.03, 0.05, 0.004), (0, 0.045, 0.0705), ic)
-    else:  # cizme
-        L, W = 0.18, 0.07
-        kau = M("Cizme_Yesil", (0.04, 0.22, 0.05), 0.35)
-        kutu((W, L, 0.015), (0, 0, 0.0075), M("Cizme_Taban", (0.55, 0.40, 0.03), 0.5), 0.005)
-        kutu((W - 0.004, L - 0.03, 0.05), (0, 0.01, 0.038), kau, 0.02)
-        kure(W / 2 - 0.004, (0, -L / 2 + 0.04, 0.035), kau, (1.0, 1.4, 0.65))
-        kutu((W + 0.004, 0.085, 0.17), (0, L / 2 - 0.05, 0.115), kau, 0.02)
-        kutu((W - 0.012, 0.065, 0.003), (0, L / 2 - 0.05, 0.2005), ic)
-        kutu((W + 0.008, 0.089, 0.02), (0, L / 2 - 0.05, 0.19), M("Cizme_Sari", (0.70, 0.48, 0.03), 0.4), 0.005)
+            for d in (0.0, 0.035):
+                yol = [(s * (eni(t) * W * 0.476 + 0.001), t * L, th + 0.010 + (tepe(t) - th - 0.02) * (t + 0.10 - d) / 0.42)
+                       for t in (-0.10 + d, 0.05 + d, 0.22 + d)]
+                supur(yol, serit_kesit(0.008, 0.002), kir, yukari=(s, 0, 0))
+    else:
+        # Konç: topuk üstünden yükselen, hafif arkaya yatık, ağza doğru genişleyen oval boru.
+        yol = [(0, 0.20 * L, 0.03), (0, 0.23 * L, 0.11), (0, 0.26 * L, 0.195)]
+        supur(yol, daire_kesit(1.0, 10), yuz_m, olcek=[(0.033, 0.040), (0.034, 0.042), (0.038, 0.046)], yukari=(0, -1, 0))
+        ust = Vector(yol[-1])
+        ic_disk([(ust.x + 0.035 * math.cos(q), ust.y + 0.043 * math.sin(q), ust.z + 0.003)
+                 for q in (2 * math.pi * i / 12 for i in range(12))], ic)                        # konç içi (koyu)
+        supur([(ust.x + 0.039 * math.cos(q), ust.y + 0.047 * math.sin(q), ust.z) for q in (2 * math.pi * i / 12 for i in range(12))],
+              serit_kesit(0.004, 0.012), M("Cizme_Sari", (0.70, 0.48, 0.03), 0.4), yukari=(0, 0, 1), kapali=True)   # sarı ağız bandı
+        supur(egri([(0, ust.y + 0.044, ust.z - 0.02), (0, ust.y + 0.058, ust.z - 0.005), (0, ust.y + 0.05, ust.z + 0.012)], 2),
+              serit_kesit(0.016, 0.004), M("Cizme_Sari", (0.70, 0.48, 0.03), 0.4), yukari=(0, 1, 0))   # arkada çekme kulağı
+
     x, y = konum
     if yan:
         n = grupla(bas, (x, y, 0.0), (0, math.pi / 2, aci))
@@ -669,68 +1057,193 @@ def ayakkabi_yigini():
     return bitir("Ayakkabi_Yigini_K3")
 
 
+# =====================================================================================
+# ANTRE: OKUL ÇANTASI
+# =====================================================================================
+
 def canta():
     kir, lac = M("Canta_Kirmizi", (0.32, 0.03, 0.025), 0.55), M("Canta_Lacivert", (0.02, 0.04, 0.14), 0.6)
-    met = mt("krom")
-    # Sırtüstü yatık gövde: 0,32 x 0,34 x 0,12; ağzı +y ucunda. Üst yüz (çantanın önü) z = 0,12.
-    kutu((0.32, 0.34, 0.12), (0, 0, 0.06), kir, 0.018)
-    for z in (0.004, 0.116):                                              # kenar biyesi
-        kutu((0.326, 0.346, 0.008), (0, 0, z), lac, 0.003)
-    kutu((0.22, 0.10, 0.02), (0, -0.11, 0.128), lac, 0.008)               # ön cep (alt uçta)
-    kutu((0.05, 0.02, 0.006), (0, -0.155, 0.139), met, 0.002)             # cep tokası
-    kutu((0.08, 0.03, 0.002), (0.06, -0.10, 0.1385), M("Canta_Yildiz", (0.70, 0.55, 0.05), 0.4))   # yapıştırma
-    kutu((0.28, 0.004, 0.09), (0, 0.169, 0.06), mt("ic_koyu"))            # açık ağız
-    # Kapak: arka üst kenarından (y = 0,17, z = 0) menteşeli, açılıp yere yatmış; iç yüzü yukarıda.
-    kutu((0.30, 0.26, 0.012), (0, 0.30, 0.006), kir, 0.01)
-    kutu((0.30, 0.02, 0.013), (0, 0.42, 0.0065), lac, 0.004)
-    for x in (-0.08, 0.08):                                               # kayış ve tokalar
-        kutu((0.03, 0.10, 0.004), (x, 0.39, 0.014), lac, 0.001)
-        kutu((0.036, 0.016, 0.006), (x, 0.345, 0.015), met, 0.002)
-    yay_cubuk((0, 0.20, 0.008), 0.05, 0.0, math.pi, 0.008, lac, 6)        # sap (ağzın önünde yere yatık)
+    met, ic = mt("krom"), mt("ic_koyu")
+    # Sırtüstü yere bırakılmış 90'lar ilkokul çantası. Koordinatlar: çantanın sırtı yerde (z = 0), önü
+    # yukarıda; ağzı (üst ucu) +y'de, dibi -y'de. Kapağı ağzın arkasından menteşeli: açılıp yere yatmış.
+    # Gövde: yuvarlak köşeli, yanları şişkin; ağız tarafında içi boşaldığı için üstü hafifçe çökmüş.
+    GY, GZ = 0.165, 0.12                                   # gövdenin yarı boyu (y) ve yüksekliği (z)
+
+    def gbicim(px, py, pz):
+        zz = pz / GZ + 0.5                                 # 0 sırt (yer), 1 ön yüz
+        yn = py / GY                                       # -1 dip, +1 ağız
+        sis = 1 + 0.045 * (1 - yn * yn) * (1 - abs(zz - 0.5) * 2)          # yanlar ortada şişkin
+        cok = 0.016 * zz * max(0.0, (yn - 0.55) / 0.45) ** 2                 # ağız tarafı çökük
+        return (px * sis, py, pz + GZ / 2 - cok)
+
+    govde = yastik((0.31, 2 * GY, GZ), (0, 0, 0), kir, gbicim, bol=(4, 4, 3))
+    for z, zo in ((0.108, 0.93), (0.012, 0.97)):           # ön ve arka kenar biyesi (lacivert şerit)
+        supur(oval_halka(0, 0, 0.155 * zo * 1.02, GY * 0.985, z, n=24, us=6.0), daire_kesit(0.005, 4), lac, kapali=True)
+    # Ön cep: dipte, kendi küçük kapağı ve krom kilidiyle; üstünde yıldız çıkartma.
+    yastik((0.19, 0.095, 0.030), (0, -0.105, 0.120), kir,
+           lambda px, py, pz: (px, py, pz + 0.004 * (1 - (2 * px / 0.19) ** 2)), bol=(2, 2, 1))
+    supur(oval_halka(0, -0.105, 0.095, 0.0475, 0.121, n=20, us=5.0), daire_kesit(0.0035, 4), lac, kapali=True)
+    yastik((0.196, 0.046, 0.010), (0, -0.080, 0.137), kir, bol=(2, 2, 1))                    # cep kapağı
+    kutu((0.03, 0.012, 0.008), (0, -0.103, 0.141), met, 0.002)                              # cep kilidi
+    kutu((0.05, 0.03, 0.002), (0.05, -0.128, 0.1365), M("Canta_Yildiz", (0.70, 0.55, 0.05), 0.4))   # çıkartma
+    for x in (-0.125, 0.125):                                                               # kapak kilitlerinin yuvası
+        kutu((0.030, 0.034, 0.008), (x, -0.118, 0.117), met, 0.002)
+        kutu((0.018, 0.010, 0.004), (x, -0.108, 0.122), ic)
+    # Ağız: çantanın üst ucunda koyu açıklık; içinden defter kaymış.
+    yastik((0.25, 0.03, 0.072), (0, 0.158, 0.060), ic, bol=(2, 1, 2))
+    # Kapak: menteşe çizgisinden (y = 0,165) yere yatmış; ucu hafif kıvrık, uç köşeleri yuvarlak.
+    def kbicim(px, py, pz):
+        yy = py + 0.30
+        dar = 1 - 0.14 * max(0.0, (yy - 0.39) / 0.045) ** 2          # uca doğru köşeler yuvarlanır
+        kiv = 0.014 * max(0.0, (yy - 0.37) / 0.065) ** 2              # uç hafif yukarı kıvrık
+        return (px * dar, yy, pz + 0.006 + kiv)
+
+    yastik((0.30, 0.27, 0.012), (0, 0, 0), kir, kbicim, bol=(3, 3, 1))
+    supur([(kbicim(px, py, 0.006)) for px, py in
+           [(-0.15, -0.13), (-0.15, 0.06), (-0.145, 0.12), (-0.11, 0.134), (0.0, 0.135), (0.11, 0.134), (0.145, 0.12),
+            (0.15, 0.06), (0.15, -0.13)]], daire_kesit(0.005, 5), lac)                     # kapak biyesi (U)
+    kutu((0.07, 0.035, 0.002), (-0.085, 0.395, 0.0135), mt("kagit"))                        # isim etiketi
+    for x in (-0.08, 0.08):                                                                 # kayışlar ve krom kilit dilleri
+        supur([kbicim(x, py, 0.008) for py in (-0.03, 0.05, 0.10, 0.128)], serit_kesit(0.03, 0.004), lac)
+        k = kbicim(x, 0.136, 0.010)
+        kutu((0.034, 0.022, 0.008), (k[0], k[1] + 0.004, k[2]), met, 0.002)
+    # Taşıma sapı: üst uçta sert plastik bir kulp, yatık çantada dışa doğru uzanıyor.
+    supur(egri([(-0.05, 0.160, 0.092), (-0.045, 0.195, 0.095), (0.0, 0.212, 0.097), (0.045, 0.195, 0.095), (0.05, 0.160, 0.092)], 3),
+          daire_kesit(1.0, 6), lac, olcek=[(0.011, 0.008)] * 13, yukari=(0, 0, 1))
+    # Omuz kayışları sırtta, yani çantanın altında kalır. Sağdaki gevşemiş: üst köşeden çıkıp yerde bir
+    # ilmek yaparak yeniden altına giriyor, üstünde krom ayar tokası. Soldakinin yalnız dipteki ucu görünür.
+    # (İki kayış da yanlarda boydan boya uzanınca çanta mavi bir tepsiye oturmuş gibi görünüyordu.)
+    supur(egri([(0.07, 0.150, 0.004), (0.135, 0.150, 0.004), (0.170, 0.095, 0.004), (0.160, 0.020, 0.004), (0.110, -0.010, 0.004)], 3),
+          serit_kesit(0.032, 0.006), lac)
+    kutu((0.036, 0.022, 0.009), (0.168, 0.085, 0.0065), met, 0.002)
+    supur(egri([(-0.100, -0.110, 0.004), (-0.156, -0.128, 0.004), (-0.150, -0.158, 0.004)], 2),
+          serit_kesit(0.032, 0.006), lac)
     # Ağızdan kaymış defter ve kalem kutusu, kapağın üstünde.
     d = kutu((0.20, 0.24, 0.008), (0.03, 0.27, 0.016), M("Defter_Mavi", (0.05, 0.12, 0.35), 0.7), 0.002)
     don(d, rz=0.18)
     kutu((0.19, 0.23, 0.004), (0.03, 0.27, 0.0135), mt("kagit"))
-    kk = kutu((0.20, 0.06, 0.04), (-0.07, 0.22, 0.032), M("Kalem_Kutusu", (0.70, 0.45, 0.03), 0.5), 0.015)
+    kk = yastik((0.20, 0.06, 0.04), (-0.07, 0.22, 0.032), M("Kalem_Kutusu", (0.70, 0.45, 0.03), 0.5), bol=(2, 1, 1))
     don(kk, rz=-0.25)
     fer = kutu((0.19, 0.004, 0.004), (-0.07, 0.22, 0.052), met)
     don(fer, rz=-0.25)
     boya_kalemi(0.10, 0.36, 0.012, 0.7, mt("boya_kirmizi"))
-    BILGI.append("govde ust yuzu z=0.120, duz ust bolge govde y -0.055..+0.17, on cep govde y -0.16..-0.06 (ust z=0.138); "
-                 "govde merkezi pivotlamadan once y=0: son koordinat = bu degerler - PIVOT kaydirmasi")
+    # Kerem'in çizim parçası (Unity'de CantaUstu3 = 0,124) gövdenin ön yüzüne konur: orada yüzey düz kalmalı.
+    ust = max(v.co.z for v in govde.data.vertices if abs(v.co.x) < 0.03 and abs(v.co.y - 0.0625) < 0.03)
+    BILGI.append("govde on yuzu parca noktasinda (pivotlamadan once x=0, y=0.0625) z=%.3f; on cep govde y -0.153..-0.058 (ust z=0.14); "
+                 "son koordinat = bu degerler - PIVOT kaydirmasi" % ust)
     return bitir("Okul_Cantasi_K3")
 
 
+# =====================================================================================
+# ANTRE: BEBEK ARABASI
+# =====================================================================================
+
 def bebek_arabasi():
-    boru, sap = mt("krom"), mt("siyah_plastik")
+    """
+    90'ların başının körüklü bebek arabası: derin bir sepet (gövde), katlanır körük, dört büyük telli
+    tekerlek, yaylı şasi ve itme kolu. Antrede duvarın dibine park edilmiş: burnu duvarda (y = 0),
+    kolu odaya (-y) bakıyor. Yerleşim ölçüsü dar (yaklaşık 0,35 x 0,45 m), bu yüzden araba gerçeğinden
+    kısa, "şehir tipi" kompakt bir model.
+    """
+    krom, siyah = mt("krom"), mt("siyah_plastik")
     kumas = M("Araba_Kumas", (0.03, 0.05, 0.16), 0.8)
     serit = M("Araba_Serit", (0.40, 0.04, 0.03), 0.8)
-    # Duvara 14,4° yaslanmış iki ana boru: dipte y = -0,34, tepede y = -0,10 (duvar y = 0).
-    alt, ust = (-0.34, 0.065), (-0.10, 0.98)
-    for x in (-0.13, 0.13):
-        cubuk((x, alt[0], alt[1]), (x, ust[0], ust[1]), 0.011, boru)
-        yay_cubuk((x, -0.05, ust[1]), 0.05, math.pi, 0.0, 0.011, boru, 6, duzlem="yz")   # baston sap
-        cubuk((x, 0.0, ust[1]), (x, 0.0, ust[1] - 0.03), 0.011, boru)
-        t0, t1 = 0.72, 0.97
-        cubuk((x, alt[0] + (ust[0] - alt[0]) * t0, alt[1] + (ust[1] - alt[1]) * t0),
-              (x, alt[0] + (ust[0] - alt[0]) * t1, alt[1] + (ust[1] - alt[1]) * t1), 0.017, sap, 10)   # köpük tutamak
-        kure(0.016, (x, 0.0, ust[1] - 0.035), sap)
-        # arka ayak borusu: ana borunun hemen arkasında, katlanmış
-        cubuk((x * 0.75, alt[0] + 0.07, 0.065), (x * 0.75, -0.17, 0.62), 0.009, boru)
-        for (yy, xx) in ((alt[0], x), (alt[0] + 0.07, x * 0.75)):         # çift tekerlekler
-            for dx in (-0.018, 0.018):
-                yatik_sil(0.062, 0.022, (xx + dx, yy, 0.062), "x", sap, 20)
-            yatik_sil(0.02, 0.06, (xx, yy, 0.062), "x", boru, 10)
-    # Katlanmış oturak/tente bohçası iki borunun arasında; boruyla aynı eğimde.
-    e = -math.atan2(ust[0] - alt[0], ust[1] - alt[1])
-    for (zc, boy, kal, m) in ((0.45, 0.62, 0.09, kumas), (0.78, 0.18, 0.11, kumas)):
-        yc = alt[0] + (zc - alt[1]) * (ust[0] - alt[0]) / (ust[1] - alt[1]) + 0.01
-        don(kutu((0.22, kal, boy), (0, yc, zc), m, 0.03), rx=e)
-    for zc in (0.30, 0.60):
-        yc = alt[0] + (zc - alt[1]) * (ust[0] - alt[0]) / (ust[1] - alt[1]) + 0.01
-        don(kutu((0.225, 0.095, 0.02), (0, yc, zc), serit, 0.005), rx=e)
-    yc = alt[0] + (0.45 - alt[1]) * (ust[0] - alt[0]) / (ust[1] - alt[1])
-    don(kutu((0.30, 0.03, 0.04), (0, yc - 0.045, 0.45), sap, 0.008), rx=e)   # toplama kayışı ve tokası
+    lastik = M("Araba_Lastik", (0.30, 0.30, 0.29), 0.7)
+    beyaz = mt("kumas_beyaz")
+    # Ölçüler: gövde y -0,03 (burun) .. -0,39 (baş); tekerlek yarıçapı 0,085; tekerlek izi x ±0,155.
+    GY0, GY1, GZ0, GZ1, GX = -0.030, -0.390, 0.36, 0.60, 0.135
+    gy = (GY0 + GY1) / 2
+    R, IZ, ON_AKS, ARKA_AKS = 0.085, 0.155, -0.085, -0.345
+
+    # Gövde (sepet): tabana doğru daralan, tekne gibi yuvarlak bir kutu.
+    def gbicim(px, py, pz):
+        zz = pz / (GZ1 - GZ0) + 0.5                        # 0 dip, 1 ağız
+        return (px * (0.86 + 0.14 * zz), py * (0.90 + 0.10 * zz) + gy, pz + (GZ0 + GZ1) / 2)
+
+    yastik((2 * GX, GY0 - GY1, GZ1 - GZ0), (0, 0, 0), kumas, gbicim, bol=(4, 6, 3))
+    supur(oval_halka(0, gy, GX * 0.985, (GY0 - GY1) / 2 * 0.985, GZ1 - 0.006, n=24, us=5.0),
+          daire_kesit(0.008, 5), serit, kapali=True)                                        # ağız kenarı biyesi
+    supur(oval_halka(0, gy, GX * 0.95, (GY0 - GY1) / 2 * 0.955, GZ0 + 0.10, n=20, us=5.0),
+          daire_kesit(0.004, 4), serit, kapali=True)                                        # yan süs şeridi
+    # Önlük: sepetin ayak yarısını örten kumaş; ucunda katlanmış beyaz battaniye kenarı, çıtçıtlar.
+    yastik((2 * GX * 0.96, 0.20, 0.022), (0, 0, 0), kumas,
+           lambda px, py, pz: (px, py - 0.135, pz + GZ1 + 0.006 + 0.012 * (1 - (px / GX) ** 2)), bol=(3, 2, 1))
+    yastik((2 * GX * 0.92, 0.035, 0.026), (0, 0, 0), beyaz,
+           lambda px, py, pz: (px, py - 0.235, pz + GZ1 + 0.012 + 0.010 * (1 - (px / GX) ** 2)), bol=(3, 1, 1))
+    for s in (-1, 1):
+        for yy in (-0.07, -0.18):
+            kure(0.006, (s * GX * 0.93, yy, GZ1 + 0.01), krom, seg=8, halka=5)
+    yastik((2 * GX * 0.88, 0.14, 0.01), (0, -0.315, GZ1 - 0.004), mt("ic_koyu"), bol=(2, 2, 1))   # körüğün altındaki karanlık iç
+
+    # Körük: iki yandaki menteşeden açılan, pileli yarım kubbe. Menteşe ekseni x boyunca, ağız yüksekliğinde.
+    yh, Rx, Ry, Rz, A1 = -0.252, 0.142, 0.14, 0.23, 1.80
+
+    def korukte(u, v):
+        s, a = math.pi * u, A1 * v                         # s: yay boyunca (bir yandan öbür yana), a: açılma açısı
+        k = 1 + 0.035 * abs(math.sin(v * 4.5 * math.pi))   # pileler: kumaş dört yerde kabarık
+        return (Rx * math.cos(s), yh - Ry * math.sin(s) * math.cos(a) * k, GZ1 + Rz * math.sin(s) * math.sin(a) * k)
+
+    bm = bmesh.new()                                       # körük kumaşını ızgara olarak kur
+    nu, nv = 12, 8
+    vs = [[bm.verts.new(korukte(i / nu, j / nv)) for j in range(nv + 1)] for i in range(nu + 1)]
+    for i in range(nu):
+        for j in range(nv):
+            bm.faces.new((vs[i][j], vs[i + 1][j], vs[i + 1][j + 1], vs[i][j + 1]))
+    me = bpy.data.meshes.new("Koruk")
+    bm.to_mesh(me)
+    bm.free()
+    kor = bpy.data.objects.new("Koruk", me)
+    bpy.context.collection.objects.link(kor)
+    kal = kor.modifiers.new("Kalinlik", "SOLIDIFY")        # tek katlı yüzeye kumaş kalınlığı ver
+    kal.thickness = 0.008
+    kal.offset = 0.0                                       # kalınlık yüzeyin iki yanına eşit dağılsın
+    ortak.ata(kor, kumas)
+    ekle(kor)
+    supur([korukte(i / 12, 1.0) for i in range(13)], daire_kesit(0.007, 5), serit, kapak=True)   # körük ağzı biyesi
+    for j in (0.45, 0.72):                                                                     # iki krom körük teli
+        supur([korukte(i / 12, j) for i in range(13)], daire_kesit(0.003, 4), krom)
+    for s in (-1, 1):
+        yatik_sil(0.020, 0.010, (s * (Rx + 0.005), yh, GZ1), "x", krom, 14)                   # körük menteşesi
+        cubuk((s * (Rx + 0.006), yh, GZ1), (s * (Rx + 0.006), yh + 0.10, GZ1 + 0.02), 0.004, krom)   # katlama kolu
+
+    # Tekerlekler: beyaz-gri lastik, krom jant ve sekiz tel.
+    for yy in (ON_AKS, ARKA_AKS):
+        for s in (-1, 1):
+            xx = s * IZ
+            supur([(xx, yy + (R - 0.009) * math.cos(q), R + (R - 0.009) * math.sin(q)) for q in (2 * math.pi * i / 16 for i in range(16))],
+                  daire_kesit(0.009, 5), lastik, yukari=(1, 0, 0), kapali=True)
+            supur([(xx, yy + (R - 0.02) * math.cos(q), R + (R - 0.02) * math.sin(q)) for q in (2 * math.pi * i / 12 for i in range(12))],
+                  daire_kesit(0.003, 4), krom, yukari=(1, 0, 0), kapali=True)
+            for i in range(8):
+                q = 2 * math.pi * i / 8
+                cubuk((xx, yy, R), (xx, yy + (R - 0.02) * math.cos(q), R + (R - 0.02) * math.sin(q)), 0.0018, krom, 4)
+            yatik_sil(0.016, 0.028, (xx, yy, R), "x", krom, 10)                                # göbek
+        cubuk((-IZ, yy, R), (IZ, yy, R), 0.006, krom, 8)                                       # dingil
+
+    # Şasi: iki yanda tekerleklerden dik kalkıp gövdenin altında düz uzanan boru; bu düz kısmın üstünde
+    # gövdeyi taşıyan dört helezon yay (yaylar raya oturur, tepesi gövdenin dibine girer; havada durmasın).
+    RAY = 0.225                                            # rayın düz kısmının yüksekliği
+    for s in (-1, 1):
+        xx = s * 0.115
+        supur(egri([(xx, ON_AKS, R), (xx, ON_AKS - 0.028, 0.19), (xx, -0.125, RAY), (xx, gy, RAY + 0.004),
+                    (xx, -0.305, RAY), (xx, ARKA_AKS + 0.028, 0.19), (xx, ARKA_AKS, R)], 2),
+              daire_kesit(0.008, 6), krom)
+        for yy in (-0.135, -0.295):
+            xy = s * 0.106                                 # yay rayın hemen içinde
+            yay = [(xy + 0.014 * math.cos(q), yy + 0.014 * math.sin(q), RAY + 0.006 + (GZ0 + 0.02 - RAY - 0.006) * q / (2 * math.pi * 3))
+                   for q in (2 * math.pi * 3 * i / 18 for i in range(19))]
+            supur(yay, daire_kesit(0.003, 4), krom)
+        cubuk((xx, ON_AKS, R), (IZ * s, ON_AKS, R), 0.007, krom, 8)
+        cubuk((xx, ARKA_AKS, R), (IZ * s, ARKA_AKS, R), 0.007, krom, 8)
+    # İtme kolu: arka şasiden kalkıp gövdenin dışından geçer; tepede siyah köpük tutamaklı yay biçimli sap.
+    for s in (-1, 1):
+        supur(egri([(s * 0.115, ARKA_AKS + 0.035, 0.205), (s * 0.150, -0.370, 0.40), (s * 0.150, -0.410, 0.70),
+                    (s * 0.140, -0.426, 0.95)], 3), daire_kesit(0.010, 6), krom)
+    sap = egri([(-0.140, -0.426, 0.95), (-0.12, -0.430, 0.992), (0.0, -0.432, 1.004), (0.12, -0.430, 0.992), (0.140, -0.426, 0.95)], 3)
+    supur(sap, daire_kesit(0.010, 6), krom)
+    supur(sap[2:-2], daire_kesit(0.016, 8), siyah)                                             # köpük tutamak
+    for s in (-1, 1):
+        yatik_sil(0.014, 0.022, (s * 0.150, -0.395, 0.60), "x", siyah, 12)                     # katlama mafsalı
     return bitir("Bebek_Arabasi_K3", "dayali")
 
 

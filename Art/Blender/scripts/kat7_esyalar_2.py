@@ -29,6 +29,7 @@ import ortak
 import acilir_ortak as ac
 import bpy
 import kat7_esyalar as k7
+from mathutils import Vector
 from kat7_esyalar import p, kutu, sil, cubuk, kure, dik_disk, simit, torna, yuzey, dondur, tasi, bitir, seffaf
 
 rnd = random.Random(77)
@@ -85,31 +86,99 @@ def uret(hangi):
         cubuk((0, -0.006, 0), (0, -0.04, -0.005), 0.004, demir)
         cubuk((0, -0.04, -0.005), (0, -0.05, 0.015), 0.004, demir)
 
-        def gen(v, ust, alt):   # kancada toplanmış tepe, aşağıda açılan en
-            return ust + (alt - ust) * min(1.0, v * 2.8)
+        # HAVLU TEK PARÇA KUMAŞ: eski sürümde iki ayrı düz levha ve üstte bir silindir vardı; sivri
+        # omuzlu tek kırmızı biçim önlük gibi okunuyordu. Şimdi havlu, ikiye katlanıp kancanın üstünden
+        # aşırılmış TEK bir yüzey: arka kat duvara yaslı iner, kancanın üstünden yuvarlak bir kıvrımla
+        # döner, ön kat öne sarkar. Her "sütun" (a) havlunun enine bir çizgisidir; o çizgi kendi omuz
+        # noktasından (katlama kenarı) aşağı iner. Ortadaki sütunlar kancada toplanır, dıştakiler
+        # omuzdan yuvarlanarak düşer; böylece üstte büzgü, aşağıda açılan kıvrımlar oluşur.
+        YARIM = 0.17            # havlunun aşağıdaki yarım eni (eski 0,34 m'lik en korunuyor)
+        KAT = 0.011             # iki kat arasındaki mesafe aşağıda: iki kumaş kalınlığı + 3 mm boşluk
+        KALIN = 0.008           # havlu kumaşının kalınlığı (havlu bez kalındır; ince levha gibi durmasın)
 
-        def arka(u, v):         # duvara yaslı arka kat: uzun
-            w = gen(v, 0.08, 0.34)
-            x = (u - 0.5) * w
-            y = -0.012 - 0.006 * math.sin(u * math.pi * 5) * min(1, v * 3) - 0.018 * (1 - min(1, v * 4))
-            return (x, y, -0.012 - 0.52 * v)
+        def kolon(a):
+            """a = -1 (sol kenar) .. +1 (sağ kenar). Bu sütunun katlama kenarındaki tepe noktası."""
+            t = abs(a)                                           # kenara uzaklık (0 orta, 1 kenar)
+            fi = t * math.pi / 2                                 # omuz açısı: 0 kancada, 90° yan kenarda
+            # Omuz eğrisi bir elips yayı: tepede yatık, yana doğru dikleşir. Sivri üçgen omuz (önlük gibi
+            # duruyordu) yerine kancanın üstünden yuvarlanıp düşen bir kubbe. exp terimi kancanın tam
+            # üstünde küçük bir tepe bırakır: kumaş kancada tutuluyor, orada biraz yukarı çekilmiş.
+            zt = -0.007 - 0.185 * (1 - math.cos(fi)) + 0.015 * math.exp(-(t / 0.12) ** 2)
+            # Katlama kenarındaki iki kat arası: kancada kumaş kancanın sapını sarar (geniş, 2,6 cm),
+            # omuzlarda yalnızca iki katın kalınlığı kadar kalır.
+            ayrik = KAT + 0.015 * (1 - t) ** 2
+            # Tepede sütunun x'i aynı elips yayından: kubbe yan kenarda tam enin %90'ına ulaşır.
+            xt = math.copysign(YARIM * 0.9 * math.sin(fi), a)
+            return t, zt, ayrik, xt
 
-        def on(u, v):           # öne düşen kat: kısa, biraz dalgalı
-            w = gen(v, 0.09, 0.33)
-            x = (u - 0.5) * w
-            y = -0.052 - 0.008 * math.sin(u * math.pi * 4 + 1) * min(1, v * 3) + 0.012 * v
-            return (x, y, -0.012 - 0.40 * v)
+        def katman(a, z, on_kat):
+            """Havlunun a sütununda, z yüksekliğinde arka (on_kat=False) ya da ön kattaki nokta."""
+            t, zt, ayrik, xt = kolon(a)
+            R = ayrik / 2                                        # katlama kıvrımının yarıçapı
+            d = max(0.0, (zt - R) - z)                           # kıvrımın altından bu yana ne kadar inildi
+            ara = KAT + (ayrik - KAT) * math.exp(-d / 0.05)      # iki kat aşağı indikçe birbirine yaklaşır
+            # En: tepedeki toplanmış x'ten aşağıdaki tam ene yavaşça açılır (üstel yaklaşım, sivri köşe yok).
+            x = xt + (a * YARIM - xt) * (1 - math.exp(-d / 0.08))
+            # Kıvrımlar: kancadan yelpaze gibi açılan dikey dalgalar. a'ya bağlı oldukları için tepede
+            # (x sıkışıkken) sık, aşağıda (x açılınca) geniş görünürler; tepede az, aşağıda derin.
+            A = 0.004 + 0.008 * min(1.0, d / 0.2)
+            w = A * math.sin(a * math.pi * 5 + 0.6) + 0.0025 * math.sin(a * math.pi * 8.5 + z * 12) * min(1.0, d / 0.1)
+            yb = -0.020 + 0.006 * math.exp(-d / 0.04) - w        # arka kat: duvarın (y = 0) hep önünde
+            return (x, yb - ara if on_kat else yb, z)
 
-        yuzey("HavluArka", arka, 16, 12, havlu, 0.008)
-        yuzey("HavluOn", on, 16, 12, havlu, 0.008)
-        cubuk((-0.05, -0.034, -0.008), (0.05, -0.034, -0.008), 0.022, havlu, 12)   # kancanın üstündeki büklüm
-        # Önde iki soluk şerit: aynı biçimi izleyen dar bantlar, kumaşın hemen önünde.
-        for z0 in (0.80, 0.86):
-            def bant(u, v, z0=z0):
-                vv = z0 + 0.035 * v
-                x, y, zz = on(u, vv)
-                return (x * 1.005, y - 0.0045, zz)
-            yuzey("Serit", bant, 16, 1, serit_m, 0.002)
+        def etek(a, on_kat):
+            """Etek ucunun z'si. Orta biraz yukarıda, köşeler aşağıda; en uçta köşe yuvarlatılır."""
+            t = abs(a)
+            taban = -0.415 if on_kat else -0.536                 # ön kat kısa, arka kat uzun (ikisi de görünsün);
+            # arka etek eski modelin boyunu (0,55 m) tutacak kadar aşağıda: pivot boyun ortası olduğu için
+            # boy değişirse kanca da yerinden kayardı.
+            kose = 0.028 * max(0.0, (t - 0.82) / 0.18) ** 2      # son %18'de etek yukarı kıvrılır: yuvarlak köşe
+            return taban + 0.012 * (1 - t * t) + kose
+
+        def havlu_f(u, v):
+            """yuzey için f(u, v): v = 0 arka etek, 0,5'e kadar arka kat, 0,5-0,625 kanca üstü kıvrım,
+            0,625-1 ön kat ve ön etek. Bölme noktaları 32 satırlık ızgaranın tam çizgilerine düşer
+            (16 + 4 + 12 satır); düşmeseydi kıvrımın köşesi bir satırın ortasında kalır, kırık görünürdü."""
+            a = u * 2 - 1
+            t, zt, ayrik, xt = kolon(a)
+            R = ayrik / 2
+            zc = zt - R                                          # kıvrımın merkez yüksekliği
+            if v <= 0.5:                                         # ARKA KAT: etekten kıvrıma yukarı
+                z = etek(a, False) + (zc - etek(a, False)) * (v / 0.5)
+                return katman(a, z, False)
+            if v >= 0.625:                                       # ÖN KAT: kıvrımdan eteğe aşağı
+                z = zc + (etek(a, True) - zc) * ((v - 0.625) / 0.375)
+                return katman(a, z, True)
+            # KIVRIM: arka kattan ön kata yarım çember (kancanın sapı bu çemberin içinden geçer).
+            th = math.pi * (v - 0.5) / 0.125                     # 0 (arka) .. π (ön)
+            xb, yb, _ = katman(a, zc, False)                     # kıvrımın arka ucu
+            yc = yb - R                                          # çemberin merkezi: iki katın ortası
+            return (xb, yc + R * math.cos(th), zc + R * math.sin(th))
+
+        yuzey("Havlu", havlu_f, 30, 32, havlu, KALIN)
+
+        def one_it(a, z, on_kat, pay):
+            """Kumaşın (a, z) noktasını yüzeyin DİK doğrultusunda (normal) öne, pay kadar it.
+            Yalnızca -y yönünde itmek kıvrımın eğik yamaçlarında yetmiyordu: şerit kumaşa gömülüp
+            yandan bakınca kesik kesik görünüyordu. Normal, yüzeyin iki küçük adımdaki değişiminin
+            çapraz çarpımıdır (iki teğetin ikisine de dik olan yön)."""
+            P = Vector(katman(a, z, on_kat))
+            Ta = Vector(katman(a + 0.01, z, on_kat)) - P         # enine teğet
+            Tz = Vector(katman(a, z + 0.01, on_kat)) - P         # dikey teğet
+            n = Ta.cross(Tz).normalized()
+            if n.y > 0:                                          # odaya (-y) bakan yönü seç
+                n = -n
+            return tuple(P + n * pay)
+
+        # İki soluk şerit: her iki katın eteğine yakın, kumaşın ön yüzünün hemen önünde. Etek eğrisini
+        # izledikleri için köşede onlar da yukarı kıvrılır. Arka katınki ön katın altından görünür.
+        for on_kat in (True, False):
+            for alt, ust in ((0.042, 0.056), (0.066, 0.080)):
+                def bant(u, v, on_kat=on_kat, alt=alt, ust=ust):
+                    a = min(0.995, max(-0.995, u * 2 - 1))       # en uçta teğet için a ± 0,01 taşmasın
+                    z = etek(a, on_kat) + alt + (ust - alt) * v
+                    return one_it(a, z, on_kat, KALIN / 2 + 0.0015)   # kumaş yüzeyinin 1,5 mm önünde
+                yuzey("Serit", bant, 30, 1, serit_m, 0.0015)
         bitir("Havlu_K7", 0.4, 1.0, kip="duvar")
 
     elif hangi == "kova":
