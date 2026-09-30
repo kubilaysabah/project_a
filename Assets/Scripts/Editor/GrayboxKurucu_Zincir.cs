@@ -236,11 +236,73 @@ public static partial class GrayboxKurucu
 
         Esya esya = gecici.AddComponent<Esya>();
         esya.Ayarla(tur, "", 0);
+        // Kafa lambasında parlasın (#83): kâğıt (not, çizim) metal kadar ışık yakalamaz, daha sönük.
+        ParlamaEkle(gecici, b.center + model.transform.localPosition, tur == EsyaTuru.Parca ? 0.55f : 1f);
 
         string yol = $"{SablonKlasoru}/{ad}.prefab";
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, yol);
         Object.DestroyImmediate(gecici);
         return sablon;
+    }
+
+    // ---------- KAFA LAMBASINDA PARILTI (#83) ----------
+    // Eşya şablonuna "Parilti" adlı küçük bir dörtgen ve FenerParlamasi bileşeni ekler. Dörtgen
+    // kapalı başlar; lamba ışığı eşyaya düşünce FenerParlamasi onu gösterir ve kameraya çevirir.
+    // merkez: parıltının eşyaya göre yeri. carpan: parlaklık (metal 1, kâğıt daha az).
+    static void ParlamaEkle(GameObject kok, Vector3 merkez, float carpan)
+    {
+        GameObject dortgen = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        dortgen.name = "Parilti";
+        // Çarpışması silinir: yoksa oyuncunun nişan ışını parıltıya çarpardı (ipucu panelindeki tuzak).
+        Object.DestroyImmediate(dortgen.GetComponent<Collider>());
+        dortgen.transform.SetParent(kok.transform, false);
+        dortgen.transform.localPosition = merkez;
+        MeshRenderer mr = dortgen.GetComponent<MeshRenderer>();
+        mr.sharedMaterial = ParlamaMalzemesi();
+        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;   // ışığın gölgesi olmaz
+        mr.receiveShadows = false;
+        mr.enabled = false;
+        FenerParlamasi fp = kok.AddComponent<FenerParlamasi>();
+        // Özel (private) alan: kurucu SerializedObject ile yazar, Inspector'da görünen değerin aynısı.
+        SerializedObject so = new SerializedObject(fp);
+        so.FindProperty("gucCarpani").floatValue = carpan;
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // Parıltının malzemesi: URP Unlit, toplamalı (additive) saydam. Toplamalı karışım altındaki
+    // rengin üstüne ışık ekler, hiçbir şeyi karartmaz: karanlıkta küçük bir ışık gibi okunur.
+    // Doku Art/Isik/scripts/parilti_uret.py'den gelir. Dosya varsa ayarları yeniden yazılır.
+    static Material ParlamaMalzemesi()
+    {
+        const string DokuYolu = "Assets/Textures/Parilti.png";
+        const string Yol = "Assets/Materials/Esya_Parilti.mat";
+        TextureImporter ti = AssetImporter.GetAtPath(DokuYolu) as TextureImporter;
+        if (ti != null && (ti.wrapMode != TextureWrapMode.Clamp || !ti.alphaIsTransparency))
+        {
+            ti.wrapMode = TextureWrapMode.Clamp;      // kenarda karşı kenarın pikselleri görünmesin
+            ti.alphaIsTransparency = true;
+            ti.SaveAndReimport();
+        }
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        Shader sh = Shader.Find("Universal Render Pipeline/Unlit");
+        if (m == null)
+        {
+            m = new Material(sh);
+            AssetDatabase.CreateAsset(m, Yol);
+        }
+        m.shader = sh;
+        m.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(DokuYolu));
+        m.SetColor("_BaseColor", Color.white);
+        m.SetFloat("_Surface", 1f);                   // saydam
+        m.SetFloat("_Blend", 2f);                     // 2 = toplamalı (Additive)
+        m.SetOverrideTag("RenderType", "Transparent");
+        m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.One);
+        m.SetInt("_ZWrite", 0);                       // arkasındakini gizlemesin
+        m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        EditorUtility.SetDirty(m);
+        return m;
     }
 
     // Blender'da yarı saydam verilen cam malzemeleri (#83): Unity FBX'teki saydamlığı okumaz; bu adlardaki
@@ -414,6 +476,7 @@ public static partial class GrayboxKurucu
         c.size = new Vector3(0.16f, 0.08f, 0.16f);
         Esya esya = gecici.AddComponent<Esya>();
         esya.Ayarla(EsyaTuru.AnahtarParcasi, "", 0);
+        ParlamaEkle(gecici, new Vector3(0f, 0.01f, 0f), 1f);   // kafa lambasında parlasın (#83)
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Esya_AnahtarParcasi.prefab");
         Object.DestroyImmediate(gecici);
         return sablon;
@@ -1313,6 +1376,7 @@ public static partial class GrayboxKurucu
         c.size = new Vector3(0.18f, 0.06f, 0.18f);
         Esya esya = gecici.AddComponent<Esya>();
         esya.Ayarla(EsyaTuru.Parca, "", 0);
+        ParlamaEkle(gecici, new Vector3(0f, 0.01f, 0f), 0.55f);   // kâğıt: metalden sönük parlar (#83)
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Esya_CizimParcasi.prefab");
         Object.DestroyImmediate(gecici);
         return sablon;

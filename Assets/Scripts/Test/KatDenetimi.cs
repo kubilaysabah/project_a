@@ -213,6 +213,9 @@ public static class KatDenetimi
         {
             kamera.position = goz;
             kamera.rotation = Quaternion.LookRotation(hedef - goz);
+            // Eşyaların kafa lambası parıltısı (#83) normalde bir sonraki karede güncellenir; fotoğraf bu
+            // karede çekildiği için hemen güncellenir, yoksa bir önceki bakışın parıltısı görünürdü.
+            foreach (FenerParlamasi fp in Object.FindObjectsByType<FenerParlamasi>()) fp.Guncelle(true);
             cam.Render();
             RenderTexture.active = rt;
             doku.ReadPixels(new Rect(0, 0, 800, 500), 0, 0); doku.Apply();

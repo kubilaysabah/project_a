@@ -49,6 +49,15 @@ public class KafaLambasi : MonoBehaviour
     /// <summary>Lamba şu an yanıyor mu (senaryolu sönme sırasında da false).</summary>
     public bool Acik { get { return acik; } }
 
+    /// <summary>
+    /// Işık şu an gerçekten yanıyor mu? Acik'ten farkı: senaryolu titremede ışık bir yanıp bir
+    /// söner, Acik ise değişmez. Eşyanın parıltısı (FenerParlamasi) ışığın kendisine bakar.
+    /// </summary>
+    public bool IsikYaniyor { get { return takili && isik != null && isik.enabled; } }
+
+    /// <summary>Işığın konumu ve baktığı yön (ışık yoksa lambanın kendisi).</summary>
+    public Transform IsikYonu { get { return isik != null ? isik.transform : transform; } }
+
     private void Awake()
     {
         isik = GetComponentInChildren<Light>(true);
