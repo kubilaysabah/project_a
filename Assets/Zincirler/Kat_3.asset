@@ -301,7 +301,7 @@ MonoBehaviour:
   - Yol: 
     X: 4.57
     Y: 0
-    Z: 6.45
+    Z: 5.905
     Donus: 0
     OnU: -1
     OnV: 0
@@ -312,7 +312,7 @@ MonoBehaviour:
   - Yol: 
     X: 4.62
     Y: 0.4
-    Z: 6.45
+    Z: 5.905
     Donus: 0
     OnU: -1
     OnV: 0
@@ -367,7 +367,7 @@ MonoBehaviour:
   - Yol: 
     X: 3.4
     Y: 0
-    Z: 6.45
+    Z: 5.905
     Donus: 0
     OnU: 1
     OnV: 0
@@ -376,9 +376,9 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 2.85
+    X: 4.45
     Y: 0
-    Z: 7.4
+    Z: 7.55
     Donus: 0
     OnU: 0
     OnV: -1

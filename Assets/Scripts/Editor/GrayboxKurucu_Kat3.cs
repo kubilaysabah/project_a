@@ -121,15 +121,18 @@ public static partial class GrayboxKurucu
 
             // ---------- SALON ----------
             // Salon u 0-5,0, v 4,75-8,1. Kapı hol duvarında (u 0,71-1,81 önü boş); karşıda pencere (u 0,7-2,1)
-            // ve hep kilitli balkon kapısı (u 3,2-4,0). Kanepe Oda B duvarında, karşısında TV dolabı.
-            M("sofa_02", 5.00f - 0.41f - 0.02f, 0f, 6.45f, -1f, 0f),
-            M("throw_pillows_01", 4.62f, 0.40f, 6.45f, -1f, 0f),
+            // ve hep kilitli balkon kapısı (u 3,2-4,0). Kanepe Oda B duvarında, hol tarafında; karşısında TV dolabı.
+            // Şahan: "salonu biraz genişlet" (#83). Oyun parkı odanın ortasından kanepenin kuzeyine, pencere
+            // duvarının köşesine; kanepe ve önündeki boyama sehpası hol tarafına kaydı: salonun ortası ve pencere
+            // önü boş kaldı. Kerem'in çizim parçası (salon_yeri, v 6,45) yine kanepenin altında.
+            M("sofa_02", 5.00f - 0.41f - 0.02f, 0f, 5.905f, -1f, 0f),
+            M("throw_pillows_01", 4.62f, 0.40f, 5.905f, -1f, 0f),
             M("painted_wooden_cabinet", 0.03f + 0.31f + 0.01f, 0f, 6.45f, 1f, 0f),
             D("Tuplu_TV_K3", 0.36f, 1.18f, 6.45f, 1f, 0f),
             M("Chandelier_01", 2.50f, Tavan, 6.45f, 0f, 1f),
             D("Hali_K3", 2.80f, 0f, 6.45f, 0f, 1f),
-            D("Boyama_Sehpasi_K3", 3.40f, 0f, 6.45f, 1f, 0f),
-            D("Oyun_Parki_K3", 2.85f, 0f, 7.40f, 0f, -1f),   // perdenin kenarına girmesin (çakışma testi)
+            D("Boyama_Sehpasi_K3", 3.40f, 0f, 5.905f, 1f, 0f),
+            D("Oyun_Parki_K3", 4.45f, 0f, 7.55f, 0f, -1f),   // köşede, kanepenin kuzeyinde
             D("Perde_K3", 1.40f, 2.30f, PetekOnuPerde, 0f, -1f),
             D("Kornis_Dirsegi", 1.40f - 0.86f, 2.288f, 8.10f, 0f, -1f),   // korniş dirsekleri (perde duvardan 22 cm önde)
             D("Kornis_Dirsegi", 1.40f + 0.86f, 2.288f, 8.10f, 0f, -1f),
