@@ -63,6 +63,24 @@ public static class KatDenetimi
         }
         Physics.SyncTransforms();
 
+        // Oyuncu açık dairenin sahanlığında değilse (1. katta oyun zemin kattan başlar) dairenin kapısının önüne,
+        // sahanlığın ortasına doğru 0,9 m içeri taşınır.
+        if (sahanlik != null && daireler.Count > 0 && Mathf.Abs(oyuncu.transform.position.y - sahanlik.position.y) > 0.5f)
+        {
+            Transform kapi = sahanlik.Find("Kapi_" + daireler[0].name.Replace("Daire_", "") + "/Mentese");
+            if (kapi != null)
+            {
+                Vector3 orta = new Vector3(sahanlik.position.x, kapi.position.y, sahanlik.position.z);
+                Vector3 yer = kapi.position + (orta - kapi.position).normalized * 0.9f;
+                yer.y = sahanlik.position.y + 0.05f;
+                CharacterController cc = oyuncu.GetComponent<CharacterController>();
+                if (cc != null) cc.enabled = false;
+                oyuncu.transform.position = yer;
+                if (cc != null) cc.enabled = true;
+                Physics.SyncTransforms();
+            }
+        }
+
         // 1. YÜRÜME: oyuncunun durduğu yerden (sahanlık), sahanlığın katında.
         var hucreler = new Dictionary<Vector2Int, Hucre>();
         var engeller = new Dictionary<string, int>();
@@ -210,6 +228,97 @@ public static class KatDenetimi
         Object.Destroy(rt);
         kamera.position = eskiKonum; kamera.rotation = eskiDonus;
         return rapor.ToString();
+    }
+
+    // ---------- KAYIT TESTİ ----------
+    // 1. adım (oyun modunda, kat açıkken): zincirin çözülme sırasındaki ilk yarısını kayda "çözüldü" diye yazar.
+    // Sonra oyun kapatılıp aynı test kaydıyla yeniden açılır ve KayitDenetle çağrılır.
+    public static string KayitHazirla(int kat)
+    {
+        KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>();
+        KilitZinciri zincir = yonetici != null ? yonetici.KatinZinciri(kat) : null;
+        if (zincir == null) return "zincir yok";
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) { odalar.Add(o.Ad); odalar.Add(KilitZinciri.IkinciOnek + o.Ad); }
+        KilitZinciri.Sonuc sonuc = zincir.Cozumle(odalar);
+        int yari = sonuc.AcilanKilitler.Count / 2;
+        var yazilan = new List<string>();
+        for (int i = 0; i < yari; i++) { Kayit.KilitCozuldu(kat, sonuc.AcilanKilitler[i]); yazilan.Add(sonuc.AcilanKilitler[i]); }
+        PlayerPrefs.Save();
+        return "kayda çözüldü yazılan: " + string.Join(",", yazilan);
+    }
+
+    // 2. adım (yeniden açılan oyunda): her kilidin durumu kayıtla aynı mı? Kapı ya da parça kilidi çözükse kapı/parça
+    // serbest, değilse kilitli olmalı; çözülmüş anahtar ve sigorta kilitlerinin eşyası (kullanıldı) sahnede olmamalı.
+    public static string KayitDenetle(int kat)
+    {
+        KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>();
+        KilitZinciri zincir = yonetici != null ? yonetici.KatinZinciri(kat) : null;
+        if (zincir == null) return "zincir yok";
+        var rapor = new StringBuilder();
+        int hata = 0, cozuk = 0, kilitli = 0;
+        foreach (Kilit k in Object.FindObjectsByType<Kilit>())
+        {
+            if (k.Kat != kat || k.Veri == null) continue;
+            bool beklenen = Kayit.KilitCozukMu(kat, k.Veri.Kimlik);
+            IcKapi kapi = k.GetComponent<IcKapi>();
+            AcilirParca parca = k.GetComponent<AcilirParca>();
+            bool dogru = k.Cozuk == beklenen;
+            if (kapi != null && kapi.Kilitli == beklenen) dogru = false;
+            if (parca != null && parca.Kilitli == beklenen) dogru = false;
+            if (!dogru) { hata++; rapor.Append($"HATA:{k.Veri.Kimlik}(kayıt {beklenen}, kilit {k.Cozuk}) "); }
+            else if (beklenen) cozuk++; else kilitli++;
+        }
+        foreach (ZincirEsyasi e in zincir.Esyalar)
+        {
+            bool kullanildi = false;
+            foreach (ZincirKilidi k in zincir.Kilitler)
+                if (k.Gerekli == e.Kimlik && (k.Tur == KilitTuru.Anahtar || k.Tur == KilitTuru.Sigorta) && Kayit.KilitCozukMu(kat, k.Kimlik)) kullanildi = true;
+            if (!kullanildi) continue;
+            foreach (Esya es in Object.FindObjectsByType<Esya>())
+                if (es.Kimlik == e.Kimlik && es.gameObject.activeInHierarchy) { hata++; rapor.Append($"HATA:kullanılmış {e.Kimlik} yeniden konmuş "); }
+        }
+        return $"{cozuk} çözük, {kilitli} kilitli, {hata} hata " + rapor;
+    }
+
+    // ---------- ÇAKIŞMA TESTİ ----------
+    // Açık dairelerdeki süslerin ve kalıcı eşyaların çarpışma kutuları birbirine ya da duvara 6 cm'den fazla
+    // gömülüyor mu? Üst üste duranlar (TV dolabın üstünde) ve yassı olanlar (halı) sayılmaz. Kutu sınırları
+    // (bounds) üzerinden ölçülür: 90 derecenin katları dışında döndürülmüş eşyada biraz fazla çıkabilir.
+    public static string Cakismalar()
+    {
+        var rapor = new StringBuilder();
+        var eslesmeler = new HashSet<string>();
+        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>())
+        {
+            if (!d.gameObject.activeInHierarchy) continue;
+            var parcalar = new List<(Collider c, string kok, bool yapi)>();
+            foreach (Collider c in d.GetComponentsInChildren<Collider>())
+            {
+                if (c.isTrigger || c.GetComponentInParent<Esya>() != null || c.GetComponentInParent<IcKapi>() != null) continue;
+                Transform kok = c.transform;
+                while (kok.parent != null && kok.parent != d.transform && kok.parent.name != "Esyalar") kok = kok.parent;
+                bool yapi = YapiMi(kok.name) || kok.name == "Esyalar";
+                parcalar.Add((c, kok.name, yapi));
+            }
+            for (int i = 0; i < parcalar.Count; i++)
+                for (int j = i + 1; j < parcalar.Count; j++)
+                {
+                    var a = parcalar[i]; var b = parcalar[j];
+                    if (a.kok == b.kok || (a.yapi && b.yapi)) continue;
+                    Bounds x = a.c.bounds, y = b.c.bounds;
+                    if (x.size.y < 0.05f || y.size.y < 0.05f) continue;                         // yassı: halı, kâğıt
+                    if (x.min.y >= y.max.y - 0.05f || y.min.y >= x.max.y - 0.05f) continue;      // üst üste duruyor
+                    float dx = Mathf.Min(x.max.x, y.max.x) - Mathf.Max(x.min.x, y.min.x);
+                    float dz = Mathf.Min(x.max.z, y.max.z) - Mathf.Max(x.min.z, y.min.z);
+                    float dy = Mathf.Min(x.max.y, y.max.y) - Mathf.Max(x.min.y, y.min.y);
+                    float derinlik = Mathf.Min(dx, Mathf.Min(dz, dy));
+                    if (derinlik <= 0.06f) continue;
+                    string ad = a.kok + "<>" + b.kok;
+                    if (eslesmeler.Add(ad)) rapor.Append($"{ad}:{derinlik:0.00}m ");
+                }
+        }
+        return eslesmeler.Count + " çakışma | " + rapor;
     }
 
     // Yürünebilir alanı başlangıç noktasından doldurur (genişlik öncelikli arama). Sınır: sahanlığın (ve onun
