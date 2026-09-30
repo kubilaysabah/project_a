@@ -1243,8 +1243,8 @@ public static partial class GrayboxKurucu
         s.FindProperty("kimlik").stringValue = "kat7_gercek_kapi";
         s.FindProperty("aciklama").stringValue = "7. kat: Cemal'in kapısı. Paspası ve terlikleri yok, gözetleme deliğinden ışık sızıyor.";
         SerializedProperty etkiler = s.FindProperty("etkiler");
-        string[] yollar = { "Kapi_1/Paspas", "Kapi_1/Terlikler", "Kapi_1/Mentese/Kapi_Gozu_Isik" };
-        bool[] gorunur = { false, false, true };
+        string[] yollar = { "Kapi_1/Paspas", "Kapi_1/Terlikler", "Kapi_1/Mentese/Kapi_Gozu_Isik", "Kapi_1/Mentese/Kapi_Alti_Isik" };
+        bool[] gorunur = { false, false, true, true };
         etkiler.arraySize = yollar.Length;
         for (int i = 0; i < yollar.Length; i++)
         {

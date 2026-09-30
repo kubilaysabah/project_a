@@ -48,3 +48,13 @@ MonoBehaviour:
     ses: {fileID: 0}
     dongu: 0
     gecikme: 0
+  - hedefYol: Kapi_1/Mentese/Kapi_Alti_Isik
+    tur: 0
+    gorunur: 1
+    vektor: {x: 0, y: 0, z: 0}
+    renk: {r: 0, g: 0, b: 0, a: 0}
+    sayi: 0
+    metin: 
+    ses: {fileID: 0}
+    dongu: 0
+    gecikme: 0

@@ -749,6 +749,25 @@ public static partial class GrayboxKurucu
         gl.range = 0.6f;
         gl.shadows = LightShadows.None;
         gozIsik.SetActive(false);
+        // Kapının altından sızan ışık (#83, 7. kat gözlem ipucu): Cemal'in notu artık gerçek kapıyı tarif
+        // etmiyor; içeride ışığı hep yanık olduğu için kapının altından ince bir ışık sızar ve sahanlığın
+        // karanlık zeminine sıcak bir leke düşer. Kapalı kurulur; 7. katın kartı yalnızca gerçek kapınınkini
+        // açar. Kanatla birlikte döndüğü için kapı açılınca SahanlikKapisi onu söndürür.
+        GameObject altIsik = new GameObject("Kapi_Alti_Isik");
+        altIsik.transform.SetParent(m, false);
+        GameObject cizgi = Kutu("Cizgi", altIsik.transform, new Vector3(-yon * 0.03f, 0.006f, kanatZ), new Vector3(0.02f, 0.012f, 0.80f));
+        Object.DestroyImmediate(cizgi.GetComponent<Collider>());   // nişanı ve adımı engellemesin
+        cizgi.GetComponent<MeshRenderer>().sharedMaterial = CamMalzeme();
+        GameObject leke = new GameObject("Leke");
+        leke.transform.SetParent(altIsik.transform, false);
+        leke.transform.localPosition = new Vector3(-yon * 0.30f, 0.05f, kanatZ);
+        Light ll = leke.AddComponent<Light>();
+        ll.type = LightType.Point;
+        ll.color = new Color(1f, 0.78f, 0.45f);
+        ll.intensity = 0.35f;
+        ll.range = 1.1f;
+        ll.shadows = LightShadows.None;
+        altIsik.SetActive(false);
 
         // ---- KAPI ÇEVRESİ EŞYALARI ----
         // Zil: kapının yanında, duvarda.

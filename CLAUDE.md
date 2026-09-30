@@ -242,6 +242,15 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
     - 8: the Yönetim office; the iskân ruhsatı hangs in the corridor, and the filing-cabinet key is in the archive's key cabinet.
   - **Verification:** 200/200 tests; the full playthrough bot passed with 0 problems and no new errors; every room captured from four corners and above; containers opened and checked; release build 391.2 MB.
   - **Line-of-sight test (same lesson, later):** a new check places the player camera at every standable point within 2.7 m of each chain item (eye 1.65 and crouched 0.6) and calls `Etkilesimci.HedefBul`. It found two items the player could never pick: floor 2's tin on the repair bench and floor 5's key on the desk. Both lie inside the box collider of a decor model they are not children of. Fix: `Etkilesimci.IcindeMi` treats a collider whose bounds contain the item as a container too. Now 39/39 items are pickable, 200/200 tests, the bot passed 3/3 runs, release build rebuilt. Scratchpad `gorus_testi.cs`; rerun it after moving items or decor.
+  - **Walkability and darkness inspection (later, same day):** `Assets/Scripts/Test/KatDenetimi.cs` (Editor only). In play mode call `KatDenetimi.Denetle(kat, folder)`. It:
+    - walks from the landing with the player's capsule (BFS, 10 cm grid);
+    - aims at every chain part via `HedefBul` from reachable spots only;
+    - writes a plan map per flat and headlamp photos in the real darkness.
+    It found blocked rooms on floors 2, 3, 5, 6 and 8. Furniture was moved and Nuri's wardrobe removed (`ae2c1ec`, `5aa8d8d`). Now every room is walkable and every item pickable on all floors. Rerun it after moving decor.
+  - **No-note hints (Şahan chose Claude's proposal):**
+    - Glow codes (floors 4, 7): looking straight at the code wall within 3.5 m with the lamp on and no power makes the headlamp die for 1.8 s, so the digits glimmer (`KaranliktaParlayan.IpucuVer`, at most every 30 s).
+    - Floor 7's real door leaks light under it (`Kapi_N/Mentese/Kapi_Alti_Isik`, built inactive on every landing door and shown by the real-door card; `SahanlikKapisi` hides it when the door opens).
+    - Knocking a wrong door makes `GezenGolge.Belir()` appear.
   - **Waiting for Şahan's test of all floors.** The floor-8 plan frame shows nine floors (matches the ninth-floor plan and Cemal's research wall); change `KAT_SAYISI` in `kat8_esyalar.py` if he objects.
 
 - 2026-09-29 (Lesson 56, later): **#83 opened** (floor-by-floor redesign).

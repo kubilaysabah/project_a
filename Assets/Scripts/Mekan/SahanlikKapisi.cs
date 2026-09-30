@@ -64,6 +64,7 @@ public class SahanlikKapisi : MonoBehaviour, IEtkilesimli
     {
         acildi = true;
         Kayit.KilitCozuldu(kat, kayitKimligi);
+        AltIsigiSondur();
         yield return new WaitForSeconds(0.9f);
         if (gicirti != null) AudioSource.PlayClipAtPoint(gicirti, KapiNoktasi(), 0.8f);
         Quaternion bas = mentese != null ? mentese.localRotation : Quaternion.identity;
@@ -89,13 +90,25 @@ public class SahanlikKapisi : MonoBehaviour, IEtkilesimli
         }
         KafaLambasi lamba = FindAnyObjectByType<KafaLambasi>();
         if (lamba != null) lamba.Titret(1.4f);
-        Debug.Log($"[KAPI] {kat}. kat: yanlış kapı ({name}) çalındı; olay.");
+        // Yanlış kapının bedeli (#83): "ardından cevap veriyorlar". Lamba titrerken Gölge oyuncunun önünde
+        // belirir ve bir süre peşinden gelir (GezenGolge; zarar vermez, korkutur). Yer bulamazsa belirmez.
+        GezenGolge gezen = FindAnyObjectByType<GezenGolge>();
+        bool belirdi = gezen != null && gezen.Belir();
+        Debug.Log($"[KAPI] {kat}. kat: yanlış kapı ({name}) çalındı; olay{(belirdi ? ", Gölge belirdi" : "")}.");
+    }
+
+    // Kapının altından sızan ışık (7. katın kartı açar) kanatla döner; kapı açılınca söndürülür.
+    private void AltIsigiSondur()
+    {
+        Transform alt = mentese != null ? mentese.Find("Kapi_Alti_Isik") : null;
+        if (alt != null) alt.gameObject.SetActive(false);
     }
 
     /// <summary>Kayıttan: gerçek kapı daha önce açılmışsa açık başlar, çalınmaz.</summary>
     public void AcikBaslat()
     {
         acildi = true;
+        AltIsigiSondur();
         if (mentese != null) mentese.localRotation = Quaternion.Euler(0f, AcikAci, 0f);
     }
 
