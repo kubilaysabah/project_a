@@ -66,6 +66,8 @@ Oyundaki bütün sesler, numarasıyla (2026-09-27, #74 için baştan sayıldı; 
 | No | Dosya · süre | Ne zaman, nerede | Kaynak | Karar |
 |---|---|---|---|---|
 | S20 | `Resources/Sesler/Adim_1.wav` · 0,42 sn | Oyuncunun ayak sesi (2B, dört çeşit sırayla). Aynı dosyalar kalın perdeyle (0,62) kaçış siluetinin ve Gezen Gölge'nin ağır adımları; Adim_2 ayrıca ayakkabı rafa konunca. | Sentez: oyuncu_sesleri_uret.py → adimlar() | **Değişsin**: oyun eski bir apartmanda geçtiği için ara ara adım attığımızda parke gıcırtısı gelebilir. → **Yeni:** sentez adım KALDI; dairede ara sıra parke gıcırtısı (qubodup, CC0), merdivende beton adım (G.Lamont, CC0) |
+| S20f | `Resources/Sesler/Adim_Fayans_1.wav`, `Adim_Fayans_2.wav` · 0,35 sn | Oyuncunun ayak sesi FAYANS üstünde (banyo, mutfak): sert, parlak topuk tıkı (400-1200-2800-5500 Hz, dar bantlar), kum yok, küçük fayanslı odanın kısa parlak yankısı. Gövde seviyesi Adim_1 ile aynı (RMS hizalı). | üretildi: oyuncu_sesleri_uret.py adim_fayans | yeni (#87), Şahan dinleyecek |
+| S20h | `Resources/Sesler/Adim_Hali_1.wav`, `Adim_Hali_2.wav` · 0,30 sn | Oyuncunun ayak sesi HALI/KİLİM üstünde (salon, yatak odası): boğuk, yumuşak "puf" (90-220-500 Hz), 1800 Hz üstü silinmiş, kumaş sürtünmesi hışırtısı, yankı neredeyse yok. Adim_1'den 3 dB kısık (RMS hizalı). | üretildi: oyuncu_sesleri_uret.py adim_hali | yeni (#87), Şahan dinleyecek |
 | S21 | `Resources/Sesler/Adim_2.wav` · 0,42 sn | Ayak sesi, çeşit 2 (bkz. S20). | Sentez: aynı | **Kaldırıldı** (#74) |
 | S22 | `Resources/Sesler/Adim_3.wav` · 0,42 sn | Ayak sesi, çeşit 3. | Sentez: aynı | **Kaldırıldı** (#74) |
 | S23 | `Resources/Sesler/Adim_4.wav` · 0,42 sn | Ayak sesi, çeşit 4. | Sentez: aynı | **Kaldırıldı** (#74) |

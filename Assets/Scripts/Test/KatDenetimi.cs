@@ -508,7 +508,8 @@ public static class KatDenetimi
     // Duvar, oda kabuğu, kapı gibi yapı parçası mı (engel listesinde sayılmaz; yalnızca eşyalar sayılır)?
     static bool YapiMi(string ad)
     {
-        if (ad == "Kapilar" || ad == "Lambalar" || ad.StartsWith("Sahanlik") || ad.StartsWith("Cekirdek") || ad.StartsWith("Daire")) return true;
+        // Ayrintilar (#87: süpürgelik, pervaz, düğme, priz, kablo) ve Lekeler bilerek çarpışmasız bina yapısıdır.
+        if (ad == "Kapilar" || ad == "Lambalar" || ad == "Ayrintilar" || ad == "Lekeler" || ad.StartsWith("Sahanlik") || ad.StartsWith("Cekirdek") || ad.StartsWith("Daire")) return true;
         foreach (DairePlani.Oda o in DairePlani.Odalar) if (o.Ad == ad) return true;
         return false;
     }

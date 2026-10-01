@@ -42,6 +42,8 @@ public class ArkaMuzik : MonoBehaviour
     {
         Ornek = this;
         kaynak = GetComponent<AudioSource>();
+        // Müzik mekânda değil, kafanın içinde: odanın yankısı (OdaYankisi, #87) ona işlemesin.
+        if (kaynak != null) kaynak.bypassListenerEffects = true;
         taban = kaynak.volume;
         dalga = new MuzikDalgasi(System.Environment.TickCount);   // her oyun farklı yerden başlar
     }

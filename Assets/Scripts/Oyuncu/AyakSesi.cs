@@ -8,10 +8,13 @@
 // Sesin kendisi oyuncunun üstündeki AudioSource'tan, üç boyutlu DEĞİL çalar
 // (spatialBlend = 0): kendi ayak sesini hep aynı yerden, "kendinden" duyarsın.
 //
-// ZEMİN (#74, Şahan'ın ses kararları): ayağın altındaki zemin bir DAİRENİN zeminiyse parke adımı
-// (Adim_1) çalar ve ara sıra eski parkenin gıcırtısı karışır (Gicirti_1-3); merdivende ve
-// sahanlıkta beton adımları (Merdiven_Adim_1-4) çalar. Zeminin kime ait olduğu aşağı atılan bir
-// ışınla bulunur: çarptığı çarpıştırıcının ebeveynlerinde DaireEksenleri varsa daire içidir.
+// ZEMİN (#74, Şahan'ın ses kararları; #87 zemine göre): ayağın altındaki zemin aşağı atılan bir
+// ışınla bulunur ve dört aileden biri çalar:
+//   - beton (Merdiven_Adim_1-4): merdiven, sahanlık, daire dışı her yer;
+//   - parke (Adim_1 + ara sıra Gicirti_1-3): dairenin kuru odaları ("Daire_Parke" kutusu);
+//   - fayans (Adim_Fayans_1-2): banyo ve mutfak ("Daire_Fayans" kutusu);
+//   - halı (Adim_Hali_1-2): halı, kilim, yolluk, paçavra üstü (süs eşyasının adından).
+// Şahan'ın Phasmophobia karşılaştırması (2026-10-01): "parke, fayans ve halı aynı sesi çıkarıyor."
 
 using UnityEngine;
 
@@ -26,17 +29,22 @@ public class AyakSesi : MonoBehaviour
     private AudioSource kaynak;
     private AudioClip[] adimlar;            // parke adımı (daire içi)
     private AudioClip[] merdivenAdimlari;   // beton adımı (merdiven, sahanlık)
+    private AudioClip[] fayansAdimlari;     // fayans adımı (banyo, mutfak) (#87)
+    private AudioClip[] haliAdimlari;       // halı adımı (#87)
     private AudioClip[] gicirtilar;         // parke gıcırtısı, ara sıra
+
+    /// <summary>Ayağın altındaki zemin türü (test ve gösterge için).</summary>
+    public enum Zemin { Beton, Parke, Fayans, Hali }
+    public Zemin SonZemin { get; private set; }
+    private readonly int[] sonCalinanlar = { -1, -1, -1, -1 };   // zemin başına son çeşit
 
     [Tooltip("Dairede bir adımın gıcırtıyla birlikte çalma olasılığı (0-1).")]
     [Range(0f, 1f)]
     [SerializeField] private float gicirtiOlasiligi = 0.12f;
     private float sonGicirti = -10f;        // iki gıcırtı arasında en az birkaç saniye
-    private int sonMerdiven = -1;
 
     private readonly AdimOlcer olcer = new AdimOlcer();
     private Vector3 oncekiKonum;
-    private int sonCalinan = -1;
 
     private void Awake()
     {
@@ -51,15 +59,22 @@ public class AyakSesi : MonoBehaviour
         // Beşinci bir adım sesi eklemek için dosyayı klasöre koymak yeter.
         var liste = new System.Collections.Generic.List<AudioClip>();
         var merdiven = new System.Collections.Generic.List<AudioClip>();
+        var fayans = new System.Collections.Generic.List<AudioClip>();
+        var hali = new System.Collections.Generic.List<AudioClip>();
         var gicirti = new System.Collections.Generic.List<AudioClip>();
         foreach (AudioClip k in Resources.LoadAll<AudioClip>("Sesler"))
         {
-            if (k.name.StartsWith("Adim")) liste.Add(k);
+            // Sıra önemli: "Adim_Fayans" de "Adim" ile başlar; önce özel aileler ayrılır.
+            if (k.name.StartsWith("Adim_Fayans")) fayans.Add(k);
+            else if (k.name.StartsWith("Adim_Hali")) hali.Add(k);
+            else if (k.name.StartsWith("Adim")) liste.Add(k);
             else if (k.name.StartsWith("Merdiven_Adim")) merdiven.Add(k);
             else if (k.name.StartsWith("Gicirti")) gicirti.Add(k);
         }
         adimlar = liste.ToArray();
         merdivenAdimlari = merdiven.ToArray();
+        fayansAdimlari = fayans.ToArray();
+        haliAdimlari = hali.ToArray();
         gicirtilar = gicirti.ToArray();
 
         oncekiKonum = transform.position;
@@ -80,14 +95,19 @@ public class AyakSesi : MonoBehaviour
 
     private void AdimCal()
     {
-        bool daire = DaireZemininde();
-        AudioClip[] cesitler = daire || merdivenAdimlari.Length == 0 ? adimlar : merdivenAdimlari;
-        int son = daire ? sonCalinan : sonMerdiven;   // bu zeminde en son çalınan çeşit
+        Zemin zemin = ZeminBul();
+        SonZemin = zemin;
+        AudioClip[] cesitler = zemin == Zemin.Fayans ? fayansAdimlari
+                             : zemin == Zemin.Hali ? haliAdimlari
+                             : zemin == Zemin.Parke ? adimlar : merdivenAdimlari;
+        if (cesitler.Length == 0) cesitler = adimlar;   // aile yoksa parke
+        bool daire = zemin == Zemin.Parke;
+        int son = sonCalinanlar[(int)zemin];            // bu zeminde en son çalınan çeşit
 
         // Bir öncekiyle aynı sesi arka arkaya çalma; tekrar kulağa hemen batar.
         int i = Random.Range(0, cesitler.Length);
         if (cesitler.Length > 1 && i == son) i = (i + 1) % cesitler.Length;
-        if (daire) sonCalinan = i; else sonMerdiven = i;
+        sonCalinanlar[(int)zemin] = i;
 
         // Her adımda perde ve şiddet biraz değişsin: gerçek adımlar hiç aynı değildir.
         kaynak.pitch = Random.Range(0.92f, 1.08f);
@@ -101,9 +121,11 @@ public class AyakSesi : MonoBehaviour
         }
     }
 
-    // Ayağın altındaki zemin bir dairenin mi? Işın oyuncunun kendi kapsülünün içinden başlar;
-    // RaycastAll bütün çarpmaları verir, oyuncunun kendi parçaları atlanır (Etkilesimci'deki ders).
-    private bool DaireZemininde()
+    // Ayağın altındaki zemin ne? Işın oyuncunun kendi kapsülünün içinden başlar; RaycastAll bütün
+    // çarpmaları verir, oyuncunun kendi parçaları atlanır (Etkilesimci'deki ders). En yakın çarpma:
+    // dairede değilse beton; adında halı/kilim/yolluk geçen bir süs eşyasıysa halı; "Daire_Fayans"
+    // kutusuysa fayans; dairenin başka her zemini parke.
+    private Zemin ZeminBul()
     {
         RaycastHit[] vuruslar = Physics.RaycastAll(transform.position + Vector3.up * 0.3f, Vector3.down, 0.8f,
                                                    ~0, QueryTriggerInteraction.Ignore);
@@ -114,6 +136,15 @@ public class AyakSesi : MonoBehaviour
             if (v.collider.transform.IsChildOf(transform)) continue;
             if (v.distance < enYakin) { enYakin = v.distance; zemin = v.collider.transform; }
         }
-        return zemin != null && zemin.GetComponentInParent<DaireEksenleri>() != null;
+        if (zemin == null || zemin.GetComponentInParent<DaireEksenleri>() == null) return Zemin.Beton;
+        // Halı: çarpılan nesnenin ya da ebeveynlerinin adı (süs eşyası "Sus_Hali_K3" gibi).
+        for (Transform t = zemin; t != null && t.GetComponent<DaireEksenleri>() == null; t = t.parent)
+        {
+            string ad = t.name;
+            if (ad.Contains("Hali") || ad.Contains("Kilim") || ad.Contains("Yolluk") || ad.Contains("Pacavra") || ad.Contains("Paspas"))
+                return Zemin.Hali;
+        }
+        if (zemin.name.StartsWith("Daire_Fayans")) return Zemin.Fayans;
+        return Zemin.Parke;
     }
 }

@@ -141,6 +141,8 @@ public static partial class GrayboxKurucu
             eksen.FindProperty("kapiZ").floatValue = yonu.kapiZ;
             eksen.FindProperty("disX").floatValue = SahanlikGen / 2f + DuvarKalin;
             eksen.ApplyModifiedPropertiesWithoutUndo();
+            // Duvar lekeleri (#87): kat açılınca DaireLekeleri kurar; malzemeleri kurucu bağlar.
+            LekeKurucu.Bagla(daire);
             // Kapalı kurulur: kayıtlı sahnede dört daire de gizli, kapılar kapalı.
             daire.SetActive(false);
         }
@@ -178,6 +180,217 @@ public static partial class GrayboxKurucu
         // Bulmaca eşyaları (#53): her katta bulunan temel takım.
         DaireEsyalariniKur(daire, d);
         DaireLambalariniKur(daire, d);
+        // Bina ayrıntıları (#87): süpürgelik, pervaz, düğme, priz, kablo.
+        OdaAyrintilariKur(daire, d);
+    }
+
+    // ---------- ODA AYRINTILARI (#87) ----------
+    // Şahan'ın No70 karşılaştırması (2026-10-01): odalar "düz ve boş" duruyordu. Gerçek bir dairede
+    // gözün farkında olmadan beklediği küçük şeyler: duvar dibinde süpürgelik, kapı çevresinde pervaz,
+    // kapının yanında bakalit düğme ve ondan tavana çıkan sıva üstü kablo, duvar dibinde priz.
+    // Hepsi binanın ortak demirbaşı (kapı, petek gibi): her dairede aynı, katlar arası tekrar
+    // yasağına girmez. Çarpışması yok: 1,2 cm'lik çıkıntılar oyuncuyu takmasın, yürünebilirlik
+    // denetimi (KatDenetimi) değişmesin.
+    const float SupurgelikYuk = 0.07f, SupurgelikKalin = 0.012f;
+    const float PervazGen = 0.05f, PervazKalin = 0.012f;
+    const float DugmeYuk = 1.10f, PrizYuk = 0.30f, MutfakPrizYuk = 1.15f;
+    const float PlakaYari = 0.041f;   // düğme ve priz plakası 8,2 cm (elektrik_aksami.py)
+
+    static void OdaAyrintilariKur(Transform daire, DaireYonu d)
+    {
+        GameObject kok = new GameObject("Ayrintilar");
+        kok.transform.SetParent(daire, false);
+        Transform t = kok.transform;
+        Material ahsap = BoyaliAhsapMalzeme();
+        Material kablo = KabloMalzeme();
+
+        foreach (DairePlani.Oda oda in DairePlani.Odalar)
+        {
+            if (!oda.Islak) SupurgelikKur(t, d, oda, ahsap);   // fayanslı odada süpürgelik yok, fayans döner
+            PrizKur(t, d, oda);
+        }
+
+        foreach (DairePlani.Aciklik a in DairePlani.Acikliklar)
+        {
+            switch (a.Tur)
+            {
+                case DairePlani.AciklikTuru.Kapi:
+                    PervazKur(t, d, a, ikiYuz: true);
+                    DugmeKur(t, d, a, kablo);
+                    break;
+                case DairePlani.AciklikTuru.BalkonKapisi:
+                    PervazKur(t, d, a, ikiYuz: false);
+                    break;
+                case DairePlani.AciklikTuru.Gecit:    // holün düğmesi, geçidin yanında
+                case DairePlani.AciklikTuru.Giris:    // antrenin düğmesi, giriş kapısının yanında
+                    DugmeKur(t, d, a, kablo);
+                    break;
+            }
+        }
+    }
+
+    // Süpürgelik: odanın dört kenarı boyunca, kapı boşluklarında kesilerek.
+    static void SupurgelikKur(Transform t, DaireYonu d, DairePlani.Oda oda, Material malzeme)
+    {
+        for (int kenar = 0; kenar < 4; kenar++)
+        {
+            bool uKenari = kenar <= 1;
+            float yuz = KenarYuzu(oda, kenar);
+            float icYon = kenar == 0 || kenar == 2 ? 1f : -1f;      // odanın içi hangi yönde
+            float d0 = Mathf.Min(yuz, yuz + icYon * SupurgelikKalin), d1 = Mathf.Max(yuz, yuz + icYon * SupurgelikKalin);
+            float bas = uKenari ? oda.V0 : oda.U0, son = uKenari ? oda.V1 : oda.U1;
+            foreach (float[] aralik in BosAraliklar(oda, kenar, bas, son, yalnizKapilar: true))
+            {
+                GameObject g = Dilim("Supurgelik", t, d, uKenari, d0, d1, aralik[0], aralik[1], 0f, SupurgelikYuk);
+                CarpismasizYap(g, malzeme);
+            }
+        }
+    }
+
+    // Pervaz: kasanın çevresinde, duvarın yüzünde düz çıta (iki dikme ve başlık). Adı "Ic_Kasa":
+    // DokuKurucu kasayla aynı kirli beyaz yağlı boyayı verir. Bölme duvarda iki yüze, dış duvarda
+    // (balkon kapısı) yalnızca oda tarafına.
+    static void PervazKur(Transform t, DaireYonu d, DairePlani.Aciklik a, bool ikiYuz)
+    {
+        float m0 = a.Merkez - a.Gen / 2f - KasaGen, m1 = a.Merkez + a.Gen / 2f + KasaGen;
+        float ky = a.Ust + 0.05f;
+        DairePlani.OdaBul(a.Oda, out DairePlani.Oda oda);
+        float odaTarafi = a.UDuvari ? Mathf.Sign((oda.U0 + oda.U1) / 2f - a.Cizgi) : Mathf.Sign((oda.V0 + oda.V1) / 2f - a.Cizgi);
+        float yari = ikiYuz ? DairePlani.IcDuvar / 2f : DairePlani.DisDuvar / 2f;
+        foreach (float taraf in ikiYuz ? new[] { odaTarafi, -odaTarafi } : new[] { odaTarafi })
+        {
+            float c0 = taraf * yari, c1 = taraf * (yari + PervazKalin);
+            float lo = Mathf.Min(c0, c1), hi = Mathf.Max(c0, c1);
+            CarpismasizYap(AciklikKutusu("Ic_Kasa", t, d, a, m0 - PervazGen, m0, 0f, ky + PervazGen, lo, hi), null);
+            CarpismasizYap(AciklikKutusu("Ic_Kasa", t, d, a, m1, m1 + PervazGen, 0f, ky + PervazGen, lo, hi), null);
+            CarpismasizYap(AciklikKutusu("Ic_Kasa", t, d, a, m0 - PervazGen, m1 + PervazGen, ky, ky + PervazGen, lo, hi), null);
+        }
+    }
+
+    // Düğme: kapının serbest ucu tarafında (menteşe m0'da, düğme m1 yanında), odanın yüzünde,
+    // 1,10 m'de; üstünden tavana sıva üstü kablo.
+    static void DugmeKur(Transform t, DaireYonu d, DairePlani.Aciklik a, Material kabloMalzeme)
+    {
+        DairePlani.OdaBul(a.Oda, out DairePlani.Oda oda);
+        float odaTarafi = a.UDuvari ? Mathf.Sign((oda.U0 + oda.U1) / 2f - a.Cizgi) : Mathf.Sign((oda.V0 + oda.V1) / 2f - a.Cizgi);
+        // Duvar yüzü: bölmede çizgiden 5 cm; girişte sahanlık kaplamasının yüzü (3 cm).
+        float yuzC = a.Tur == DairePlani.AciklikTuru.Giris ? SahanlikKaplama
+                   : a.Tur == DairePlani.AciklikTuru.Gecit ? DairePlani.IcDuvar / 2f : DairePlani.IcDuvar / 2f;
+        float c = odaTarafi * yuzC;
+        float pay = a.Tur == DairePlani.AciklikTuru.Kapi ? KasaGen + PervazGen : 0f;
+        float m = a.Merkez + a.Gen / 2f + pay + 0.06f + PlakaYari;
+        // Kenarın dışına taşmasın (odanın bu duvarı m'de bitiyorsa düğme öbür uca).
+        float kenarSon = a.UDuvari ? oda.V1 : oda.U1;
+        if (m + PlakaYari > kenarSon - 0.02f) m = a.Merkez - a.Gen / 2f - pay - 0.06f - PlakaYari;
+
+        Vector3 on = a.UDuvari ? d.Yon(odaTarafi, 0f) : d.Yon(0f, odaTarafi);   // odanın içine bakar
+        float yDonus = Mathf.Atan2(on.x, on.z) * Mathf.Rad2Deg;
+        // Modelin pivotu arka yüzün ALT ortasında (elektrik_aksami.py): plakanın ortası 1,10'a gelsin.
+        Vector3 konum = AciklikNoktasi(d, a, m, DugmeYuk - PlakaYari, c);
+        GameObject dugme = Model("Dugme", t, "Dugme", "Dugme", konum, yDonus, carpisma: false);
+        if (dugme == null) { Debug.LogWarning("[DAIRE] Dugme.fbx yok (elektrik_aksami.py)."); return; }
+
+        // Kablo: düğmenin üstünden tavana, duvar yüzünde 1,2 cm'lik kanal.
+        float lo = Mathf.Min(c, c + odaTarafi * 0.012f), hi = Mathf.Max(c, c + odaTarafi * 0.012f);
+        GameObject kablo = AciklikKutusu("Kablo", t, d, a, m - 0.006f, m + 0.006f, DugmeYuk + PlakaYari, DairePlani.TavanYuk, lo, hi);
+        CarpismasizYap(kablo, kabloMalzeme);
+    }
+
+    // Priz: odanın açıklıksız en uzun duvar parçasının ortasında, 30 cm'de (mutfakta tezgâh
+    // üstü 1,15 m). Salonda ikinci bir priz parçanın çeyreğinde. Banyoda priz yok (90'lar).
+    static void PrizKur(Transform t, DaireYonu d, DairePlani.Oda oda)
+    {
+        if (oda.Ad == "Banyo") return;
+        int enIyiKenar = -1; float[] enIyi = null; float enUzun = 0f;
+        for (int kenar = 0; kenar < 4; kenar++)
+        {
+            bool uKenari = kenar <= 1;
+            float bas = uKenari ? oda.V0 : oda.U0, son = uKenari ? oda.V1 : oda.U1;
+            foreach (float[] aralik in BosAraliklar(oda, kenar, bas, son, yalnizKapilar: false))
+                if (aralik[1] - aralik[0] > enUzun) { enUzun = aralik[1] - aralik[0]; enIyi = aralik; enIyiKenar = kenar; }
+        }
+        if (enIyi == null || enUzun < 0.5f) return;
+        float y = oda.Ad == "Mutfak" ? MutfakPrizYuk : PrizYuk;
+        PrizKoy(t, d, oda, enIyiKenar, (enIyi[0] + enIyi[1]) / 2f, y);
+        if (oda.Ad == "Salon" && enUzun > 2f) PrizKoy(t, d, oda, enIyiKenar, enIyi[0] + enUzun / 4f, y);
+    }
+
+    static void PrizKoy(Transform t, DaireYonu d, DairePlani.Oda oda, int kenar, float m, float y)
+    {
+        bool uKenari = kenar <= 1;
+        float yuz = KenarYuzu(oda, kenar);
+        float icYon = kenar == 0 || kenar == 2 ? 1f : -1f;
+        Vector3 on = uKenari ? d.Yon(icYon, 0f) : d.Yon(0f, icYon);
+        float yDonus = Mathf.Atan2(on.x, on.z) * Mathf.Rad2Deg;
+        Vector3 konum = uKenari ? d.Nokta(yuz, y - PlakaYari, m) : d.Nokta(m, y - PlakaYari, yuz);   // pivot altta
+        if (Model("Priz", t, "Priz", "Priz", konum, yDonus, carpisma: false) == null)
+            Debug.LogWarning("[DAIRE] Priz.fbx yok (elektrik_aksami.py).");
+    }
+
+    // Kenarın odadaki yüzü: sahanlık tarafında kaplamanın yüzü (3 cm içeride).
+    static float KenarYuzu(DairePlani.Oda oda, int kenar)
+    {
+        if (kenar == 0) return oda.U0 <= 0.001f ? SahanlikKaplama : oda.U0;
+        return kenar == 1 ? oda.U1 : kenar == 2 ? oda.V0 : oda.V1;
+    }
+
+    // Kenar boyunca açıklıkların dışında kalan aralıklar {başlangıç, bitiş}. yalnizKapilar: pencere
+    // sayılmaz (süpürgelik pencerenin altından geçer); priz için pencere de engel sayılır.
+    static List<float[]> BosAraliklar(DairePlani.Oda oda, int kenar, float bas, float son, bool yalnizKapilar)
+    {
+        bool uKenari = kenar <= 1;
+        float yuz = kenar == 0 ? oda.U0 : kenar == 1 ? oda.U1 : kenar == 2 ? oda.V0 : oda.V1;
+        var engeller = new List<float[]>();
+        foreach (DairePlani.Aciklik a in DairePlani.Acikliklar)
+        {
+            if (a.UDuvari != uKenari || Mathf.Abs(a.Cizgi - yuz) > 0.15f) continue;
+            if (a.Merkez <= bas || a.Merkez >= son) continue;
+            if (yalnizKapilar && a.Tur == DairePlani.AciklikTuru.Pencere) continue;
+            float pay = a.Tur == DairePlani.AciklikTuru.Kapi || a.Tur == DairePlani.AciklikTuru.BalkonKapisi ? KasaGen + PervazGen : 0.02f;
+            engeller.Add(new[] { a.Merkez - a.Gen / 2f - pay, a.Merkez + a.Gen / 2f + pay });
+        }
+        engeller.Sort((x, y) => x[0].CompareTo(y[0]));
+        var sonuc = new List<float[]>();
+        float imlec = bas;
+        foreach (float[] e in engeller)
+        {
+            if (e[0] > imlec + 0.05f) sonuc.Add(new[] { imlec, e[0] });
+            imlec = Mathf.Max(imlec, e[1]);
+        }
+        if (son > imlec + 0.05f) sonuc.Add(new[] { imlec, son });
+        return sonuc;
+    }
+
+    static void CarpismasizYap(GameObject g, Material malzeme)
+    {
+        if (g == null) return;
+        Collider c = g.GetComponent<Collider>();
+        if (c != null) Object.DestroyImmediate(c);
+        if (malzeme != null) g.GetComponent<MeshRenderer>().sharedMaterial = malzeme;
+    }
+
+    static Material BoyaliAhsapMalzeme()
+    {
+        return SabitMalzeme("Assets/Materials/Supurgelik.mat", new Color(0.16f, 0.11f, 0.07f), 0.45f);   // koyu yağlı boya ahşap
+    }
+
+    static Material KabloMalzeme()
+    {
+        return SabitMalzeme("Assets/Materials/Kablo.mat", new Color(0.55f, 0.52f, 0.45f), 0.3f);   // sararmış plastik kanal
+    }
+
+    static Material SabitMalzeme(string yol, Color renk, float parlaklik)
+    {
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            AssetDatabase.CreateAsset(m, yol);
+        }
+        m.SetColor("_BaseColor", renk);
+        m.SetFloat("_Smoothness", parlaklik);
+        EditorUtility.SetDirty(m);
+        return m;
     }
 
     // ---------- ODA: DÖŞEME VE DÖRT DUVAR ----------
@@ -303,11 +516,11 @@ public static partial class GrayboxKurucu
     }
 
     // Bir duvar dilimi: kalınlık yönünde d0..d1, kenar boyunca s0..s1, yükseklikte y0..y1.
-    static void Dilim(string ad, Transform t, DaireYonu d, bool uKenari,
-                      float d0, float d1, float s0, float s1, float y0, float y1)
+    static GameObject Dilim(string ad, Transform t, DaireYonu d, bool uKenari,
+                            float d0, float d1, float s0, float s1, float y0, float y1)
     {
-        if (uKenari) DaireKutu(ad, t, d, d0, d1, y0, y1, s0, s1);
-        else DaireKutu(ad, t, d, s0, s1, y0, y1, d0, d1);
+        return uKenari ? DaireKutu(ad, t, d, d0, d1, y0, y1, s0, s1)
+                       : DaireKutu(ad, t, d, s0, s1, y0, y1, d0, d1);
     }
 
     // Açıklığın plandaki bir noktası: duvar boyunca m, kalınlıkta c (çizgiden uzaklık).

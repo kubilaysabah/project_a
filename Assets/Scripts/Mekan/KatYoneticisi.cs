@@ -857,6 +857,9 @@ public class KatYoneticisi : MonoBehaviour
         if (kaplamalar == null || kaplamalar.Length < KatKaplamalari.KatSayisi * KatKaplamalari.YuzeySayisi) return;
         if (kaplamaYerleri[daire] == null) return;
         int k = Mathf.Clamp(kat, 1, KatKaplamalari.KatSayisi) - 1;
+        // Lekeler de katın giysisi (#87): duvar kâğıdıyla birlikte kurulur.
+        DaireLekeleri lekeler = daireler[daire] != null ? daireler[daire].GetComponent<DaireLekeleri>() : null;
+        if (lekeler != null) lekeler.Kur(kat);
         foreach (KaplamaYeri yer in kaplamaYerleri[daire])
         {
             // sharedMaterials bir KOPYA dizi döndürür: değiştirip geri atamak gerekir.
