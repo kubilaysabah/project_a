@@ -35,6 +35,11 @@ public static class AyarKurallari
     // Açıkken fareyi yukarı itmek aşağı baktırır (uçak kumandası gibi).
     public const bool TersVarsayilan = false;
 
+    // ---------- KAFA SALLANMASI (#92) ----------
+    // Yürürken kameranın hafifçe sallanması. Bazı oyuncuların midesini bulandırır (hareket
+    // hassasiyeti); bu yüzden kapatılabilir. Varsayılan açık: oyunun hissinin parçası.
+    public const bool SallanmaVarsayilan = true;
+
     // ---------- GÖRÜNTÜ (#30) ----------
     // Grafik kalitesi: 0 = Düşük, 1 = Orta, 2 = Yüksek. Oyun Yüksek'te ayarlandı.
     public const int KaliteDusuk = 0, KaliteOrta = 1, KaliteYuksek = 2;

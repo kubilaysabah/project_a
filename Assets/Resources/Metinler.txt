@@ -68,6 +68,7 @@ ayar.hassasiyet	Fare hassasiyeti: {0}×	Mouse sensitivity: {0}×
 ayar.ses	Ses seviyesi: %{0}	Volume: {0}%
 ayar.gorus	Görüş açısı: {0}°	Field of view: {0}°
 ayar.ters	Fareyi ters çevir: {0}	Invert mouse: {0}
+ayar.sallanma	Kafa sallanması: {0}	Head bob: {0}
 ayar.acik	Açık	On
 ayar.kapali	Kapalı	Off
 ayar.varsayilan	Varsayılana dön	Reset to defaults

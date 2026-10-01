@@ -74,8 +74,8 @@ public class DuraklatmaMenusu : MonoBehaviour
     // Yeniden yüklenen sahnede başlık ekranı atlanır (dogrudanBasla), oyun kararmadan açılarak başlar.
     private int katOnay;                  // sorusu gösterilen kat (0 = yok)
     private static bool dogrudanBasla;    // sahne menüden kat seçilerek yüklendi: başlık ekranı gösterilmesin
-    private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3,
-                      AyarKontroller = 4, AyarVarsayilan = 5, AyarGeri = 6, AyarOgeSayisi = 7;
+    private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3, AyarSallanma = 4,
+                      AyarKontroller = 5, AyarVarsayilan = 6, AyarGeri = 7, AyarOgeSayisi = 8;
 
     // Kontroller sayfasının satırları. Her satırın metni "eylem|klavye ve fare|oyun kolu": üç sütun
     // tek anahtarda durur, dil değişince üçü birlikte değişir. Tuşların kendisi de çevrilir
@@ -463,6 +463,7 @@ public class DuraklatmaMenusu : MonoBehaviour
             switch (gezgin.Secili)
             {
                 case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
+                case AyarSallanma: Ayarlar.Sallanma = !Ayarlar.Sallanma; break;
                 case AyarKontroller: SayfaAc(SayfaKontrol); break;
                 case AyarVarsayilan: Ayarlar.VarsayilanaDon(); break;
                 case AyarGeri: SayfaAc(SayfaAna); break;
@@ -522,6 +523,7 @@ public class DuraklatmaMenusu : MonoBehaviour
             case AyarSes: Ayarlar.Ses = Mathf.Round((Ayarlar.Ses + 0.05f * yon) * 20f) / 20f; OrnekSesCal(); break;
             case AyarGorus: Ayarlar.Gorus = Mathf.Round(Ayarlar.Gorus + yon); break;
             case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
+            case AyarSallanma: Ayarlar.Sallanma = !Ayarlar.Sallanma; break;
         }
     }
 
@@ -884,7 +886,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     {
         float en = 480f, ara = 14f;
         float x = (ArayuzOlcegi.Genislik - en) / 2f;
-        float y = ArayuzOlcegi.Yukseklik / 2f - 260f;   // #80: Kontroller düğmesi eklendi, sayfa 30 px yukarı
+        float y = ArayuzOlcegi.Yukseklik / 2f - 290f;   // #80: Kontroller, #92: kafa sallanması düğmesi eklendi; sayfa yukarı
 
         GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.ayarlar"), baslikStili);
         y += 60f + 2f * ara;
@@ -933,6 +935,13 @@ public class DuraklatmaMenusu : MonoBehaviour
         Vurgula(AyarTers, r);
         string tersYazisi = string.Format(Dil.Getir("ayar.ters"), Ayarlar.Ters ? Dil.Getir("ayar.acik") : Dil.Getir("ayar.kapali"));
         if (GUI.Button(r, tersYazisi, dugmeStili)) Ayarlar.Ters = !Ayarlar.Ters;
+        y += 44f + ara;
+
+        // Kafa sallanması (#92): yürürken kameranın sallanması ve sarsıntılar; midesi bulananlar kapatır.
+        r = new Rect(x, y, en, 44f);
+        Vurgula(AyarSallanma, r);
+        string sallanmaYazisi = string.Format(Dil.Getir("ayar.sallanma"), Ayarlar.Sallanma ? Dil.Getir("ayar.acik") : Dil.Getir("ayar.kapali"));
+        if (GUI.Button(r, sallanmaYazisi, dugmeStili)) Ayarlar.Sallanma = !Ayarlar.Sallanma;
         y += 44f + ara;
 
         // Kontroller (#80): tuş listesinin sayfası.

@@ -24,6 +24,7 @@ public class AyarKurallariTestleri
         Assert.AreEqual(1f, AyarKurallari.SesVarsayilan);
         Assert.AreEqual(60f, AyarKurallari.GorusVarsayilan);
         Assert.IsFalse(AyarKurallari.TersVarsayilan);
+        Assert.IsTrue(AyarKurallari.SallanmaVarsayilan, "kafa sallanması varsayılan olarak açık (#92)");
     }
 
     [Test]

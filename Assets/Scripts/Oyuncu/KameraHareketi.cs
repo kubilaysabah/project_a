@@ -21,8 +21,9 @@
 //      Perlin gürültüsüyle döndürür (aşağıda tanımı var).
 //   3. GECİKEN FENER: kafa lambasının ışığı her kare kameranın dönüşüne yumuşakça yetişir.
 //
-// Ayardan kapatma: Kapali (static) true ise sallanma ve sarsıntı yok (hareket hassasiyeti olan
-// oyuncular için; menü ayarı sonra bağlanacak). Fenerin gecikmesi görüşü oynatmadığı için kalır.
+// Ayardan kapatma: Ayarlar → "Kafa sallanması: Kapalı" (Ayarlar.Sallanma, #92) ya da testler için Kapali
+// (static) true ise sallanma ve sarsıntı yok (hareket hassasiyeti olan oyuncular için). Fenerin gecikmesi
+// görüşü oynatmadığı için kalır.
 //
 // ---------- AYNI TAHTAYA İKİ KİŞİ YAZIYOR ----------
 // Kameranın yerel konumu ve dönüşü tek bir "tahta". Ona İKİ bileşen yazıyor:
@@ -48,7 +49,7 @@ using UnityEngine;
 public class KameraHareketi : MonoBehaviour
 {
     /// <summary>
-    /// True iken kafa sallanması ve sarsıntı yok (ayar; menü bağlantısı sonra yapılacak).
+    /// True iken kafa sallanması ve sarsıntı yok (testler için; oyuncunun ayarı Ayarlar.Sallanma).
     /// "static": bileşenin kendisine değil sınıfa ait, tek bir değer; sahne yeniden yüklenince de kalır.
     /// </summary>
     public static bool Kapali = false;
@@ -176,7 +177,7 @@ public class KameraHareketi : MonoBehaviour
         Vector3 konum = Vector3.zero;
         Vector3 aci = Vector3.zero;   // x = yukarı-aşağı, y = sağa-sola, z = yan yatma (derece)
 
-        if (!Kapali)
+        if (!Kapali && Ayarlar.Sallanma)
         {
             Sallanma(dt, ref konum, ref aci);
             Sarsinti(dt, ref aci);

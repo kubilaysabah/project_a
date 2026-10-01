@@ -21,6 +21,7 @@ public static class Ayarlar
     private const string HassasiyetAdi = "ayar_hassasiyet";
     private const string SesAdi = "ayar_ses";
     private const string TersAdi = "ayar_ters";
+    private const string SallanmaAdi = "ayar_sallanma";   // kafa sallanması (#92)
     private const string GorusAdi = "ayar_gorus";
     private const string KaliteAdi = "ayar_kalite";
     private const string ParlaklikAdi = "ayar_parlaklik";
@@ -31,6 +32,7 @@ public static class Ayarlar
 
     private static float hassasiyet, ses, gorus, parlaklik;
     private static bool ters, tamEkran, vsync;
+    private static bool sallanma = AyarKurallari.SallanmaVarsayilan;
     private static int kalite, genislik, yukseklik;
     private static bool hazir;
 
@@ -55,6 +57,13 @@ public static class Ayarlar
     }
 
     /// <summary>Fare yukarı itilince aşağı bakılsın mı.</summary>
+    /// <summary>Yürürken kafa sallanması (ve kamera sarsıntısı) açık mı? (#92, KameraHareketi okur)</summary>
+    public static bool Sallanma
+    {
+        get { Hazirla(); return sallanma; }
+        set { Hazirla(); sallanma = value; Kaydet(); }
+    }
+
     public static bool Ters
     {
         get { Hazirla(); return ters; }
@@ -126,13 +135,14 @@ public static class Ayarlar
         Kaydet();
     }
 
-    /// <summary>Oyun ayarlarını (hassasiyet, ses, ters, görüş) oyunun ayarlandığı hâle döndürür.</summary>
+    /// <summary>Oyun ayarlarını (hassasiyet, ses, ters, kafa sallanması, görüş) oyunun ayarlandığı hâle döndürür.</summary>
     public static void VarsayilanaDon()
     {
         Hazirla();
         hassasiyet = AyarKurallari.HassasiyetVarsayilan;
         ses = AyarKurallari.SesVarsayilan;
         ters = AyarKurallari.TersVarsayilan;
+        sallanma = AyarKurallari.SallanmaVarsayilan;
         gorus = AyarKurallari.GorusVarsayilan;
         AudioListener.volume = ses;
         Kaydet();
@@ -144,6 +154,7 @@ public static class Ayarlar
         PlayerPrefs.SetFloat(HassasiyetAdi, hassasiyet);
         PlayerPrefs.SetFloat(SesAdi, ses);
         PlayerPrefs.SetInt(TersAdi, ters ? 1 : 0);   // bool doğrudan saklanamıyor; 1/0 olarak
+        PlayerPrefs.SetInt(SallanmaAdi, sallanma ? 1 : 0);
         PlayerPrefs.SetFloat(GorusAdi, gorus);
         PlayerPrefs.SetInt(KaliteAdi, kalite);
         PlayerPrefs.SetFloat(ParlaklikAdi, parlaklik);
@@ -169,6 +180,7 @@ public static class Ayarlar
         hassasiyet = AyarKurallari.Hassasiyet(PlayerPrefs.GetFloat(HassasiyetAdi, AyarKurallari.HassasiyetVarsayilan));
         ses = AyarKurallari.Ses(PlayerPrefs.GetFloat(SesAdi, AyarKurallari.SesVarsayilan));
         ters = PlayerPrefs.GetInt(TersAdi, AyarKurallari.TersVarsayilan ? 1 : 0) == 1;
+        sallanma = PlayerPrefs.GetInt(SallanmaAdi, AyarKurallari.SallanmaVarsayilan ? 1 : 0) == 1;
         gorus = AyarKurallari.Gorus(PlayerPrefs.GetFloat(GorusAdi, AyarKurallari.GorusVarsayilan));
         kalite = AyarKurallari.Kalite(PlayerPrefs.GetInt(KaliteAdi, AyarKurallari.KaliteVarsayilan));
         parlaklik = AyarKurallari.Parlaklik(PlayerPrefs.GetFloat(ParlaklikAdi, AyarKurallari.ParlaklikVarsayilan));
