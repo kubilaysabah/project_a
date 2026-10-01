@@ -140,6 +140,7 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
         // Kapanırken kanadın süpüreceği yerde oyuncu varsa durur (kapı oyuncunun üstüne kapanmaz).
         if (Mathf.Abs(yeni) < Mathf.Abs(aci) && KanatYoluDolu()) return;
         if (Mathf.Approximately(aci, 0f) && !Mathf.Approximately(yeni, 0f)) Cal(acilmaSesi, 0.5f);   // kapalıdan ayrılırken gıcırtı
+        GicirtiyiBesle(Mathf.Abs(yeni - aci));
         AciyiUygula(yeni);
     }
 
@@ -147,6 +148,48 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
     public void SuruklemeBitti()
     {
         acik = Mathf.Abs(aci) > 3f;
+    }
+
+    // ---------- SÜRÜKLEME GICIRTISI (#100) ----------
+    // Amnesia'nın kapıları gibi: kapı fareyle itilirken menteşe SÜREKLİ gıcırdar; yavaş itilen kapı
+    // kısık ve uzun, hızlı itilen kapı gür gıcırdar, durunca susar. Döngülü bir gıcırtı (menteşede,
+    // 3B) hep çalar ama sesi kapının dönüş hızına göre açılıp kısılır; ses yoksa (kapı duruyor) kaynak
+    // durdurulur. Saniyede 120° ve üstü tam ses.
+    private const float GicirtiTamHiz = 120f, GicirtiEnSes = 0.55f;
+    private static AudioClip gicirtiDongu;
+    private AudioSource gicirtiKaynagi;
+    private float gicirtiHedef;       // bu karede istenen ses (Surukle besler)
+
+    private void GicirtiyiBesle(float donulenDerece)
+    {
+        if (gicirtiDongu == null) gicirtiDongu = Resources.Load<AudioClip>("Sesler/Kapi_Gicirti_Dongu");
+        if (gicirtiDongu == null || mentese == null || Time.deltaTime <= 0f) return;
+        if (gicirtiKaynagi == null)
+        {
+            gicirtiKaynagi = mentese.gameObject.AddComponent<AudioSource>();
+            gicirtiKaynagi.clip = gicirtiDongu;
+            gicirtiKaynagi.loop = true;
+            gicirtiKaynagi.playOnAwake = false;
+            gicirtiKaynagi.spatialBlend = 1f;      // menteşeden gelir
+            gicirtiKaynagi.minDistance = 0.8f;
+            gicirtiKaynagi.maxDistance = 12f;
+            gicirtiKaynagi.volume = 0f;
+        }
+        float hiz = donulenDerece / Time.deltaTime;
+        gicirtiHedef = Mathf.Max(gicirtiHedef, Mathf.Clamp01(hiz / GicirtiTamHiz) * GicirtiEnSes);
+        // Perde hızla biraz değişir: yavaş itilen kapı daha derin inler.
+        gicirtiKaynagi.pitch = Mathf.Lerp(0.85f, 1.1f, Mathf.Clamp01(hiz / GicirtiTamHiz));
+        if (!gicirtiKaynagi.isPlaying) gicirtiKaynagi.Play();
+    }
+
+    private void LateUpdate()
+    {
+        if (gicirtiKaynagi == null) return;
+        // Ses hedefe yumuşakça gider; hedef her kare sıfırlanır, Surukle o kare beslemediyse ses söner.
+        float t = 1f - Mathf.Exp(-Time.deltaTime / 0.08f);
+        gicirtiKaynagi.volume = Mathf.Lerp(gicirtiKaynagi.volume, gicirtiHedef, t);
+        gicirtiHedef = 0f;
+        if (gicirtiKaynagi.isPlaying && gicirtiKaynagi.volume < 0.005f) gicirtiKaynagi.Stop();
     }
 
     /// <summary>Kilidi takar ya da çözer. Hep kilitli kapı (balkon) çözülmez.</summary>

@@ -289,6 +289,14 @@ public static partial class GrayboxKurucu
         Vector3 konum = AciklikNoktasi(d, a, m, DugmeYuk - PlakaYari, c);
         GameObject dugme = Model("Dugme", t, "Dugme", "Dugme", konum, yDonus, carpisma: false);
         if (dugme == null) { Debug.LogWarning("[DAIRE] Dugme.fbx yok (elektrik_aksami.py)."); return; }
+        // Çalışan düğme (#100): basılabilsin diye küçük bir çarpıştırıcı (plakanın kendisi kadar, 2 cm
+        // derin; oyuncuyu takmaz) ve odasını bilen IsikDugmesi. Modelin pivotu plakanın alt ortasında.
+        BoxCollider dugmeKutusu = dugme.AddComponent<BoxCollider>();
+        dugmeKutusu.center = new Vector3(0f, PlakaYari, 0.01f);
+        dugmeKutusu.size = new Vector3(2f * PlakaYari, 2f * PlakaYari, 0.02f);
+        var dugmeSeri = new SerializedObject(dugme.AddComponent<IsikDugmesi>());
+        dugmeSeri.FindProperty("odaAdi").stringValue = a.Oda;
+        dugmeSeri.ApplyModifiedPropertiesWithoutUndo();
 
         // Kablo: düğmenin üstünden tavana, duvar yüzünde 1,2 cm'lik kanal.
         float lo = Mathf.Min(c, c + odaTarafi * 0.012f), hi = Mathf.Max(c, c + odaTarafi * 0.012f);

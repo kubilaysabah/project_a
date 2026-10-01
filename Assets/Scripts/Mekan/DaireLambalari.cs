@@ -23,6 +23,8 @@ public class DaireLambalari : MonoBehaviour
     private const float DolguOrani = 0.30f;
 
     private readonly List<string> yanabilen = new List<string>();
+    // Oyuncunun düğmeyle söndürdüğü odalar (#100, IsikDugmesi). Kat değişince (Ayarla) temizlenir.
+    private readonly HashSet<string> elleKapali = new HashSet<string>();
     private DaireElektrigi elektrik;
 
     private void OnEnable()
@@ -42,6 +44,7 @@ public class DaireLambalari : MonoBehaviour
     {
         yanabilen.Clear();
         if (odalar != null) yanabilen.AddRange(odalar);
+        elleKapali.Clear();
         StopAllCoroutines();
         foreach (Transform l in lambalar) Yak(l, YanmaliMi(l));
     }
@@ -67,11 +70,25 @@ public class DaireLambalari : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Düğmeye basıldı (#100): o odanın lambası yanabiliyorsa (elektrik var, oda listede) söner ya da
+    /// yanar. Yanamıyorsa hiçbir şey olmaz; düğme yalnızca tıklar. Dönüş: lamba şimdi yanıyor mu.
+    /// </summary>
+    public bool ElleDegistir(string oda)
+    {
+        bool yanabilir = yanabilen.Contains(oda) && (elektrik == null || elektrik.Var);
+        if (!yanabilir) return false;
+        if (!elleKapali.Remove(oda)) elleKapali.Add(oda);
+        foreach (Transform l in lambalar)
+            if (l != null && l.name == "Lamba_" + oda) Yak(l, YanmaliMi(l));
+        return !elleKapali.Contains(oda);
+    }
+
     private bool YanmaliMi(Transform lamba)
     {
         if (lamba == null) return false;
         string oda = lamba.name.Substring("Lamba_".Length);      // "Lamba_Salon" -> "Salon"
-        return yanabilen.Contains(oda) && (elektrik == null || elektrik.Var);
+        return yanabilen.Contains(oda) && (elektrik == null || elektrik.Var) && !elleKapali.Contains(oda);
     }
 
     // Coroutine: yield return satırında durur, verilen süre sonra kaldığı yerden devam eder.
