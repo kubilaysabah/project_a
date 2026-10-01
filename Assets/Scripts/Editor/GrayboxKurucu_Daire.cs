@@ -804,6 +804,11 @@ public static partial class GrayboxKurucu
         GameObject lavabo = DaireEsyasi("Lavabo", e, d, 3.6f, 0f, -0.8f, 0f, 1f, "Sifon");
         Acilir(lavabo, "Sifon", AcilirParca.Hareket.Kaydir, new Vector3(0f, -0.9f, 0.44f).normalized, 0.5f, 0.9f);
         IpuclariniAyarla(lavabo, "Sifon", "ipucu.sok", "ipucu.tak");
+        // BANYO AYNASI (#94): lavabonun üstündeki duvarda gerçek yansıtan ayna ve yalnızca aynada
+        // görünen korku. Yapımı AynaKurucu'da; lavabonun çocuğu olur (lavaboyu gizleyen kat aynayı
+        // da gizler). Aynasız katlar: AynaKurucu.AynasizKatlar. Ayna, lavabonun önüyle aynı yöne bakar.
+        AynaKurucu.BanyoAynasiKur(daire, lavabo != null ? lavabo.transform : null,
+            d.Nokta(AynaKurucu.AynaU, AynaKurucu.AynaMerkezY, AynaKurucu.AynaV), d.Yon(0f, 1f));
 
         // Klozet (#73): antre tarafındaki duvarın (u = 2,7) dibinde, yüzü banyoya dönük. v = 0,4:
         // lavabodan uzak, 5. katta menteşesi sökülüp içeri devrilen banyo kapısının düştüğü
