@@ -23,6 +23,8 @@ ipucu.cal	KAPIYI ÇAL	KNOCK
 ipucu.kanirt	KANIRT	PRY OPEN
 ipucu.kir	KIR	BREAK
 ipucu.cagir	ÇAĞIR	CALL
+ipucu.saklan	SAKLAN	HIDE
+ipucu.saklanma_tuslar	{0}: çık	{0}: get out
 
 # ---- Yönetici notu (açılış) ----
 not.yonetici	Kapıcı Efendi,\n\nCemal Bey ayrıldı; eşyalarını odada bıraktı, kafa lambası çivide asılı. Al, geceleri lambasız çıkma; ampullerin çoğu yanmıyor.\n\nKatların arasına güvenlik için demir kapılar taktırdık. Her katın anahtarı o katta bir yerdedir. Önce o katın işlerini bitir, anahtarı bul, sonra yukarı çık.\n\nKiracılar rahatsız edilmesin. Kapılar açılmazsa ısrar etme.\n\nSabah çatı kapısını kilitle.\n\n— Yönetim	Janitor,\n\nCemal has left; his things are still in the room, his headlamp hangs on the nail. Take it, and don't go up at night without it — most of the bulbs are out.\n\nWe have had iron doors fitted between the floors, for safety. Each floor's key is somewhere on that floor. Finish the floor's chores first, find the key, then go up.\n\nDo not disturb the tenants. If a door won't open, don't insist.\n\nLock the roof door in the morning.\n\n— The Management

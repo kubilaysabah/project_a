@@ -4,7 +4,8 @@
 //
 // Şahan'ın isteği (2026-10-01): 1-5. katlarda tehdit yoktu; şimdi her katta oyuncunun gürültüsü
 // ve oyalanması binayı kızdırır. Kademeler:
-//   1. huzursuz: kafa lambası ve dairenin lambaları titrer, müzik kabarır; sonra üst kattan adımlar.
+//   1. huzursuz: kafa lambası ve dairenin lambaları titrer, müzik kabarır; sonra üst kattan adımlar
+//                ya da duvara odada olmayan birinin gölgesi düşer (GolgeIzi, #93).
 //   2. yakın:    Gezen Gölge belirir (#71'in bileşeni); sonra kapı tıklatılır, lamba söner.
 //   3. AV:       Gölge oyuncunun arkasında, görmediği bir yerde belirir ve oyuncunun geçtiği yoldan
 //                (iz) gelir. Yakalarsa oyuncu katın başında uyanır (kilitler kalır, elindeki düşer:
@@ -23,6 +24,15 @@
 //
 // Gezen Gölge'nin kendi saati yok (Şahan, 2026-10-01): Gölge yalnızca buradan (2. kademe) ve yanlış
 // kapı çalınınca (SahanlikKapisi) gelir.
+//
+// DOLAPTA SAKLANAN OYUNCU (#97, SaklanmaYeri): oyuncu bir gardıroba girince
+//   - gerilim kuralı onu tam gizlenmiş sayar (dairede, lamba kapalı, eğik, kıpırtısız): gerilim en
+//     yavaş hızla (SessizSogma) soğur;
+//   - iz bırakmaz: Gölge izin sonuna, yani oyuncunun dolaba girdiği yere kadar gelir;
+//   - görülmez (Goruyor false) ve yakalanmaz: Gölge dolabın önüne 0,8 m'ye kadar gelse de yakalama
+//     sınaması atlanır. Gölge orada durur, bakınır ve GizlenmeSuresi dolunca "izi kaybetti" der.
+// Oyuncunun kontrolcüsü saklanırken kapalıdır; Etkin() buna rağmen çalışır, yoksa Gölge dolabın
+// önünde donup kalır, av hiç bitmezdi.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -72,6 +82,8 @@ public class Varlik : MonoBehaviour
     /// <summary>Gerilim 0-1 (test göstergesi için).</summary>
     public float Gerilim { get { return kural != null ? kural.Deger : 0f; } }
     public int Kademe { get { return kural != null ? kural.Kademe : 0; } }
+    /// <summary>Av sürerken sahnedeki Gölge (yoksa null). SaklanmaYeri: Gölge yakındayken dolaba girilmez.</summary>
+    public Transform AvGolgesi { get { return golge != null ? golge.transform : null; } }
 
     private void Awake() { Ornek = this; }
     private void OnDestroy() { if (Ornek == this) Ornek = null; }
@@ -115,10 +127,12 @@ public class Varlik : MonoBehaviour
         IziKaydet();
         DairedeMi();
 
-        bool hareketli = govde != null && new Vector3(govde.velocity.x, 0f, govde.velocity.z).magnitude > 0.1f;
-        bool lambaAcik = lamba != null && lamba.IsikYaniyor;
-        bool egik = kontrol != null && kontrol.Egik;
-        GerilimTepkisi tepki = kural.Ilerlet(Time.deltaTime, dairede, lambaAcik, egik, hareketli);
+        // Dolapta saklanan oyuncu (#97) tam gizlenmiş sayılır: gerilim en yavaş hızla soğur.
+        bool saklaniyor = SaklanmaYeri.Saklaniyor;
+        bool hareketli = !saklaniyor && govde != null && new Vector3(govde.velocity.x, 0f, govde.velocity.z).magnitude > 0.1f;
+        bool lambaAcik = !saklaniyor && lamba != null && lamba.IsikYaniyor;
+        bool egik = saklaniyor || (kontrol != null && kontrol.Egik);
+        GerilimTepkisi tepki = kural.Ilerlet(Time.deltaTime, saklaniyor || dairede, lambaAcik, egik, hareketli);
         if (tepki != GerilimTepkisi.Yok) Goster(tepki);
     }
 
@@ -128,7 +142,9 @@ public class Varlik : MonoBehaviour
         if (Kapali || sablon == null) return false;
         if (!yonetici.enabled || !yonetici.GolgeSayabilir) return false;   // açılış, kapı açık, çatı, final
         if (DuraklatmaMenusu.BaslikEkraninda) return false;
-        if (kontrol == null || !kontrol.enabled) return false;             // menü, not, şifre ekranı, karartma
+        // Menü, not, şifre ekranı, karartma: kontrolcü kapalı. Dolapta saklanırken de kapalıdır ama kural
+        // işlemeye devam eder (#97): gerilim soğur, Gölge dolabın önünde bakınıp vazgeçer.
+        if (kontrol == null || (!kontrol.enabled && !SaklanmaYeri.Saklaniyor)) return false;
         if (Time.timeScale <= 0f) return false;
         foreach (KacisAni k in FindObjectsByType<KacisAni>()) if (k.Basladi) return false;       // 7. kat
         foreach (SaklanmaAni s in FindObjectsByType<SaklanmaAni>()) if (s.Suruyor) return false; // 6. kat
@@ -142,6 +158,7 @@ public class Varlik : MonoBehaviour
         izSayaci += Time.deltaTime;
         if (izSayaci < IzAraligi) return;
         izSayaci = 0f;
+        if (SaklanmaYeri.Saklaniyor) return;   // dolaptaki oyuncu hiç iz bırakmaz (#97)
         if (kural.AvSuruyor && Gizli()) return;
         izler.Add(oyuncu.position);
         izZamanlari.Add(Time.time);
@@ -188,6 +205,11 @@ public class Varlik : MonoBehaviour
                 break;
             case GerilimTepkisi.LambaSonme:
                 if (lamba != null) lamba.Sondur(1.3f);
+                break;
+            case GerilimTepkisi.GolgeIzi:
+                // Duvara odada olmayan birinin gölgesi düşer (#93). Lamba kapalıysa, gölgesizse ya da
+                // önünde uygun bir duvar yoksa en azından lamba titrer.
+                if (!GolgeIzi.Goster(sablon, lamba, oyuncu) && lamba != null) lamba.Titret(0.9f);
                 break;
             case GerilimTepkisi.Av:
                 StartCoroutine(Av());
@@ -277,8 +299,10 @@ public class Varlik : MonoBehaviour
             gormemeSayaci = sayilir ? gormemeSayaci + Time.deltaTime : 0f;
             if (gormemeSayaci >= GerilimKurali.GizlenmeSuresi) { Debug.Log("[VARLIK] av: Gölge izi kaybetti (saklandı)."); break; }
 
+            // Yakalama. Dolapta saklanan oyuncu yakalanmaz (#97): Gölge dolabın önüne kadar gelse de
+            // bu sınama atlanır; yukarıdaki görmeme sayacı onu vazgeçirir.
             Vector3 arada = oyuncu.position - golge.transform.position; arada.y = 0f;
-            if (arada.magnitude < YakalamaMesafesi && Mathf.Abs(oyuncu.position.y - golge.transform.position.y) < 1.2f)
+            if (!SaklanmaYeri.Saklaniyor && arada.magnitude < YakalamaMesafesi && Mathf.Abs(oyuncu.position.y - golge.transform.position.y) < 1.2f)
             {
                 Yakalandi();
                 yield break;
@@ -332,9 +356,10 @@ public class Varlik : MonoBehaviour
         return false;
     }
 
-    // Oyuncu gizleniyor mu: çömelmiş ve kafa lambası kapalı.
+    // Oyuncu gizleniyor mu: dolapta saklanıyor (#97) ya da çömelmiş ve kafa lambası kapalı.
     private bool Gizli()
     {
+        if (SaklanmaYeri.Saklaniyor) return true;
         return kontrol != null && kontrol.Egik && lamba != null && !lamba.IsikYaniyor;
     }
 
@@ -363,6 +388,7 @@ public class Varlik : MonoBehaviour
     private bool Goruyor()
     {
         if (golge == null || kamera == null) return false;
+        if (SaklanmaYeri.Saklaniyor) return false;   // dolaptaki oyuncu görülmez (#97)
         Vector3 bas = golge.transform.position + Vector3.up * BasYuksekligi;
         Vector3 goz = kamera.transform.position;
         if (Vector3.Distance(bas, goz) > GormeMesafesi) return false;

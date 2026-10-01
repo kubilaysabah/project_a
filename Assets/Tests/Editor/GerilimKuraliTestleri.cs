@@ -164,7 +164,7 @@ public class GerilimKuraliTestleri
             if (i % 100 == 0) k.Gurultu(0.05f);
             GerilimTepkisi t = k.Ilerlet(0.1f, true, false, false, true);
             if (k.Kademe != 1) break;
-            if (t == GerilimTepkisi.Titreme || t == GerilimTepkisi.UstKatAdimlari)
+            if (t == GerilimTepkisi.Titreme || t == GerilimTepkisi.UstKatAdimlari || t == GerilimTepkisi.GolgeIzi)
             {
                 tekrar++;
                 if (ilk < 0f) ilk = i * 0.1f; else if (son < 0f) son = i * 0.1f;
@@ -205,6 +205,26 @@ public class GerilimKuraliTestleri
         Assert.AreEqual(0f, k.Deger);
         Assert.AreEqual(0, k.Kademe);
         Assert.AreEqual(1.0f, k.KatCarpani);
+    }
+
+    [Test]
+    public void Duvardaki_golge_iki_kademede_de_tekrar_tepkisi_olarak_gelir()
+    {
+        // Uzun süre 1. ve 2. kademede kalan oyuncu duvardaki gölgeyi (#93) en az bir kez görmeli.
+        foreach (float seviye in new[] { 0.45f, 0.70f })
+        {
+            var k = new GerilimKurali(4);
+            k.KatAyarla(4);
+            k.Gurultu(seviye);
+            int iz = 0;
+            for (int i = 0; i < 6000; i++)                  // 600 sn
+            {
+                if (i % 100 == 0) k.Gurultu(0.04f);        // soğumasın, aynı kademede kalsın
+                if (k.Ilerlet(0.1f, true, false, false, true) == GerilimTepkisi.GolgeIzi) iz++;
+                if (k.AvSuruyor) break;
+            }
+            Assert.Greater(iz, 0, $"gerilim {seviye}: duvardaki gölge hiç gelmedi");
+        }
     }
 
     [Test]

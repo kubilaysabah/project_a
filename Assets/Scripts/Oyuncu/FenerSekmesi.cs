@@ -59,10 +59,17 @@ public class FenerSekmesi : MonoBehaviour
 
     private void KaliteyiUygula() { acik = Ayarlar.Kalite != AyarKurallari.KaliteDusuk; }
 
+    // Bastırma (#93): duvardaki gölge (GolgeIzi) sürerken sekme ışığı söner. Sekme gölgesiz bir dolgu
+    // ışığıdır ve duvarın önünde durur; açık kalsa gölgenin içini aydınlatıp silerdi.
+    private static float bastirmaBitis;
+
+    /// <summary>Sekme ışığını 'sure' saniye söndürür (yumuşak geçişle).</summary>
+    public static void Bastir(float sure) { bastirmaBitis = Mathf.Max(bastirmaBitis, Time.time + sure); }
+
     private void LateUpdate()
     {
         if (isik == null) return;
-        if (!acik || lamba == null || !lamba.IsikYaniyor) hedefSiddet = 0f;
+        if (!acik || lamba == null || !lamba.IsikYaniyor || Time.time < bastirmaBitis) hedefSiddet = 0f;
         else Hesapla();
 
         // Yumuşak geçiş: her karede kalan yolun bir kısmı (Lerp), kare hızından bağımsız.

@@ -35,6 +35,7 @@ public enum GerilimTepkisi
     Tiklatma,         // kapalı bir oda kapısı tıklatılır (2. kademe tekrarı)
     LambaSonme,       // kafa lambası kısa süre söner (2. kademe tekrarı)
     Av,               // Gölge oyuncunun izini sürer (3. kademe)
+    GolgeIzi,         // duvara odada olmayan birinin gölgesi düşer (1-2. kademe tekrarı, #93); SONA eklendi
 }
 
 public class GerilimKurali
@@ -198,11 +199,20 @@ public class GerilimKurali
     private GerilimTepkisi TekrarTepkisi(int k)
     {
         // Next(n): 0 ile n-1 arasında rastgele tam sayı.
-        if (k == 1) return rastgele.Next(2) == 0 ? GerilimTepkisi.Titreme : GerilimTepkisi.UstKatAdimlari;
-        switch (rastgele.Next(3))
+        if (k == 1)
+        {
+            switch (rastgele.Next(3))
+            {
+                case 0: return GerilimTepkisi.Titreme;
+                case 1: return GerilimTepkisi.UstKatAdimlari;
+                default: return GerilimTepkisi.GolgeIzi;   // duvardaki gölge (#93)
+            }
+        }
+        switch (rastgele.Next(4))
         {
             case 0: return GerilimTepkisi.Golge;
             case 1: return GerilimTepkisi.Tiklatma;
+            case 2: return GerilimTepkisi.GolgeIzi;
             default: return GerilimTepkisi.LambaSonme;
         }
     }

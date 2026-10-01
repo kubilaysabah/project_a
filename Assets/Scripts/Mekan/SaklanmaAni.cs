@@ -61,6 +61,9 @@ public class SaklanmaAni : MonoBehaviour
     /// <summary>Uyarı ya da devriye sürüyor mu (Varlık, #86, bu sırada durur)?</summary>
     public bool Suruyor { get { return durum == Durum.Uyari || durum == Durum.Devriye; } }
 
+    /// <summary>Devriyedeki Gölge (yoksa null). SaklanmaYeri (#97): Gölge yakındayken dolaba girilmez.</summary>
+    public Transform Golge { get { return golge != null ? golge.transform : null; } }
+
     private void OnDestroy()
     {
         foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi -= KapiAcildi;
@@ -128,13 +131,15 @@ public class SaklanmaAni : MonoBehaviour
     }
 
     // Gölge oyuncuyu görüyor mu? Kısa bakışlar birikmez: görmediği anda sayaç yavaşça söner.
+    // Dolapta saklanan oyuncu (#97, SaklanmaYeri) hiç görülmez: Gölge dolabın önünden geçip gider.
     private void Bak()
     {
         if (golge == null || goz == null) return;
         Vector3 bas = golge.transform.position + Vector3.up * BasYuksekligi;
         Vector3 hedefNokta = goz.position;
         Vector3 fark = hedefNokta - bas;
-        bool goruyor = fark.magnitude < GormeMesafesi
+        bool goruyor = !SaklanmaYeri.Saklaniyor
+                       && fark.magnitude < GormeMesafesi
                        && Vector3.Angle(golge.transform.forward, new Vector3(fark.x, 0f, fark.z)) < GormeAcisi
                        && !ArasiKapali(bas, hedefNokta);
         gormeSayaci = goruyor ? gormeSayaci + Time.deltaTime : Mathf.Max(0f, gormeSayaci - Time.deltaTime * 0.5f);
