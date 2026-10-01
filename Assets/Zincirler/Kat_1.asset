@@ -421,7 +421,7 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 3.4
+    X: 2.85
     Y: 0
     Z: 5.085
     Donus: 0
@@ -432,7 +432,7 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 3.7
+    X: 3.15
     Y: 0.912
     Z: 5.25
     Donus: 0
@@ -442,6 +442,17 @@ MonoBehaviour:
     Sablon: {fileID: 9164063123432879046, guid: 5cde5055568c6624fab23846e8d9f0c0, type: 3}
     Metin: 
     Ad: 
+  - Yol: 
+    X: 5
+    Y: 0
+    Z: 5.55
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 736823783616619317, guid: cd9d983330469d244a3baa9d543c3ab4, type: 3}
+    Metin: 
+    Ad: Gardirop_Nermin
   - Yol: 
     X: 4.77
     Y: 0
@@ -705,7 +716,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 2352641571865322946, guid: faf29ac5cd381f14ca67789e90528e05, type: 3}
     Metin: 
-    Ad: 
+    Ad: Koli_Ust_OdaA
   - Yol: 
     X: 8.12
     Y: 1.65
@@ -738,3 +749,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 0
   saklanmaSesi: {fileID: 0}
+  anVar: 1
+  an:
+    Tur: 2
+    Yol: Koli_Ust_OdaA
+    TetikOda: 
+    TetikEsya: kat_anahtari
+    TetikKilit: 
+    Gecikme: 1.2
+    Klip: {fileID: 8300000, guid: 5adc00cfb6e43c341a181353626d7d33, type: 3}
+    Ses: 0.9
+    Sayi: 6
+    Genlik: 90
+    Sure: 0.55
+    EksenZ: 0
+    Pivot: {x: 0, y: 0, z: 0.15}
+    Kayma: {x: 0, y: -0.4, z: 0.07}
+    U: 0
+    V: 0
+    Yukseklik: 1.2
+    Siddet: 3

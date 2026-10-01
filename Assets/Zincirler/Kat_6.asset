@@ -651,12 +651,12 @@ MonoBehaviour:
     Y: 0
     Z: 3.8
     Donus: 0
-    OnU: -1
-    OnV: 0
+    OnU: 0
+    OnV: 1
     Yatik: 0
     Sablon: {fileID: 7780138178549485997, guid: 5e02b38e7e285e24a8d3f9ad2ea5430b, type: 3}
     Metin: 
-    Ad: 
+    Ad: Manken_Hol_Sabri
   - Yol: 'B:'
     X: 10.5
     Y: 0
@@ -903,3 +903,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 1
   saklanmaSesi: {fileID: 8300000, guid: 482b44ee12097e34d8f3ffff5677158a, type: 3}
+  anVar: 1
+  an:
+    Tur: 4
+    Yol: B:Manken_Hol_Sabri
+    TetikOda: B:Hol
+    TetikEsya: 
+    TetikKilit: 
+    Gecikme: 1
+    Klip: {fileID: 8300000, guid: 3a7a73ae0d622ba42acf9beb1d849e7e, type: 3}
+    Ses: 0.45
+    Sayi: 4
+    Genlik: 7
+    Sure: 1.5
+    EksenZ: 0
+    Pivot: {x: 0, y: 0, z: 0}
+    Kayma: {x: 0, y: 0, z: 0}
+    U: 0
+    V: 0
+    Yukseklik: 1.2
+    Siddet: 3

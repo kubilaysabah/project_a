@@ -42,6 +42,9 @@ public static partial class GrayboxKurucu
         AcilirSablonKur("Hol_Konsolu_K7");
         AcilirSablonKur("Bufe_Cemal_K7");
         AcilirSablonKur("Sandik_Cemal_K7");
+        // Saklanılabilen gardırop (#97): iki dar kapaklı (Gardirop_K7.fbx); adında "Gardirop" geçtiği için
+        // daire açılınca SaklanmaYeri de eklenir (SaklanmaKurali).
+        AcilirSablonKur("Gardirop_K7");
     }
 
     static KatZinciriVarligi Kat7Kur(GameObject golge)
@@ -174,6 +177,10 @@ public static partial class GrayboxKurucu
             D("Tek_Kisilik_Yatak_K7", 7.70f + 0.51f, 0f, 8.10f - 0.98f, 0f, -1f),
             D("Komodin_K7", 8.95f, 0f, 8.10f - 0.19f, 0f, -1f),
             D("Koliler_K7", 10.28f, 0f, 5.33f, -1f, 0f),
+            // Cemal'in gardırobu (#97): Oda B duvarına (u = 7,7) sırtını dayamış, odaya (+u) bakar; eşyalarını
+            // kolilere toplamış, gardırop boş; içinde saklanılabilir. v 5,15-5,95: yatağa (v 6,14'ten) değmez;
+            // kapakları açılınca u 8,62'ye kadar gelir, açık oda kapısının kanadı (u 8,7) serbest kalır.
+            DA("Gardirop_Cemal", "Gardirop_K7", 7.70f, 0f, 5.55f, 1f, 0f),
 
             // ---------- ODA B ---------- (u 5,1-7,6, v 4,75-8,1; kapının önü boş)
             // Salon duvarında Cemal'in sandığı; pencerenin yanında bavullar; Oda A duvarında araştırma duvarı.
@@ -181,6 +188,19 @@ public static partial class GrayboxKurucu
             D("Bavullar_K7", 7.00f, 0f, 7.65f, 0f, -1f),
             D("Arastirma_Duvari_K7", 7.60f, 1.50f, 6.40f, -1f, 0f),
         };
+
+        // ---------- KATIN ANI (#96): ARKADAN ÇARPAN KAPI ----------
+        // Oda A'nın kapısı kırık anahtarla açılır; oyuncu karanlık yatak odasına girer (fosforlu şifre burada,
+        // kafa lambasını kapatması gerekecek). 2 sn sonra, oyuncu kapıdan en az 1,5 m içerideyken kapı arkasından
+        // hızla çarparak kapanır (0,2 sn). Kapı kilitlenmez; açılır. Ama oyuncu artık karanlıkta, kapalı bir
+        // odada, ışığını söndürmek zorunda.
+        v.anVar = true;
+        v.an = new KatAniVerisi
+        {
+            Tur = KatAniTuru.KapiCarpma, Yol = "Kapilar/Kapi_Oda_A", TetikOda = "Oda_A", Gecikme = 2f, Sure = 0.2f,
+            Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Carpma.wav"), Ses = 1f,
+        };
+        if (v.an.Klip == null) Debug.LogError("[ZINCIR] Kapi_Carpma.wav bulunamadı.");
 
         var odalar = new List<string>();
         foreach (DairePlani.Oda o in DairePlani.Odalar) odalar.Add(o.Ad);

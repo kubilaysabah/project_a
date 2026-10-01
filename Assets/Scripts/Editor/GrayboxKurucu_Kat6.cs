@@ -166,8 +166,9 @@ public static partial class GrayboxKurucu
             DA("Ceyiz_Sandigi_A", "Ceyiz_Sandigi_K6", 7.70f + 0.25f, 0f, 6.00f, 1f, 0f),
 
             // ================= B: DAİRE 4 (terzi Sabri Usta) =================
-            // HOL: koridorun dibinde, girene dönük bir manken.
-            D("Manken_K6", 10.05f, 0f, 3.80f, -1f, 0f, B),
+            // HOL: koridorun dibinde bir manken. #96: adı var ve yüzü DUVARA dönük (kuzey duvarı, +v); katın anında
+            // oyuncu her gözünü ayırdığında ona döner (eskiden girene dönüktü; duvardan dönmesi ilk dönüşü belli eder).
+            DA("Manken_Hol_Sabri", "Manken_K6", 10.05f, 0f, 3.80f, 0f, 1f, B),
             D("Petek", 10.50f, 0f, 3.80f, -1f, 0f, B),
             // SALON (atölye): pencerenin önünde sanayi makinesi, ortada kesim masası (üstünde dikiş kutusu),
             // Oda B duvarında elbise askısı, köşelerde mankenler ve kumaş topları.
@@ -209,6 +210,18 @@ public static partial class GrayboxKurucu
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;
         v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Tezgah", "Klozet", "Lavabo" };
+
+        // ---------- KATIN ANI (#96): BAKMAYINCA DÖNEN MANKEN ----------
+        // B dairesinin holüne girilince (Sabri Usta'nın evi) koridorun dibindeki manken, oyuncu onu gördükten sonra
+        // her gözünü ondan ayırdığında yüzünü oyuncuya çevirir; dört kez. Dönerken hiç görülmez, yalnızca ayağının
+        // tahtada sürtündüğü duyulur. Mankenin yüzü başta duvara dönük (yukarıdaki süs).
+        v.anVar = true;
+        v.an = new KatAniVerisi
+        {
+            Tur = KatAniTuru.BakmayincaDon, Yol = B + "Manken_Hol_Sabri", TetikOda = B + "Hol", Gecikme = 1f,
+            Sayi = 4, Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Sesler/Gicirti_2.wav"), Ses = 0.45f,
+        };
+        if (v.an.Klip == null) Debug.LogError("[ZINCIR] Resources/Sesler/Gicirti_2.wav bulunamadı.");
 
         var odalar = new List<string>();
         foreach (DairePlani.Oda o in DairePlani.Odalar) { odalar.Add(o.Ad); odalar.Add(KilitZinciri.IkinciOnek + o.Ad); }

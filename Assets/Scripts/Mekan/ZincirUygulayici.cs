@@ -272,6 +272,14 @@ public class ZincirUygulayici
             sa.Hazirla(kat, varlik.kacisSablonu, varlik.saklanmaSesi, yol);
             if (Kayit.KilitCozukMu(kat, "saklanma")) sa.BittiBaslat();
         }
+        // Katın anı (#96): bir kez olan imza korku anı. Nesnesi bu satırdan önce konan bir süs olabilir
+        // ("Sallanan_Sandalye_Nuri"); süsler Uygula'da zincirden önce konduğu için burada bulunur.
+        if (varlik.anVar && varlik.an != null) AniKur(daire, varlik, kat);
+
+        // Saklanma yerleri (#97): süsler ve bulmaca eşyaları yerine konduktan sonra, dairedeki gardırop ve
+        // boy dolaplarına SaklanmaYeri eklenir (zaten varsa dokunulmaz). İki daireli katta ikincisine de.
+        SaklanmaYeri.DaireyeEkle(daire);
+        if (IkinciDaire != null) SaklanmaYeri.DaireyeEkle(IkinciDaire);
 
         if (varlik.parcalar != null && varlik.parcalar.Count > 0)
         {
@@ -322,6 +330,26 @@ public class ZincirUygulayici
             c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, KilitZinciri.OdaAdi(ks.Oda), KapiBul(daire, ks.Oda), t.GetComponentInParent<DaireEksenleri>(),
                       ks.Kapatilabilir, ks.SusturanKilit, kat);
         }
+    }
+
+    // Katın anını kurar (#96): dairenin köküne bir KatAni bileşeni, tarifi ve bulduğu nesnelerle.
+    private void AniKur(Transform daire, KatZinciriVarligi varlik, int kat)
+    {
+        KatAniVerisi an = varlik.an;
+        // Anın nesnesi (boş yol: nesnesiz an). Bulunamazsa yazıyla uyarılır, an yine de kurulur
+        // (nesnesiz türler, ör. sesin çapası yoksa, sessizce hiçbir şey yapmaz).
+        Transform hedef = string.IsNullOrEmpty(an.Yol) ? null : Cozum(daire, an.Yol);
+        if (!string.IsNullOrEmpty(an.Yol) && hedef == null) Debug.LogWarning($"[ZINCIR] Katın anının nesnesi '{an.Yol}' bulunamadı.");
+        // Tetik odasının dairesi: "B:" ile başlıyorsa ikinci daire. Oyuncunun odası o dairenin eksenleriyle bulunur.
+        string tetikOda = an.TetikOda ?? "";
+        Transform odaDairesi = tetikOda.StartsWith(KilitZinciri.IkinciOnek) ? IkinciDaire : daire;
+        DaireEksenleri odaEksen = odaDairesi != null ? odaDairesi.GetComponent<DaireEksenleri>() : null;
+        // Plan noktasının (U, V) dairesi: nesnenin dairesi (ikinci dairedeki bir lamba ikinci dairenin planına bakar).
+        DaireEksenleri planEksen = hedef != null ? hedef.GetComponentInParent<DaireEksenleri>() : null;
+        if (planEksen == null) planEksen = daire.GetComponent<DaireEksenleri>();
+        KatAni bilesen = daire.gameObject.AddComponent<KatAni>();
+        bilesen.Hazirla(kat, an, hedef, odaEksen, KilitZinciri.OdaAdi(tetikOda), planEksen, varlik.kacisSablonu);
+        if (Kayit.KilitCozukMu(kat, "an")) bilesen.BittiBaslat();
     }
 
     // Katın süslerini (mobilya, dekor, aile fotoğrafı, isim kartları) daireye koyar (#83'ten beri
@@ -542,6 +570,9 @@ public class ZincirUygulayici
         // yanıyor, fosforlu yazı görünmüyor, buzdolabı hiç açılmıyordu. Kol, kırılan kavanoz ve
         // menteşe kilitleri de aynı "varsa yeniden ekleme" kalıbını kullanıyor.
         foreach (Kilit k in daire.GetComponentsInChildren<Kilit>(true)) Object.DestroyImmediate(k);
+        // Katın anı (#96): en başta sökülür. Yarıda kalmış bir "lamba bir an yandı" anı lambayı eski
+        // hâline alır; bu, aşağıdaki "bütün lambalar sönük" kararından ÖNCE olmalı, sonra değil.
+        foreach (KatAni a in daire.GetComponentsInChildren<KatAni>(true)) Object.DestroyImmediate(a);
         // Kırılan nesneler bütünleşir. Sahanlıktaki yerler de temizlenir (dairenin ebeveyni).
         foreach (Kirilan k in daire.GetComponentsInChildren<Kirilan>(true)) { k.Sifirla(); Object.DestroyImmediate(k); }
         // Devrilen kapılar yerine konur, vidalar geri takılır.
@@ -637,6 +668,7 @@ public class ZincirUygulayici
         foreach (KatSusu s in varlik.suslar) Ekle(s.Yol);
         foreach (KatSesi s in varlik.sesler) Ekle(s.Yol);
         foreach (AcikParca a in varlik.acikParcalar) Ekle(a.Yol);
+        if (varlik.anVar && varlik.an != null) Ekle(varlik.an.Yol);   // katın anının nesnesi (#96)
 
         // Dairenin bütün eşyaları. Oda oda döşenen katta (yalnizSecilenEsyalar, #83) yalnızca katın
         // seçtiği ya da başvurduğu eşya görünür. Öbür katlarda bulmaca eşyası başvuruluyorsa görünür,

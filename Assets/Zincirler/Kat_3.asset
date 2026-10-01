@@ -299,6 +299,17 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
+    X: 9.58
+    Y: 0
+    Z: 2.95
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 3981584962364779697, guid: 28a5c53d65e68514f9f7a302897fc9ae, type: 3}
+    Metin: 
+    Ad: Gardirop_Murat
+  - Yol: 
     X: 4.57
     Y: 0
     Z: 5.905
@@ -627,7 +638,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 148135375012933662, guid: 4d4a21bad0310e74ab6054d3551ca230, type: 3}
     Metin: 
-    Ad: 
+    Ad: Besik_Ayla
   - Yol: 
     X: 7.96
     Y: 0
@@ -714,3 +725,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 0
   saklanmaSesi: {fileID: 0}
+  anVar: 1
+  an:
+    Tur: 0
+    Yol: Besik_Ayla
+    TetikOda: Oda_A
+    TetikEsya: 
+    TetikKilit: 
+    Gecikme: 1.5
+    Klip: {fileID: 8300000, guid: 7825146eb540fa0478438570cc490bec, type: 3}
+    Ses: 0.5
+    Sayi: 7
+    Genlik: 7
+    Sure: 1.5
+    EksenZ: 0
+    Pivot: {x: 0, y: 0.52, z: 0}
+    Kayma: {x: 0, y: 0, z: 0}
+    U: 0
+    V: 0
+    Yukseklik: 1.2
+    Siddet: 3

@@ -313,7 +313,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 143855111789105283, guid: 0fb5298e8f0d72040a1dea4f0c915f44, type: 3}
     Metin: 
-    Ad: 
+    Ad: Su_Kovasi_Karaca
   - Yol: 
     X: 7.7
     Y: 0
@@ -738,3 +738,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 0
   saklanmaSesi: {fileID: 0}
+  anVar: 1
+  an:
+    Tur: 6
+    Yol: Su_Kovasi_Karaca
+    TetikOda: 
+    TetikEsya: kat_anahtari
+    TetikKilit: 
+    Gecikme: 3
+    Klip: {fileID: 8300000, guid: f98c94c82bc81be44ac09f5f94233dc8, type: 3}
+    Ses: 0.9
+    Sayi: 6
+    Genlik: 7
+    Sure: 0
+    EksenZ: 0
+    Pivot: {x: 0, y: 0, z: 0}
+    Kayma: {x: 0, y: 0, z: 0}
+    U: 0
+    V: 0
+    Yukseklik: 1.2
+    Siddet: 3

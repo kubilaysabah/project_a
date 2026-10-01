@@ -34,9 +34,12 @@ public static partial class GrayboxKurucu
             ParcaSablonuKur(ad, ad);
         AcilirSablonKur("Buzdolabi_K4", Buzdolabi4Isik);
         AcilirSablonKur("Alet_Kutusu_K4");
+        // Saklanılabilen gardırop (#97): iki kapaklı (Gardirop_K4.fbx); adında "Gardirop" geçtiği için
+        // daire açılınca SaklanmaYeri de eklenir (SaklanmaKurali).
+        AcilirSablonKur("Gardirop_K4");
     }
 
-    static KatZinciriVarligi Kat4Kur()
+    static KatZinciriVarligi Kat4Kur(GameObject golge)
     {
         string yol = $"{ZincirKlasoru}/Kat_4.asset";
         KatZinciriVarligi v = AssetDatabase.LoadAssetAtPath<KatZinciriVarligi>(yol);
@@ -73,7 +76,9 @@ public static partial class GrayboxKurucu
         };
         v.parcalar = new List<KatParcasi>();
         v.sesler = new List<KatSesi>();
-        v.acikParcalar = new List<AcikParca>();
+        // Hasan'ın gardırobunun bir kapağı aralık başlar (#97): %12 açık (~13°). Boş dairede biri az önce içine
+        // girip çıkmış gibi; oyuncu dokununca kapanır (AcilirParca.Aralik).
+        v.acikParcalar = new List<AcikParca> { new AcikParca { Yol = "Gardirop_Hasan/Kapi_1", Oran = 0.12f } };
         v.buzdolabiFisiCekili = false;
         v.yananOdalar = new List<string> { "Antre", "Hol", "Salon", "Mutfak", "Oda_B" };
         v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Tezgah" };
@@ -99,6 +104,10 @@ public static partial class GrayboxKurucu
             D("Mumlar_K4", 3.20f, 0f, 6.20f, 0f, 1f),
             D("Yikik_Sehpa_K4", 3.80f, 0f, 7.50f, 0f, -1f),
             D("Petek", 1.40f, 0f, 8.10f, 0f, -1f),
+            // Hasan'ın gardırobu (#97): Oda B duvarına (u = 5,0) sırtını dayamış, salona (-u) bakar; içinde
+            // saklanılabilir (Hasan karanlıkta burada saklanmış). v 4,975-6,025: hol duvarından 22 cm uzakta
+            // (kapağın ucu açılınca 12 cm taşar); fosforlu şifrenin yeri (v 7,2) serbest kalır.
+            DA("Gardirop_Hasan", "Gardirop_K4", 5.00f, 0f, 5.50f, -1f, 0f),
 
             // ---------- MUTFAK ---------- (u 6,8-10,5, v -0,8-2,85; kapının önü boş; tezgâh dip duvarda)
             DA("Buzdolabi_Hasan", "Buzdolabi_K4", 7.20f, 0f, -0.80f + 0.32f, 0f, 1f),
@@ -112,6 +121,21 @@ public static partial class GrayboxKurucu
             D("Termos_K4", 6.55f, 0f, 6.30f, 1f, 0f),
             D("Gaz_Lambasi_K4", 6.20f, 0f, 7.85f, 0f, -1f),
             D("Duvar_Tebesir_K4", 5.10f, 1.00f, 6.50f, 1f, 0f),
+        };
+
+        // ---------- KATIN ANI (#96): IŞIKTA SİLUET ----------
+        // Oyuncu Hasan'ın alet kutusundan sigortayı alır. Daire hâlâ elektriksiz; ama oyuncu Oda B'nin kapısına
+        // döndüğü an holün lambası bir anlığına titreyerek yanar: kapının hemen önünde, holde, biri duruyor.
+        // 0,6 sn sonra lamba söner; kafa lambası titrer; ışık dönünce hol boş. An, siluetin yeri oyuncunun
+        // ekranına girene kadar bekler (sırtı dönükken yanan lambayı kimse görmez); oyuncu çıkmak için kapıya
+        // dönmek zorunda. Siluetin yeri holde, Oda B'nin kapısının (u 5,95-6,75) tam karşısında, 1,15 m önünde.
+        v.anVar = true;
+        v.kacisSablonu = golge;   // siluet: kaçış ve saklanma anlarının Gölge'si
+        v.an = new KatAniVerisi
+        {
+            Tur = KatAniTuru.IsikSiluet, Yol = "Lambalar/Lamba_Hol", TetikEsya = "sigorta", Gecikme = 0.8f,
+            U = 6.35f, V = 3.55f, Sure = 0.6f, Siddet = 3f,
+            Klip = AnSesi("An_Vizilti"), Ses = 0.8f,
         };
 
         var odalar = new List<string>();

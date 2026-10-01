@@ -276,3 +276,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 0
   saklanmaSesi: {fileID: 0}
+  anVar: 0
+  an:
+    Tur: 0
+    Yol: 
+    TetikOda: 
+    TetikEsya: 
+    TetikKilit: 
+    Gecikme: 1.5
+    Klip: {fileID: 0}
+    Ses: 0.8
+    Sayi: 6
+    Genlik: 7
+    Sure: 1.5
+    EksenZ: 0
+    Pivot: {x: 0, y: 0, z: 0}
+    Kayma: {x: 0, y: 0, z: 0}
+    U: 0
+    V: 0
+    Yukseklik: 1.2
+    Siddet: 3

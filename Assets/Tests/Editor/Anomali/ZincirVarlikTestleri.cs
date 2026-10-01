@@ -179,6 +179,64 @@ public class ZincirVarlikTestleri
         finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
     }
 
+    // #96: her katın anı. Nesnesinin yolu dört dairede de (ya da adı verilmiş süsün şablonunda) bulunmalı,
+    // tetik odası planda olmalı, sesi bağlı olmalı; ışıkta siluetin bir silueti, plan noktası olan anların
+    // noktası bir odanın içinde olmalı. Yanlış yazılmış bir yol oyunda yalnızca bir uyarı basar ve an olmaz;
+    // bu test onu oyun oynanmadan yakalar. Sınıflar oyun derlemesinde: alanlar yansımayla okunur.
+    [Test]
+    public void Her_katin_aninin_yolu_odasi_ve_sesi_var()
+    {
+        var odalar = new List<string>();
+        foreach (DairePlani.Oda o in DairePlani.Odalar) { odalar.Add(o.Ad); odalar.Add(KilitZinciri.IkinciOnek + o.Ad); }
+        Scene sahne = EditorSceneManager.OpenScene(SahneYolu, OpenSceneMode.Additive);
+        try
+        {
+            Transform a = null;
+            foreach (GameObject g in sahne.GetRootGameObjects()) if (g.name == "Sahanlik_A") a = g.transform;
+            Assert.IsNotNull(a);
+            foreach (string guid in AssetDatabase.FindAssets("t:ScriptableObject", new[] { "Assets/Zincirler" }))
+            {
+                string yol = AssetDatabase.GUIDToAssetPath(guid);
+                ScriptableObject v = AssetDatabase.LoadAssetAtPath<ScriptableObject>(yol);
+                var varAlani = v.GetType().GetField("anVar");
+                if (varAlani == null || !(bool)varAlani.GetValue(v)) continue;
+                object an = v.GetType().GetField("an").GetValue(v);
+                var tur = an.GetType();
+                string turAdi = tur.GetField("Tur").GetValue(an).ToString();
+                string anYolu = (string)tur.GetField("Yol").GetValue(an);
+                string oda = (string)tur.GetField("TetikOda").GetValue(an);
+                string esya = (string)tur.GetField("TetikEsya").GetValue(an);
+                string kilit = (string)tur.GetField("TetikKilit").GetValue(an);
+                Object klip = (Object)tur.GetField("Klip").GetValue(an);
+                float u = (float)tur.GetField("U").GetValue(an), vv = (float)tur.GetField("V").GetValue(an);
+
+                Assert.IsTrue(klip != null, $"{yol}: katın anının ({turAdi}) sesi bağlı değil");
+                Assert.IsFalse(string.IsNullOrEmpty(anYolu), $"{yol}: katın anının ({turAdi}) nesnesi yok");
+                Assert.IsFalse(string.IsNullOrEmpty(oda) && string.IsNullOrEmpty(esya) && string.IsNullOrEmpty(kilit),
+                               $"{yol}: katın anının hiçbir tetiği yok (oda, eşya ya da kilit)");
+                if (!string.IsNullOrEmpty(oda)) Assert.Contains(oda, odalar, $"{yol}: anın tetik odası '{oda}' planda yok");
+                // Tetik eşyası ve kilidi katın zincirinde olmalı.
+                KilitZinciri z = (KilitZinciri)v.GetType().GetField("zincir").GetValue(v);
+                if (!string.IsNullOrEmpty(esya))
+                    Assert.IsTrue(z.Esyalar.Exists(e => e.Kimlik == esya), $"{yol}: anın tetik eşyası '{esya}' zincirde yok");
+                if (!string.IsNullOrEmpty(kilit))
+                    Assert.IsTrue(z.Kilitler.Exists(k => k.Kimlik == kilit), $"{yol}: anın tetik kilidi '{kilit}' zincirde yok");
+                for (int n = 1; n <= 4; n++)
+                    Assert.IsNotNull(Bul(a, a.Find($"Daire_{n}"), n, anYolu, AdliSusler(yol)), $"{yol}: Daire_{n} için anın nesnesi '{anYolu}' yok");
+                if (turAdi == "KapiCarpma")
+                    Assert.IsTrue(anYolu.Contains("Kapilar/Kapi_"), $"{yol}: kapı çarpma anının nesnesi bir oda kapısı değil ('{anYolu}')");
+                if (turAdi == "IsikSiluet")
+                {
+                    Assert.IsTrue((Object)v.GetType().GetField("kacisSablonu").GetValue(v) != null, $"{yol}: ışıkta siluet anının silueti (kacisSablonu) yok");
+                    Assert.IsNotNull(DairePlani.NoktaninOdasi(u, vv), $"{yol}: siluetin yeri ({u}, {vv}) hiçbir odada değil");
+                }
+                if (turAdi == "EkranAc")
+                    Assert.IsNotNull(DairePlani.NoktaninOdasi(u, vv), $"{yol}: ekran ışığının hedefi ({u}, {vv}) hiçbir odada değil");
+            }
+        }
+        finally { EditorSceneManager.CloseScene(sahne, removeScene: true); }
+    }
+
     // T listesi (#75): her zincir eşyasının adı metin tablosunda olmalı, tablodaki her esya.*
     // satırı da bir eşyaya ait olmalı. Yeni bir eşya eklenip adı unutulursa listede anahtarın
     // kendisi ("esya.bilmem_ne") görünürdü; eşya silinip adı kalırsa tablo çöplenirdi.

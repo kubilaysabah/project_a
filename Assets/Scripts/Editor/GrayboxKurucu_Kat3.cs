@@ -36,6 +36,9 @@ public static partial class GrayboxKurucu
                                       "Kanepe_K3", "Cocuk_Sandalyesi_K3" })
             ParcaSablonuKur(ad, ad);
         AcilirSablonKur("Komodin_K3");
+        // Saklanılabilen gardırop (#97): iki kapaklı, kapakları açılır (Gardirop_K3.fbx); adında "Gardirop"
+        // geçtiği için daire açılınca SaklanmaYeri de eklenir (SaklanmaKurali).
+        AcilirSablonKur("Gardirop_K3");
     }
 
     // Okul çantasının üst yüzü (kat3_esyalar.py, yerde yatan çanta): 2. parça bunun üstünde durur.
@@ -119,6 +122,11 @@ public static partial class GrayboxKurucu
             Foto("kat3", true, 4.60f, 1.60f, 2.95f, 0f, 1f),
             D("Dagilmis_Oyuncaklar_K3", 7.20f, 0f, 3.50f, 0f, 1f),
             D("Petek", 10.50f, 0f, 3.80f, -1f, 0f),
+            // Ailenin hol dolabı (#97): holün dibinde, güney duvarına (v = 2,95) sırtını dayamış, kuzeye (+v) bakar;
+            // içinde saklanılabilir. u 9,09-10,07: doğu kapağının ucu açılınca 16 cm taşar (10,23'e kadar); dip
+            // duvardaki peteğin ön yüzü u 10,29'da (duvardan 21 cm), kapak ona değmez. Önünde Oda A kapısına giden
+            // 1,1 m'lik geçit açık kalır.
+            DA("Gardirop_Murat", "Gardirop_K3", 9.58f, 0f, 2.95f, 0f, 1f),
 
             // ---------- SALON ----------
             // Salon u 0-5,0, v 4,75-8,1. Kapı hol duvarında (u 0,71-1,81 önü boş); karşıda pencere (u 0,7-2,1)
@@ -179,10 +187,26 @@ public static partial class GrayboxKurucu
             // şifonyer Oda B duvarında. Önceki iki yerleşimde odaya ya da komodinin önüne girilemiyordu.
             D("Karyola_K3", 10.50f - 1.005f, 0f, 7.12f, -1f, 0f),   // pencere perdesinin fırfırına değmesin (çakışma testi)
             DA("Komodin_Ayla", "Komodin_K3", 10.50f - 0.23f, 0f, 6.08f, -1f, 0f),   // karyolayla birlikte kaydı (çakışma testi)
-            D("Besik_K3", 7.70f + 0.26f, 0f, 5.40f, 1f, 0f),
+            // Beşiğin adı var (#96): katın anında kendiliğinden sallanır.
+            DA("Besik_Ayla", "Besik_K3", 7.70f + 0.26f, 0f, 5.40f, 1f, 0f),
             D("Sifonyer_K3", 7.70f + 0.26f, 0f, 6.90f, 1f, 0f),
             D("Perde_OdaA_K3", 9.10f, 2.30f, 8.10f, 0f, -1f),
             D("Kilim_K3", 9.30f, 0f, 5.95f, 0f, 1f),
+        };
+
+        // ---------- KATIN ANI (#96): SALLANAN BEŞİK ----------
+        // Şifreyle açılan son oda anne-babanın odası. Oyuncu girdikten 1,5 sn sonra kapının yanındaki boş beşik
+        // kendiliğinden sallanır: içinde bebek yok, kimse itmiyor. Yedi salınım, her biri 1,5 sn, 7°'den sönerek.
+        // Beşiğin kızakları uzun kenarının iki ucunda, yerel YZ düzleminde (kat3_esyalar_2.py): beşik yerel X
+        // ekseninde (uzun ekseninde) sallanır. Kızağın alt kavisi z = 0,96 y² parabolü; tabanındaki eğrilik
+        // yarıçapı 1 / (2 × 0,96) ≈ 0,52 m. Dönme noktası o çemberin merkezi (yerden 0,52 m): kızak yere
+        // değerek sallanır, havaya kalkmaz.
+        v.anVar = true;
+        v.an = new KatAniVerisi
+        {
+            Tur = KatAniTuru.Sallanma, Yol = "Besik_Ayla", TetikOda = "Oda_A", Gecikme = 1.5f,
+            Sayi = 7, Genlik = 7f, Sure = 1.5f, Pivot = new Vector3(0f, 0.52f, 0f),
+            Klip = AnSesi("An_Gicirti"), Ses = 0.5f,
         };
 
         var odalar = new List<string>();

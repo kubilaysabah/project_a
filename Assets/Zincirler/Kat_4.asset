@@ -23,7 +23,9 @@ MonoBehaviour:
   gorunenEsyalar:
   - Sigorta_Kutusu
   - Tezgah
-  acikParcalar: []
+  acikParcalar:
+  - Yol: Gardirop_Hasan/Kapi_1
+    Oran: 0.12
   buzdolabiFisiCekili: 0
   zincir:
     KapaliOdalar:
@@ -243,6 +245,17 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
+    X: 5
+    Y: 0
+    Z: 5.5
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 3675813490145970083, guid: ba8ae617c524e9448bf9eee048e07e7f, type: 3}
+    Metin: 
+    Ad: Gardirop_Hasan
+  - Yol: 
     X: 7.2
     Y: 0
     Z: -0.48000002
@@ -348,7 +361,7 @@ MonoBehaviour:
   yanlisKapiSesleri: []
   elektrikYok: 0
   kacisVar: 0
-  kacisSablonu: {fileID: 0}
+  kacisSablonu: {fileID: 3859886990552203880, guid: 4b38d86f79492c84d88deb70b8af0bd2, type: 3}
   kacisGecikme: 3
   kacisHizi: 2.2
   kacisBaslangicSesi: {fileID: 0}
@@ -356,3 +369,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 0
   saklanmaSesi: {fileID: 0}
+  anVar: 1
+  an:
+    Tur: 5
+    Yol: Lambalar/Lamba_Hol
+    TetikOda: 
+    TetikEsya: sigorta
+    TetikKilit: 
+    Gecikme: 0.8
+    Klip: {fileID: 8300000, guid: 5e0e71923c8f84242847180cb849d5ae, type: 3}
+    Ses: 0.8
+    Sayi: 6
+    Genlik: 7
+    Sure: 0.6
+    EksenZ: 0
+    Pivot: {x: 0, y: 0, z: 0}
+    Kayma: {x: 0, y: 0, z: 0}
+    U: 6.35
+    V: 3.55
+    Yukseklik: 1.2
+    Siddet: 3

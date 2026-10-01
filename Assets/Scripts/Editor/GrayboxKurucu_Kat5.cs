@@ -109,7 +109,8 @@ public static partial class GrayboxKurucu
             D("Yolluk_K5", 3.90f, 0f, 3.80f, 0f, 1f),
             // Kova holün kuzey kenarında, salon ile Oda B kapılarının arasında: ortadayken koridoru, Oda B'nin
             // önündeyken kapıyı kapatıyordu (yürünebilirlik denetimi).
-            D("Su_Kovasi_K5", 4.60f, 0f, 4.25f, 0f, 1f),
+            // Kovanın adı var (#96): katın anının sesi ondan gelir.
+            DA("Su_Kovasi_Karaca", "Su_Kovasi_K5", 4.60f, 0f, 4.25f, 0f, 1f),
             D("Konsol_K5", 7.70f, 0f, 4.65f - 0.16f, 0f, -1f),
             M("mantel_clock_01", 7.50f, 0.80f, 4.52f, 0f, -1f),
             Foto("kat5", false, 7.92f, 0.80f, 4.52f, 0f, -1f),
@@ -168,6 +169,17 @@ public static partial class GrayboxKurucu
             D("Sandalye_K5", 6.35f, 0f, 7.12f, 0f, 1f),
             D("Kitaplik_K5", 5.10f + 0.18f, 0f, 6.30f, 1f, 0f),
             D("Perde_OdaB_K5", 6.35f, 2.30f, 8.10f, 0f, -1f),
+        };
+
+        // ---------- KATIN ANI (#96): SU YENİDEN DAMLIYOR ----------
+        // Oyuncu vanayı kapatmış, damla susmuş, sifonun ağzından katın anahtarını almıştır. 3 sn sonra holdeki
+        // kovaya yeniden su damlamaya başlar; önce seyrek, sonra sıklaşarak, sonra birden kesilir. Su kesik:
+        // tavandan damlayan şey su değil, ya da yukarıda biri var. Cemal'in yarım işinin cevapsız sorusu.
+        v.anVar = true;
+        v.an = new KatAniVerisi
+        {
+            Tur = KatAniTuru.Ses, Yol = "Su_Kovasi_Karaca", TetikEsya = "kat_anahtari", Gecikme = 3f,
+            Klip = AnSesi("An_Damla"), Ses = 0.9f, Sure = 0f,
         };
 
         var odalar = new List<string>();

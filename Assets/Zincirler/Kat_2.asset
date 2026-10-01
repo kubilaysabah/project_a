@@ -298,6 +298,17 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
+    X: 9.85
+    Y: 0
+    Z: 2.95
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 519939903815897575, guid: 806f4ee8583891f43bdda217e10aeebf, type: 3}
+    Metin: 
+    Ad: Gardirop_Nuri
+  - Yol: 
     X: 1.4
     Y: 2.32
     Z: 7.8800006
@@ -439,14 +450,14 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 2115781984987569264, guid: 777dae95170c120408f8a920b527acb5, type: 3}
     Metin: 
-    Ad: 
-  - Yol: 
-    X: 2.85
+    Ad: Sallanan_Sandalye_Nuri
+  - Yol: Sallanan_Sandalye_Nuri
+    X: 0
     Y: 0.43
-    Z: 7.35
+    Z: 0
     Donus: 0
-    OnU: -0.3
-    OnV: -1
+    OnU: 0
+    OnV: 1
     Yatik: 0
     Sablon: {fileID: 5369878216078214616, guid: ceca2090825f1134f8c7c7b74ca9833f, type: 3}
     Metin: 
@@ -798,3 +809,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 0
   saklanmaSesi: {fileID: 0}
+  anVar: 1
+  an:
+    Tur: 0
+    Yol: Sallanan_Sandalye_Nuri
+    TetikOda: Salon
+    TetikEsya: 
+    TetikKilit: 
+    Gecikme: 2.5
+    Klip: {fileID: 8300000, guid: 7825146eb540fa0478438570cc490bec, type: 3}
+    Ses: 0.6
+    Sayi: 6
+    Genlik: 6
+    Sure: 1.7
+    EksenZ: 0
+    Pivot: {x: 0, y: 0.9, z: 0}
+    Kayma: {x: 0, y: 0, z: 0}
+    U: 0
+    V: 0
+    Yukseklik: 1.2
+    Siddet: 3

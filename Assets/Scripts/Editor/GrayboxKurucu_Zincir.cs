@@ -104,6 +104,10 @@ public static partial class GrayboxKurucu
         ParcaSablonuKur("Acik_Gardirop", "Acik_Gardirop");
         ParcaSablonuKur("Acik_Bavul", "Acik_Bavul");
         ParcaSablonuKur("Abajur", "Abajur");
+        // 1. katın saklanılabilen gardırobu (#97): iki kapaklı, kapakları açılır (Gardirop_K1.fbx).
+        // AcilirSablonKur kapakları menteşesinden döndürür; adında "Gardirop" geçtiği için daire
+        // açılınca SaklanmaYeri de eklenir (SaklanmaKurali).
+        AcilirSablonKur("Gardirop_K1");
         KatZinciriVarligi kat1 = Kat1Kur(koliBuyuk, koliKucuk, koliAcik);
         // 2. kat antre dekoru (#83): katlarda aynı model kullanılmaz (Şahan), yeni modeller.
         ParcaSablonuKur("Portmanto_Tik", "Portmanto_Tik");
@@ -138,6 +142,8 @@ public static partial class GrayboxKurucu
             ParcaSablonuKur(ad, ad);
         foreach (string ad in new[] { "Komodin_Nuri", "Teneke_Nuri" })
             AcilirSablonKur(ad);
+        // 2. katın saklanılabilen gardırobu (#97): tek kapaklı, dar (Gardirop_K2.fbx).
+        AcilirSablonKur("Gardirop_K2");
         KatZinciriVarligi kat2 = Kat2Kur();
         GameObject cizimParcasi = CizimParcasiSablonuKur();
         GameObject levye = SablonKur("Esya_Levye", "Levye", EsyaTuru.Levye, null);
@@ -145,13 +151,14 @@ public static partial class GrayboxKurucu
         GameObject anahtarParcasi = AnahtarParcasiSablonuKur();
         GameObject tabak = SablonKur("Esya_Tabak", "Tabak", EsyaTuru.Tabak, null);
         GameObject isimKarti = IsimKartiSablonuKur();
+        // Gölge (siluet) şablonu 4. kattan önce kurulur: 4. katın anı (#96, ışıkta siluet) onu kullanır.
+        GameObject golge = GolgeSablonuKur();
         Kat3SablonlariniKur();   // #83: 3. katın Blender modelleri (GrayboxKurucu_Kat3.cs)
         KatZinciriVarligi kat3 = Kat3Kur();
         Kat4SablonlariniKur();   // #83: 4. katın Blender modelleri (GrayboxKurucu_Kat4.cs)
-        KatZinciriVarligi kat4 = Kat4Kur();
+        KatZinciriVarligi kat4 = Kat4Kur(golge);
         Kat5SablonlariniKur();   // #83: 5. katın Blender modelleri (GrayboxKurucu_Kat5.cs)
         KatZinciriVarligi kat5 = Kat5Kur();
-        GameObject golge = GolgeSablonuKur();
         Kat6SablonlariniKur();   // #83: 6. katın Blender modelleri (GrayboxKurucu_Kat6.cs)
         KatZinciriVarligi kat6 = Kat6Kur(isimKarti, golge);
         Kat7SablonlariniKur();   // #83: 7. katın Blender modelleri (GrayboxKurucu_Kat7.cs)
@@ -216,6 +223,11 @@ public static partial class GrayboxKurucu
         vSeri.FindProperty("haberci").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Olay/Olay_UstKatAdimlari.wav");
         vSeri.FindProperty("tiklatma").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
         vSeri.ApplyModifiedPropertiesWithoutUndo();
+
+        // Takılınca ipucu (#98): bileşenin bağlanacak bir varlığı yok (sesi Resources'tan düşer).
+        if (yonetici.GetComponent<TakilmaIpucu>() == null) yonetici.gameObject.AddComponent<TakilmaIpucu>();
+        // Şimşek (#95): kendi kurucusu bağlar (ay ışığı, pencereler, gök gürültüsü, siluet şablonu).
+        SimsekKurucu.Kur();
 
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
@@ -664,8 +676,15 @@ public static partial class GrayboxKurucu
             // Çarşafla örtülü kanepe: landing duvarı boyunca, kapının açılan kanadından uzakta.
             Sus(Sablon("Carsafli_Kanepe"), 0.03f + 0.46f, 0f, 6.70f, 1f, 0f),
             // Boşaltılmış vitrin: hol duvarında; rafları boş, tezgâhında tek bir kahve fincanı unutulmuş.
-            M("vintage_cabinet_01", 3.40f, 0f, 4.75f + 0.335f, 0f, 1f),
-            Sus(Sablon("Fincan"), 3.70f, VitrinTezgahi, 4.75f + 0.50f, 0f, 1f),
+            // Vitrin (2 m eninde) 55 cm batıya, kapının yanına alındı (#97): Oda B duvarındaki gardırobun sol
+            // kapağı açılırken vitrinin ucuna çarpıyordu. Kapının açılan kanadı u 0,85-1,75'te; vitrin 1,84'te başlar.
+            M("vintage_cabinet_01", 2.85f, 0f, 4.75f + 0.335f, 0f, 1f),
+            Sus(Sablon("Fincan"), 3.15f, VitrinTezgahi, 4.75f + 0.50f, 0f, 1f),   // fincan vitrinle birlikte kaydı
+            // Nermin'in gardırobu (#97): Oda B duvarına (u = 5,0) sırtını dayamış, salona (-u) bakar. Ailenin
+            // götüremediği tek büyük eşya; içinde saklanılabilir. Pivotu arka-alt ortada, duvarın iç yüzünde.
+            // v 5,04-6,06: kapaklar 105° açılınca uçları yanlardan 13 cm taşar; güneyde hol duvarına (4,75) ve
+            // vitrine (u 3,86'ya kadar), kuzeyde TV sehpasına (v 6,17'den) değmez.
+            DA("Gardirop_Nermin", "Gardirop_K1", 5.00f, 0f, 5.55f, -1f, 0f),
             // TV sehpası: Oda B duvarında, kanepeye bakar; üstünde dantel ve biblo, televizyon yok.
             M("vintage_wooden_drawer_01", 5.00f - 0.23f, 0f, 6.60f, -1f, 0f),
             Sus(Sablon("TV_Ustu"), 5.00f - 0.23f, 0.55f, 6.60f, -1f, 0f),
@@ -715,8 +734,24 @@ public static partial class GrayboxKurucu
             Sus(Sablon("Sokuk_Karyola"), 10.50f, 0f, 5.77f, -1f, 0f),
             // Koliler: hol duvarında, kapının solunda; üstlerinde düğün fotoğrafının izi ve boş çivisi.
             Sus(koliBuyuk, 8.12f, 0f, 4.75f + 0.21f, 0f, 1f),
-            Sus(koliKucuk, 8.10f, 0.40f, 4.75f + 0.21f, 0.15f, 1f),
+            // Üstteki küçük kolinin adı var (#96): katın anında anahtar alınınca devrilip yere düşer.
+            new KatSusu { Ad = "Koli_Ust_OdaA", Sablon = koliKucuk, X = 8.10f, Y = 0.40f, Z = 4.75f + 0.21f, OnU = 0.15f, OnV = 1f },
             Sus(Sablon("Tablo_Izi_Genis"), 8.12f, 1.65f, 4.75f, 0f, 1f),
+        };
+
+        // ---------- KATIN ANI (#96): DEVRİLEN KOLİ ----------
+        // Oyuncu komodinin çekmecesinden katın anahtarını alır; 1,2 sn sonra arkasında, kapının yanındaki
+        // koli yığınının üstündeki küçük koli öne devrilip yere düşer. Öğretici katın tek korkusu: kimse yok,
+        // yalnızca boşaltılan evin bir kolisi; ama oyuncu ilk kez arkasına döner.
+        // Koli 40 x 30 x 30 cm, pivotu tabanının ortası, ön yüzü odaya (+Z) bakar. Ön alt kenarının
+        // (Pivot: 15 cm önde) üstünden 90° devrilir; sonunda büyük kolinin önüne, yere (40 cm aşağı,
+        // 7 cm ileri) yan yatmış iner.
+        v.anVar = true;
+        v.an = new KatAniVerisi
+        {
+            Tur = KatAniTuru.Devrilme, Yol = "Koli_Ust_OdaA", TetikEsya = "kat_anahtari", Gecikme = 1.2f,
+            Genlik = 90f, Sure = 0.55f, Pivot = new Vector3(0f, 0f, 0.15f), Kayma = new Vector3(0f, -0.40f, 0.07f),
+            Klip = AnSesi("An_Devrilme"), Ses = 0.9f,
         };
         // Boşaltılmış buzdolabı: fişi çekilmiş, kapısı aralık.
         v.acikParcalar = new List<AcikParca> { new AcikParca { Yol = "Esyalar/Buzdolabi/Kapi", Oran = 0.35f } };
@@ -991,6 +1026,19 @@ public static partial class GrayboxKurucu
     static KatSusu DA(string ad, string sablon, float u, float y, float v, float onU, float onV, string yol = "")
     { return new KatSusu { Ad = ad, Sablon = Sablon(sablon), Yol = yol, X = u, Y = y, Z = v, OnU = onU, OnV = onV }; }
 
+    // Katın anının sesi (#96): Art/Ses/scripts/an_sesleri_uret.py'nin ürettiği Assets/Audio/Anlar/<ad>.wav.
+    // Kat dosyası sese BAĞLANIR (build'e girsin diye; bulunarak yüklenmez).
+    static AudioClip AnSesi(string ad)
+    {
+        AudioClip k = AssetDatabase.LoadAssetAtPath<AudioClip>($"Assets/Audio/Anlar/{ad}.wav");
+        if (k == null) Debug.LogError($"[ZINCIR] Assets/Audio/Anlar/{ad}.wav yok (python Art/Ses/scripts/an_sesleri_uret.py).");
+        return k;
+    }
+
+    // Bir süse ad verir (#96): M(...) gibi adsız üreten yardımcıların sonucunu, anın başvurabileceği
+    // adlı bir süs yapar.
+    static KatSusu Adli(KatSusu s, string ad) { s.Ad = ad; return s; }
+
     static GameObject Sablon(string ad)
     {
         GameObject g = AssetDatabase.LoadAssetAtPath<GameObject>($"{SablonKlasoru}/{ad}.prefab");
@@ -1237,6 +1285,11 @@ public static partial class GrayboxKurucu
             // (yürünebilirlik denetimi); şimdi kuzey tarafta 75 cm geçit kalıyor.
             Sus(Sablon("Devrik_Sandalye"), 4.05f, 0f, 3.45f, 0f, 1f),
             Sus(Sablon("Kirik_Gozluk"), 5.05f, 0.008f, 3.95f, 0.3f, 1f),
+            // Nuri Bey'in hol dolabı (#97): holün dibinde, güney duvarına (v = 2,95) sırtını dayamış, kuzeye (+v)
+            // bakar; içinde saklanılabilir. Tek kapağın menteşesi batı (mutfak) yanında; doğu yanı (u 10,245) dip
+            // duvardaki peteğin ön yüzüne (u 10,29, duvardan 21 cm) 4,5 cm kalır. Önünde Oda A kapısına giden 1,1 m'lik
+            // geçit açık kalır.
+            DA("Gardirop_Nuri", "Gardirop_K2", 9.85f, 0f, 2.95f, 0f, 1f),
 
             // ---------- SALON (Şahan'ın seçimi: 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14) ----------
             // Salon u 0-5,0, v 4,75-8,1. Kapı hol duvarında (u 0,85-1,75); bu dairede içeri, kanepe tarafına
@@ -1264,8 +1317,11 @@ public static partial class GrayboxKurucu
             Sus(Sablon("Cay_Takimi"), 1.60f, SehpaUstu, 6.35f, 1f, 0f),
             Sus(Sablon("Gazete_Kilif"), 1.50f, SehpaUstu, 7.15f, 1f, 0.15f),
             // Pencere ile balkon kapısının arasında sallanan sandalye, üstünde katlı örgü battaniye.
-            M("Rockingchair_01", 2.85f, 0f, 7.35f, -0.3f, -1f),
-            Sus(Sablon("Orgu_Battaniye"), 2.85f, SandalyeOturagi, 7.35f, -0.3f, -1f),
+            // Sandalyenin adı var (#96: katın anında kendiliğinden sallanır). Battaniye ona çapalanır (Yol =
+            // sandalyenin adı): sandalyenin çocuğu olur ve onunla birlikte sallanır. Yeri aynı: sandalyenin
+            // ekseninde oturağın yüksekliği, dönüş yok (ikisi de aynı plan yönüne bakıyordu).
+            Adli(M("Rockingchair_01", 2.85f, 0f, 7.35f, -0.3f, -1f), "Sallanan_Sandalye_Nuri"),
+            new KatSusu { Sablon = Sablon("Orgu_Battaniye"), Yol = "Sallanan_Sandalye_Nuri", Y = SandalyeOturagi },
             // Koltuk dantelleri: kanepenin sırtında üç, berjerin sırtında bir.
             Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 6.35f, 1f, 0f),
             Sus(Sablon("Koltuk_Danteli"), KanepeSirtU, KanepeSirtY, 6.85f, 1f, 0f),
@@ -1327,6 +1383,19 @@ public static partial class GrayboxKurucu
             Sus(Sablon("Supurge_Faras"), 6.70f, 0f, 1.55f, -1f, 0f),
             Sus(Sablon("Damacana"), 4.85f, 0f, 1.50f, 1f, 0f),
             Sus(Sablon("Sogan_Sepeti"), 4.86f, 0f, 1.95f, 1f, 0f),
+        };
+
+        // ---------- KATIN ANI (#96): SALLANAN SANDALYE ----------
+        // Oyuncu salona girdikten 2,5 sn sonra Nuri Bey'in sallanan sandalyesi kendiliğinden sallanmaya
+        // başlar: biri az önce kalkmış gibi. Altı salınım, her biri 1,7 sn, 6°'den sönerek; her uçta tahta
+        // gıcırdar. Sallanan sandalyenin kızakları bir çember yayıdır; çemberin merkezinin (yerden ~0,9 m)
+        // çevresinde dönen kızak yere değmeye devam eder, bu yüzden dönme noktası oturağın üstünde.
+        v.anVar = true;
+        v.an = new KatAniVerisi
+        {
+            Tur = KatAniTuru.Sallanma, Yol = "Sallanan_Sandalye_Nuri", TetikOda = "Salon", Gecikme = 2.5f,
+            Sayi = 6, Genlik = 6f, Sure = 1.7f, Pivot = new Vector3(0f, 0.9f, 0f),
+            Klip = AnSesi("An_Gicirti"), Ses = 0.6f,
         };
 
         var odalar = new List<string>();

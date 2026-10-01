@@ -165,4 +165,13 @@ public class KatZinciriVarligi : ScriptableObject
     // görülmeden atlatılmalı. Gölge'nin şablonu kacisSablonu'ndan (aynı siluet).
     public bool saklanmaVar;
     public AudioClip saklanmaSesi;           // giriş kapısında tıklatma
+
+    // ---------- KATIN ANI (#96) ----------
+    // Her katın bir kez olan imza korku anı (sallanan sandalye, çarpan kapı, ışıkta siluet...).
+    // Tarifin kendisi KatAni.cs'teki KatAniVerisi; oynatan da KatAni bileşeni. Unity, [Serializable]
+    // bir sınıf alanını hiçbir zaman boş (null) bırakmaz, her dosyada içi varsayılanlarla dolu bir
+    // tarif durur; bu yüzden "bu katta an var mı" ayrı bir işaretle söylenir. IsikSiluet'in silueti
+    // kacisSablonu'dur (aynı Gölge).
+    public bool anVar;
+    public KatAniVerisi an = new KatAniVerisi();
 }

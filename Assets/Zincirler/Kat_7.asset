@@ -588,6 +588,17 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
+    X: 7.7
+    Y: 0
+    Z: 5.55
+    Donus: 0
+    OnU: 1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 6097720083337088533, guid: a083b11ad49027540b115889927a6b4f, type: 3}
+    Metin: 
+    Ad: Gardirop_Cemal
+  - Yol: 
     X: 5.3599997
     Y: 0
     Z: 7.2
@@ -644,3 +655,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 0
   saklanmaSesi: {fileID: 0}
+  anVar: 1
+  an:
+    Tur: 1
+    Yol: Kapilar/Kapi_Oda_A
+    TetikOda: Oda_A
+    TetikEsya: 
+    TetikKilit: 
+    Gecikme: 2
+    Klip: {fileID: 8300000, guid: bff77e25bb9c043429a8aeee2826c1a7, type: 3}
+    Ses: 1
+    Sayi: 6
+    Genlik: 7
+    Sure: 0.2
+    EksenZ: 0
+    Pivot: {x: 0, y: 0, z: 0}
+    Kayma: {x: 0, y: 0, z: 0}
+    U: 0
+    V: 0
+    Yukseklik: 1.2
+    Siddet: 3

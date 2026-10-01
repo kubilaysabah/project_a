@@ -491,7 +491,7 @@ MonoBehaviour:
   - Yol: 
     X: 5
     Y: 1.95
-    Z: 6.5
+    Z: 7.7
     Donus: 0
     OnU: -1
     OnV: 0
@@ -499,6 +499,17 @@ MonoBehaviour:
     Sablon: {fileID: 1918850002066306607, guid: 350ef03cb99e24b4e87bb889c7003374, type: 3}
     Metin: 
     Ad: 
+  - Yol: 
+    X: 5
+    Y: 0
+    Z: 6.45
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 396668771836711085, guid: ad7c36dac100aed4c8effabf201e2ad1, type: 3}
+    Metin: 
+    Ad: Gardirop_Mudur
   - Yol: 
     X: 1.4
     Y: 0
@@ -674,7 +685,7 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 1190523725201385501, guid: 13b107d85c7f50c499e04175f465fff0, type: 3}
     Metin: 
-    Ad: 
+    Ad: Tepegoz_Toplanti
   - Yol: 
     X: 5.1
     Y: 1.55
@@ -709,3 +720,23 @@ MonoBehaviour:
   cizimBoyu: 0.3
   saklanmaVar: 0
   saklanmaSesi: {fileID: 0}
+  anVar: 1
+  an:
+    Tur: 3
+    Yol: Tepegoz_Toplanti
+    TetikOda: Oda_B
+    TetikEsya: 
+    TetikKilit: 
+    Gecikme: 2.5
+    Klip: {fileID: 8300000, guid: f68ad3d3085fd924db1558a2e3f98a86, type: 3}
+    Ses: 0.7
+    Sayi: 6
+    Genlik: 7
+    Sure: 5
+    EksenZ: 0
+    Pivot: {x: 0, y: 1.05, z: 0.13}
+    Kayma: {x: 0, y: 0, z: 0}
+    U: 5.12
+    V: 7
+    Yukseklik: 1.55
+    Siddet: 6

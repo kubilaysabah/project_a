@@ -111,3 +111,18 @@ Oyundaki bütün sesler, numarasıyla (2026-09-27, #74 için baştan sayıldı; 
 | No | Dosya · süre | Ne zaman, nerede | Kaynak | Karar |
 |---|---|---|---|---|
 | S49 | `Audio/Anomali/Bebek_Yakin.wav` · 14 sn | Asansör kuyusundan yakın, boğuksuz bebek ağlaması. Yalnızca kapalı bir anomali kartı kullanıyor; oyunda hiç çalmıyor. | Kayıt: S06'nın kaydı, kuyu yankısıyla | **Kaldırıldı** (#74) |
+
+---
+
+## 8. Yeni sesler (2026-10-01, #91 #95 #96; Şahan dinleyecek)
+
+| No | Dosya · süre | Ne zaman, nerede | Kaynak | Karar |
+|---|---|---|---|---|
+| S50 | `Resources/Sesler/Kalp_Atisi.wav` · 0,45 sn | Gerilim yükselince oyuncunun kalp atışı (2B, oda yankısı yok); gerilim 1. kademede yavaş, avda hızlı (#91). | Sentez: oyuncu_sesleri_uret.py → kalp_atisi() | yeni, Şahan dinleyecek |
+| S51 | `Resources/Sesler/Gok_Gurultusu_1.wav` · 8,9 sn | Şimşekten 1-3 sn sonra yakın gök gürültüsü (2B, uzaklığa göre kısılıp boğulur) (#95). | Sentez: hava_uret.py → gok_gurultusu() | yeni, Şahan dinleyecek |
+| S52 | `Resources/Sesler/Gok_Gurultusu_2.wav` · 7,2 sn | Uzak gök gürültüsü (#95). | Sentez: hava_uret.py → gok_gurultusu() | yeni, Şahan dinleyecek |
+| S53 | `Audio/Anlar/An_Gicirti.wav` · 1,1 sn | 2. kat sallanan sandalye, 3. kat beşik: her salınımın ucunda ahşap gıcırtısı (3B) (#96). | Sentez: an_sesleri_uret.py | yeni, Şahan dinleyecek |
+| S54 | `Audio/Anlar/An_Devrilme.wav` · 1,5 sn | 1. kat: koli devrilip yere düşer (3B) (#96). | Sentez: an_sesleri_uret.py | yeni, Şahan dinleyecek |
+| S55 | `Audio/Anlar/An_Vizilti.wav` · 1,05 sn | 4. kat: hol lambası titreyerek yanarken elektrik vızıltısı (3B) (#96). | Sentez: an_sesleri_uret.py | yeni, Şahan dinleyecek |
+| S56 | `Audio/Anlar/An_Damla.wav` · 5,2 sn | 5. kat: su kesikken kovaya hızlanarak damlayan su (3B) (#96). | Sentez: an_sesleri_uret.py | yeni, Şahan dinleyecek |
+| S57 | `Audio/Anlar/An_Parazit.wav` · 5,8 sn | 8. kat: tepegöz kendiliğinden açılır: şalter, uğultu, fan, çatırtı (3B) (#96). | Sentez: an_sesleri_uret.py | yeni, Şahan dinleyecek |

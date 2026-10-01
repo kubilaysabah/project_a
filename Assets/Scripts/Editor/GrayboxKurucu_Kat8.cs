@@ -38,6 +38,9 @@ public static partial class GrayboxKurucu
             ParcaSablonuKur(ad, ad);
         AcilirSablonKur("Anahtar_Dolabi_K8");
         AcilirSablonKur("Evrak_Dolabi_K8");
+        // Saklanılabilen gardırop (#97): iki kapaklı (Gardirop_K8.fbx); adında "Gardirop" geçtiği için
+        // daire açılınca SaklanmaYeri de eklenir (SaklanmaKurali).
+        AcilirSablonKur("Gardirop_K8");
     }
 
     static KatZinciriVarligi Kat8Kur()
@@ -142,7 +145,11 @@ public static partial class GrayboxKurucu
             D("Dosya_Rafi_K8", 0.03f + 0.19f, 0f, 6.60f, 1f, 0f),
             D("Kasa_K8", 4.62f, 0f, 7.70f, -1f, 0f),
             D("Jaluzi_K8", 1.40f, 2.30f, 8.10f, 0f, -1f),
-            D("Duvar_Saati_K8", 5.00f, 1.95f, 6.50f, -1f, 0f),
+            // Duvar saati kasanın üstüne alındı (#97): eski yeri (v 6,5) gardırobun arkasında kalıyordu.
+            D("Duvar_Saati_K8", 5.00f, 1.95f, 7.70f, -1f, 0f),
+            // Müdürün elbise dolabı (#97): Oda B duvarına (u = 5,0) sırtını dayamış, odaya (-u) bakar; içinde
+            // saklanılabilir. v 5,99-6,91: dosya dolabının çekmecesi (v 5,4'ün önü) ve kasa (v 7,45'ten) serbest.
+            DA("Gardirop_Mudur", "Gardirop_K8", 5.00f, 0f, 6.45f, -1f, 0f),
             D("Petek", 1.40f, 0f, 8.10f, 0f, -1f),
 
             // ---------- MUTFAK (çay ocağı) ---------- (u 6,8-10,5, v -0,8-2,85; kapının önü boş)
@@ -171,9 +178,23 @@ public static partial class GrayboxKurucu
             D("Toplanti_Masasi_K8", 5.10f + 0.42f, 0f, 7.00f, 1f, 0f),
             D("Toplanti_Sandalyesi_K8", 6.25f, 0f, 7.00f, -1f, 0f),
             DA("Evrak_Dolabi_Toplanti", "Evrak_Dolabi_K8", 7.05f, 0f, 8.10f - 0.24f, 0f, -1f),
-            D("Tepegoz_K8", 7.20f, 0f, 5.25f, -1f, 0.3f),
+            DA("Tepegoz_Toplanti", "Tepegoz_K8", 7.20f, 0f, 5.25f, -1f, 0.3f),   // adı var: katın anı (#96)
             // Tahta batı duvarında, masanın üstünde (doğu duvarında yürüme yolunu daraltıyordu).
             D("Kara_Tahta_K8", 5.10f, 1.55f, 7.00f, 1f, 0f),
+        };
+
+        // ---------- KATIN ANI (#96): KENDİLİĞİNDEN AÇILAN TEPEGÖZ ----------
+        // Toplantı odası (Oda B) karanlık. Oyuncu girdikten 2,5 sn sonra kapının yanındaki tepegöz cızırdayarak
+        // açılır: kara tahtaya titreyen soğuk beyaz bir ışık vurur, 5 sn sonra bir anda söner. Yansıtılan bir şey
+        // yok; boş bir ışık karesi. Işık tepegözün başlığının önünden çıkar (aynanın 13 cm önü, yerden 1,05 m;
+        // modelin içinde kalsaydı başlığın kendi gövdesi ışığı örterdi) ve kara tahtanın ortasına (u 5,12,
+        // v 7,0, yükseklik 1,55) bakar; plan noktası verildiği için aynalı dairede de tahtayı bulur.
+        v.anVar = true;
+        v.an = new KatAniVerisi
+        {
+            Tur = KatAniTuru.EkranAc, Yol = "Tepegoz_Toplanti", TetikOda = "Oda_B", Gecikme = 2.5f, Sure = 5f,
+            Pivot = new Vector3(0f, 1.05f, 0.13f), U = 5.12f, V = 7.0f, Yukseklik = 1.55f, Siddet = 6f,
+            Klip = AnSesi("An_Parazit"), Ses = 0.7f,
         };
 
         var odalar = new List<string>();
