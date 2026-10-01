@@ -232,6 +232,20 @@ Things only Kubilay can do. Claude on Kubilay's machine: walk him through these,
 
 ## Current status (UPDATE THIS SECTION whenever progress is made)
 
+- 2026-10-01 (Lesson 58): Şahan asked to replace modern-looking props with worn 1990s versions (#81).
+  - **Every Blender prop is aged on import** (`1d8ef37`):
+    - Done by `EsyaEskitici`, an AssetPostprocessor using `OnPreprocessMaterialDescription` with order 100, so it runs after URP's FBX material preprocessor. `OnPostprocessMaterial` is never called for `ImportViaMaterialDescription` FBX.
+    - Effect: colour desaturated 30 %, darkened and yellowed; smoothness ≤ 0.32; a grime detail map on top.
+    - Skipped: task items, `Golge` and emissive materials.
+    - After changing the rule, bump `Surum`. Menu: `Huzur → Eşyaları Eskit`.
+  - **13 props remodelled** (`f023199`):
+    - Floor 3: sofa `Kanepe_K3` (replaces Poly Haven `sofa_02`; open underneath for the drawing piece), child chair `Cocuk_Sandalyesi_K3` (replaces `SchoolChair_01`), high chair, oilcloth table, desk, night lamp.
+    - Fridges on floors 5, 6 and 8; floor 5 bathroom cabinet; medicine cabinet.
+    - Floor 6B pouf `Puf_K6` (replaces `Ottoman_01`); floor 8 cleaning cart.
+    - `throw_pillows_01` was removed because it collided with the new sofa. These four Poly Haven models are now unused.
+  - **Verification:** room inspection on 6 floors OK, `Eksikler()` 0 findings, 212/212 tests, bot 0 problems, release build 380.8 MB.
+  - Waiting for Şahan's test.
+
 - 2026-09-30 (Lesson 57): Şahan asked Claude to finish **all floors and rooms** in the #83 way on its own; he tests later.
   - **Floor 2 finished** (`59bedb4`): Oda A key in the sewing-machine drawer → radio (102.7) in the locked bedroom → pantry padlock 1027 → floor key in a biscuit tin on Nuri's repair bench. The named-decor infrastructure (see the #83 architecture bullet) came with it.
   - **Floors 3-8 refurnished room by room**, about 150 new Blender models (scripts `Art/Blender/scripts/kat3..8_esyalar*.py`, modelled by six parallel Claude subagents). Every chain was redone so each room holds at most one task item. Hint notes were removed or cut down to story (`not.kat6_kol/_takvim`, `kat7_kol/_sifre`, `kat8_kiler/_salon/_arsiv` deleted; `kat3_anne`, `kat4_giris`, `kat5_liste`, `kat6_davet`, `kat7_cemal/_son`, `kat8_yonetim` trimmed).
