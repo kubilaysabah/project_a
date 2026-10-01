@@ -65,7 +65,8 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
     {
         Kilit kilit = GetComponent<Kilit>();
         if (kilit != null && !kilit.Cozuk && kilit.Etkilesim(oyuncu)) return;
-        if (kilitli) { Cal(kilitliSesi, 0.5f); return; }
+        if (kilitli) { Cal(kilitliSesi, 0.5f); Varlik.Gurultu(0.04f); return; }   // kilitli: sarsıldı (#86)
+        if (!acik) Varlik.Gurultu(0.02f);                                           // çekmece/kapak açıldı (#86)
         hareketEden = StartCoroutine(Git(acik ? 0f : 1f));
     }
 

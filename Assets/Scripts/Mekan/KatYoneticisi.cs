@@ -1124,7 +1124,11 @@ public class KatYoneticisi : MonoBehaviour
         string olay = olayPlani == null || catiAcildi ? ""
             : "   ·   olay: " + olayPlani.KatIcin(sayac.MevcutKat);
 
-        string alt = $"kayıt: {Kayit.Kat}. kat" + poset + kartAdi + olay + fps +
+        // Varlığın gerilimi (#86): kademe ve 0-1 değer.
+        Varlik varlik = GetComponent<Varlik>();
+        string gerilim = varlik == null ? "" : $"   ·   gerilim {varlik.Gerilim:0.00} (k{varlik.Kademe}{(varlik.AvSuruyor ? " AV" : "")})";
+
+        string alt = $"kayıt: {Kayit.Kat}. kat" + poset + kartAdi + olay + gerilim + fps +
                      (catiModu ? "   ·   üstte çatı" : "") +
                      (catiOdasinda ? "   ·   çatı odasında" : "") +
                      (acilisModu ? "   ·   AÇILIŞ (zemin kat)" : "");
@@ -1171,6 +1175,13 @@ public class KatYoneticisi : MonoBehaviour
     /// anahtar düşer ve kurulumda büfeye geri konur; an da yeniden kurulur.
     /// </summary>
     public void SaklanmadaYakalandi(int kat) { StartCoroutine(KatiBastanKur(kat, kilitleriSil: false)); }
+
+    /// <summary>
+    /// Varlığın avında yakalanıldı (#86, Varlik): saklanmadaki gibi karanlık, katın başında uyanış,
+    /// kilitler kalır. 7. katın kaçışından farklı olarak kilitler SİLİNMEZ: av her katta ve her
+    /// oyalanmada gelebilir; 8. katın yedi kilidini her seferinde kaybetmek oyunu bıktırırdı.
+    /// </summary>
+    public void AvdaYakalandi(int kat) { StartCoroutine(KatiBastanKur(kat, kilitleriSil: false)); }
 
     private IEnumerator KatiBastanKur(int kat, bool kilitleriSil)
     {

@@ -111,6 +111,7 @@ public class MenteseSokucu : MonoBehaviour
             yield return null;
         }
         if (devrilmeSesi != null) AudioSource.PlayClipAtPoint(devrilmeSesi, nokta, 0.9f);
+        Varlik.Gurultu(0.3f);    // kapı devrildi: bina duydu (#86)
         mesgul = false;
     }
 

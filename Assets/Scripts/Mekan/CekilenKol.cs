@@ -56,6 +56,7 @@ public class CekilenKol : MonoBehaviour, IEtkilesimli
         harekette = true;
         if (ses == null) ses = Resources.Load<AudioClip>("Sesler/Kol_Cekme");
         if (ses != null) AudioSource.PlayClipAtPoint(ses, transform.position, 0.7f);
+        Varlik.Gurultu(0.1f);    // kol çekildi: bina duydu (#86)
         for (float t = 0f; t < sure; t += Time.deltaTime)
         {
             // Hızlanarak iner (t*t): ağır bir kol önce direnir, sonra düşer.

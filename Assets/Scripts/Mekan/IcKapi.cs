@@ -73,6 +73,7 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
         {
             // Kol iner ama dil kilitte: kapı sarsılır, açılmaz. Cevap kapının kendisi.
             Cal(kilitliSesi, 0.7f);
+            Varlik.Gurultu(0.04f);   // kapı sarsıldı (#86)
             return;
         }
         // Kapanırken kanadın süpüreceği yerde oyuncu duruyorsa kapatmıyoruz: yoksa kanat

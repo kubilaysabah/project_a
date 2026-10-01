@@ -38,6 +38,7 @@ public class OyunBotu : MonoBehaviour
     public static OyunBotu Baslat()
     {
         if (Ornek != null) Destroy(Ornek.gameObject);
+        Varlik.Kapali = true;   // bot ışınlanır ve eşyaları doğrudan çağırır; Varlık (#86) işlemesin
         GameObject g = new GameObject("Oyun_Botu");
         Ornek = g.AddComponent<OyunBotu>();
         return Ornek;

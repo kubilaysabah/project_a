@@ -65,5 +65,6 @@ public class KirilanKavanoz : MonoBehaviour, IEtkilesimli
         }
         if (kirilmaSesi == null) kirilmaSesi = Resources.Load<AudioClip>("Sesler/Cam_Kirilma");
         if (kirilmaSesi != null) AudioSource.PlayClipAtPoint(kirilmaSesi, transform.position, 0.8f);
+        Varlik.Gurultu(0.25f);   // cam kırıldı: bina duydu (#86)
     }
 }

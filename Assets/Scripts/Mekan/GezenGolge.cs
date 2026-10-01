@@ -108,6 +108,7 @@ public class GezenGolge : MonoBehaviour
         if (kontrol == null || !kontrol.enabled) return false;              // menü, not, şifre ekranı
         foreach (KacisAni k in FindObjectsByType<KacisAni>())               // 7. katın kaçışı sürüyor
             if (k.Basladi) return false;
+        if (Varlik.Ornek != null && Varlik.Ornek.AvSuruyor) return false;  // Varlığın avı sürüyor (#86)
         return true;
     }
 

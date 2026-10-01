@@ -207,6 +207,16 @@ public static partial class GrayboxKurucu
         gSeri.FindProperty("haberci").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Olay/Olay_UstKatAdimlari.wav");
         gSeri.ApplyModifiedPropertiesWithoutUndo();
 
+        // Varlık (#86): gerilim kuralı ve av, aynı nesnede. Gölge şablonu ve haberci Gezen Gölge'yle
+        // aynı; tıklatma 6-7. katın kapı tıklatması.
+        Varlik varlik = yonetici.GetComponent<Varlik>();
+        if (varlik == null) varlik = yonetici.gameObject.AddComponent<Varlik>();
+        var vSeri = new SerializedObject(varlik);
+        vSeri.FindProperty("sablon").objectReferenceValue = golge;
+        vSeri.FindProperty("haberci").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Olay/Olay_UstKatAdimlari.wav");
+        vSeri.FindProperty("tiklatma").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
+        vSeri.ApplyModifiedPropertiesWithoutUndo();
+
         AssetDatabase.SaveAssets();
         SahneyiKaydet("Zincir");
         Debug.Log("[ZINCIR] Şablonlar, test zinciri ve 1-8. katlar kuruldu ve bağlandı.");

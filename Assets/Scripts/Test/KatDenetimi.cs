@@ -46,6 +46,7 @@ public static class KatDenetimi
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>();
         if (oyuncu == null || etk == null || yonetici == null) return "oyuncu ya da kat yöneticisi yok (oyun modunda mı?)";
         const BindingFlags Gizli = BindingFlags.NonPublic | BindingFlags.Instance;
+        Varlik.Kapali = true;   // denetim oyuncuyu ışınlar; Varlık (#86) işlemesin
 
         // Bütün oda kapıları açılır (balkon kapısı hep kilitli kalır; onu açmaya gerek yok).
         foreach (IcKapi k in Object.FindObjectsByType<IcKapi>())

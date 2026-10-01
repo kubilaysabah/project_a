@@ -46,6 +46,14 @@ public class DaireLambalari : MonoBehaviour
         foreach (Transform l in lambalar) Yak(l, YanmaliMi(l));
     }
 
+    /// <summary>Yanan lambalar bir an titrer, sonra yanık kalır (Varlık, #86). Sönük lamba sönük kalır.</summary>
+    public void Titret()
+    {
+        if (!isActiveAndEnabled) return;
+        foreach (Transform l in lambalar)
+            if (YanmaliMi(l)) StartCoroutine(TitreyerekYak(l, Random.Range(0f, 0.2f)));
+    }
+
     private void ElektrikDegisti()
     {
         StopAllCoroutines();

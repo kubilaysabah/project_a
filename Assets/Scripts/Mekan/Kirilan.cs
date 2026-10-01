@@ -51,6 +51,7 @@ public class Kirilan : MonoBehaviour
         {
             if (ses == null) ses = Resources.Load<AudioClip>("Sesler/Cam_Kirilma");
             if (ses != null) AudioSource.PlayClipAtPoint(ses, transform.position, 0.8f);
+            Varlik.Gurultu(0.25f);   // cam kırıldı: bina duydu (#86)
         }
     }
 

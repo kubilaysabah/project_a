@@ -58,6 +58,9 @@ public class SaklanmaAni : MonoBehaviour
     /// <summary>Kayıttan: bu katın saklanma anı daha önce atlatıldı.</summary>
     public void BittiBaslat() { durum = Durum.Bitti; }
 
+    /// <summary>Uyarı ya da devriye sürüyor mu (Varlık, #86, bu sırada durur)?</summary>
+    public bool Suruyor { get { return durum == Durum.Uyari || durum == Durum.Devriye; } }
+
     private void OnDestroy()
     {
         foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi -= KapiAcildi;
