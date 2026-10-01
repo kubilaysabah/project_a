@@ -1339,11 +1339,27 @@ public static partial class GrayboxKurucu
     }
 
     // Kovalayan siluetin şablonu (#58): yalnızca model; çarpışma yok (oyuncuyu itmesin, nişanı engellemesin).
+    //
+    // #90: Golge.fbx artık altı parça (golge.py): Govde + Bas + Kol_Sol/Sag + Bacak_Sol/Sag, her
+    // birinin pivotu kendi ekleminde. Gövde şablonun doğrudan çocuğu, öbür beş parça GÖVDENİN
+    // çocuğu ve sıfır konumla eklenir: Model yardımcısı parçanın FBX içindeki kendi konumunu
+    // (omuzdaki, kalçadaki pivotunu) zaten ekliyor (DaireEsyasi'nin kapak/çekmece parçalarıyla
+    // aynı yol). Böylece ileride yazılacak animasyon (GolgeAnimasyonu) "Govde/Kol_Sol" gibi
+    // bir parçayı döndürünce uzuv ekleminden sallanır; gövdeyi taşıyan kod ise değişmez,
+    // çünkü gövdenin pivotu eskisi gibi ayakların arasında (0, 0, 0).
     static GameObject GolgeSablonuKur()
     {
         GameObject gecici = new GameObject("Kacis_Golgesi");
-        if (Model("Model", gecici.transform, "Golge", null, Vector3.zero, 0f, carpisma: false) == null)
+        // Gövde: FBX'teki "Govde" parçası, şablon kökünde, sıfır konum (pivot yerde).
+        GameObject govde = Model("Govde", gecici.transform, "Golge", "Govde", Vector3.zero, 0f, carpisma: false);
+        if (govde == null)
         { Object.DestroyImmediate(gecici); Debug.LogWarning("[ZINCIR] Golge.fbx yok."); return null; }
+        // Uzuvlar: adları FBX'tekiyle bire bir aynı; animasyon kodu bu adlarla bulacak.
+        foreach (string parca in new[] { "Bas", "Kol_Sol", "Kol_Sag", "Bacak_Sol", "Bacak_Sag" })
+            if (Model(parca, govde.transform, "Golge", parca, Vector3.zero, 0f, carpisma: false) == null)
+                Debug.LogWarning($"[ZINCIR] Golge.fbx içinde '{parca}' parçası yok (golge.py yeniden çalıştırılmalı).");
+        // Canlılık (#90): yürüyüş, nefes, oyuncuya dönen baş; parçaları adlarıyla bulur.
+        gecici.AddComponent<GolgeAnimasyonu>();
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Kacis_Golgesi.prefab");
         Object.DestroyImmediate(gecici);
         return sablon;

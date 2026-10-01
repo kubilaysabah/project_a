@@ -525,6 +525,80 @@ URETICILER = {"bebek": bebek, "tv": tv, "guvercin": guvercin, "kapi_carpma": kap
               "radyo": radyo}
 URETICILER.update(URETICILER_74)
 
+
+# ---------- TELEFON KONUŞMALARI (#90) ----------
+# Kapıcı odasındaki telefona gelen aramalar (2. kat Nuri, 5. kat Hasan) seslendirilecek.
+# Proje kuralı: insan sesi asla sentezlenmez; konuşmaları Şahan kendisi okuyup kaydeder
+# (nasıl kaydedileceği Docs/seslendirme.md'de). Bu işlemci o temiz kaydı alıp 90'ların
+# Türk şehir hattından, bakalit bir ahizeden duyulan sese çevirir.
+#
+#   python Art/Ses/scripts/kayit_isle.py telefon <girdi> <cikti_adi>
+#     girdi:     Art/Ses/kayitlar/ içindeki dosya adı (wav, m4a, mp3...) ya da tam bir yol
+#     cikti_adi: oyundaki ad, uzantısız (ör. telefon_kat2)
+#     çıktı:     Assets/Resources/Sesler/Konusmalar/<cikti_adi>.wav  (44,1 kHz, mono, 16 bit)
+#
+# Öbür üreticilerden farkı: argüman ister. O yüzden URETICILER sözlüğünde DEĞİLDİR; betik
+# adsız çalıştırılınca bütün sesleri yeniden üretirken konuşmalara dokunmaz (dokunamaz da:
+# hangi kaydı işleyeceğini bilmez). Aşağıdaki __main__ onu ayrı bir dalda ele alır.
+#
+# NEDEN BÖYLE DUYULUR: 90'ların analog telefon hattı sesi 300-3400 Hz arasına sıkıştırır
+# (hattın "ses bandı"). Bunun altındaki gövde (göğüs tınısı) ve üstündeki parlaklık ("s",
+# "ş" harflerinin tizliği) yolda kalır; kulak tam da bu eksikliği "telefondan geliyor" diye
+# tanır. Ahizedeki karbon mikrofon ise gür heceleri ezer (hafif bir hırıltı), hat boşken
+# de şebekenin 50 Hz vınlaması ve cılız bir hışırtı duyulur. Dört adım bunları taklit eder.
+KONUSMALAR = os.path.join(SESLER, "Konusmalar")
+
+
+def telefon(dosya_adi, cikti_adi, klasor=None):
+    """Temiz bir ses kaydını 90'lar ahize sesine çevirip Konusmalar/<cikti_adi>.wav yazar.
+    'klasor' yalnızca deneme içindir (çıktıyı Assets dışına yazmak için)."""
+    import math
+    H = H44
+
+    # Girdi ya kayitlar/ klasöründe bir dosya adıdır ya da var olan bir yol (deneme için).
+    girdi = os.path.abspath(dosya_adi) if os.path.isfile(dosya_adi) else dosya_adi
+    ses = oku(girdi, H)                                        # Blender çevirir, -1..1 örnekler
+
+    # 1. HAT BANDI: 300 Hz altı ve 3400 Hz üstü atılır. Biquad süzgeçler tek geçişte yumuşak
+    #    bir yamaç çizer; iki kez geçince yamaç dikleşir ve bant "telefon gibi" sertleşir.
+    for _ in range(2):
+        ses = ortak.alcak(ortak.yuksek(ses, 300, H), 3400, H)
+    # Üstüne 3600 Hz'de iki geçiş daha: eski hatlar tizleri gerçekten keskin keser. Örnek hızı
+    # 44,1 kHz kalır (Unity'ye dokunulmaz); "8 kHz'lik hat" hissini bu sert kesim verir.
+    for _ in range(2):
+        ses = ortak.alcak(ses, 3600, H)
+
+    # 2. KARBON MİKROFON: gür heceler yumuşakça ezilir (tanh). ses_ortak'taki darbeler için
+    #    1-4 arası "surus" kullanılır; burada 3,2 ile hafif ama duyulur bir hırıltı oluşur.
+    #    (Fonksiyon önce tepeyi 1'e eşitler; o yüzden sonuç -1..1 arasındadır.)
+    ses = ortak.yumusak_sinirla(ses, 3.2)
+
+    # 3. HAT YATAĞI: 50 Hz şebeke vınlaması (üstüne cılız 100 Hz harmoniği; trafo vınlaması
+    #    hep ikinci harmoniğini de taşır) ve hattın hışırtısı (bant sınırlı gürültü).
+    #    Seviye -45 dB: 10^(-45/20) ≈ 0,0056. Konuşmanın tepesi 1 iken bu, ancak sessiz
+    #    anlarda fark edilen bir taban: hattın "açık" olduğunu söyler, konuşmayı bozmaz.
+    n = len(ses)
+    taban = 10 ** (-45 / 20)
+    hisirti = ortak.tepeyi_esitle(ortak.bant(ortak.gurultu(n), 1800, H, 0.5))
+    for i in range(n):
+        t = i / H
+        vinlama = 0.8 * math.sin(2 * math.pi * 50 * t) + 0.3 * math.sin(2 * math.pi * 100 * t)
+        ses[i] += taban * (vinlama + 0.7 * hisirti[i])
+
+    # 4. YAZ: tepe 0,8'e ölçeklenir (öbür oyun sesleriyle aynı), 44,1 kHz mono 16 bit.
+    hedef = os.path.join(klasor or KONUSMALAR, cikti_adi + ".wav")
+    ortak.kaydet(hedef, ses, H, 0.8)
+    return hedef
+
+
 if __name__ == "__main__":
-    for ad in (sys.argv[1:] or list(URETICILER)):
-        URETICILER[ad]()
+    argumanlar = sys.argv[1:]
+    if argumanlar and argumanlar[0] == "telefon":
+        # Konuşma işlemcisi argüman ister: python kayit_isle.py telefon <girdi> <cikti_adi>
+        if len(argumanlar) != 3:
+            print("Kullanım: python kayit_isle.py telefon <girdi> <cikti_adi>   (ör. telefon telefon_kat2.wav telefon_kat2)")
+            sys.exit(1)
+        telefon(argumanlar[1], argumanlar[2])
+    else:
+        for ad in (argumanlar or list(URETICILER)):
+            URETICILER[ad]()

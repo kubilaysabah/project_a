@@ -15,6 +15,7 @@ public class Telefon : MonoBehaviour, IEtkilesimli
 
     private static AudioClip ahizeSesi;
     private Vector3 ahizeYeri;
+    private AudioSource konusmaKaynagi;   // seslendirilmiş konuşma (#90; kayıt yoksa yalnızca yazı)
 
     private void Awake()
     {
@@ -38,12 +39,37 @@ public class Telefon : MonoBehaviour, IEtkilesimli
             konusmaEkrani.Ayarla(konusma);
             konusmaEkrani.Etkilesim(oyuncu);
         }
+        KonusmayiCal(konusma);
+    }
+
+    // Seslendirme (#90): "not.telefon_kat2" için Resources/Sesler/Konusmalar/telefon_kat2 varsa
+    // ahizeden (2B, kulakta) çalar; yazı ekranı altyazı olarak kalır. Kayıt yoksa hiçbir şey olmaz:
+    // Şahan kayıtları yaptıkça dosyalar klasöre konur, kod değişmez (Docs/seslendirme.md).
+    private void KonusmayiCal(string anahtar)
+    {
+        if (string.IsNullOrEmpty(anahtar)) return;
+        string ad = anahtar.StartsWith("not.") ? anahtar.Substring(4) : anahtar;
+        AudioClip klip = Resources.Load<AudioClip>("Sesler/Konusmalar/" + ad);
+        if (klip == null) return;
+        if (konusmaKaynagi == null)
+        {
+            konusmaKaynagi = gameObject.AddComponent<AudioSource>();
+            konusmaKaynagi.playOnAwake = false;
+            konusmaKaynagi.spatialBlend = 0f;        // ahize kulakta: iki boyutlu
+            konusmaKaynagi.bypassListenerEffects = true;   // odanın yankısı hattan gelen sese işlemez
+        }
+        konusmaKaynagi.clip = klip;
+        konusmaKaynagi.volume = 0.85f;
+        konusmaKaynagi.PlayDelayed(0.7f);   // ahize kulağa gidene kadar
     }
 
     private void Update()
     {
         // Konuşma ekranı kapanınca ahize yerine iner.
         if (ahize != null && ahize.localPosition != ahizeYeri && (konusmaEkrani == null || konusmaEkrani.EtkilesimeAcik))
+        {
             ahize.localPosition = ahizeYeri;
+            if (konusmaKaynagi != null && konusmaKaynagi.isPlaying) konusmaKaynagi.Stop();   // ahize kapandı, ses kesilir
+        }
     }
 }
