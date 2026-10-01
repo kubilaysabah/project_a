@@ -10,11 +10,14 @@
 //
 // ZEMİN (#74, Şahan'ın ses kararları; #87 zemine göre): ayağın altındaki zemin aşağı atılan bir
 // ışınla bulunur ve dört aileden biri çalar:
-//   - beton (Merdiven_Adim_1-4): merdiven, sahanlık, daire dışı her yer;
-//   - parke (Adim_1 + ara sıra Gicirti_1-3): dairenin kuru odaları ("Daire_Parke" kutusu);
-//   - fayans (Adim_Fayans_1-2): banyo ve mutfak ("Daire_Fayans" kutusu);
-//   - halı (Adim_Hali_1-2): halı, kilim, yolluk, paçavra üstü (süs eşyasının adından).
+//   - beton (Merdiven_Adim_1-8): merdiven, sahanlık, daire dışı her yer;
+//   - parke (Adim_1-8 + ara sıra Gicirti_1-3): dairenin kuru odaları ("Daire_Parke" kutusu);
+//   - fayans (Adim_Fayans_1-8): banyo ve mutfak ("Daire_Fayans" kutusu);
+//   - halı (Adim_Hali_1-8): halı, kilim, yolluk, paçavra üstü (süs eşyasının adından).
 // Şahan'ın Phasmophobia karşılaştırması (2026-10-01): "parke, fayans ve halı aynı sesi çıkarıyor."
+// #101 (2026-10-01): dört ailenin hepsi GERÇEK KAYIT; aynı kişi, aynı ayakkabı, aynı mikrofon
+// (sturmankin, CC0), zemin başına 8 adım. Korku oyunlarının adımları böyle kaydedilir: zemin
+// değişince "aynı ayak başka yere bastı" diye duyulur. Kesim: kayit_isle.py adimlar.
 
 using UnityEngine;
 
@@ -110,7 +113,10 @@ public class AyakSesi : MonoBehaviour
         sonCalinanlar[(int)zemin] = i;
 
         // Her adımda perde ve şiddet biraz değişsin: gerçek adımlar hiç aynı değildir.
-        kaynak.pitch = Random.Range(0.92f, 1.08f);
+        // #101: ±%4 (eskiden ±%8). Sentez adımın tek çeşidi vardı, çeşidi perde taşıyordu; şimdi
+        // her zeminde 8 gerçek adım var ve gerçek kayıtta ±%8 perde ayakkabıyı değiştirmiş gibi
+        // duyulur (kaba bir ayakkabı ince, ince bir ayakkabı kaba).
+        kaynak.pitch = Random.Range(0.96f, 1.04f);
         kaynak.PlayOneShot(cesitler[i], siddet * Random.Range(0.85f, 1.0f));
 
         // Eski parke: ara sıra adımın altından bir gıcırtı (iki gıcırtı arası en az 3 sn).

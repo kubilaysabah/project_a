@@ -19,7 +19,11 @@ zorunluluğu getirmez; yine de kaynakları burada kayıtlı.
 | `849570__spiritzip__dog-barking-at-night.wav` | Uzaktan köpek havlaması (#37), iki parça | https://freesound.org/people/spirit.zip/sounds/849570/ | spirit.zip | CC0 1.0 |
 | `847083__funkelfang__water-drip-leaky-faucet-in-ceramic-sink.wav` | S12 lavabo damlası (#74) | https://freesound.org/people/Funkelfang/sounds/847083/ | Funkelfang | **CC BY 4.0: jenerikte isim yazılı** |
 | `802595__qubodup__creaking-floorboards-13-long-slow.wav` | S20+ parke gıcırtısı (#74) | https://freesound.org/people/qubodup/sounds/802595/ | qubodup | CC0 1.0 |
-| `118041__glamont__concrete-stairs.wav` | S20m merdivende beton adımlar (#74) | https://freesound.org/people/G.Lamont/sounds/118041/ | G.Lamont | CC0 1.0 |
+| `118041__glamont__concrete-stairs.wav` | Kullanılmıyor: S20m merdiven adımı #101'de sturmankin beton kaydına geçti (eskiden #74) | https://freesound.org/people/G.Lamont/sounds/118041/ | G.Lamont | CC0 1.0 |
+| `273372__sturmankin__wood_15a_darkshoes_walk.wav` | S20 oyuncunun parke adımı, 8 çeşit (#101) | https://freesound.org/people/sturmankin/sounds/273372/ | sturmankin | CC0 1.0 |
+| `272150__sturmankin__ceramic_14a_lightshoes_walk.wav` | S20f oyuncunun fayans adımı, 8 çeşit (#101; aynı bankada fayans üstünde koyu ayakkabı kaydı yok, hafif ayakkabı) | https://freesound.org/people/sturmankin/sounds/272150/ | sturmankin | CC0 1.0 |
+| `271911__sturmankin__carpet_15a_darkshoes_walk.wav` | S20h oyuncunun halı adımı, 8 çeşit (#101) | https://freesound.org/people/sturmankin/sounds/271911/ | sturmankin | CC0 1.0 |
+| `272255__sturmankin__concrete_15a_darkshoes_walk.wav` | S20m merdiven, sahanlık ve daire dışı beton adımı, 8 çeşit (#101) | https://freesound.org/people/sturmankin/sounds/272255/ | sturmankin | CC0 1.0 |
 | `248037__sophiehall3535__pick-up-keys-1.wav` | S24 anahtar alma (#74) | https://freesound.org/s/248037/ | sophiehall3535 | CC0 1.0 |
 | `784151__loganzsound__glass-break-hammer.wav` | S25 kavanoz kırılması (#74) | https://freesound.org/s/784151/ | loganzsound | CC0 1.0 |
 | `pixabay_kodack_trying-to-open-a-locked-door-104302.mp3` | S28 kilitli oda kapısı (#74) | https://pixabay.com/sound-effects/household-trying-to-open-a-locked-door-104302/ | Kodack | Pixabay Content License |

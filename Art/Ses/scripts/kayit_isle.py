@@ -460,19 +460,135 @@ def rev_gicirti():
         _kaydet(SESLER, f"Gicirti_{i}.wav", kes(k, bas, son, giris=0.03, cikis=0.25, hiz=H44), tepe=0.6)
 
 
-def rev_merdiven():
-    """S20m: G.Lamont, "Concrete Stairs" (CC0). Merdivende ve sahanlıkta beton adımlar; kayıttaki
-    dört adım tek tek (Merdiven_Adim_1-4). Adları "Adim" ile başlamıyor: AyakSesi o önekle
-    başlayanların hepsini parke adımı sayıyor."""
-    k = oku("118041__glamont__concrete-stairs.wav", H44)
-    for i, bas in enumerate((4.47, 5.12, 5.72, 6.37), 1):
-        _kaydet(SESLER, f"Merdiven_Adim_{i}.wav", kes(k, bas, bas + 0.4, giris=0.002, cikis=0.12, hiz=H44))
+# ---------- OYUNCUNUN ADIMLARI (#101) ----------
+# Şahan'ın isteği (2026-10-01): adım sesleri korku oyunlarını (Amnesia, Outlast, Visage) baz alsın.
+# O oyunların adımları gerçek foley kaydıdır ve her zeminde AYNI ayakkabı kaydedilir: oyuncu zemin
+# değişince "aynı adamın ayağı başka yere bastı" diye duyar. Bizde parke, fayans ve halı sentezdi,
+# merdiven ise başka birinin kaydı; ayakkabılar birbirini tutmuyordu.
+#
+# Kaynak: Freesound kullanıcısı sturmankin'in ayak sesi bankası (CC0). Aynı kişi, aynı mikrofon
+# (ZOOM H2), aynı ev. Koyu deri ayakkabı: parke, halı, beton. Fayansta koyu ayakkabıyla yürüyüş
+# kaydı yok; aynı bankanın hafif ayakkabı kaydı kullanıldı (aynı banyo, aynı mikrofon).
+#
+# Her kayıttan adımlar TEK TEK bulunur ve kesilir:
+#   1. Zarf: 5 ms'lik pencerelerde sesin gücü (RMS).
+#   2. Başlangıç: güç bir eşiği aşağıdan yukarı geçtiği an bir adım vardır (iki adım arası en az
+#      0,3 sn); kesim, topuğun ilk değişini kaçırmamak için oradan geriye, gücün düştüğü yere kayar.
+#      Eşik kaydın kendi gürültüsüne göre: sessiz kayıtta düşük, halıda (kayıt gürültüsü
+#      yüksek, adım yumuşak) daha yüksek.
+#   3. Temiz adım: öncesinde 0,3 sn, sonrasında 0,45 sn başka adım olmayan adımlar (üst üste binen
+#      iki adım tek dosyaya girmesin). En gür ve en kısık %20 atılır (tökezleme, sürtme), kalanlardan
+#      kayıt boyunca eşit aralıkla 8 tane seçilir: çeşit, ayağın sağ/sol farkını ve yorgunluğu taşır.
+#   4. İşleme: 60 Hz altı atılır (bodrum gürültüsü), başa 2 ms, sona 120 ms yumuşak geçiş; seviye
+#      her adımın en gür 100 ms'sine göre eşitlenir (adımlar arası tutarlı). Korku oyunlarındaki gibi
+#      oyuncunun kendi adımı KISIK: eski sentez adımdan 1 dB kısık; halı 3,5 dB daha kısık.
+# Çıktı: Adim_1-8 (parke), Adim_Fayans_1-8, Adim_Hali_1-8, Merdiven_Adim_1-8 (beton).
+
+ADIM_KAYITLARI = [
+    # (kayıt, çıktı öneki, en gür 100 ms hedefi dB, alçak geçiren Hz ya da None)
+    # Halı kaydının hışırtısı (kayıt gürültüsü) yüksek; halıda tiz bir şey duyulmaz, o yüzden
+    # 5 kHz üstü kısılır: hem hışırtı azalır hem adım daha boğuk, halıya yakışır.
+    ("273372__sturmankin__wood_15a_darkshoes_walk.wav", "Adim", -19.5, None),
+    ("272150__sturmankin__ceramic_14a_lightshoes_walk.wav", "Adim_Fayans", -19.0, None),
+    ("271911__sturmankin__carpet_15a_darkshoes_walk.wav", "Adim_Hali", -23.0, 5000),
+    ("272255__sturmankin__concrete_15a_darkshoes_walk.wav", "Merdiven_Adim", -19.0, None),
+]
+ADIM_SAYISI = 8
+
+
+def _zarf(x, hiz, pencere=0.005):
+    """5 ms'lik pencerelerin RMS gücü (her 2. örnek: hız için; zarf için yeterli)."""
+    adim = int(pencere * hiz)
+    z = []
+    for i in range(0, len(x) - adim, adim):
+        parca = x[i:i + adim:2]
+        z.append((sum(v * v for v in parca) / len(parca)) ** 0.5)
+    return z
+
+
+def _en_gur_100ms(x, hiz):
+    """Sesin en gür 100 ms'sinin RMS'i (dB). Bütün dosyanın RMS'i uzunluğa bağlı olduğu için
+    farklı uzunluktaki sesler bununla karşılaştırılır (esya_sesleri_uret.py ile aynı ölçü)."""
+    n = int(0.1 * hiz)
+    en = 1e-9
+    for i in range(0, max(1, len(x) - n), n // 4):
+        p = x[i:i + n]
+        r = (sum(v * v for v in p) / max(1, len(p))) ** 0.5
+        en = max(en, r)
+    import math
+    return 20 * math.log10(en)
+
+
+def _adim_baslangiclari(z):
+    """Zarftan adım başlangıçlarının pencere numaraları."""
+    s = sorted(z)
+    medyan = s[len(s) // 2]
+    esik = max(medyan * 6, s[int(len(s) * 0.9)] * 0.8)
+    baslar, son = [], -10 ** 9
+    for i in range(1, len(z)):
+        if z[i] > esik and z[i - 1] <= esik and (i - son) * 0.005 > 0.3:
+            # Eşik, adımın yükselen kenarının ORTASINDA aşılır; topuğun ilk değişi daha öncedir.
+            # Oradan kesilseydi adımın vuruşu kesik başlardı (ilk denemede ilk 12 ms'de -12 dB
+            # ses vardı). Bu yüzden geriye, gücün adımın tepesinin %10'unun ya da kayıt
+            # gürültüsünün 2 katının altına indiği yere kadar yürünür (en çok 150 ms).
+            tepe = max(z[i:i + 20])
+            alt = max(medyan * 2, tepe * 0.1)
+            j = i
+            while j > 0 and z[j - 1] > alt and i - j < 30:
+                j -= 1
+            baslar.append(j)
+            son = i
+    return baslar
+
+
+def adimlar():
+    """#101: dört zeminin adımları gerçek kayıttan, zemin başına 8 çeşit."""
+    for kayit, onek, hedef_db, alcak_hz in ADIM_KAYITLARI:
+        x = oku(kayit, H44)
+        z = _zarf(x, H44)
+        baslar = _adim_baslangiclari(z)
+        # Pencere 220 örnek = 4,989 ms (tam 5 ms değil); 0,005 ile çarpılsaydı 20. saniyede
+        # kesim 44 ms geç kalır, adımın vuruşu kesilirdi (ilk denemede tam olarak bu oldu).
+        pencere = int(0.005 * H44) / H44
+        zamanlar = [b * pencere for b in baslar]
+        adaylar = []
+        for k, t in enumerate(zamanlar):
+            if t < 0.5 or t > len(x) / H44 - 1.0:
+                continue                                   # kaydın başı ve sonu (kayıt tuşu, nefes)
+            onceki = zamanlar[k - 1] if k > 0 else -10.0
+            sonraki = zamanlar[k + 1] if k + 1 < len(zamanlar) else 10 ** 9
+            if t - onceki < 0.3 or sonraki - t < 0.45:
+                continue                                   # üst üste binen adım
+            parca = x[int((t - 0.01) * H44):int((t + 0.40) * H44)]
+            adaylar.append((t, max(abs(v) for v in parca), parca))
+        if len(adaylar) < ADIM_SAYISI:
+            raise RuntimeError(f"{kayit}: yalnızca {len(adaylar)} temiz adım bulundu")
+        # En gür ve en kısık %20 atılır; kalanlardan zamana yayılmış 8 tane.
+        sirali = sorted(adaylar, key=lambda a: a[1])
+        kes_ = len(sirali) // 5
+        orta = sorted(sirali[kes_:len(sirali) - kes_], key=lambda a: a[0])
+        if len(orta) < ADIM_SAYISI:
+            orta = sorted(adaylar, key=lambda a: a[0])
+        secilen = [orta[int(i * (len(orta) - 1) / (ADIM_SAYISI - 1))] for i in range(ADIM_SAYISI)]
+        for i, (t, _, parca) in enumerate(secilen, 1):
+            p = ortak.yuksek(list(parca), 60, H44)
+            if alcak_hz:
+                p = ortak.alcak(p, alcak_hz, H44)
+            p = kes(p, 0.0, len(p) / H44, giris=0.002, cikis=0.12, hiz=H44)
+            # Seviye: en gür 100 ms hedefe; tepe 0,8'i geçmesin (kaydet tepeye ölçekler, o yüzden
+            # tepe değerini kendimiz hesaplayıp veriyoruz).
+            simdi = _en_gur_100ms(p, H44)
+            kazanc = 10 ** ((hedef_db - simdi) / 20)
+            tepe = min(0.8, max(abs(v) for v in p) * kazanc)
+            _kaydet(SESLER, f"{onek}_{i}.wav", p, tepe)
+        print(f"  {onek}: {len(zamanlar)} adım bulundu, {len(adaylar)} temiz, 8 seçildi "
+              f"({', '.join(f'{a[0]:.2f}' for a in secilen)} sn)")
 
 
 URETICILER_74 = {"damla": rev_damla, "anahtar": rev_anahtar, "cam": rev_cam, "devrilme": rev_devrilme,
                  "vida": rev_vida, "demir_sarsma": rev_demir_sarsma, "kol": rev_kol, "sigorta": rev_sigorta,
                  "sifre": rev_sifre, "zil": rev_zil, "ic_kilitli": rev_ic_kilitli, "asansor_zili": rev_asansor_zili,
-                 "gicirti": rev_gicirti, "merdiven": rev_merdiven}
+                 "gicirti": rev_gicirti, "adimlar": adimlar}
 
 
 def rev_ic_acilma():

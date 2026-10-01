@@ -53,7 +53,7 @@ public class GezenGolge : MonoBehaviour
         oyuncu = kontrol != null ? kontrol.transform : null;
         if (adimlar == null)
         {
-            // Tek adım sesi (#74: Adim_2-4 kalktı; S20 gerçek kayıtla değişecek).
+            // Yedek adım: zemin bulunamazsa parke adımı (#101'den beri gerçek kayıt).
             adimlar = new[] { Resources.Load<AudioClip>("Sesler/Adim_1") };
         }
     }

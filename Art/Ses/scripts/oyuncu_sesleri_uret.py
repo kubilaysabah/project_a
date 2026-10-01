@@ -57,166 +57,9 @@ def kaydet(klasor, ad, ornekler, tepe=0.8):
 
 
 # ---------- AYAK SESİ ----------
-# Revizyon (Şahan, 2026-09-26): "sanki ayağına demir kova giymiş gibi". Eski adım bir
-# sinüs dalgasıydı; sinüs tek perdede çınlar, kova sesi tam olarak budur. Gerçek bir
-# adımda çınlayan hiçbir şey yoktur, üç kısa gürültü vardır:
-#   TOPUK: ayakkabının betona ilk değişi. Kısa bir darbe, alçak-orta frekanslarda
-#          GENİŞ bantlardan geçer (q küçük: hiçbir perde öne çıkmaz, "tok" duyulur).
-#   TABAN: 45-75 ms sonra ayağın önü basar; daha hafif ve biraz daha parlak.
-#   SÜRTÜNME: taban betonun tozunu hafifçe sürter; çok kısık bir hışırtı.
-# Sonra merdiven boşluğunun kısa bir yankısı eklenir. Dört çeşit, frekansları ve
-# zamanlamaları biraz farklı; oyunda perde de her adımda değişiyor (AyakSesi.cs).
-def adimlar():
-    H = HIZ_KESKIN
-    for n in range(1, 2):   # #74: yalnızca Adim_1 (Şahan: mevcut adım sesi kalsın; öbür çeşitler kalktı)
-        random.seed(100 + n)
-        N = int(0.42 * H)
-        k = random.uniform(0.88, 1.12)                       # bu çeşidin "ayakkabı tonu"
-        s = [0.0] * N
-
-        topuk = modlar(darbe(N, H, 0.003), H,
-                       [(150 * k, 1.1, 1.0), (360 * k, 1.6, 0.75), (820 * k, 1.4, 0.5), (1800 * k, 1.2, 0.4), (3600 * k, 1.0, 0.18)])
-        ekle(s, topuk, int(0.004 * H))
-
-        # 2. tur (Şahan: "biraz daha gelişebilir"): betonun üstündeki kum ve toz. Topukla
-        # birlikte ezilen minik taneler; adıma gerçek zeminin "cızırtısını" katar.
-        for _ in range(random.randint(6, 10)):
-            m = random.randint(int(0.0005 * H), int(0.002 * H))
-            tane = bant([random.uniform(-1, 1) * (1 - j / m) for j in range(m)] + [0.0] * int(0.004 * H),
-                        random.uniform(2500, 6000), H, 2.0)
-            ekle(s, tane, int(random.uniform(0.005, 0.06) * H), random.uniform(0.05, 0.15))
-
-        taban = modlar(darbe(N, H, 0.003), H, [(300 * k, 1.4, 0.6), (1150 * k, 1.2, 0.5), (2900 * k, 1.0, 0.3)])
-        ekle(s, taban, int(random.uniform(0.045, 0.075) * H), random.uniform(0.3, 0.5))
-
-        hisirti = bant(gurultu(N), 2500 * k, H, 0.8)          # sürtünme
-        sure = random.uniform(0.06, 0.1)
-        for i in range(N):
-            t = i / H - 0.012
-            if 0 < t < sure:
-                s[i] += 0.06 * hisirti[i] * math.sin(math.pi * t / sure)
-
-        s = alcak(s, 6000, H)                                # çok tiz bir tıkırtı kalmasın
-        s = yanki(s, H, boyut=0.45, sonum=0.45, islak=0.16, oda=0.6)   # kısa merdiven yankısı
-        s = yumusak_sinirla(s, 4.0)                          # eski adım kadar gür duyulsun
-        kaydet_hiz(os.path.join(SESLER, f"Adim_{n}.wav"), s, H, 0.8)
-
-
-# ---------- ZEMİNE GÖRE AYAK SESİ (#87) ----------
-# Seviye hizalama: kaydet_hiz dosyayı EN YÜKSEK NOKTAYA göre ölçekler. Ama kulak sesin
-# gövdesini (ortalama gücünü, "RMS") duyar, tepesini değil; halı gibi yumuşak bir ses
-# tepesi eşit olsa bile gövdesi bambaşka çıkabilir (ilk denemede iki halı çeşidi
-# arasında 4,6 dB fark vardı). O yüzden yeni adımlar Adim_1'in ölçülen gövde seviyesine
-# hizalanır: tepe öyle seçilir ki RMS hedefe gelsin, yine de 0,8'i aşmasın.
-# RMS: örneklerin karelerinin ortalamasının karekökü; dB = 20·log10(rms).
-ADIM_RMS_DB = -24.6          # Adim_1.wav'ın ölçülen gövde seviyesi (dBFS), 2026-10-01
-
-
-def rms_icin_tepe(ornekler, hedef_db, en_fazla=0.8):
-    """Sesi 'hedef_db' RMS'e getirecek tepe değerini döndürür (en fazla 'en_fazla')."""
-    rms = math.sqrt(sum(x * x for x in ornekler) / len(ornekler)) or 1e-9
-    tepe = max(abs(x) for x in ornekler) or 1.0
-    hedef = 10 ** (hedef_db / 20)                            # dB -> doğrusal
-    return min(en_fazla, tepe * hedef / rms)                 # tepe, rms'i hedefe taşıyacak kadar ölçeklenir
-
-# Adim_1 beton merdiven için yapıldı; dairenin içinde de aynı ses çalıyordu. Oysa ayak
-# sesini belirleyen şey ayakkabı değil, ZEMİNDİR: aynı darbe gürültüsü hangi cisme
-# vurursa onun modlarını titreştirir. O yüzden her iki yeni ses de Adim_1'in üç
-# katmanlı iskeletini (topuk, taban, sürtünme) olduğu gibi kullanır; yalnızca modlar,
-# süzgeç ve oda değişir. Oyun kodu (AyakSesi.cs) zemine göre doğru aileyi seçer.
-#
-# FAYANS (banyo, mutfak): seramik sert ve incedir; vurulduğunda enerjiyi hemen geri
-# verir. Bunun ses karşılığı iki şey:
-#   - modlar TİZDİR (400-5500 Hz) ve q'ları BÜYÜKTÜR: her perde dar bir bantta, bir an
-#     daha uzun "çın" eder — topuğun fayansa "tık" demesi budur. Betonun geniş, tok
-#     bantlarının tam tersi.
-#   - darbe daha KISADIR (1,5 ms): sert yüzeyde ayakkabı tabanı ezilmez, anında durur.
-# Kum/toz yoktur (fayans silinir); sürtünme nerdeyse sıfır. Oda ise küçük ve fayans
-# kaplı bir banyo: yansımalar sık (oda küçük), tizler az sönüyor (sonum küçük) ve
-# yankının payı betondakinden büyük (islak) — küçük, parlak, "banyo" yankısı.
-def adim_fayans():
-    H = HIZ_KESKIN
-    for n in range(1, 3):                                    # iki çeşit: Adim_Fayans_1, _2
-        random.seed(200 + n)                                 # tohum sabit: her çalıştırma aynı dosya
-        N = int(0.35 * H)                                    # 0,35 sn; fayans adımı betondan kısa söner
-        k = random.uniform(0.92, 1.08)                       # bu çeşidin ayakkabı/karo tonu
-        s = [0.0] * N
-
-        # TOPUK: çok kısa darbe, dar ve tiz bantlar (q 3-5). 1200 Hz en güçlü mod:
-        # ince seramik karonun "tık" perdesi orada.
-        topuk = modlar(darbe(N, H, 0.0015), H,
-                       [(400 * k, 3.0, 0.8), (1200 * k, 4.5, 1.0), (2800 * k, 5.0, 0.7), (5500 * k, 4.0, 0.35)])
-        ekle(s, topuk, int(0.004 * H))
-
-        # Nerdeyse hiç kum yok: en fazla iki minik tane, çok kısık (temiz karo yüzeyi).
-        for _ in range(random.randint(0, 2)):
-            m = random.randint(int(0.0005 * H), int(0.0015 * H))
-            tane = bant([random.uniform(-1, 1) * (1 - j / m) for j in range(m)] + [0.0] * int(0.004 * H),
-                        random.uniform(4000, 7000), H, 2.5)
-            ekle(s, tane, int(random.uniform(0.01, 0.05) * H), random.uniform(0.03, 0.06))
-
-        # TABAN: 40-65 ms sonra ayağın önü basar; topuğa göre daha hafif ama yine çınlayan.
-        taban = modlar(darbe(N, H, 0.0015), H, [(600 * k, 3.0, 0.5), (1800 * k, 3.5, 0.5), (4000 * k, 3.0, 0.3)])
-        ekle(s, taban, int(random.uniform(0.04, 0.065) * H), random.uniform(0.3, 0.45))
-
-        # SÜRTÜNME: sert, pürüzsüz yüzeyde kayma çok kısa ve çok kısık bir "ssst".
-        hisirti = bant(gurultu(N), 3500 * k, H, 1.0)
-        sure = random.uniform(0.03, 0.05)
-        for i in range(N):
-            t = i / H - 0.01
-            if 0 < t < sure:
-                s[i] += 0.025 * hisirti[i] * math.sin(math.pi * t / sure)
-
-        s = alcak(s, 9000, H)                                # betona göre daha parlak kalsın (6000 -> 9000)
-        s = yanki(s, H, boyut=0.35, sonum=0.25, islak=0.3, oda=0.35)   # küçük, fayanslı, parlak oda
-        s = yumusak_sinirla(s, 4.0)                          # Adim_1 ile aynı sürüş: gövde aynı oranda şişer
-        kaydet_hiz(os.path.join(SESLER, f"Adim_Fayans_{n}.wav"), s, H,
-                   rms_icin_tepe(s, ADIM_RMS_DB))            # Adim_1 ile aynı gövde seviyesi
-
-
-# HALI / KİLİM (90'lar salonu, yatak odası): kalın dokuma darbeyi EMER. Ayakkabı tabanı
-# bir anda durmaz, liflerin içine gömülerek yavaşlar; o yüzden:
-#   - darbe UZUNDUR (6 ms): yumuşak yüzeyde çarpma yayılır, "tok" yerine "puf" olur.
-#   - modlar ALÇAKTIR (90-500 Hz) ve q'ları KÜÇÜKTÜR: hiçbir perde çınlamaz, yalnızca
-#     döşemenin altındaki zeminin boğuk gümbürtüsü kalır.
-#   - güçlü bir alçak geçiren süzgeç (1800 Hz, iki kez: eğim dikleşir) tizleri siler;
-#     halı tam olarak bunu yapar, yüksek frekansları yutar.
-# Tek tiz unsur liflerin tabanla sürtünmesi: kumaşın yumuşak "fışş"ı — kum cızırtısı
-# değil, daha uzun ve daha alçak bir hışırtı. Oda yankısı neredeyse yok: halı, perde ve
-# koltuk dolu bir salon yansıtmaz, sesi emer (kuru). Halı sesi doğası gereği kısıktır;
-# dosya Adim_1'den 3 dB daha alçak gövde seviyesine (RMS) hizalanır.
-def adim_hali():
-    H = HIZ_KESKIN
-    for n in range(1, 3):                                    # iki çeşit: Adim_Hali_1, _2
-        random.seed(300 + n)                                 # tohum sabit: yeniden üretilebilir
-        N = int(0.3 * H)                                     # 0,3 sn; emilen ses çabuk biter
-        k = random.uniform(0.9, 1.1)                         # bu çeşidin tonu
-        s = [0.0] * N
-
-        # TOPUK: uzun, yayılmış darbe; alçak ve geniş bantlar (q ~1): boğuk gümbürtü.
-        topuk = modlar(darbe(N, H, 0.006), H,
-                       [(90 * k, 0.9, 1.0), (220 * k, 1.1, 0.7), (500 * k, 1.0, 0.35)])
-        ekle(s, topuk, int(0.004 * H))
-
-        # TABAN: 55-85 ms sonra, daha da hafif; halıda topuk-taban farkı silinir.
-        taban = modlar(darbe(N, H, 0.006), H, [(120 * k, 1.0, 0.6), (300 * k, 1.0, 0.4)])
-        ekle(s, taban, int(random.uniform(0.055, 0.085) * H), random.uniform(0.35, 0.5))
-
-        # KUMAŞ SÜRTÜNMESİ: orta frekanslı (1200 Hz), geniş bantlı, 80-140 ms süren yumuşak
-        # hışırtı; zarf sinüs biçimli (yavaş başlar, yavaş biter), kumaş gibi.
-        hisirti = bant(gurultu(N), 1200 * k, H, 0.5)
-        sure = random.uniform(0.08, 0.14)
-        for i in range(N):
-            t = i / H - 0.008
-            if 0 < t < sure:
-                s[i] += 0.09 * hisirti[i] * math.sin(math.pi * t / sure)
-
-        s = alcak(alcak(s, 1800, H), 1800, H)                # iki kez: halının tiz yutması
-        s = yanki(s, H, boyut=0.3, sonum=0.6, islak=0.04, oda=0.5)   # neredeyse kuru: döşeli oda
-        s = yumusak_sinirla(s, 3.0)                          # daha az sürüş: yumuşak ses sivrilmesin
-        kaydet_hiz(os.path.join(SESLER, f"Adim_Hali_{n}.wav"), s, H,
-                   rms_icin_tepe(s, ADIM_RMS_DB - 3.0))      # Adim_1'den 3 dB kısık gövde
-
+# #101 (2026-10-01): oyuncunun adımları artık GERÇEK KAYIT (sturmankin, CC0; kayit_isle.py adimlar).
+# Parke (Adim_1), fayans ve halı adımlarının sentez üreticileri bu yüzden silindi: burada kalsalar,
+# bu betik yeniden çalıştırılınca kayıttan kesilen adımların üstüne sentez yazardı.
 
 # ---------- KALP ATIŞI (#92) ----------
 # Gerilim yükselince oyuncunun kendi kalbi duyulur (GerilimEtkisi.cs). Bu ses odada çalan bir
@@ -367,8 +210,7 @@ def sabah():
 # #74: lamba cızırtısı kalktı; adım üreticisi yalnızca Adim_1'i üretir (öbür çeşitler kalktı).
 # #87: zemine göre iki yeni adım ailesi (fayans, halı).
 # #92: gerilimde duyulan kalp atışı.
-URETICILER = {"adimlar": adimlar, "adim_fayans": adim_fayans, "adim_hali": adim_hali,
-              "kalp_atisi": kalp_atisi,
+URETICILER = {"kalp_atisi": kalp_atisi,
               "lamba_sonme": lamba_sonme, "poset": poset, "sabah": sabah}
 
 if __name__ == "__main__":
