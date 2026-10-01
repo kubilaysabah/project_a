@@ -38,6 +38,24 @@ public class FenerParlamasi : MonoBehaviour
     private float mevcut;                         // şu anki güç (hedefe yumuşakça yaklaşır)
     private MaterialPropertyBlock blok;
 
+    // ---------- ZORLA PARLAMA (#98) ----------
+    // Takılan oyuncuya bina yazısız ipucu verir (TakilmaIpucu): eşya, lambanın ışığında olmasa da
+    // kısa bir an parlar. Parlama bir "nabız" gibi gelir ve gider: sinüs eğrisinin yarım tepesi.
+    private const float ZorlaGuc = 0.8f;          // nabzın tepesindeki güç (ışıktaki en güçlü parıltı 1)
+    private float zorlaKalan;                     // zorla parlamanın kalan süresi (saniye)
+    private float zorlaSure;                      // zorla parlamanın toplam süresi (saniye)
+
+    /// <summary>
+    /// Eşyayı lambanın ışığından bağımsız olarak 'sure' saniye parlatır (#98). Kabı kapalıysa
+    /// (kapalı çekmece, buzdolabı) yine parlamaz: içeride ne olduğunu ele vermesin.
+    /// </summary>
+    public void Parla(float sure)
+    {
+        if (!(sure > 0f)) return;   // sıfır, eksi ya da bozuk (NaN) süre: hiçbir şey yapma
+        zorlaSure = sure;
+        zorlaKalan = sure;
+    }
+
     private void Awake()
     {
         parilti = transform.Find("Parilti");
@@ -55,6 +73,7 @@ public class FenerParlamasi : MonoBehaviour
     private void OnDisable()
     {
         mevcut = 0f;
+        zorlaKalan = 0f;   // eşya ele alındı ya da kat değişti: yarım kalan zorla parlama da biter
         if (cizici != null) cizici.enabled = false;
     }
 
@@ -84,6 +103,20 @@ public class FenerParlamasi : MonoBehaviour
             hedef = ParlamaKurali.Guc(aci, mesafe, KafaLambasi.DisAci / 2f, ParlamaKurali.Menzil);
             // Işık eşyaya ulaşıyor mu? Ölçüm pahalı olduğu için yalnızca konideyse bakılır.
             if (hedef > 0f && !IsikUlasiyor(kaynak.position, merkez, mesafe)) hedef = 0f;
+        }
+        // Zorla parlama (#98): lambadan bağımsız, ama kap kapalıysa yine yok. Duvarın arkasındaki
+        // eşyanın parıltısını derinlik testi zaten gizler (parıltı da sahnedeki her yüzey gibi
+        // önündeki duvarın arkasında kalır), ayrıca ışın atmaya gerek yok.
+        if (zorlaKalan > 0f)
+        {
+            // Kat denetimi (aninda) aynı karede fotoğraf çeker; orada zaman ilerletilmez.
+            if (!aninda) zorlaKalan -= Time.deltaTime;
+            if (kabiAcik && zorlaSure > 0f)
+            {
+                // t: 0'dan 1'e ilerleyen oran; Sin(t·π) 0'dan başlar, ortada 1 olur, sonda 0'a döner.
+                float t = 1f - Mathf.Clamp01(zorlaKalan / zorlaSure);
+                hedef = Mathf.Max(hedef, ZorlaGuc * Mathf.Sin(t * Mathf.PI));
+            }
         }
         // MoveTowards: değeri hedefe en fazla "adım" kadar yaklaştırır; parıltı yumuşakça gelir, gider.
         mevcut = aninda ? hedef : Mathf.MoveTowards(mevcut, hedef, SonmeHizi * Time.deltaTime);
