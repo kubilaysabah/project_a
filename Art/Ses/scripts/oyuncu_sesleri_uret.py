@@ -8,6 +8,7 @@
 #   Assets/Resources/Sesler/Lamba_Sonme cezada sönen lambanın "tık"ı
 #   Assets/Resources/Sesler/Lamba_Cizirti son lamba titrerken elektrik cızırtısı
 #   Assets/Resources/Sesler/Poset_Hisirti poşet toplanırken kâğıt hışırtısı
+#   Assets/Resources/Sesler/Kalp_Atisi  gerilimde oyuncunun kendi kalbi (#92)
 #   Assets/Audio/Ortam/Ortam_Sabah      çatı kapısı açılınca: uzak şehir, kuşlar, rüzgâr
 #
 # "Resources" klasöründeki dosyaları oyun kodu adıyla yükleyebiliyor (Resources.Load);
@@ -217,6 +218,56 @@ def adim_hali():
                    rms_icin_tepe(s, ADIM_RMS_DB - 3.0))      # Adim_1'den 3 dB kısık gövde
 
 
+# ---------- KALP ATIŞI (#92) ----------
+# Gerilim yükselince oyuncunun kendi kalbi duyulur (GerilimEtkisi.cs). Bu ses odada çalan bir
+# şey değil, göğüste HİSSEDİLEN bir şey; o yüzden kuru (yankısız) ve çok alçak.
+#
+# Gerçek bir kalp atışı iki kapak sesinden oluşur: "LUB" (kalbin kasılıp kapakların kapanması,
+# daha uzun ve alçak) ve hemen ardından "DUB" (atardamar kapaklarının kapanması, daha kısa,
+# daha hafif). Steteskopla dinlenen ses de, kulağında kendi nabzını duyan birinin duyduğu da
+# 40-150 Hz arasında boğuk iki gümlemedir; hiçbir perde ÇINLAMAZ.
+#
+# Sinüs YOK (ses_ortak.py'nin kuralı: sinüs "bip" ya da "kova" gibi duyulur). Her gümleme:
+#   1. GÜRÜLTÜ PATLAMASI: darbe() gibi ama yumuşak başlayan bir zarfla (8-10 ms yükselir,
+#      sonra söner). Ani başlayan bir patlama tıkırtı yapardı; kalp "tık" demez, "güm" der.
+#   2. GÖVDE MODLARI: göğüs kafesinin ve kalbin kendisinin alçak frekansları (45-90 Hz güçlü,
+#      140-220 Hz hafif). q küçük (1-2): geniş bant, hiçbir perde öne çıkmaz, boğuk duyulur.
+#      Hafif üst modlar, küçük hoparlörde (dizüstü) 40 Hz hiç çalınamadığı için var: onlar
+#      sayesinde gümleme kulaklıksız da seçilir.
+#   3. GÜÇLÜ ALÇAK GEÇİREN (400 Hz, iki kez): et ve kemik tizi tamamen yutar.
+# Sonra 25 Hz altı kesilir (hoparlörü boşuna zorlayan, duyulmayan titreşim ve sıfır kayması).
+# Yankı neredeyse yok: çok küçük, çok kısık bir iz (göğüs boşluğunun kendi tınısı).
+def kalp_atisi():
+    H = HIZ_KESKIN
+    random.seed(400)                                         # tohum sabit: her çalıştırma aynı dosya
+    N = int(0.45 * H)                                        # toplam 0,45 sn (oyunda en hızlı aralık da 0,45)
+    s = [0.0] * N
+
+    def gumleme(uzunluk, yukselme, modlistesi):
+        """Yumuşak başlayan bir gürültü patlamasını gövde modlarından geçirir."""
+        m = int(uzunluk * H)                                 # patlamanın örnek sayısı
+        y = max(1, int(yukselme * H))                        # zarfın yükselme süresi (örnek)
+        patlama = [0.0] * N
+        for i in range(m):
+            zarf = min(1.0, i / y) * (1 - i / m) ** 2        # yavaş başla, hızla sön
+            patlama[i] = random.uniform(-1, 1) * zarf
+        return modlar(patlama, H, modlistesi)
+
+    # LUB: daha uzun (70 ms patlama), daha alçak, daha güçlü.
+    lub = gumleme(0.07, 0.010, [(45, 1.2, 1.0), (62, 1.5, 0.9), (90, 1.3, 0.55), (150, 1.0, 0.18)])
+    ekle(s, lub, int(0.005 * H), 1.0)
+
+    # DUB: 0,13 sn sonra; daha kısa (50 ms), bir tık daha tiz, daha hafif.
+    dub = gumleme(0.05, 0.008, [(55, 1.2, 0.8), (80, 1.6, 1.0), (120, 1.3, 0.5), (220, 1.0, 0.15)])
+    ekle(s, dub, int((0.005 + 0.13) * H), 0.62)
+
+    s = alcak(alcak(s, 400, H), 400, H)                      # iki kez: eğim dikleşir, tiz tamamen gider
+    s = yuksek(s, 25, H)                                     # duyulmayan alt titreşimi ve sıfır kaymasını at
+    s = yanki(s, H, boyut=0.2, sonum=0.8, islak=0.03, oda=0.25)   # neredeyse kuru: göğüste, odada değil
+    s = yumusak_sinirla(s, 2.0)                              # tepeyi biraz bastır, gövde dolgunlaşsın
+    kaydet_hiz(os.path.join(SESLER, "Kalp_Atisi.wav"), s, H, 0.8)
+
+
 # ---------- LAMBA SÖNMESİ ----------
 # Eski bir duvar anahtarının "tık"ı: iki kısa darbe, 11 ms arayla (önce tuşun basılması,
 # sonra mekanizmanın oturması; ikincisi daha güçlü). Her darbe sert plastik gövdenin
@@ -315,7 +366,9 @@ def sabah():
 
 # #74: lamba cızırtısı kalktı; adım üreticisi yalnızca Adim_1'i üretir (öbür çeşitler kalktı).
 # #87: zemine göre iki yeni adım ailesi (fayans, halı).
+# #92: gerilimde duyulan kalp atışı.
 URETICILER = {"adimlar": adimlar, "adim_fayans": adim_fayans, "adim_hali": adim_hali,
+              "kalp_atisi": kalp_atisi,
               "lamba_sonme": lamba_sonme, "poset": poset, "sabah": sabah}
 
 if __name__ == "__main__":

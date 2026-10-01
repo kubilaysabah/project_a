@@ -75,6 +75,12 @@ public static class OyuncuKurucu
         if (kamera.GetComponent<OdaYankisi>() == null) kamera.gameObject.AddComponent<OdaYankisi>();
         // Fenerin sahte sekme ışığı (#89): huzmenin vurduğu yere konan nokta ışığı.
         if (kamera.GetComponent<FenerSekmesi>() == null) kamera.gameObject.AddComponent<FenerSekmesi>();
+        // Kameranın bedenli hareketleri (#91): yürürken kafa sallanması, sarsıntı, dönüşte geride
+        // kalan fener huzmesi. Kontrolcüyle aynı kameraya yazdığı için kendi izini her kare siler.
+        if (kamera.GetComponent<KameraHareketi>() == null) kamera.gameObject.AddComponent<KameraHareketi>();
+        // Gerilimin ekrana ve bedene yansıması (#92): kenar kararması, gren, solan renk, kalp
+        // atışı, titreme. Volume'unu oyun başlarken kendisi kurar; sahneye kaydedilecek bir şey yok.
+        if (kamera.GetComponent<GerilimEtkisi>() == null) kamera.gameObject.AddComponent<GerilimEtkisi>();
 
         // Kamerayı oyuncunun çocuğu yap. false = yerel konumu koru,
         // böylece aşağıdaki değerler doğrudan geçerli olur.
