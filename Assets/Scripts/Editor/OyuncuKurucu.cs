@@ -73,6 +73,8 @@ public static class OyuncuKurucu
         kamera.gameObject.name = "Kamera";
         // Bulunulan odanın yankısı (#87): dinleyicinin nesnesinde, yoksa eklenir.
         if (kamera.GetComponent<OdaYankisi>() == null) kamera.gameObject.AddComponent<OdaYankisi>();
+        // Fenerin sahte sekme ışığı (#89): huzmenin vurduğu yere konan nokta ışığı.
+        if (kamera.GetComponent<FenerSekmesi>() == null) kamera.gameObject.AddComponent<FenerSekmesi>();
 
         // Kamerayı oyuncunun çocuğu yap. false = yerel konumu koru,
         // böylece aşağıdaki değerler doğrudan geçerli olur.
