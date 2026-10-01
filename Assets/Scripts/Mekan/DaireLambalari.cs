@@ -98,10 +98,14 @@ public class DaireLambalari : MonoBehaviour
         float[] adimlar = { 0.07f, 0.12f, 0.05f, 0.30f };        // yan, sön, yan, sön ... sonra yanık
         for (int i = 0; i < adimlar.Length; i++)
         {
+            // Titreme sürerken düğmeyle söndürüldüyse (ya da elektrik gittiyse) titreme orada biter (#103).
+            if (!YanmaliMi(lamba)) { Yak(lamba, false); yield break; }
             Yak(lamba, i % 2 == 0);
             yield return new WaitForSeconds(adimlar[i]);
         }
-        Yak(lamba, true);
+        // Sonunda lambanın olması gereken hâli: eskiden hep "yanık"tı; titreme sırasında düğmeyle
+        // söndürülen lamba yanık kalıyor, düğme ise onu kapalı sanıyordu.
+        Yak(lamba, YanmaliMi(lamba));
     }
 
     private void Yak(Transform lamba, bool yan)

@@ -162,6 +162,11 @@ public class Varlik : MonoBehaviour
         if (kural.AvSuruyor && Gizli()) return;
         izler.Add(oyuncu.position);
         izZamanlari.Add(Time.time);
+        // Av sürerken iz KIRPILMAZ (#103): Gölge izi sıra numarasıyla (hedefIz) yürür; baştan bir nokta
+        // atılınca bütün noktalar bir sıra kayar ve Gölge'nin hedefi bir nokta ileri atlardı. Kırpma her
+        // 0,25 sn'de olduğu için Gölge saniyede dört nokta atlıyor, kapı ağızlarında duvarlardan geçiyordu.
+        // Av en çok 18 sn sürer; iz o kadar uzar, av bitince eski noktalar bir sonraki kayıtta atılır.
+        if (kural.AvSuruyor) return;
         while (izZamanlari.Count > 0 && Time.time - izZamanlari[0] > IzSuresi) { izler.RemoveAt(0); izZamanlari.RemoveAt(0); }
     }
 

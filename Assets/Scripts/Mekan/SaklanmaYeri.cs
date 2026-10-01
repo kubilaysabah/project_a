@@ -91,6 +91,9 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
             if (Saklaniyor || !isActiveAndEnabled) return false;
             if (KilitliMi()) return false;
             if (YakindaGolgeVar(OnNoktasi(), SaklanmaKurali.GolgeYakinligi)) return false;
+            // 7. katın kovalamacasında dolap yok (#103): silüet oyuncunun yürüdüğü yolu adım adım izler ve
+            // yolun sonunda dolabın içindeki oyuncuyu bulurdu. Kovalamacanın kuralı kaçmaktır.
+            foreach (KacisAni k in FindObjectsByType<KacisAni>()) if (k.Suruyor) return false;
             return true;
         }
     }
@@ -228,6 +231,16 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
             GicirtiCal();
         }
         Debug.Log($"[SAKLANMA] {name} içinden çıkıldı.");
+    }
+
+    /// <summary>
+    /// Oyuncu bir dolaptaysa hemen, sessizce çıkarılır (#103). Kat baştan kurulmadan ÖNCE çağrılır: yoksa
+    /// kurulum dolabı kapatınca (OnDisable) oyuncu karartmanın ortasında dolabın önüne geri konur ve
+    /// kontrolü erken geri alır.
+    /// </summary>
+    public static void ZorlaCik()
+    {
+        if (Aktif != null) Aktif.Cik(false);
     }
 
     // Dolap saklanırken yok olursa (daire yeniden kuruldu, sahne kapandı) oyuncu içeride kilitli

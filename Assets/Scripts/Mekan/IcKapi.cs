@@ -260,6 +260,9 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
         if (mentese != null) mentese.localRotation = Quaternion.Euler(0f, a, 0f);
     }
 
+    /// <summary>Oyuncu kanadın kapalı konumunun içinde mi (kapı kapanırsa içinden geçer)? KatAni bakar (#103).</summary>
+    public bool OyuncuYolunda { get { return KanatYoluDolu(); } }
+
     // Kanadın KAPALI konumunda kapladığı kutuyu yoklar: içinde oyuncunun gövdesi var mı?
     private bool KanatYoluDolu()
     {

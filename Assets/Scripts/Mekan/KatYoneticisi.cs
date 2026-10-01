@@ -1124,9 +1124,6 @@ public class KatYoneticisi : MonoBehaviour
             ? "   ·   kart: " + uygulayiciA.UygulananKart.Kimlik
             : "";
 
-        string poset = toplayici != null
-            ? $"   ·   poşet: {toplayici.TasinanPoset} (bu katta {copPlani.KattakiToplam(sayac.MevcutKat)})"
-            : "";
 
         // FPS: saniyedeki kare sayısı = 1 / bir karenin süresi. ms: bir kare kaç milisaniye.
         // Editor'de bu sayı güvenilmez (Editor kendi pencerelerini de çiziyor); gerçek
@@ -1141,7 +1138,7 @@ public class KatYoneticisi : MonoBehaviour
         Varlik varlik = GetComponent<Varlik>();
         string gerilim = varlik == null ? "" : $"   ·   gerilim {varlik.Gerilim:0.00} (k{varlik.Kademe}{(varlik.AvSuruyor ? " AV" : "")})";
 
-        string alt = $"kayıt: {Kayit.Kat}. kat" + poset + kartAdi + olay + gerilim + fps +
+        string alt = $"kayıt: {Kayit.Kat}. kat" + kartAdi + olay + gerilim + fps +
                      (catiModu ? "   ·   üstte çatı" : "") +
                      (catiOdasinda ? "   ·   çatı odasında" : "") +
                      (acilisModu ? "   ·   AÇILIŞ (zemin kat)" : "");
@@ -1198,6 +1195,8 @@ public class KatYoneticisi : MonoBehaviour
 
     private IEnumerator KatiBastanKur(int kat, bool kilitleriSil)
     {
+        // Dolaptaysa önce çıkar (#103): çıkış kontrolü geri verir; hemen aşağıda yeniden kapatılır.
+        SaklanmaYeri.ZorlaCik();
         // Karanlıkta oyuncu yürüyemesin.
         BirinciSahisKontrolcu kontrol = oyuncu != null ? oyuncu.GetComponent<BirinciSahisKontrolcu>() : null;
         if (kontrol != null) kontrol.enabled = false;

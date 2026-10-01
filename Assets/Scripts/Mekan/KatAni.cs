@@ -327,6 +327,19 @@ public class KatAni : MonoBehaviour
     {
         carpanKapi = hedef.GetComponent<IcKapi>();
         Transform mentese = hedef.Find("Mentese");
+        // Oyuncu kapının yolundaysa (eşikte duruyorsa) kapı çarpmaz, oyuncu çekilene kadar bekler (#103):
+        // kanat oyuncunun içinden geçer, oyuncu kapının çarpışmasına gömülüp sıkışabilirdi. En çok 6 sn
+        // beklenir; oyuncu hâlâ yoldaysa kapı kıpırdamaz, yalnızca ses ve lamba titremesi olur.
+        float bekleme = 0f;
+        while (carpanKapi != null && carpanKapi.OyuncuYolunda && bekleme < 6f) { bekleme += Time.deltaTime; yield return null; }
+        if (carpanKapi != null && carpanKapi.OyuncuYolunda)
+        {
+            Cal(veri.Klip, mentese.position + Vector3.up * 1.0f, veri.Ses, 1f);
+            KafaLambasi l0 = FindAnyObjectByType<KafaLambasi>();
+            if (l0 != null) l0.Titret(0.5f);
+            Korkut();
+            yield break;
+        }
         float bas = Mathf.DeltaAngle(0f, mentese.localEulerAngles.y);   // -180..180 arası şimdiki açı
         float sure = Mathf.Max(0.08f, veri.Sure);
         kapiCarpiyor = true;

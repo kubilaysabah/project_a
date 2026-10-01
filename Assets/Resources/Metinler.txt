@@ -162,6 +162,7 @@ menu.kontrol_incele	Eşyayı incele|F|X	Inspect an item|F|X
 menu.kontrol_lamba	Kafa lambası|L|LB	Headlamp|L|LB
 menu.kontrol_liste	Eşya listesi|T|Select	Item list|T|Select
 menu.kontrol_egil	Eğil|Ctrl  (basılı tut)|Sağ çubuğa bas	Crouch|Ctrl  (hold)|Click right stick
+menu.kontrol_saklan	Dolaba saklan, çık|E  (çık: E / Esc)|A  (çık: A / B)	Hide in a wardrobe, leave|E  (leave: E / Esc)|A  (leave: A / B)
 menu.kontrol_menu	Menü|Esc|Start	Menu|Esc|Start
 menu.kontrol_geri	Menüde geri|Esc|B	Back in menus|Esc|B
 

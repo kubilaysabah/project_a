@@ -194,7 +194,9 @@ public class AynaYansimasi : MonoBehaviour
         if (yansimaKamerasi == null || doku == null) { Ciziliyor = false; return; }
 
         // 1) Hariç kat mı? Öyleyse ayna (cam + çerçeve) görünmez ve hiçbir şey çizilmez.
-        int kat = yonetici != null ? yonetici.MevcutKat : 0;
+        // Bulunulan kat (#103): MevcutKat ulaşılan en yüksek kattır. Oyuncu 8. kattan 7. kata inince sahanlık
+        // 7. katın dairesini gösterir; MevcutKat'a bakınca ayna Cemal'in kimlik notunun üstünde beliriyordu.
+        int kat = yonetici != null ? yonetici.BulunulanKat : 0;
         bool haric = System.Array.IndexOf(haricKatlar, kat) >= 0;
         if (haric != gizli)
         {

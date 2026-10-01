@@ -34,6 +34,9 @@ public class KacisAni : MonoBehaviour
 
     private enum Durum { Bekliyor, Basladi, Bitti }
     private Durum durum = Durum.Bekliyor;
+
+    /// <summary>Kovalamaca şu an sürüyor mu (silüet oyuncunun peşinde)? Saklanma yeri bakar (#103).</summary>
+    public bool Suruyor { get { return durum == Durum.Basladi; } }
     private readonly List<Vector3> izler = new List<Vector3>();
     private float izSayaci, adimSayaci, baslangicZamani;
     private int hedefIz;

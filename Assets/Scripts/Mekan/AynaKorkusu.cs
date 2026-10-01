@@ -46,6 +46,23 @@ public class AynaKorkusu : MonoBehaviour
     // Korkunun yaşandığı "kat:daire" anahtarları (bkz. dosyanın başı).
     private static readonly HashSet<string> yasananlar = new HashSet<string>();
 
+    // Statik alanlar sahne yeniden yüklenince SIFIRLANMAZ (#103): kat seçince ya da finalden sonra sahne
+    // yeniden yüklenir ve kat baştan oynanır, ama liste dolu kaldığı için o aynalar bir daha korkutmuyordu.
+    // RuntimeInitializeOnLoadMethod: oyun başlarken Unity'nin kendiliğinden çağırdığı fonksiyon; burada
+    // "her sahne yüklendiğinde listeyi boşalt" diye sahne yükleme olayına (sceneLoaded) abone olunur.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void SahneOlayinaBaglan()
+    {
+        yasananlar.Clear();
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= SahneYuklendi;   // iki kez abone olmasın
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += SahneYuklendi;
+    }
+
+    private static void SahneYuklendi(UnityEngine.SceneManagement.Scene sahne, UnityEngine.SceneManagement.LoadSceneMode kip)
+    {
+        yasananlar.Clear();
+    }
+
     private AynaYansimasi ayna;
     private KatYoneticisi yonetici;
     private BirinciSahisKontrolcu kontrol;
@@ -102,7 +119,9 @@ public class AynaKorkusu : MonoBehaviour
         return !yasananlar.Contains(Anahtar());
     }
 
-    private string Anahtar() { return (yonetici != null ? yonetici.MevcutKat : 0) + ":" + daireAdi; }
+    // Bulunulan kat (#103): MevcutKat ulaşılan en yüksek kattır; oyuncu aşağı indiğinde sahanlık alt katın
+    // dairesini gösterir ve korku o katın sayılmalıdır.
+    private string Anahtar() { return (yonetici != null ? yonetici.BulunulanKat : 0) + ":" + daireAdi; }
 
     // Aynanın merkezi ekranın ortadaki "alan" kadarlık kısmında mı? (alan = 1: ekranın herhangi bir yeri.)
     // WorldToViewportPoint: dünya noktasının ekrandaki yeri, 0-1 arası (0,5; 0,5 ekranın ortası);

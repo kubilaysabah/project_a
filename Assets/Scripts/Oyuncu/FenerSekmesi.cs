@@ -101,7 +101,11 @@ public class FenerSekmesi : MonoBehaviour
         // Fener uzaklaştıkça duvara düşen ışık azalır (kare ters orantı; 1,5 m'den yakını doymuş):
         // 2 m'de 0,6, 4 m'de 0,18, 6 m'de 0,08.
         float dusen = Mathf.Clamp01(3f / (mesafe * mesafe + 1f));
-        hedefSiddet = KafaLambasi.Siddet * Oran * albedo * dusen * 3f;
+        // Fenerin o anki gücü (#103): eşya incelenirken fener %12'ye kısılır; sekme tam güçle hesaplanınca
+        // incelenen eşyanın arkasındaki oda fenerden parlak bir dolguyla aydınlanıyordu.
+        Light fener = lamba.IsikYonu.GetComponent<Light>();
+        float fenerOrani = fener != null ? Mathf.Clamp01(fener.intensity / KafaLambasi.Siddet) : 1f;
+        hedefSiddet = KafaLambasi.Siddet * Oran * albedo * dusen * 3f * fenerOrani;
         // Işık yüzeyden 90 cm önde durur (ama kameranın gerisine geçmez): yüzeyin kendisi değil,
         // çevresi aydınlansın; 25 cm'de duvarda parlak bir leke oluşuyordu.
         hedefNokta = enYakin.point + enYakin.normal * Mathf.Min(Aciklik, mesafe * 0.6f);

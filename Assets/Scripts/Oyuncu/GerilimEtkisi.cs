@@ -245,8 +245,10 @@ public class GerilimEtkisi : MonoBehaviour
             avda = varlik.AvSuruyor;
             if (avda) hedef = 1f;
         }
+        // Kontrol kapalıysa (menü, not, yakın bakış) efekt söner; AMA dolapta saklanırken de kontrol kapalıdır
+        // ve tam o anda Gölge kapının önündedir (#103): saklanma bu kuralın dışında tutulur.
         bool kapali = DuraklatmaMenusu.BaslikEkraninda || Time.timeScale == 0f
-                      || kontrolcu == null || !kontrolcu.enabled;
+                      || kontrolcu == null || (!kontrolcu.enabled && !SaklanmaYeri.Saklaniyor);
         if (kapali) { hedef = 0f; avda = false; }
 
         // Yumuşatma: yükselirken ve düşerken farklı süre. 1 - e^(-dt/süre): kare hızından bağımsız.
