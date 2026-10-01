@@ -72,6 +72,9 @@ public static class OyuncuKurucu
 
         kamera.gameObject.name = "Kamera";
         // Bulunulan odanın yankısı (#87): dinleyicinin nesnesinde, yoksa eklenir.
+        // Yankı filtresi sahneye kalıcı eklenir: oyun sırasında AddComponent ile eklendiğinde Unity her
+        // oyunda "Only custom filters can be played" uyarısı veriyordu. OdaYankisi önce var olanı arar.
+        if (kamera.GetComponent<AudioReverbFilter>() == null) kamera.gameObject.AddComponent<AudioReverbFilter>();
         if (kamera.GetComponent<OdaYankisi>() == null) kamera.gameObject.AddComponent<OdaYankisi>();
         // Fenerin sahte sekme ışığı (#89): huzmenin vurduğu yere konan nokta ışığı.
         if (kamera.GetComponent<FenerSekmesi>() == null) kamera.gameObject.AddComponent<FenerSekmesi>();

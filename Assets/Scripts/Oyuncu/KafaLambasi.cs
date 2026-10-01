@@ -71,7 +71,12 @@ public class KafaLambasi : MonoBehaviour
     private void Awake()
     {
         isik = GetComponentInChildren<Light>(true);
-        kaynak = gameObject.AddComponent<AudioSource>();
+        // Ses kaynağı kameranın kendisine değil bir ALT nesneye konur (#87/#91): kamerada oda yankısı
+        // filtresi (OdaYankisi) var ve Unity, aynı nesnede bir ses kaynağı bulunca filtreyi dinleyiciye değil
+        // o kaynağa bağlar; yankı odadaki seslere değil lambanın tıkına uygulanırdı.
+        GameObject sesNesnesi = new GameObject("Lamba_Sesi");
+        sesNesnesi.transform.SetParent(transform, false);
+        kaynak = sesNesnesi.AddComponent<AudioSource>();
         kaynak.playOnAwake = false;
         kaynak.spatialBlend = 0f;             // kendi kafandaki lamba: 2B
         tik = Resources.Load<AudioClip>("Sesler/Lamba_Sonme");   // eski anahtar tıkı (#25'teki ses)

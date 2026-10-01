@@ -190,7 +190,11 @@ public class GerilimEtkisi : MonoBehaviour
         // Kalp: 2B, mekânın yankısının dışında. ignoreListenerPause false (varsayılan): menüde
         // AudioListener.pause açılınca o da durur.
         kalp = Resources.Load<AudioClip>("Sesler/Kalp_Atisi");
-        kalpKaynagi = gameObject.AddComponent<AudioSource>();
+        // Kaynaklar kameranın ALT nesnesinde: kamerada oda yankısı filtresi var; aynı nesnedeki bir ses
+        // kaynağı filtreyi dinleyiciden alıp kendine bağlardı (KafaLambasi'ndaki not).
+        GameObject sesNesnesi = new GameObject("Gerilim_Sesleri");
+        sesNesnesi.transform.SetParent(transform, false);
+        kalpKaynagi = sesNesnesi.AddComponent<AudioSource>();
         kalpKaynagi.playOnAwake = false;
         kalpKaynagi.spatialBlend = 0f;              // 2B: kafanın içinde
         kalpKaynagi.bypassListenerEffects = true;   // OdaYankisi'nin yankısı uygulanmasın
@@ -201,7 +205,7 @@ public class GerilimEtkisi : MonoBehaviour
         AudioClip nefes = Resources.Load<AudioClip>("Sesler/Nefes");
         if (nefes != null)
         {
-            nefesKaynagi = gameObject.AddComponent<AudioSource>();
+            nefesKaynagi = sesNesnesi.AddComponent<AudioSource>();
             nefesKaynagi.clip = nefes;
             nefesKaynagi.loop = true;
             nefesKaynagi.playOnAwake = false;
