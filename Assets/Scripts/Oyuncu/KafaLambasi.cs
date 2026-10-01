@@ -46,6 +46,16 @@ public class KafaLambasi : MonoBehaviour
     /// <summary>Lamba oyuncunun kafasında mı? Açılışta çividen alınana kadar false (#56).</summary>
     public bool Takili { get { return takili; } }
 
+    /// <summary>
+    /// İnceleme kısması (#88, IncelemeEkrani): eşya kameranın 42 cm önündeyken tam şiddetli lamba onu
+    /// bembeyaz patlatır (ışık yakında kare-ters orantıyla kat kat güçlenir). Açıkken şiddet %12'ye
+    /// iner: eşya okunur, oda arkada karanlığa çekilir; kapanınca eski şiddet.
+    /// </summary>
+    public void IncelemeKismasi(bool acik)
+    {
+        if (isik != null) isik.intensity = acik ? Siddet * 0.12f : Siddet;
+    }
+
     /// <summary>Lamba şu an yanıyor mu (senaryolu sönme sırasında da false).</summary>
     public bool Acik { get { return acik; } }
 

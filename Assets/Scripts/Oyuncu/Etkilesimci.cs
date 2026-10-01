@@ -32,6 +32,24 @@ public class Etkilesimci : MonoBehaviour
     public IEtkilesimli Hedef { get; private set; }
 
     private InputAction etkilesimEylemi;
+    private InputAction bakisEylemi;      // sürüklerken fare/çubuk hareketi buradan okunur (#88)
+
+    // ---------- SÜRÜKLEME DURUMU (#88) ----------
+    // E'ye basılınca hedef sürüklenebilir bir kapı ya da çekmeceyse hemen açılmaz: önce bakılır,
+    // oyuncu E'yi tutup fareyi itiyor mu? 0,18 sn'den uzun tutulursa ya da fare 5 pikselden çok
+    // oynarsa SÜRÜKLEME başlar (bakış kilitlenir, hareket kapıya gider); bırakınca kapı olduğu
+    // yerde kalır. Daha önce bırakılırsa bu kısa bir DOKUNUŞTUR: eski davranış, tam aç/kapa.
+    private const float SuruklemeSuresi = 0.18f, SuruklemePikseli = 5f;
+    private const float DereceBasinaPiksel = 0.35f;   // kapı: 1 piksel = 0,35°
+    private const float OranBasinaPiksel = 0.0025f;   // çekmece: 1 piksel = %0,25
+    private const float KolKapiHizi = 110f, KolCekmeceHizi = 0.8f;   // kolda saniyede (tam itiş)
+    private IEtkilesimli basiliHedef;
+    private IcKapi basiliKapi;
+    private AcilirParca basiliParca;
+    private float basmaZamani;
+    private Vector2 birikim;
+    private bool surukluyor;
+    private float suruklenen;   // bu tutuşta kapıya/çekmeceye gerçekten gidilen toplam hareket (piksel)
 
     // Nişangâhı çizmeden önce bakılır: oyuncu yürüyemiyorsa (duraklatma, kararma) çizilmez.
     private BirinciSahisKontrolcu kontrolcu;
@@ -51,13 +69,20 @@ public class Etkilesimci : MonoBehaviour
         else
         {
             etkilesimEylemi = varlik.FindAction("Player/Interact");
+            bakisEylemi = varlik.FindAction("Player/Look");
         }
 
         kontrolcu = GetComponent<BirinciSahisKontrolcu>();
     }
 
     private void OnEnable() { etkilesimEylemi?.Enable(); }
-    private void OnDisable() { etkilesimEylemi?.Disable(); }
+    private void OnDisable()
+    {
+        etkilesimEylemi?.Disable();
+        // Yakın ekran ya da karartma sırasında kapanırsak sürükleme yarıda kalır: kilidi bırak.
+        if (surukluyor && kontrolcu != null) kontrolcu.BakisKilidi = false;
+        basiliHedef = null; basiliKapi = null; basiliParca = null; surukluyor = false;
+    }
 
     // ---------- HER KARE ----------
 
@@ -65,18 +90,83 @@ public class Etkilesimci : MonoBehaviour
     {
         if (kamera == null) return;
 
+        // Sürükleme sürerken nişan değişmez: fare kapıdadır, kafada değil.
+        if (basiliHedef != null) { SuruklemeyiSur(); return; }
+
         Hedef = HedefBul(out Transform hedefGovdesi);
 
         if (etkilesimEylemi == null) return;
-        if (!etkilesimEylemi.WasPressedThisFrame()) return;
 
-        if (Hedef != null && Hedef.EtkilesimeAcik)
+        // İnceleme (#88): F (kolda X) bir eşyayı gözün önüne getirir.
+        bool incele = (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+                   || (Gamepad.current != null && Gamepad.current.buttonWest.wasPressedThisFrame);
+        if (incele && !IncelemeEkrani.Acik && Hedef is Esya esya && esya.EtkilesimeAcik)
         {
-            Hedef.Etkilesim(gameObject);
-
-            // Etkileşimden sonra hedef genelde kaybolur; nişangâh bu karede boşalsın.
-            Hedef = null;
+            IncelemeEkrani.Ac(esya, gameObject);
+            return;
         }
+
+        if (!etkilesimEylemi.WasPressedThisFrame()) return;
+        if (Hedef == null || !Hedef.EtkilesimeAcik) return;
+
+        // Sürüklenebilir kapı ya da çekmece: hemen değil, bırakınca ya da fare oynayınca karar.
+        IcKapi kapi = Hedef as IcKapi;
+        AcilirParca parca = Hedef as AcilirParca;
+        if (parca == null && hedefGovdesi != null) parca = hedefGovdesi.GetComponent<AcilirParca>();
+        if ((kapi != null && kapi.Suruklenebilir) || (parca != null && parca.Suruklenebilir))
+        {
+            basiliHedef = Hedef; basiliKapi = kapi; basiliParca = kapi != null ? null : parca;
+            basmaZamani = Time.time; birikim = Vector2.zero; surukluyor = false; suruklenen = 0f;
+            return;
+        }
+
+        Hedef.Etkilesim(gameObject);
+
+        // Etkileşimden sonra hedef genelde kaybolur; nişangâh bu karede boşalsın.
+        Hedef = null;
+    }
+
+    // E basılıyken: kısa dokunuş mu, sürükleme mi? Sürüklemede fare/çubuk hareketi kapıya gider.
+    private void SuruklemeyiSur()
+    {
+        bool basili = etkilesimEylemi != null && etkilesimEylemi.IsPressed();
+        Vector2 delta = bakisEylemi != null ? bakisEylemi.ReadValue<Vector2>() : Vector2.zero;
+        bool kol = bakisEylemi != null && bakisEylemi.activeControl != null && bakisEylemi.activeControl.device is Gamepad;
+
+        if (!surukluyor)
+        {
+            birikim += kol ? delta * 10f : delta;
+            if (Time.time - basmaZamani > SuruklemeSuresi || birikim.magnitude > SuruklemePikseli)
+            {
+                surukluyor = true;
+                if (kontrolcu != null) kontrolcu.BakisKilidi = true;
+            }
+        }
+        if (surukluyor && kamera != null)
+        {
+            // Fare yukarı = oyuncudan uzağa it; işaret kapının açılış yönüne göre.
+            float ileri = delta.y;
+            suruklenen += Mathf.Abs(kol ? ileri * 10f : ileri);
+            if (basiliKapi != null)
+                basiliKapi.Surukle((kol ? ileri * KolKapiHizi * Time.deltaTime : ileri * DereceBasinaPiksel) * basiliKapi.AcilisIsareti(kamera.forward));
+            else if (basiliParca != null)
+                basiliParca.Surukle((kol ? ileri * KolCekmeceHizi * Time.deltaTime : ileri * OranBasinaPiksel) * basiliParca.AcilisIsareti(kamera.forward));
+        }
+        if (basili) return;
+
+        // Bırakıldı. E uzun tutulsa bile fare oynamadıysa bu bir DOKUNUŞTUR: tam aç/kapa.
+        if (kontrolcu != null) kontrolcu.BakisKilidi = false;
+        if (surukluyor && suruklenen >= SuruklemePikseli)
+        {
+            basiliKapi?.SuruklemeBitti();
+            basiliParca?.SuruklemeBitti();
+        }
+        else if (basiliHedef.EtkilesimeAcik)
+        {
+            basiliHedef.Etkilesim(gameObject);   // kısa dokunuş: eskisi gibi tam aç/kapa
+        }
+        basiliHedef = null; basiliKapi = null; basiliParca = null; surukluyor = false;
+        Hedef = null;
     }
 
     // ---------- NİŞAN ----------

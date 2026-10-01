@@ -165,9 +165,15 @@ public class BirinciSahisKontrolcu : MonoBehaviour
 
     // ---------- UPDATE ----------
     // Update HER KAREDE çalışır. Saniyede 60 kare varsa saniyede 60 kez.
+    /// <summary>
+    /// Bakış kilidi (#88): true iken fare/çubuk kafayı çevirmez; Etkilesimci kapı ya da çekmece
+    /// sürüklerken açar (fare hareketi kapıya gider), bırakınca kapatır. Yürüme sürer.
+    /// </summary>
+    public bool BakisKilidi { get; set; }
+
     private void Update()
     {
-        Bak();
+        if (!BakisKilidi) Bak();
         Egil();
         Yuru();
 

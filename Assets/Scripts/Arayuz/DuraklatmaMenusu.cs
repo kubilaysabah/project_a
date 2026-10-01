@@ -81,7 +81,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     // tek anahtarda durur, dil değişince üçü birlikte değişir. Tuşların kendisi de çevrilir
     // ("basılı tut" / "hold"). Anahtarlar düz yazılır ki metin bütünlük testi onları kodda bulsun.
     private static readonly string[] KontrolSatirlari = {
-        "menu.kontrol_yuru", "menu.kontrol_bak", "menu.kontrol_etkilesim", "menu.kontrol_lamba",
+        "menu.kontrol_yuru", "menu.kontrol_bak", "menu.kontrol_etkilesim", "menu.kontrol_surukle", "menu.kontrol_incele", "menu.kontrol_lamba",
         "menu.kontrol_liste", "menu.kontrol_egil", "menu.kontrol_menu", "menu.kontrol_geri",
     };
     private const int GorCozunurluk = 0, GorEkran = 1, GorVSync = 2, GorKalite = 3,

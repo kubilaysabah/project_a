@@ -100,6 +100,55 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
         hareket = null;
     }
 
+    // ---------- SÜRÜKLEME (#88) ----------
+    // Şahan: "kapılar E'ye basınca kendi kendine açılıyor." E basılı tutulup fare itilince kanat
+    // fareyle döner, bırakınca olduğu yerde kalır (aralık kapı). Kısa bir E dokunuşu eskisi gibi
+    // tam açar/kapar (Etkilesim). Sürükleme yalnızca kilitsiz, devrilmemiş, hareketsiz kapıda.
+
+    /// <summary>Şu an sürüklenebilir mi (kilit yok ya da çözük, devrik değil, hareket etmiyor)?</summary>
+    public bool Suruklenebilir
+    {
+        get
+        {
+            if (hareket != null || devrik || kilitli) return false;
+            Kilit kilit = GetComponent<Kilit>();
+            return kilit == null || kilit.Cozuk;
+        }
+    }
+
+    /// <summary>
+    /// Fareyi ileri itmek kapıyı oyuncudan UZAĞA itmeli. Kanat açılırken kameradan uzaklaşıyorsa
+    /// +1 (ileri = aç), yaklaşıyorsa -1 (ileri = kapat). Kanadın ortasının şimdiki ve 5° daha açık
+    /// konumu karşılaştırılır.
+    /// </summary>
+    public float AcilisIsareti(Vector3 kameraIleri)
+    {
+        if (mentese == null || kanat == null || mentese.parent == null) return 1f;
+        Vector3 simdi = kanat.position;
+        float isaret = Mathf.Sign(acikAci);
+        Vector3 sonra = mentese.parent.TransformPoint(mentese.localPosition + Quaternion.Euler(0f, aci + 5f * isaret, 0f) * kanat.localPosition);
+        Vector3 acilma = sonra - simdi;   // açılırken kanadın gittiği yön
+        return Vector3.Dot(acilma, kameraIleri) >= 0f ? 1f : -1f;
+    }
+
+    /// <summary>Kanadı 'derece' kadar açar (artı) ya da kapatır (eksi); 0 ile tam açık arasında kalır.</summary>
+    public void Surukle(float derece)
+    {
+        if (!Suruklenebilir || Mathf.Abs(derece) < 0.0001f) return;
+        float isaret = Mathf.Sign(acikAci);
+        float yeni = Mathf.Clamp(aci * isaret + derece, 0f, Mathf.Abs(acikAci)) * isaret;
+        // Kapanırken kanadın süpüreceği yerde oyuncu varsa durur (kapı oyuncunun üstüne kapanmaz).
+        if (Mathf.Abs(yeni) < Mathf.Abs(aci) && KanatYoluDolu()) return;
+        if (Mathf.Approximately(aci, 0f) && !Mathf.Approximately(yeni, 0f)) Cal(acilmaSesi, 0.5f);   // kapalıdan ayrılırken gıcırtı
+        AciyiUygula(yeni);
+    }
+
+    /// <summary>Sürükleme bitti: 3°'den fazla açıksa "açık" sayılır (E'ye dokununca kapanır).</summary>
+    public void SuruklemeBitti()
+    {
+        acik = Mathf.Abs(aci) > 3f;
+    }
+
     /// <summary>Kilidi takar ya da çözer. Hep kilitli kapı (balkon) çözülmez.</summary>
     public void Kilitle(bool k)
     {

@@ -94,6 +94,53 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
         if (kilitli && acik) Ayarla(false);
     }
 
+    // ---------- SÜRÜKLEME (#88) ----------
+    /// <summary>Şu an sürüklenebilir mi (kilitsiz, hareketsiz)?</summary>
+    public bool Suruklenebilir
+    {
+        get
+        {
+            if (hareketEden != null || kilitli) return false;
+            Kilit kilit = GetComponent<Kilit>();
+            return kilit == null || kilit.Cozuk;
+        }
+    }
+
+    /// <summary>
+    /// Fareyi ileri itmek parçayı oyuncudan UZAĞA itmeli: açılırken kameradan uzaklaşıyorsa +1
+    /// (ileri = aç), yaklaşıyorsa -1. Çekmece: açılma yönü eksenin kendisi. Kapak: ekseni etrafında
+    /// dönen parçanın ortasının gittiği yön (eksen × (merkez - pivot)).
+    /// </summary>
+    public float AcilisIsareti(Vector3 kameraIleri)
+    {
+        Transform ebeveyn = transform.parent;
+        Vector3 eksenDunya = ebeveyn != null ? ebeveyn.TransformDirection(kapaliDonus * eksen.normalized) : kapaliDonus * eksen.normalized;
+        Vector3 acilma;
+        if (hareket == Hareket.Kaydir) acilma = eksenDunya * Mathf.Sign(miktar);
+        else
+        {
+            Renderer r = GetComponentInChildren<Renderer>();
+            Vector3 merkez = r != null ? r.bounds.center : transform.position + transform.forward * 0.2f;
+            acilma = Vector3.Cross(eksenDunya, merkez - transform.position) * Mathf.Sign(miktar);
+        }
+        return Vector3.Dot(acilma, kameraIleri) >= 0f ? 1f : -1f;
+    }
+
+    /// <summary>Açıklık oranını 'fark' kadar değiştirir (0 kapalı, 1 tam açık).</summary>
+    public void Surukle(float fark)
+    {
+        if (!Suruklenebilir || Mathf.Abs(fark) < 0.00001f) return;
+        float yeni = Mathf.Clamp01(oran + fark);
+        if (oran <= 0f && yeni > 0f) { Cal(acilmaSesi, 0.4f); Varlik.Gurultu(0.02f); }
+        Uygula(yeni);
+    }
+
+    /// <summary>Sürükleme bitti: %30'dan fazla açıksa "açık" sayılır (içindeki eşya alınabilir).</summary>
+    public void SuruklemeBitti()
+    {
+        acik = oran > 0.3f;
+    }
+
     /// <summary>Parçayı sessizce aralık bırakır (kat hazırlanırken, #83: boşaltılmış buzdolabının
     /// kapısı). oran 0 kapalı, 1 tam açık. Parça "açık" sayılır: oyuncu dokununca kapanır.</summary>
     public void Aralik(float oran)

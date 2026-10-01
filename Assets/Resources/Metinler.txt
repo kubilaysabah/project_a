@@ -123,6 +123,7 @@ esya.tabak	Tabak: {0}	Plate: {0}
 # ---- Aile fotoğrafları (#69): yakın bakış, menü sayfası ve fotoğrafların arkasındaki el yazıları ----
 ipucu.bak	BAK	LOOK
 foto.tuslar	{0}: çevir      {1}: kapat	{0}: turn over      {1}: close
+inceleme.tuslar	{0}: al      {1}: bırak      fare: çevir	{0}: take      {1}: put back      mouse: turn
 foto.menu_tuslar	{0}: çevir	{0}: turn over
 foto.bos	Henüz bir fotoğrafa bakmadın.	You haven't looked at any photos yet.
 menu.fotograflar	Fotoğraflar	Photos
@@ -153,6 +154,8 @@ menu.kontrol_kol	Oyun kolu	Gamepad
 menu.kontrol_yuru	Yürü|W A S D  (ya da oklar)|Sol çubuk	Walk|W A S D  (or arrow keys)|Left stick
 menu.kontrol_bak	Etrafa bak|Fare|Sağ çubuk	Look around|Mouse|Right stick
 menu.kontrol_etkilesim	Al, aç, oku|E|A	Take, open, read|E|A
+menu.kontrol_surukle	Kapıyı, çekmeceyi sürükle|E (basılı tut) + fare|A (basılı tut) + sağ çubuk	Drag a door or drawer|E (hold) + mouse|A (hold) + right stick
+menu.kontrol_incele	Eşyayı incele|F|X	Inspect an item|F|X
 menu.kontrol_lamba	Kafa lambası|L|LB	Headlamp|L|LB
 menu.kontrol_liste	Eşya listesi|T|Select	Item list|T|Select
 menu.kontrol_egil	Eğil|Ctrl  (basılı tut)|Sağ çubuğa bas	Crouch|Ctrl  (hold)|Click right stick
