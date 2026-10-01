@@ -809,7 +809,17 @@ public class KatYoneticisi : MonoBehaviour
     public bool AcilisModunda { get { return acilisModu; } }
 
     /// <summary>Bu katın kat kapısı açıldı mı (ya da kat geride mi kaldı)?</summary>
-    public bool KatKapisiAcikMi(int kat) { return KapiAcikMi(kat); }
+    public bool KatKapisiAcikMi(int kat)
+    {
+        // 8. katın (çatı katının) demir kat kapısı yok; yerinde çatı kapısı var. KapiAcikMi bu katı hep
+        // "açık" sayar, çünkü oyuncunun çatı odasına kadar yürüyebilmesi gerekir. Ama "katın kapısı açıldı
+        // mı" diye soranlar (T listesi, takılma ipucu, Gölge'nin avı) aslında "kat bitti mi" diye soruyor.
+        // 8. katta kat, çatı kapısı çatı anahtarıyla açılınca biter. Bu ayrım yokken T listesi çatı
+        // anahtarını alınmadan "bulundu" gösteriyordu, ipucu hiç gelmiyordu, av da başlar başlamaz bitiyordu.
+        if (kat >= KatSayaci.CatiKati) return catiAcildi;
+        // Öbür katlar: demir kapı açıldıysa ya da kat geride kaldıysa.
+        return KapiAcikMi(kat);
+    }
 
     /// <summary>Bu katın kilit zinciri; tanımlı değilse null.</summary>
     private KilitZinciri ZincirBul(int kat)
