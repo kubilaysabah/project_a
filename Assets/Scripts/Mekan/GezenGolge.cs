@@ -1,10 +1,13 @@
 // GezenGolge.cs
 // Bütün katlarda gezen Gölge (#71).
 //
-// Oyuncu bir katta, katın kapısını açıp çıkamadığı sürece her 1-2 dakikada bir (GolgeZamanlayici)
-// önce ÜST KATTAN AĞIR ADIMLAR duyulur; sesin ortasında 7. kattaki kaçış Gölgesi'nin aynısı
-// ANİDEN belirir: oyuncunun önünde, görebileceği bir yerde (#74, Şahan: "canavar gelmeden önce
-// çalalım, sesin ortasında canavar belirsin"). Adımlar bitince yer yoksa Gölge çıkmaz, ses kalır.
+// Gölge'nin KENDİ SAATİ YOK (Şahan, 2026-10-01, #86: "gezen gölgenin zamanlayıcısı kalksın, sadece
+// gerilimle gelsin"). Eskiden her 1-2 dakikada bir kendiliğinden belirirdi (GolgeZamanlayici, #71);
+// şimdi onu yalnızca Varlık çağırır (gerilim 2. kademeye varınca, HaberciyleBelir) ve yanlış kapı
+// çalınca SahanlikKapisi çağırır (Belir). HaberciyleBelir'de önce ÜST KATTAN AĞIR ADIMLAR duyulur;
+// sesin ortasında 7. kattaki kaçış Gölgesi'nin aynısı ANİDEN belirir: oyuncunun önünde, görebileceği
+// bir yerde (#74, Şahan: "canavar gelmeden önce çalalım, sesin ortasında canavar belirsin").
+// Adımlar bitince yer yoksa Gölge çıkmaz, ses kalır.
 // 2 saniye oyuncuya doğru koşar; oyuncuya 1,2 m'den fazla yaklaşmaz, dokunmaz. Sonra kafa lambası
 // titrer ve Gölge kaybolur. Hasar yok, ölüm yok, kat sıfırlanmaz (Şahan'ın isteği): yalnızca korku.
 //
@@ -15,7 +18,7 @@
 //   - altında oyuncuyla aynı yükseklikte zemin var (merdivende ya da boşlukta belirmesin);
 //   - bir insan sığacak kadar boş (Physics.CheckCapsule: duvarın içinde belirmesin).
 // Böylece Gölge koşarken de duvardan geçmez: oyuncuyla arasındaki yol zaten açık.
-// Uygun nokta yoksa (oyuncu duvara dönük duruyor) 8 saniye sonra yeniden denenir.
+// Uygun nokta yoksa (oyuncu duvara dönük duruyor) Gölge bu seferlik çıkmaz; Varlık sonraki tepkide yine dener.
 //
 // Ne zaman sayılmaz? Kat yöneticisi "oyuncu katta sıkışık değil" dediğinde (açılış, kat kapısı
 // açıldı, çatı), başlık ekranında, oyuncunun kontrolü kapalıyken (duraklatma, not, şifre ekranı)
@@ -36,7 +39,6 @@ public class GezenGolge : MonoBehaviour
     private const float EnYakin = 1.2f;                  // oyuncuya en fazla bu kadar yaklaşır
     private const float AdimAraligi = 0.4f;
 
-    private GolgeZamanlayici zamanlayici;
     private KatYoneticisi yonetici;
     private BirinciSahisKontrolcu kontrol;
     private Transform oyuncu;
@@ -46,8 +48,6 @@ public class GezenGolge : MonoBehaviour
 
     private void Start()
     {
-        // Tohum: her oyun farklı olsun diye zamandan; testler zamanlayıcıyı kendi tohumuyla dener.
-        zamanlayici = new GolgeZamanlayici(System.Environment.TickCount);
         yonetici = GetComponent<KatYoneticisi>();
         kontrol = FindAnyObjectByType<BirinciSahisKontrolcu>();
         oyuncu = kontrol != null ? kontrol.transform : null;
@@ -58,13 +58,16 @@ public class GezenGolge : MonoBehaviour
         }
     }
 
-    private void Update()
+    /// <summary>
+    /// Önce üst kattan adımlar, sesin ortasında Gölge (Varlık, 2. kademe). Oyuncunun önünde yer yoksa
+    /// adımlar da çalmaz ve false döner (Varlık o zaman kapıyı tıklatır).
+    /// </summary>
+    public bool HaberciyleBelir()
     {
-        if (zamanlayici == null || yonetici == null || oyuncu == null) return;
-        if (!zamanlayici.Ilerlet(Time.deltaTime, yonetici.MevcutKat, SayabilirMi())) return;
-        // Önce yer aranır: oyuncu duvara dönükse adımlar da çalmaz, 8 sn sonra yeniden denenir.
-        if (!YerVarMi()) { zamanlayici.Ertele(8f); return; }
+        if (golge != null || haberciCaliyor || sablon == null || oyuncu == null) return false;
+        if (!YerVarMi()) return false;
         StartCoroutine(HaberciVeBelir());
+        return true;
     }
 
     // Üst kattan adımlar başlar; sesin ortasında Gölge belirir.
@@ -86,6 +89,7 @@ public class GezenGolge : MonoBehaviour
     }
 
     // Şu an oyuncunun önünde Gölge'ye uygun bir yer var mı (yer tutulmaz, yalnızca bakılır)?
+    // (Oyuncu duvara dönükse adımlar da çalmasın: ses gelip Gölge çıkmaması kuralı boşa harcar.)
     private bool YerVarMi()
     {
         Camera kamera = kontrol != null ? kontrol.GetComponentInChildren<Camera>() : null;
@@ -99,7 +103,7 @@ public class GezenGolge : MonoBehaviour
         return ekran.z > 0f && ekran.x >= 0.15f && ekran.x <= 0.85f && ekran.y >= 0.15f && ekran.y <= 0.85f;
     }
 
-    // Saat bu karede işlesin mi?
+    // Gölge şu an belirebilir mi (adımlar çalarken oyuncu menüye girdiyse, kapıyı açtıysa belirmez)?
     private bool SayabilirMi()
     {
         if (golge != null || haberciCaliyor || sablon == null) return false;

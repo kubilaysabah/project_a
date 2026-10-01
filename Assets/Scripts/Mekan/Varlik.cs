@@ -20,6 +20,9 @@
 //
 // Kapali (static): oyun botu ve kat denetimi kuralı kapatır; ışınlanarak gezen bir test oyuncusu
 // gerçek bir oyuncu gibi ısınmamalı.
+//
+// Gezen Gölge'nin kendi saati yok (Şahan, 2026-10-01): Gölge yalnızca buradan (2. kademe) ve yanlış
+// kapı çalınınca (SahanlikKapisi) gelir.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -176,8 +179,9 @@ public class Varlik : MonoBehaviour
                 if (haberci != null) AudioSource.PlayClipAtPoint(haberci, oyuncu.position + Vector3.up * 3f, 0.8f);
                 break;
             case GerilimTepkisi.Golge:
+                // Önce üst kattan adımlar, sesin ortasında Gölge (#74 kuralı). Yer yoksa en azından kapı.
                 GezenGolge gezen = GetComponent<GezenGolge>();
-                if (gezen == null || !gezen.Belir()) KapiTiklat();   // yer yoksa en azından kapı
+                if (gezen == null || !gezen.HaberciyleBelir()) KapiTiklat();
                 break;
             case GerilimTepkisi.Tiklatma:
                 KapiTiklat();
