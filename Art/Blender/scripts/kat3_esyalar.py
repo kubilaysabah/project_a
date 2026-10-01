@@ -25,14 +25,18 @@
 #   hali           Hali_K3             : kırmızı zeminli, göbek motifli salon halısı.
 #   perde          Perde_K3            : iki yana bağlanmış sarı pamuklu perde, ortada tül (pivot çubuk yüksekliği).
 #   raf            Duvar_Rafi_K3       : duvar rafı; porselen biblolar ve küçük vazo (duvar eşyası).
+#   kanepe         Kanepe_K3           : ceviz iskeletli, çizgili dokuma döşemeli üçlü kanepe; gevşek sırt minderleri,
+#                                        çökmüş orta oturak, sırtında dantel. Altı yerden 18 cm açık (çizim parçası).
 # MUTFAK
-#   mama           Mama_Sandalyesi_K3  : beyaz-pembe plastik ve metal, tablalı mama sandalyesi.
-#   masa           Masa_K3             : mavi muşamba örtülü yuvarlak masa; meyve kâsesi ve şekerlik.
+#   mama           Mama_Sandalyesi_K3  : torna ayaklı ahşap mama sandalyesi; vinil minder, ahşap tabla, sarkan önlük.
+#   masa           Masa_K3             : krom ayaklı kare mutfak masası, kırmızı pötikare muşamba; meyve kâsesi ve şekerlik.
 #   sandalye       Sandalye_K3         : mavi boyalı ahşap mutfak sandalyesi.
 #   buzdolabi      Buzdolabi_K3        : krem, üstü dondurucu iki kapılı buzdolabı; kapıda mıknatıslı resimler (tek parça).
 #   ocak           Ocak_K3             : beyaz dört gözlü fırınlı ocak; süt tenceresi ve iki katlı çaydanlık.
 #   camasir        Camasir_Makinesi_K3 : önden yüklemeli beyaz çamaşır makinesi; üstünde dolu çamaşır sepeti.
 #   biberon        Biberon_Takimi_K3   : iki biberon ve bir mama tenekesi (tezgâh üstü).
+# ODA B (yatak odası eşyalarının çoğu kat3_esyalar_2.py'de)
+#   cocuksandalye  Cocuk_Sandalyesi_K3 : yeşil boyalı çelik borulu, kontrplak oturaklı çocuk/okul sandalyesi.
 # Ön yüz -y (Unity'de +Z). Pivot: yer ve masa üstü eşyalarında tabanın ortası; duvar eşyalarında arka yüzün
 # ortası; duvara dayalı eşyada duvarın dibi (arka y = 0, taban z = 0); perdede çubuk yüksekliğinde arka kenar.
 
@@ -1578,69 +1582,252 @@ def raf():
     return bitir("Duvar_Rafi_K3", "duvar")
 
 
+# ---------- 90'LAR YENİLEMESİ: ORTAK YARDIMCILAR (mama sandalyesi, masa, kanepe, çocuk sandalyesi) ----------
+# Şahan bu dört eşyayı "fazla modern" buldu (pembe plastik mama sandalyesi, benekli yuvarlak masa, Poly Haven'ın
+# siyah deri kanepesi, mavi plastik okul sandalyesi). Yerlerine 1994'te bir Türk evinde gerçekten bulunacak,
+# yıpranmış eşyalar geldi. Aşağıdaki üç yardımcı bu dört modelin ortak ihtiyacı.
+
+def uvle(olcek=1.0):
+    """
+    P'deki her parçaya "kutu izdüşümü" ile doku koordinatı (UV) verir.
+    NEDEN: Unity içe aktarırken her eşyanın üstüne bir kir dokusu bindirir; doku, modelin UV'sine göre yerleşir.
+    bmesh ile kurduğumuz parçaların (supur, yastik, prizma, örtü) hiç UV'si yoktur; birleşince bütün köşeleri
+    UV'nin (0, 0) noktasına düşer ve kir o parçada tek renk bir leke olur.
+    NASIL: her yüzün normali (yüzün baktığı yön) hangi eksene en yakınsa, yüz o eksene dik düzleme "gölgesi
+    düşürülür": üste bakan yüz (x, y), yana bakan (y, z), öne bakan (x, z) alır. Birim metredir: kir dokusu
+    bütün eşyalarda aynı ölçekte görünür (dairenin duvar ve döşemelerindeki "UV metre" kuralının aynısı).
+    """
+    for n in P:
+        me = n.data
+        if not me.uv_layers:                              # UV katmanı yoksa aç
+            me.uv_layers.new(name="UVMap")
+        me.uv_layers[0].name = "UVMap"                    # birleşirken katmanlar adla eşleşir: hepsi aynı adda
+        uv = me.uv_layers[0].data
+        dm = n.matrix_world                               # parçanın dünyadaki konumu (meshte olmayan kaydırma)
+        for p in me.polygons:
+            ax, ay, az = (abs(c) for c in p.normal)       # yüzün yönünün eksenlere yakınlığı
+            for li in p.loop_indices:                     # yüzün her köşesi ("loop")
+                q = dm @ me.vertices[me.loops[li].vertex_index].co
+                if az >= ax and az >= ay:
+                    uv[li].uv = (q.x * olcek, q.y * olcek)     # üst/alt yüz
+                elif ax >= ay:
+                    uv[li].uv = (q.y * olcek, q.z * olcek)     # sağ/sol yüz
+                else:
+                    uv[li].uv = (q.x * olcek, q.z * olcek)     # ön/arka yüz
+
+
+def desenle(n, mats, kural):
+    """
+    Tek parçaya birden çok malzeme verir: her yüz, merkezinin dünyadaki konumuna göre kural(konum) ile seçilen
+    malzemeyi alır. Çizgili döşemelik kumaş ve kareli muşamba böyle yapılır: doku resmi yerine yüzleri
+    boyamak. Unity birleşik meshi malzeme başına bir alt parçaya (submesh) böler; ek doku dosyası gerekmez.
+    """
+    n.data.materials.clear()
+    for m in mats:                                        # malzeme yuvaları: 0, 1, 2 ...
+        n.data.materials.append(m)
+    for p in n.data.polygons:
+        p.material_index = kural(n.matrix_world @ p.center)
+    return n
+
+
+def torna(a, b, profil, mat, kose=10):
+    """
+    Tornada çekilmiş ahşap parça (mama sandalyesi ayağı, kanepe ayağı, parmaklık): a'dan b'ye düz bir eksen.
+    profil: (t, r) çiftleri; t 0'da a ucu, 1'de b ucu; r o noktadaki yarıçap. Daire kesit eksen boyunca
+    sürüklenir ve her noktada r kadar büyütülür (supur): halkalar, boğumlar, incelen uçlar tek parça olur.
+    Aynı t iki kez yazılmamalı (supur gidiş yönünü komşu noktalardan hesaplar, sıfır uzunluk bozar).
+    """
+    A, B = Vector(a), Vector(b)
+    yol = [A + (B - A) * t for t, r in profil]            # eksen üzerindeki noktalar
+    return supur(yol, daire_kesit(1.0, kose), mat, yukari=(1, 0, 0), olcek=[r for t, r in profil])
+
+
 def mama():
-    boru, pembe, beyaz = mt("beyaz_plastik"), mt("pembe_plastik"), M("Mama_Beyaz", (0.82, 0.82, 0.80), 0.3)
-    alt = {(sx, sy): (sx * 0.21, sy * 0.23, 0.012) for sx in (-1, 1) for sy in (-1, 1)}
-    ust = {(sx, sy): (sx * 0.15, sy * 0.13, 0.52) for sx in (-1, 1) for sy in (-1, 1)}
-    for k in alt:                                                          # açılı metal ayaklar
-        cubuk(alt[k], ust[k], 0.012, M("Mama_Boru", (0.75, 0.75, 0.74), 0.3, 0.3), 10)
-        kure(0.016, (alt[k][0], alt[k][1], 0.0096), mt("siyah_plastik"), (1, 1, 0.6))
-    lerp = lambda a, b, t: tuple(a[i] + (b[i] - a[i]) * t for i in range(3))
-    for sy in (-1, 1):                                                     # yan ayaklar arasında destek
-        cubuk(lerp(alt[(-1, sy)], ust[(-1, sy)], 0.3), lerp(alt[(1, sy)], ust[(1, sy)], 0.3), 0.009, M("Mama_Boru", (0.75, 0.75, 0.74), 0.3, 0.3))
-    kutu((0.36, 0.34, 0.03), (0, 0, 0.525), beyaz, 0.01)                  # oturak kabuğu
-    kutu((0.33, 0.30, 0.05), (0, 0.005, 0.555), pembe, 0.02)              # minder
-    s = kutu((0.34, 0.04, 0.38), (0, 0.17, 0.76), beyaz, 0.015)           # sırt
-    don(s, rx=-0.14)
-    s = kutu((0.30, 0.03, 0.32), (0, 0.14, 0.76), pembe, 0.012)
-    don(s, rx=-0.14)
-    for sx in (-1, 1):                                                     # kolluklar
-        cubuk((sx * 0.17, 0.14, 0.67), (sx * 0.17, -0.12, 0.67), 0.01, beyaz)
-        cubuk((sx * 0.17, -0.12, 0.67), (sx * 0.16, -0.12, 0.55), 0.01, beyaz)
-    kutu((0.44, 0.24, 0.018), (0, -0.21, 0.685), beyaz, 0.008)            # tabla
-    for (w, d, x, y) in ((0.44, 0.015, 0, -0.325), (0.44, 0.015, 0, -0.095), (0.015, 0.24, -0.215, -0.21), (0.015, 0.24, 0.215, -0.21)):
-        kutu((w, d, 0.018), (x, y, 0.70), pembe, 0.005)
-    kutu((0.26, 0.07, 0.02), (0, -0.195, 0.25), pembe, 0.006)             # ayaklık
+    # 90'ların ahşap mama sandalyesi: açılı dört torna ayak, ayaklık, vinil kaplı minder, çubuklu sırt,
+    # kolluklara oturan çıkarılabilir ahşap tabla. Tablanın önünden havlu bir önlük sarkıyor.
+    # Ölçüler eski plastik sandalyenin sınır kutusuyla aynı (0,45 x 0,58 x 0,95): Unity'deki yeri değişmesin.
+    ah = M("Mama_Ahsap", (0.15, 0.075, 0.03), 0.45)                        # koyu cilalı kayın
+    asinmis = M("Mama_Asinmis", (0.26, 0.15, 0.065), 0.7)                  # cilası gitmiş, biraz açık ahşap
+    vinil = M("Mama_Vinil", (0.32, 0.13, 0.035), 0.38)                     # hardal-kahve vinil (suni deri)
+    sunger = M("Mama_Sunger", (0.62, 0.50, 0.20), 0.9)                     # yırtıktan görünen sarı sünger
+    alt = {(sx, sy): (sx * 0.20, sy * 0.21, 0.0) for sx in (-1, 1) for sy in (-1, 1)}     # ayak uçları (geniş)
+    ust = {(sx, sy): (sx * 0.155, sy * 0.125, 0.53) for sx in (-1, 1) for sy in (-1, 1)}  # oturak altı (dar)
+    lerp = lambda a, b, t: tuple(a[i] + (b[i] - a[i]) * t for i in range(3))              # a-b arası t oranında nokta
+    # Ayak profili (alttan üste): ince uç, boğum halkası, uzun gövde, oturak altında ikinci halka.
+    ayak = [(0.0, 0.016), (0.06, 0.018), (0.09, 0.024), (0.12, 0.017), (0.40, 0.019), (0.46, 0.021),
+            (0.88, 0.022), (0.93, 0.026), (0.97, 0.019), (1.0, 0.019)]
+    for k in alt:
+        torna(alt[k], ust[k], ayak, ah)
+    # Arka ayaklar oturağın üstünde sırt dikmesi olarak devam eder; geriye yatık, tepesinde topuz.
     for sx in (-1, 1):
-        cubuk((sx * 0.13, -0.195, 0.25), (sx * 0.18, -0.20, 0.25), 0.008, beyaz)
-    # Tablada plastik kâse ve kaşık.
-    k = koni(0.03, 0.045, 0.035, (0.08, -0.22, 0.712), M("Mama_Kase", (0.75, 0.52, 0.04), 0.35), 20)
-    ortak.oy(k, ortak.silindir("Oy", 0.038, 0.04, (0.08, -0.22, 0.72 + 0.008), mt("sut"), 20))
-    kutu((0.10, 0.012, 0.004), (-0.07, -0.23, 0.696), M("Mama_Kasik", (0.04, 0.15, 0.45), 0.35), 0.002)
+        torna(ust[(sx, 1)], (sx * 0.15, 0.225, 0.93), [(0.0, 0.019), (0.5, 0.017), (0.9, 0.018), (1.0, 0.016)], ah)
+        kure(0.021, (sx * 0.15, 0.226, 0.936), ah, (1, 1, 0.9), seg=10, halka=6)
+    # Ayaklar arası çubuklar: yanlarda alçakta, arkada biraz yukarıda (torna, ortası kalın).
+    cub = [(0.0, 0.010), (0.5, 0.013), (1.0, 0.010)]
+    for sx in (-1, 1):
+        torna(lerp(alt[(sx, -1)], ust[(sx, -1)], 0.28), lerp(alt[(sx, 1)], ust[(sx, 1)], 0.28), cub, ah, 8)
+    torna(lerp(alt[(-1, 1)], ust[(-1, 1)], 0.42), lerp(alt[(1, 1)], ust[(1, 1)], 0.42), cub, ah, 8)
+    # Ayaklık: ön ayakların önünde, iki küçük takozla ayaklara vidalı tahta.
+    kutu((0.33, 0.075, 0.018), (0, -0.195, 0.25), ah, 0.004)
+    for sx in (-1, 1):
+        kutu((0.025, 0.05, 0.035), (sx * 0.165, -0.175, 0.228), ah, 0.003)
+    elips(0.13, 0.05, 0.0012, (0.02, -0.195, 0.2596), asinmis, 14)         # basıla basıla cilası gitmiş orta
+    # Oturak tahtası ve üstünde vinil minder (biyeli kenar, sol ön köşesi yırtık).
+    kutu((0.35, 0.33, 0.025), (0, 0.0, 0.5425), ah, 0.005)
+
+    def minder_bicim(px, py, pz):
+        """Minderin üstü ortada hafif çökük (yıllarca oturulmuş)."""
+        if pz > 0:
+            pz -= 0.008 * (1 - (2 * px / 0.32) ** 2) * (1 - (2 * py / 0.30) ** 2)
+        return (px, py, pz)
+
+    yastik((0.32, 0.30, 0.04), (0, 0.005, 0.575), vinil, minder_bicim, bol=(3, 3, 1))
+    supur(oval_halka(0, 0.005, 0.158, 0.148, 0.592, n=20, us=5.0), daire_kesit(0.0045, 5), vinil, kapali=True)  # biye
+    kutu((0.05, 0.004, 0.012), (-0.10, -0.1465, 0.58), mt("ic_koyu"))     # yırtık dikiş (karanlık yarık)
+    kure(0.014, (-0.10, -0.145, 0.581), sunger, (1.4, 0.6, 0.7), seg=8, halka=5)   # dışarı taşan sünger
+    # Sırt: dikmeler arasında kavisli üst tahta, alt kayıt ve üç torna parmaklık.
+    yol = [(x, 0.2125 + 0.02 * (1 - (x / 0.15) ** 2), 0.88) for x in (-0.15, -0.075, 0.0, 0.075, 0.15)]
+    supur(yol, serit_kesit(0.018, 0.07), ah, yukari=(0, 0, 1))             # içe kavisli üst tahta
+    kutu((0.29, 0.02, 0.03), (0, 0.17, 0.66), ah, 0.004)                   # alt kayıt
+    for x in (-0.07, 0.0, 0.07):
+        torna((x, 0.135, 0.555), (x, 0.205, 0.85), [(0.0, 0.009), (0.3, 0.012), (0.5, 0.009), (0.7, 0.012), (1.0, 0.009)], ah, 8)
+    # Kolluklar: sırt dikmesinden öne uzanan yuvarlak uçlu tahta, önde bir torna dikme taşır.
+    for sx in (-1, 1):
+        kutu((0.04, 0.32, 0.022), (sx * 0.175, 0.0, 0.70), ah, 0.006)
+        sil(0.02, 0.022, (sx * 0.175, -0.16, 0.70), ah, 12)
+        torna((sx * 0.165, -0.13, 0.555), (sx * 0.175, -0.15, 0.69), [(0.0, 0.011), (0.5, 0.014), (1.0, 0.011)], ah, 8)
+        kutu((0.03, 0.05, 0.0012), (sx * 0.175, -0.14, 0.7116), asinmis)   # el değen yerde cila aşınmış
+    # Tabla: kolluklara oturan çerçeveli ahşap tepsi; önündeki kenarda diş izleri, ortasında kâse izi.
+    T = 0.715                                                              # tabla üst yüzü
+    kutu((0.44, 0.22, 0.015), (0, -0.22, T - 0.0075), ah, 0.003)
+    for (w, d, x, y) in ((0.44, 0.014, 0, -0.323), (0.44, 0.014, 0, -0.117), (0.014, 0.22, -0.213, -0.22), (0.014, 0.22, 0.213, -0.22)):
+        kutu((w, d, 0.014), (x, y, T + 0.007), ah, 0.003)
+    for i in range(5):                                                     # diş izleri: ön kenarda küçük çentikler
+        kutu((0.006, 0.004, 0.004), (-0.06 + i * 0.012 + (i % 2) * 0.003, -0.3285, T + 0.012), mt("ic_koyu"))
+    elips(0.12, 0.10, 0.0008, (0.07, -0.215, T + 0.0004), asinmis, 16)    # tabaklar konup kalka aşınmış yer
+    # Tablada emaye kâse (beyaz, mavi kenarlı, kenarı çatlamış) ve alüminyum kaşık.
+    k = koni(0.03, 0.045, 0.035, (0.08, -0.22, T + 0.0175), mt("beyaz_emaye"), 20)
+    ortak.oy(k, ortak.silindir("Oy", 0.038, 0.04, (0.08, -0.22, T + 0.0255), mt("sut"), 20))
+    r = sil(0.0455, 0.004, (0.08, -0.22, T + 0.034), M("Emaye_Mavi", (0.03, 0.08, 0.30), 0.3), 20)
+    ortak.oy(r, ortak.silindir("Oy", 0.040, 0.01, (0.08, -0.22, T + 0.034), mt("sut"), 20))   # yalnız kenar halkası kalsın
+    dik_disk(0.004, 0.002, (0.08, -0.266, T + 0.022), mt("ic_koyu"), 8)   # emayesi atmış nokta
+    don(kutu((0.10, 0.012, 0.004), (-0.07, -0.23, T + 0.002), M("Aluminyum", (0.55, 0.55, 0.53), 0.45, 0.8), 0.002), rz=0.25)
+    # Önlük: tablanın üstünden ön kenara, oradan aşağı sarkan havlu; üstünde sarı ördek aplike ve mama lekesi.
+    havlu = M("Onluk_Havlu", (0.30, 0.45, 0.60), 0.95)
+    yol = egri([(-0.10, -0.17, T + 0.003), (-0.10, -0.29, T + 0.004), (-0.10, -0.334, T + 0.017),
+                (-0.098, -0.338, T - 0.05), (-0.094, -0.336, T - 0.13)], 3)
+    supur(yol, serit_kesit(0.17, 0.004), havlu, yukari=(0, -1, 1))
+    supur(yol, serit_kesit(0.176, 0.0025), mt("kumas_beyaz"), yukari=(0, -1, 1))   # beyaz biye (kenarda taşar)
+    dik_disk(0.026, 0.002, (-0.094, -0.3395, T - 0.085), mt("boya_sari"), 14)      # ördek aplikesi
+    dik_disk(0.009, 0.002, (-0.076, -0.3405, T - 0.068), mt("boya_sari"), 10)      # ördeğin başı
+    dik_disk(0.012, 0.001, (-0.12, -0.3395, T - 0.11), M("Mama_Leke", (0.30, 0.17, 0.05), 0.6), 10)
+    uvle()
     return bitir("Mama_Sandalyesi_K3")
 
 
+def musamba(W, T, sark, n_ic, mats, kal=0.0015):
+    """
+    Kare masaya serilmiş, kenarlardan sarkan kareli muşamba (tek parça, yüz yüz boyanmış).
+    W: masa tablasının kenarı; T: muşambanın üst yüzü; sark: kenardan sarkan kumaş boyu; n_ic: üstte
+    bir kenar boyunca kaç kare; mats: (beyaz, açık kırmızı, koyu kırmızı).
+    Kumaş önce düz bir ızgara olarak düşünülür: (u, v) muşambanın serili hâlindeki koordinatı. Masanın
+    üstüne düşen kısım düz kalır; dışarı taşan kısım (kenara uzaklığı d) önce 6 mm yarıçaplı bir yayla
+    kenardan döner, sonra aşağı sarkar ve hafifçe dışa açılır. Köşelerde kumaş iki yöne birden taşar: köşe
+    noktasının çevresinde dönerek sarkar, bu yüzden köşeler kenarlardan daha uzun sarkar (gerçek muşambadaki
+    gibi) ve birkaç kıvrım yapar.
+    Pötikare (pötikare = Fransızca "küçük kare"): dikey ve yatay açık kırmızı şeritler; ikisinin kesiştiği kare
+    koyu kırmızı, hiçbirine düşmeyen kare beyaz kalır. Her ızgara hücresi bu kurala göre boyanır.
+    """
+    h = W / n_ic                                          # bir karenin kenarı
+    k0 = 0.006                                            # kenardan dönüş yayının yarıçapı
+    yay = k0 * math.pi / 2                                # yayın uzunluğu (çeyrek daire)
+    # Izgara çizgileri: üstte her kare sınırı, kenarda yay için bir ara çizgi, sarkan kısımda iki çizgi.
+    dis = [0.0045, yay] + [yay + (sark - yay) * k / 2 for k in (1, 2)]
+    ic = [-W / 2 + i * h for i in range(n_ic + 1)]
+    cizgi = [-W / 2 - d for d in reversed(dis)] + ic + [W / 2 + d for d in dis]
+
+    def nokta(u, v):
+        """Serili hâldeki (u, v) noktasının masadaki 3B yeri."""
+        cu, cv = max(-W / 2, min(W / 2, u)), max(-W / 2, min(W / 2, v))   # masanın üstündeki en yakın nokta
+        eu, ev = u - cu, v - cv                           # kenardan ne kadar taşıyor
+        d = math.hypot(eu, ev)
+        if d < 1e-9:
+            return (u, v, T)                              # masanın üstünde: düz
+        yx, yy = eu / d, ev / d                           # taşma yönü (kenara dik, köşede çapraz)
+        if d <= yay:                                      # kenardan dönüş: çeyrek daire
+            aci = d / k0
+            ote, dus = k0 * math.sin(aci), k0 * (1 - math.cos(aci))
+        else:                                             # sarkan kısım
+            kalan = d - yay
+            kose = min(abs(eu), abs(ev)) / d * 1.414      # 0 kenarın ortasında, 1 tam köşede
+            dalga = 0.010 * kose * (kalan / sark) * math.sin(math.atan2(ev, eu) * 8)   # köşe kıvrımları
+            ote, dus = k0 + kalan * 0.12 + dalga, k0 + kalan
+        return (cu + yx * ote, cv + yy * ote, T - dus)
+
+    m = len(cizgi)
+    noktalar = [nokta(u, v) for u in cizgi for v in cizgi]   # i. u çizgisi, j. v çizgisi → i * m + j
+    yuzler, renk = [], []
+    for i in range(m - 1):
+        for j in range(m - 1):
+            a = i * m + j
+            yuzler.append((a, a + m, a + m + 1, a + 1))   # +x sonra +y: yukarıdan saat yönünün tersi, yüz yukarı bakar
+            uc, vc = (cizgi[i] + cizgi[i + 1]) / 2, (cizgi[j] + cizgi[j + 1]) / 2   # hücre ortası (serili hâlde)
+            su = math.floor((uc + W / 2) / h) % 2 == 0    # dikey kırmızı şeride mi düşüyor
+            sv = math.floor((vc + W / 2) / h) % 2 == 0    # yatay kırmızı şeride mi
+            renk.append(int(su) + int(sv))                # 0 beyaz, 1 açık kırmızı, 2 koyu kırmızı
+    me = bpy.data.meshes.new("Musamba")
+    me.from_pydata(noktalar, [], yuzler)
+    me.update()
+    o = bpy.data.objects.new("Musamba", me)
+    bpy.context.collection.objects.link(o)
+    for mat in mats:
+        o.data.materials.append(mat)
+    for p, r in zip(me.polygons, renk):
+        p.material_index = r
+    # Kalınlık aşağıya (masaya doğru) eklenir: üst yüz T'de kalır, alttan ve etekten bakınca kâğıt gibi incecik görünmez.
+    o.modifiers.new("Kalinlik", "SOLIDIFY").thickness = kal
+    return ekle(o)
+
+
 def masa():
-    ah, mus, beyaz = mt("ahsap_orta"), M("Musamba_Mavi", (0.04, 0.12, 0.36), 0.3), M("Musamba_Cicek", (0.80, 0.80, 0.76), 0.3)
-    sil(0.45, 0.03, (0, 0, 0.735), ah, 40)
-    for x in (-0.21, 0.21):
-        for y in (-0.21, 0.21):
-            koni(0.016, 0.022, 0.72, (x, y, 0.36), ah, 12)
-    for s in (-1, 1):
-        kutu((0.44, 0.02, 0.06), (0, s * 0.21, 0.69), ah, 0.004)
-        kutu((0.02, 0.44, 0.06), (s * 0.21, 0, 0.69), ah, 0.004)
-    sil(0.47, 0.004, (0, 0, 0.752), mus, 48)                              # muşamba üst
-    e = sil(0.472, 0.11, (0, 0, 0.697), mus, 48)                          # sarkan etek
-    ortak.oy(e, ortak.silindir("Oy", 0.466, 0.13, (0, 0, 0.697), mus, 48))
-    for i in range(-4, 5):                                                 # beyaz çiçek benekleri
-        for j in range(-4, 5):
-            x, y = i * 0.1 + (0.05 if j % 2 else 0), j * 0.1
-            if x * x + y * y < 0.43 ** 2:
-                sil(0.012, 0.001, (x, y, 0.7545), beyaz, 8)
-    for i in range(20):                                                    # etekteki benekler: önde kurup çevir
-        a = i * math.pi / 10
-        bas = len(P)
-        dik_disk(0.012, 0.001, (0, -0.4735, 0.70), beyaz, 8)
-        grupla(bas, (0, 0, 0), (0, 0, a))
-    T = 0.754
+    # 90'ların kare mutfak masası: krom borulu dört ayak, sunta tabla, üstünde kenarlardan sarkan kırmızı
+    # pötikare muşamba (çay bardağı izleri, sigara yanığı, bıçak kesiği). Üstündekiler eskisi gibi:
+    # meyve kâsesi ve şekerlik. Sınır kutusu eski yuvarlak masayla aynı (0,95 x 0,95 x 0,89).
+    T = 0.754                                                              # muşambanın üst yüzü (eskisiyle aynı)
+    W = 0.90                                                               # tablanın kenarı
+    sunta = M("Masa_Sunta", (0.30, 0.22, 0.13), 0.7)                       # tablanın kenarı ve altı: çıplak sunta
+    krom = M("Masa_Krom", (0.55, 0.55, 0.53), 0.3, 0.9)                    # matlaşmış krom boru
+    pas = M("Masa_Pas", (0.20, 0.07, 0.02), 0.9)
+    kutu((W, W, 0.022), (0, 0, T - 0.0015 - 0.011), sunta, 0.003)          # tabla
+    for s in (-1, 1):                                                      # tablanın altındaki çerçeve (kayıtlar)
+        kutu((W - 0.08, 0.02, 0.05), (0, s * (W / 2 - 0.04), T - 0.0235 - 0.025), sunta, 0.002)
+        kutu((0.02, W - 0.08, 0.05), (s * (W / 2 - 0.04), 0, T - 0.0235 - 0.025), sunta, 0.002)
+    for x in (-1, 1):
+        for y in (-1, 1):
+            px, py = x * (W / 2 - 0.05), y * (W / 2 - 0.05)
+            sil(0.015, T - 0.0235 - 0.012, (px, py, 0.012 + (T - 0.0235 - 0.012) / 2), krom, 14)   # krom ayak
+            sil(0.017, 0.024, (px, py, 0.012), mt("siyah_plastik"), 14)                            # plastik ayak pabucu
+            kutu((0.06, 0.06, 0.006), (px, py, T - 0.0235 - 0.003), krom)                         # tablaya vidalı tabla
+            if x * y > 0:                                                  # iki ayakta paslanmış halka
+                sil(0.0153, 0.012, (px, py, 0.055 + 0.02 * (x > 0)), pas, 14)
+    musamba(W, T, 0.09, 14, (M("Musamba_Beyaz", (0.80, 0.78, 0.72), 0.35), M("Musamba_Kirmizi", (0.62, 0.10, 0.07), 0.35),
+                            M("Musamba_Koyu", (0.32, 0.03, 0.025), 0.35)))
+    # Yıpranma: iki çay bardağı halkası, bir sigara yanığı, bıçak kesiği.
+    leke = M("Musamba_Cay_Izi", (0.22, 0.10, 0.04), 0.5)
+    for (cx, cy) in ((0.20, 0.17), (0.25, 0.10)):
+        supur(oval_halka(cx, cy, 0.025, 0.025, T + 0.0004, n=16, us=2.0), serit_kesit(0.004, 0.0006), leke, kapali=True)
+    sil(0.006, 0.0006, (-0.27, -0.20, T + 0.0003), mt("ic_koyu"), 10)                 # sigara yanığı
+    sil(0.010, 0.0004, (-0.27, -0.20, T + 0.0002), M("Musamba_Yanik", (0.25, 0.14, 0.05), 0.6), 12)   # yanığın sararmış çevresi
+    don(kutu((0.11, 0.0015, 0.0006), (0.05, -0.30, T + 0.0003), mt("ic_koyu")), rz=0.35)   # bıçak kesiği
     # Meyve kâsesi (beyaz, mavi kenarlı) ve meyveler.
     k = koni(0.06, 0.13, 0.07, (-0.10, 0.06, T + 0.035), mt("porselen"), 32)
     ortak.oy(k, ortak.silindir("Oy", 0.115, 0.07, (-0.10, 0.06, T + 0.035 + 0.012), mt("porselen"), 32))
-    sil(0.131, 0.008, (-0.10, 0.06, T + 0.066), M("Kase_Mavi", (0.04, 0.10, 0.40), 0.2), 32)
+    r = sil(0.131, 0.008, (-0.10, 0.06, T + 0.066), M("Kase_Mavi", (0.04, 0.10, 0.40), 0.2), 32)
+    ortak.oy(r, ortak.silindir("Oy", 0.118, 0.02, (-0.10, 0.06, T + 0.066), mt("sut"), 32))   # mavi kenar bir halka; kâsenin ağzını kapatmasın
     elma, port = M("Elma", (0.35, 0.03, 0.02), 0.4), M("Portakal", (0.60, 0.20, 0.02), 0.6)
     for (x, y, z, m, r) in ((-0.14, 0.04, 0.045, elma, 0.036), (-0.07, 0.10, 0.045, elma, 0.036), (-0.06, 0.02, 0.047, port, 0.038),
                             (-0.13, 0.11, 0.05, port, 0.038), (-0.10, 0.06, 0.09, elma, 0.035)):
-        kure(r, (x, y, T + z), m, seg=16, halka=10)
+        kure(r, (x, y, T + z), m, seg=12, halka=8)
     ban = M("Muz", (0.70, 0.50, 0.05), 0.5)
     for i in range(4):                                                     # kavisli muz
         a0, a1 = 0.3 + i * 0.35, 0.3 + (i + 1) * 0.35
@@ -1649,9 +1836,10 @@ def masa():
     # Şekerlik: kapaklı porselen, kenarında çay kaşığı.
     sil(0.04, 0.06, (0.18, -0.12, T + 0.03), mt("porselen"), 20, 0.006)
     sil(0.043, 0.008, (0.18, -0.12, T + 0.064), mt("porselen"), 20)
-    kure(0.01, (0.18, -0.12, T + 0.075), M("Sekerlik_Yaldiz", (0.60, 0.42, 0.10), 0.3, 0.9))
+    kure(0.01, (0.18, -0.12, T + 0.075), M("Sekerlik_Yaldiz", (0.60, 0.42, 0.10), 0.3, 0.9), seg=8, halka=6)
     sil(0.0405, 0.008, (0.18, -0.12, T + 0.03), M("Kase_Mavi", (0.04, 0.10, 0.40), 0.2), 20)
     don(kutu((0.11, 0.008, 0.003), (0.26, -0.14, T + 0.0015), mt("celik")), rz=0.4)
+    uvle()
     return bitir("Masa_K3")
 
 
@@ -1794,11 +1982,213 @@ def biberon():
     return bitir("Biberon_Takimi_K3")
 
 
+# =====================================================================================
+# SALON: KANEPE (Poly Haven'ın siyah deri chesterfield'ının yerine)
+# =====================================================================================
+
+def cizgili_kural(cx, sira, gen, eksen=0):
+    """
+    Çizgili döşemelik kumaşın kuralı (desenle için): yüzün eksen koordinatı, minderin ortasından (cx) ne kadar
+    uzaksa sira dizisinde o kadar ilerlenir; her adım gen metre genişliğinde bir şerittir. Ortadan iki yana
+    simetrik gider: döşemeci kumaşı minderin ortasına göre keser.
+    """
+    def kural(c):
+        i = int(abs(c[eksen] - cx) / gen)                 # ortadan kaçıncı şerit
+        return sira[i % len(sira)]
+    return kural
+
+
+def kanepe():
+    # 90'ların üçlü kanepesi: ceviz ahşap iskelet (torna kısa ayaklar, önde görünen ön kayıt, ahşap kol başlıkları
+    # ve sırt kapağı), bej-kahve-kiremit çizgili dokuma döşeme, üç oturak ve üç gevşek sırt minderi, ortadaki
+    # oturak çökmüş. Sırtta tığ işi dantel. Ölçü: 1,81 x 0,82, ön yüz -y.
+    # ÖNEMLİ: kanepenin altında yerde Kerem'in yırtık çizim parçası duruyor; oyuncu çömelip altına bakıyor.
+    # Bu yüzden ayaklar dışında her şey yerden 18 cm yukarıda başlar, altı baştan sona açıktır.
+    ceviz = M("Kanepe_Ceviz", (0.06, 0.03, 0.013), 0.45)                   # koyu cilalı ceviz
+    asinmis = M("Kanepe_Ceviz_Asinmis", (0.09, 0.05, 0.022), 0.7)         # ellerin değdiği yerde cilası gitmiş
+    # Dokuma renkleri birbirine yakın, kirli ve sıcak tutuldu: parlak, zıt çizgiler bugünün plaj minderi gibi duruyordu.
+    bej = M("Kanepe_Bej", (0.30, 0.21, 0.11), 0.95)                        # dokumanın zemin rengi (kirli bej)
+    kahve = M("Kanepe_Kahve", (0.09, 0.045, 0.02), 0.95)
+    kiremit = M("Kanepe_Kiremit", (0.22, 0.075, 0.03), 0.95)               # soluk kiremit
+    hardal = M("Kanepe_Hardal", (0.34, 0.22, 0.06), 0.95)                  # sırma gibi hardal sarısı
+    zeytin = M("Kanepe_Zeytin", (0.10, 0.10, 0.04), 0.95)
+    kumas = [bej, kahve, kiremit, hardal, zeytin]
+    # Şerit sırası (ortadan dışa): bej zemin, kahve-kiremit-kahve üçlüsü, bej, hardal, ince zeytin, bej ...
+    # Her şerit tam bir yüz genişliğindedir: şerit yüzden darsa bazı renkler hiç bir yüze düşmez ve desen
+    # rastgele kalın bantlara dönüşür (ilk denemede öyle oldu). Minderin 0,53 m'lik eni 20 yüze bölünüyor.
+    sira = [0, 0, 1, 2, 1, 0, 3, 0, 4, 0, 0, 1, 3, 1]
+    G = 0.53 / 20                                                          # bir şeridin (bir yüzün) genişliği
+    YUK = 0.18                                                             # ahşap iskeletin yerden yüksekliği (alt boşluk)
+    XA = 0.80                                                              # iç genişliğin yarısı (kolların iç yüzü)
+    # --- Ayaklar: dört köşede ve arkanın ortasında kısa torna ayak, hafif dışa açık.
+    ayak = [(0.0, 0.017), (0.10, 0.019), (0.55, 0.024), (0.62, 0.029), (0.70, 0.024), (0.92, 0.027), (1.0, 0.027)]
+    for (x, y) in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
+        torna((x * 0.865, y * 0.355, 0.0), (x * 0.852, y * 0.342, YUK), ayak, ceviz, 8)
+    torna((0.0, 0.36, 0.0), (0.0, 0.35, YUK), ayak, ceviz, 8)               # arka orta ayak (önde ayak yok: parça görünsün)
+    # --- Ahşap iskelet: ön kayıt (alt kenarı kavisli değil, oluklu), arka kayıt, iki yan kayıt.
+    kutu((2 * XA, 0.04, 0.12), (0, -0.375, YUK + 0.06), ceviz, 0.004)     # ön kayıt, önden görünen ahşap
+    kutu((2 * XA - 0.04, 0.004, 0.006), (0, -0.396, YUK + 0.085), mt("ic_koyu"))   # ön kayıttaki oyma oluk
+    kutu((2 * XA, 0.04, 0.10), (0, 0.38, YUK + 0.05), ceviz)              # arka kayıt (duvara bakar, pahsız)
+    for s in (-1, 1):
+        kutu((0.105, 0.80, 0.08), (s * 0.8525, 0.0, YUK + 0.04), ceviz, 0.004)          # kolun alt kaydı
+        kutu((0.06, 0.045, 0.42), (s * 0.8525, -0.3825, YUK + 0.21), ceviz, 0.005)      # kolun ön dikmesi (ahşap)
+        kutu((0.06, 0.045, 0.42), (s * 0.8525, 0.3825, YUK + 0.21), ceviz)              # kolun arka dikmesi (pahsız)
+    # --- Oturma tablası (minderlerin altındaki döşeli kasa) ve sırt kasası.
+    kutu((2 * XA, 0.70, 0.06), (0, -0.01, 0.31), kahve, 0.01)
+    yastik((2 * XA, 0.13, 0.42), (0, 0.335, 0.30 + 0.21), bej, bol=(6, 1, 2))   # minderlerin arkasında kalır: düz bej
+    kutu((2 * XA + 0.04, 0.155, 0.03), (0, 0.33, 0.735), ceviz, 0.008)    # sırtın ahşap kapağı
+    # --- Kollar: döşeli yan pano + üstte ahşap başlık; başlığın önü el değe değe açılmış, birinde sigara yanığı.
+    for s in (-1, 1):
+        kol = yastik((0.09, 0.74, 0.34), (s * 0.8525, 0.0, YUK + 0.08 + 0.17), bej, bol=(1, 8, 2))
+        desenle(kol, kumas, cizgili_kural(0.0, sira, 0.74 / 16, eksen=1))  # 16 yüz: şerit = bir yüz
+        kutu((0.12, 0.75, 0.03), (s * 0.845, 0.025, 0.615), ceviz, 0.01)  # kol başlığı
+        sil(0.06, 0.03, (s * 0.845, -0.35, 0.615), ceviz, 16)             # başlığın yuvarlak önü
+        elips(0.06, 0.14, 0.001, (s * 0.845, -0.32, 0.6305), asinmis, 14)  # el değen yer
+    sil(0.006, 0.0008, (0.84, 0.05, 0.6304), mt("ic_koyu"), 10)            # sigara yanığı
+    # --- Oturak minderleri: üç tane; ortadaki yıllarca oturulmaktan çökmüş, sağdakinin ön dikişi patlamış.
+    for i, cx in enumerate((-0.535, 0.0, 0.535)):
+        cokme = 0.035 if i == 1 else 0.015                                 # orta minder daha çok çökük
+
+        def oturak(px, py, pz, cokme=cokme):
+            if pz > 0:                                                     # yalnız üst yüz çöker
+                pz -= cokme * (1 - (2 * px / 0.53) ** 2) * max(0.0, 1 - ((py + 0.06) / 0.31) ** 2) * (pz / 0.065)
+            if py < -0.2:                                                  # ön kenar biraz şişkin, öne taşar
+                py -= 0.008 * (1 - (2 * pz / 0.13) ** 2)
+            return (px + cx, py - 0.075, pz + 0.405)
+
+        m = yastik((0.53, 0.62, 0.13), (0, 0, 0), bej, oturak, bol=(10, 2, 1))
+        desenle(m, kumas, cizgili_kural(cx, sira, G))
+    kutu((0.08, 0.006, 0.012), (0.56, -0.392, 0.41), mt("ic_koyu"))       # patlamış dikiş
+    kure(0.02, (0.56, -0.392, 0.408), M("Kanepe_Sunger", (0.60, 0.50, 0.22), 0.9), (1.8, 0.5, 0.45), seg=8, halka=5)  # sünger
+    elips(0.09, 0.07, 0.0015, (-0.04, -0.12, 0.4368), M("Kanepe_Leke", (0.20, 0.13, 0.06), 0.95), 14)  # çökük minderde çay lekesi
+    # --- Sırt minderleri: oturakların üstünde, arkaya yatık, ortası kabarık; tepeleri ahşap kapağın altında kalır.
+    orta = None
+    for cx in (-0.535, 0.0, 0.535):
+        def sirt_m(px, py, pz, cx=cx):
+            if py < 0:                                                     # ön yüz ortada kabarık
+                py *= 1 + 0.35 * (1 - (2 * px / 0.52) ** 2) * (1 - (2 * pz / 0.25) ** 2)
+            return (px + cx, py + 0.165 + pz * 0.25, pz + 0.47 + 0.125)   # tepe arkaya yatık
+        m = yastik((0.52, 0.14, 0.25), (0, 0, 0), bej, sirt_m, bol=(10, 1, 2))
+        desenle(m, kumas, cizgili_kural(cx, sira, G))
+        if cx == 0.0:
+            orta = m                                                       # dantel bunun üstüne serilecek
+    # --- Dantel: sırt kapağının üstüne atılmış, öne doğru orta minderin tepesine ve önüne sarkan tığ işi örtü.
+    # Minderin yüzeyi biçimlendirilmiş ve yuvarlatılmış olduğu için yerini hesapla bulmak zor; onun yerine
+    # minderin üstüne ve önüne "ışın" atıyoruz (ray_cast: bir noktadan bir yöne giden çizginin yüzeye çarptığı
+    # yer). Dantel çarpma noktalarının 3 mm dışından geçer: yüzeye yapışık durur, içine gömülmez.
+    bpy.context.view_layer.update()
+    dx = 0.04                                                              # tam ortada değil, biraz kaymış
+    yol = [Vector((dx, 0.414, 0.69)), Vector((dx, 0.412, 0.748)), Vector((dx, 0.39, 0.7535)),
+           Vector((dx, 0.31, 0.7535)), Vector((dx, 0.255, 0.751))]          # ahşap kapağın arkası ve üstü
+    for y in (0.225, 0.19, 0.155, 0.125):                                  # minderin tepesine yukarıdan ışın
+        ok, q, nrm, _ = orta.ray_cast(Vector((dx, y, 1.0)), Vector((0, 0, -1)))
+        if ok:
+            yol.append(q + nrm * 0.003)
+    on = []
+    for z in (0.69, 0.67, 0.65, 0.63):                                     # minderin önüne, önden ışın
+        ok, q, nrm, _ = orta.ray_cast(Vector((dx, -0.5, z)), Vector((0, 1, 0)))
+        if ok:
+            on.append(q + nrm * 0.003)
+    yol += on
+    dantel_m = M("Kanepe_Dantel", (0.66, 0.63, 0.54), 0.95)               # sararmış beyaz pamuk iplik
+    supur(yol, serit_kesit(0.30, 0.002), dantel_m, yukari=(0, -1, 1))
+    # Tığ işinin görüntüsü: sarkan ucunda fistolar (yarım daire dişler), içinde sıra sıra delikler. Delik
+    # gerçekten açılmaz (üçgen sayısı patlar); arkadaki kumaşın gölgesi renginde küçük kareler delik gibi okunur.
+    uc = on[-1]
+    golge = M("Kanepe_Dantel_Golge", (0.16, 0.11, 0.06), 0.95)
+    for k in range(9):
+        dik_disk(0.017, 0.002, (dx - 0.136 + k * 0.034, uc.y + 0.0005, uc.z), dantel_m, 8)
+        kutu((0.008, 0.0012, 0.008), (dx - 0.136 + k * 0.034, uc.y - 0.0012, uc.z - 0.006), golge)
+    for j, q in enumerate(on[1:-1]):                                       # iki sıra delik (üst sıra minderin kıvrımında kalır)
+        for k in range(8 if j % 2 else 9):
+            kutu((0.007, 0.0012, 0.007), (dx - 0.136 + k * 0.034 + (0.017 if j % 2 else 0), q.y - 0.002, q.z), golge)
+    uvle()
+    return bitir("Kanepe_K3")
+
+
+# =====================================================================================
+# ODA B: ÇOCUK SANDALYESİ (Kerem'in çalışma masasının sandalyesi; mavi plastik okul sandalyesinin yerine)
+# =====================================================================================
+
+def cocuk_sandalye():
+    # 90'ların okul sandalyesi, çocuk boyu: yeşile boyalı bükme çelik boru iskelet, kontrplak oturak ve kavisli
+    # kontrplak sırt (perçinli). Boyası yer yer atmış (altından çelik görünür), bir ayağın dibi paslı.
+    # Oturağa tükenmez kalemle çizilmiş, sırtına çıkartma yapıştırılmış, altına sakız yapıştırılmış.
+    boya = M("Cocuk_Boya_Yesil", (0.06, 0.19, 0.09), 0.5)                  # fırın boyalı boru
+    celik = mt("celik")                                                    # boyası atmış yerde çıplak çelik
+    pas = M("Cocuk_Pas", (0.20, 0.07, 0.02), 0.9)
+    kontrplak = M("Cocuk_Kontrplak", (0.30, 0.18, 0.08), 0.55)             # vernikli kayın kontrplak
+    R = 0.0105                                                             # borunun yarıçapı
+    kesit = daire_kesit(1.0, 8)
+    yollar = {}
+    for sx in (-1, 1):
+        xf, xs = sx * 0.235, sx * 0.212                                    # ayak ucunda geniş, oturakta dar
+        # Yan boru tek parça bükülmüş: ön ayak → oturak kaydı → arka ayak (yuvarlak dirseklerle).
+        yan = egri([(xf, -0.245, 0.0), (xs + sx * 0.004, -0.205, 0.30), (xs, -0.19, 0.345), (xs, -0.15, 0.362),
+                    (xs, 0.13, 0.362), (xs, 0.17, 0.345), (xs + sx * 0.004, 0.19, 0.30), (xf, 0.245, 0.0)], 3)
+        supur(yan, kesit, boya, yukari=(1, 0, 0), olcek=[R] * len(yan))
+        # Sırt dikmesi: oturak kaydından kalkıp geriye yatarak yükselir.
+        dik = egri([(xs, 0.15, 0.362), (xs, 0.175, 0.50), (xs, 0.195, 0.62), (xs, 0.205, 0.70)], 3)
+        supur(dik, kesit, boya, yukari=(1, 0, 0), olcek=[R] * len(dik))
+        sil(R * 0.95, 0.008, (xs, 0.205, 0.703), mt("siyah_plastik"), 8)  # dikmenin ucundaki plastik tapa
+        sil(0.0135, 0.02, (xf, -0.245, 0.01), mt("siyah_plastik"), 10)   # ön ayak lastiği
+        sil(0.0135, 0.02, (xf, 0.245, 0.01), mt("siyah_plastik"), 10)              # arka ayak lastiği
+        yollar[sx] = (yan, dik)
+    for y in (-0.12, 0.10):                                                # iki yanı birbirine bağlayan oturak altı borular
+        cubuk((-0.212, y, 0.352), (0.212, y, 0.352), 0.009, boya, 8)
+
+    def soyuk(yol, i, uzun, mat):
+        """Boru üstünde i. noktadan başlayan kısa bir halka: boyanın atıp çeliğin (ya da pasın) göründüğü yer."""
+        a, b = yol[i], yol[i] + (yol[i + 1] - yol[i]).normalized() * uzun
+        cubuk(tuple(a), tuple(b), R * 1.07, mat, 8)
+
+    yan, dik = yollar[1]
+    soyuk(yan, 2, 0.018, celik)                                            # sağ ön ayakta tekme izi
+    soyuk(yan, 4, 0.010, celik)
+    soyuk(dik, 6, 0.014, celik)                                            # sırt dikmesinde sürtünme
+    yan, dik = yollar[-1]
+    soyuk(yan, len(yan) - 3, 0.025, pas)                                   # sol arka ayağın dibi paslı
+    soyuk(yan, 9, 0.012, celik)
+
+    # Oturak: bükme kontrplak; ortası hafif çukur, ön kenarı aşağı kıvrık (diz altını kesmesin).
+    def oturak(px, py, pz):
+        z = pz + 0.010 * (2 * px / 0.40) ** 2                              # yanlara doğru hafif yükselir
+        if py < -0.13:
+            z -= ((-0.13 - py) / 0.05) ** 2 * 0.02                         # ön kenar aşağı kıvrılır
+        return (px, py - 0.01, z + 0.379)
+
+    yastik((0.40, 0.36, 0.012), (0, 0, 0), kontrplak, oturak, bol=(4, 4, 1))
+    # Sırt: içe kavisli kontrplak, dikmelerin önüne perçinli, üstü geriye yatık.
+    def sirt(px, py, pz):
+        return (px, py + 0.21 - 0.025 * (2 * px / 0.42) ** 2 + pz * 0.15, pz + 0.63)
+
+    yastik((0.42, 0.012, 0.15), (0, 0, 0), kontrplak, sirt, bol=(6, 1, 2))
+    for sx in (-1, 1):                                                     # perçinler
+        for z in (0.595, 0.665):
+            on = 0.21 - 0.025 * (2 * 0.19 / 0.42) ** 2 - 0.006 + (z - 0.63) * 0.15
+            dik_disk(0.006, 0.003, (sx * 0.19, on - 0.0008, z), celik, 8)
+    # Çıkartma: sırtın önünde sarı-kırmızı yuvarlak etiket, sırtın eğimine yatırılmış.
+    on = 0.21 - 0.025 * (2 * 0.08 / 0.42) ** 2 - 0.006 + 0.01 * 0.15
+    don(dik_disk(0.026, 0.0012, (0.08, on - 0.0008, 0.64), mt("boya_sari"), 16), rx=-math.atan(0.15))
+    don(dik_disk(0.014, 0.0012, (0.08, on - 0.0018, 0.64), mt("boya_kirmizi"), 12), rx=-math.atan(0.15))
+    # Oturağın üstüne tükenmez kalemle çizilmiş çizgiler (yüzeyin kavisine göre yükseklik).
+    ust = lambda x: 0.379 + 0.006 + 0.010 * (2 * x / 0.40) ** 2 + 0.0003
+    for (x0, y0, x1, y1) in ((-0.09, 0.03, 0.01, 0.07), (-0.07, 0.00, 0.02, 0.035), (0.04, -0.05, 0.10, -0.02)):
+        xm, ym = (x0 + x1) / 2, (y0 + y1) / 2
+        don(kutu((math.hypot(x1 - x0, y1 - y0), 0.0015, 0.0004), (xm, ym - 0.01, ust(xm)), mt("boya_mavi")),
+            rz=math.atan2(y1 - y0, x1 - x0))
+    # Oturağın altına yapıştırılmış sakız.
+    kure(0.012, (0.09, 0.04, 0.3715), M("Sakiz", (0.55, 0.38, 0.40), 0.8), (1.3, 1.0, 0.4), seg=8, halka=5)
+    uvle()
+    return bitir("Cocuk_Sandalyesi_K3")
+
+
 ESYALAR = {
     "askilik": askilik, "ayakkabi": ayakkabi_yigini, "canta": canta, "bebek_arabasi": bebek_arabasi, "terlik": terlikler,
     "cizimler": cizimler, "oyuncak": oyuncaklar, "yolluk": yolluk,
     "tv": tv, "boyama": boyama, "park": park, "hali": hali, "perde": perde, "raf": raf,
     "mama": mama, "masa": masa, "sandalye": sandalye, "buzdolabi": buzdolabi, "ocak": ocak, "camasir": camasir, "biberon": biberon,
+    "kanepe": kanepe, "cocuksandalye": cocuk_sandalye,
 }
 
 if __name__ == "__main__":

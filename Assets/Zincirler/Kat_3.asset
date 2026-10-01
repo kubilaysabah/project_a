@@ -306,18 +306,7 @@ MonoBehaviour:
     OnU: -1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 9130452927379219228, guid: 62894a50110d580459f30676a32ec3a6, type: 3}
-    Metin: 
-    Ad: 
-  - Yol: 
-    X: 4.62
-    Y: 0.4
-    Z: 5.905
-    Donus: 0
-    OnU: -1
-    OnV: 0
-    Yatik: 0
-    Sablon: {fileID: 3098382005570840974, guid: f31af7e1fb14c4a47a0277ec4613866f, type: 3}
+    Sablon: {fileID: 390001602076389756, guid: 0788b5c48ef66ad4da82b94067f925bb, type: 3}
     Metin: 
     Ad: 
   - Yol: 
@@ -548,7 +537,7 @@ MonoBehaviour:
     OnU: -1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 5648442490865177686, guid: e7d45cf6b38313d408368d7f902bf505, type: 3}
+    Sablon: {fileID: 3898086278161217077, guid: c3d42c10775e15848825f3ce752d889c, type: 3}
     Metin: 
     Ad: 
   - Yol: 

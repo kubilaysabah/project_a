@@ -18,7 +18,7 @@
 #   hali         Hali_K5             : bej-kahve Isparta tipi halı (2,5 x 1,7 m).
 #   perde        Perde_K5            : ahşap kornişte kahverengi pileli fon perde ve arkasında tül (1,4 m pencere).
 # MUTFAK
-#   buzdolabi    Buzdolabi_K5        : 90'lar beyaz, iki kapılı, dikey kollu buzdolabı (açılmaz, tek parça).
+#   buzdolabi    Buzdolabi_K5        : 80'lerin sonu sararmış emaye buzdolabı; yuvarlak köşeli, ayrı dondurucu kapılı (açılmaz).
 #   ocak         Ocak_K5             : krem ocak, 3 gaz + 1 elektrik gözü, cam kapağı kalkık.
 #   masa         Mutfak_Masasi_K5    : sarı formika üstlü, alüminyum kenarlı mutfak masası.
 #   tabure       Tabure_K5           : aynı takımdan sarı formika tabure.
@@ -26,7 +26,7 @@
 # BANYO
 #   camasir      Camasir_Makinesi_K5 : üstten yüklemeli, yarı otomatik (çift kazanlı) beyaz-mavi çamaşır makinesi.
 #   havlu        Havlu_Askisi_K5     : çift çubuklu havlu askısı, iki havlu.
-#   ecza         Banyo_Dolabi_K5     : aynalı ecza dolabı (süs), altında diş fırçası bardaklı küçük raf.
+#   ecza         Banyo_Dolabi_K5     : bizote aynalı boyalı sac banyo dolabı, ayna lambası; altında kolonyalı, paslı krom cam raf.
 #   legen        Legen_Kova_K5       : yeşil plastik leğen ve mavi kova.
 # KİLER
 #   raf          Raf_K5              : ahşap raf; boya kutuları, kavanozlar, tenekeler.
@@ -824,25 +824,114 @@ elif hangi == "perde":
 # MUTFAK
 # =====================================================================
 elif hangi == "buzdolabi":
-    beyaz = ortak.malzeme("K5_BuzBeyaz", (0.80, 0.80, 0.77), puruz=0.3)
-    gri = ortak.malzeme("K5_BuzKol", (0.45, 0.45, 0.44), puruz=0.35)
-    EN, DER, H = 0.60, 0.62, 1.70
-    K((EN, DER - 0.05, H), (0, 0.025, H / 2), beyaz, 0.015)                                  # gövde
-    y_on = 0.025 - (DER - 0.05) / 2
-    K((EN - 0.006, 0.045, 0.43), (0, y_on - 0.0225, 1.47), beyaz, 0.012)                     # dondurucu kapısı
-    K((EN - 0.006, 0.045, 1.14), (0, y_on - 0.0225, 0.66 + 0.02), beyaz, 0.012)              # soğutucu kapısı
-    K((EN - 0.01, 0.01, 0.012), (0, y_on - 0.004, 1.245), siyah)                             # iki kapı arası derz
-    K((EN - 0.02, 0.012, 0.075), (0, y_on - 0.006, 0.0375), siyah)                          # alt ızgara
+    # 80'lerin sonu / 90'ların başı yerli buzdolabı (o yılların Arçelik/Beko çizgisi, marka yazısı yok):
+    # köşeleri iri yuvarlatılmış emaye gövde, üstte ayrı küçük dondurucu kapısı, altta büyük soğutucu kapısı,
+    # her kapının arkasında kaburgalı lastik conta, sağ kenarda uzun dikey kollar, kapı üstünde marka şeridi.
+    # Emaye 30 yılda sararmış; alt köşeler paslanmış, kol çevresi el kiri tutmuş. Üstünde dantel örtü,
+    # kapısında mıknatıslarla tutturulmuş 1994 takvim yaprağı. Açılmaz, tek parça.
+    beyaz = ortak.malzeme("K5_BuzEmaye", (0.74, 0.71, 0.60), puruz=0.32)      # sararmış emaye (doğrusal renk)
+    lastik = ortak.malzeme("K5_BuzConta", (0.055, 0.055, 0.05), puruz=0.85)   # kapı contası: mat koyu lastik
+    kol_m = ortak.malzeme("K5_BuzKol", (0.55, 0.52, 0.44), puruz=0.4)         # kolun bej plastik gövdesi
+    pas = ortak.malzeme("K5_BuzPas", (0.16, 0.06, 0.02), puruz=0.9)           # pas: koyu turuncu-kahve, mat
+    demir = ortak.malzeme("K5_BuzDemir", (0.03, 0.028, 0.025), puruz=0.7)     # emaye atınca görünen kararmış sac
+    kir = ortak.malzeme("K5_BuzElKiri", (0.38, 0.34, 0.25), puruz=0.7)        # kol çevresinde el kiri
+    altin = ortak.malzeme("K5_BuzYaldiz", (0.50, 0.38, 0.12), puruz=0.35, metal=0.9)   # marka "harfleri"
+    EN, H = 0.60, 1.69                                # genişlik ve gövde üstünün yüksekliği
+    Y_ARKA, Y_ON = 0.31, -0.245                       # gövdenin arka (duvar) ve ön yüzü; eski ölçü kutusu korunur
+    # Gövde: bütün kenarları iri yuvarlatılmış (o yılların pres sacı keskin köşe yapmazdı).
+    govde = K((EN, Y_ARKA - Y_ON, H - 0.02), (0, (Y_ARKA + Y_ON) / 2, 0.02 + (H - 0.02) / 2), beyaz, 0.035)
+    govde.modifiers["Pah"].segments = 4              # 4 bölümlü pah: köşe kırık değil, yumuşak bir kavis olur
+    # Ayaklar: önde iki ayarlı siyah ayak, arkada iki sabit takoz (gövde yerden 2 cm yukarıda durur).
+    for x in (-EN / 2 + 0.05, EN / 2 - 0.05):
+        S(0.016, 0.02, (x, Y_ON + 0.04, 0.01), siyah, 12)                                    # ön vidalı ayak
+        K((0.04, 0.04, 0.02), (x, Y_ARKA - 0.05, 0.01), siyah)                               # arka takoz
+    # Alt ızgara: kapının altında, gövdenin önünde siyah zeminli, bej çıtalı hava ızgarası.
+    K((EN - 0.07, 0.006, 0.075), (0, Y_ON - 0.003, 0.068), siyah, 0.002)
     for i in range(5):
-        K((EN - 0.08, 0.004, 0.006), (0, y_on - 0.013, 0.015 + i * 0.013), gri)
-    for (z0, z1) in ((1.29, 1.46), (0.98, 1.20)):                                            # dikey kollar (sağ kenarda)
-        K((0.028, 0.03, z1 - z0), (EN / 2 - 0.05, y_on - 0.075, (z0 + z1) / 2), gri, 0.008)
-        for z in (z0 + 0.012, z1 - 0.012):
-            K((0.02, 0.03, 0.02), (EN / 2 - 0.05, y_on - 0.057, z), gri, 0.004)
-    K((0.10, 0.004, 0.018), (-EN / 2 + 0.10, y_on - 0.046, 1.20), krom, 0.002)               # marka plakası
-    # Soğutucu kapısında mıknatıslı küçük takvim kartı (evin düzenli sahibinden).
-    K((0.08, 0.002, 0.11), (-0.12, y_on - 0.046, 0.95), ortak.malzeme("K5_Kart", (0.70, 0.62, 0.45), puruz=0.8))
-    dik_disk(0.01, 0.006, (-0.12, y_on - 0.049, 1.0), ortak.malzeme("K5_Miknatis", (0.05, 0.12, 0.30), puruz=0.4), 12)
+        K((EN - 0.11, 0.006, 0.005), (0, Y_ON - 0.007, 0.042 + i * 0.013), kol_m)
+    # Kapılar: (alt z, üst z). Önce conta katmanları, sonra kapı levhası.
+    y_kapi = Y_ON - 0.015 - 0.0225                    # kapı levhasının ortası (conta 1,5 cm + kapı 4,5 cm)
+    y_yuz = Y_ON - 0.06                               # kapının ön yüzü: rozet, mıknatıs, takvim buraya yapışır
+    for (z0, z1) in ((0.115, 1.285), (1.30, H - 0.02)):
+        h = z1 - z0                                   # kapının yüksekliği
+        # KABURGALI CONTA: üç ince lastik katman, ortadaki daha dar. Yandan bakınca girintili-çıkıntılı
+        # koyu bir şerit görünür; gerçek buzdolabı contasının körüklü kesiti böyle okunur.
+        for k_, daralma in enumerate((0.022, 0.034, 0.022)):
+            K((EN - daralma, 0.005, h - daralma), (0, Y_ON - 0.0025 - k_ * 0.005, (z0 + z1) / 2), lastik, 0.0015)
+        kapi = K((EN - 0.006, 0.045, h), (0, y_kapi, (z0 + z1) / 2), beyaz, 0.022)        # kapı levhası
+        kapi.modifiers["Pah"].segments = 3            # kapı kenarları da yuvarlak: sac kapı kıvrılarak bükülmüş
+    # Menteşe kapakları sol kenarda: üstte, iki kapı arasında, altta (bej plastik başlıklar).
+    for z in (H - 0.005, 1.2925, 0.105):
+        K((0.05, 0.05, 0.016), (-EN / 2 + 0.04, Y_ON - 0.03, z), kol_m, 0.004)
+    # UZUN DİKEY KOLLAR (sağ kenarda): bej plastik tutamak, önünde krom şerit, iki ucunda kapıya vidalı ayak.
+    xk = EN / 2 - 0.045                               # kolların x konumu
+    for (z0, z1) in ((0.80, 1.25), (1.33, 1.50)):     # soğutucu kolu uzun, dondurucu kolu kısa
+        K((0.03, 0.022, z1 - z0), (xk, y_yuz - 0.031, (z0 + z1) / 2), kol_m, 0.006)       # tutamak gövdesi
+        K((0.010, 0.004, z1 - z0 - 0.03), (xk, y_yuz - 0.043, (z0 + z1) / 2), krom)      # krom ön şerit
+        for z in (z0 + 0.015, z1 - 0.015):
+            K((0.026, 0.022, 0.03), (xk, y_yuz - 0.011, z), kol_m, 0.004)                # vidalı ayaklar
+        # Kolun alt ucunun altında yılların el kiri: tutamağı kavrayan parmakların bıraktığı koyu iz.
+        kure(0.02, (xk - 0.004, y_yuz + 0.0085, z0 + 0.05), kir, (0.9, 0.5, 2.2), seg=10)
+    # MARKA ŞERİDİ: soğutucu kapısının üstünde krom çerçeveli siyah şerit, içinde yaldız "harfler"
+    # (gerçek marka adı yazmıyoruz: kısa yaldız çubuklar uzaktan yazı gibi okunur) ve küçük kırmızı amblem.
+    K((0.30, 0.004, 0.032), (-0.10, y_yuz - 0.002, 1.235), krom, 0.001)                     # krom çerçeve
+    K((0.29, 0.005, 0.024), (-0.10, y_yuz - 0.003, 1.235), siyah)                           # siyah zemin
+    for i, w in enumerate((0.022, 0.018, 0.024, 0.020, 0.018, 0.022, 0.016)):
+        K((w, 0.002, 0.011), (-0.215 + i * 0.033, y_yuz - 0.0065, 1.235), altin)            # yaldız harfler
+    K((0.02, 0.003, 0.02), (0.035, y_yuz - 0.006, 1.235), ortak.malzeme("K5_BuzAmblem", (0.45, 0.04, 0.03), puruz=0.4))
+    # Dondurucu kapısında "üç yıldız" plakası (o yılların dondurucu sınıfı işareti): her yıldız üç ince çubuk.
+    K((0.11, 0.003, 0.04), (-0.18, y_yuz - 0.0015, 1.36), krom, 0.001)
+    for j in range(3):
+        for a_ in (0, math.pi / 3, 2 * math.pi / 3):  # 60° arayla üç çubuk: altı kollu yıldız
+            KR((0.022, 0.002, 0.004), (-0.215 + j * 0.035, y_yuz - 0.004, 1.36), siyah, (0, a_, 0))
+    # 1994 TAKVİM YAPRAĞI: kâğıt, kırmızı başlık bandı, ızgara çizgileri; hafif eğik asılmış.
+    kagit = ortak.malzeme("K5_Takvim", (0.70, 0.66, 0.52), puruz=0.85)
+    cizgi = ortak.malzeme("K5_TakvimCizgi", (0.12, 0.11, 0.10), puruz=0.8)
+    tx, tz, eg = -0.10, 0.92, math.radians(-4)        # takvimin merkezi ve eğikliği (y ekseni etrafında)
+    KR((0.17, 0.0015, 0.23), (tx, y_yuz - 0.001, tz), kagit, (0, eg, 0))
+
+    def takvim_noktasi(dx, dz):
+        """Takvimin kendi düzlemindeki (dx, dz) noktasını, eğiklik verilmiş haliyle dünyaya çevirir."""
+        return (tx + dx * math.cos(eg) + dz * math.sin(eg), tz - dx * math.sin(eg) + dz * math.cos(eg))
+
+    x_, z_ = takvim_noktasi(0, 0.095)
+    KR((0.17, 0.002, 0.04), (x_, y_yuz - 0.0018, z_), ortak.malzeme("K5_TakvimBaslik", (0.40, 0.04, 0.03), puruz=0.7), (0, eg, 0))
+    for r_ in range(6):                               # yatay ızgara çizgileri (hafta satırları)
+        x_, z_ = takvim_noktasi(0, 0.06 - r_ * 0.032)
+        KR((0.15, 0.002, 0.0018), (x_, y_yuz - 0.0019, z_), cizgi, (0, eg, 0))
+    for c_ in range(8):                               # dikey ızgara çizgileri (yedi gün sütunu)
+        x_, z_ = takvim_noktasi(-0.075 + c_ * 0.0214, -0.02)
+        KR((0.0018, 0.002, 0.16), (x_, y_yuz - 0.0019, z_), cizgi, (0, eg, 0))
+    # Mıknatıslar: takvimi tutan kırmızı elma (sapıyla), biraz ötede sarı limon ve yeşil yaprak.
+    x_, z_ = takvim_noktasi(0, 0.115)
+    kure(0.016, (x_, y_yuz - 0.009, z_), ortak.malzeme("K5_MiknatisElma", (0.42, 0.03, 0.02), puruz=0.35), (1, 0.55, 1))
+    K((0.003, 0.004, 0.012), (x_, y_yuz - 0.012, z_ + 0.017), ortak.malzeme("K5_MiknatisSap", (0.08, 0.04, 0.01), puruz=0.6))
+    kure(0.014, (0.10, y_yuz - 0.008, 1.08), ortak.malzeme("K5_MiknatisLimon", (0.60, 0.48, 0.04), puruz=0.35), (1.35, 0.55, 1))
+    kure(0.012, (0.06, y_yuz - 0.007, 0.70), ortak.malzeme("K5_MiknatisYaprak", (0.06, 0.25, 0.05), puruz=0.35), (0.7, 0.55, 1.5))
+    # Yeşil yaprağın tuttuğu küçük bakkal veresiye pusulası.
+    KR((0.07, 0.0012, 0.09), (0.06, y_yuz - 0.0008, 0.66), ortak.malzeme("K5_Pusula", (0.66, 0.64, 0.58), puruz=0.9), (0, math.radians(6), 0))
+    # AŞINMA: kapıların alt kenarında emaye atmış, ortası kararmış sac, çevresi pas halesi
+    # (yer silinirken yıllarca su değmiş, kapı tekmeyle kapatılmış). Her leke tek bir dörtgen değil,
+    # rastgele kaydırılmış birkaç yassı diskin üst üste binmesi: kenarı düzensiz, gerçek pas gibi okunur.
+    def pas_lekesi(x, z, r):
+        """Kapı yüzünde (x, z) çevresinde, yaklaşık r yarıçaplı düzensiz pas lekesi ve ortasında çıplak sac."""
+        for _ in range(4):                            # dört pas diski, her biri biraz kayık ve farklı boyda
+            dik_disk(r * rnd.uniform(0.5, 0.9), 0.0012,
+                     (x + rnd.uniform(-r, r) * 0.6, y_yuz - 0.0006, z + rnd.uniform(-r, r) * 0.4), pas, 10)
+        for _ in range(2):                            # iki küçük koyu disk: emayenin tamamen atıp sacın göründüğü yer
+            dik_disk(r * rnd.uniform(0.2, 0.35), 0.0018,
+                     (x + rnd.uniform(-r, r) * 0.3, y_yuz - 0.0009, z + rnd.uniform(-r, r) * 0.2), demir, 8)
+    for (x, z, r) in ((-0.25, 0.16, 0.03), (-0.19, 0.135, 0.016), (0.235, 0.14, 0.024),
+                      (0.08, 1.316, 0.014), (-0.04, 0.128, 0.012)):
+        pas_lekesi(x, z, r)
+    for s_ in (-1, 1):
+        # Gövdenin iki yan yüzünde, yere yakın pas akıntıları: aşağı doğru uzamış yassı damlalar.
+        for (y_, hh) in ((-0.17, 0.10), (-0.12, 0.06), (0.05, 0.08)):
+            kure(0.008, (s_ * (EN / 2 - 0.001), y_, 0.03 + hh / 2), pas, (0.25, 1.0, hh / 0.016), seg=10)
+    # Üstte dantel örtü ve ön kenardan sarkan fistolar (Türk evinde buzdolabının üstü hiç çıplak durmaz).
+    K((0.42, 0.36, 0.003), (0, 0.02, H + 0.0015), dantel_m)
+    for i in range(11):
+        K((0.028, 0.003, 0.03), (-0.19 + i * 0.038, Y_ON + 0.012, H - 0.012), dantel_m)
     ad, h, uzak = "Buzdolabi_K5", 1.7, 2.3
 
 elif hangi == "ocak":
@@ -1022,27 +1111,126 @@ elif hangi == "havlu":
     kaldir = 0.55
 
 elif hangi == "ecza":
+    # 90'ların başı banyo dolabı: fırın boyalı sac dolap, önünde kenarı pahlı (bizote) ayna kapak; aynanın
+    # gümüşü yıllar içinde kenarlardan içeri doğru kararmış, sol alt köşesi çatlak. Üstünde opal camlı
+    # krom ayna lambası ve çekme ipi. Altında krom konsollu cam raf: limon kolonyası, kahverengi cam
+    # saç losyonu şişesi, diş fırçalı bardak, tıraş fırçası, sabunluk ve aşınmış sabun. Krom yer yer paslı.
     duvar = True
-    krem = ortak.malzeme("K5_EczaKrem", (0.72, 0.68, 0.58), puruz=0.35)
-    ayna = ortak.malzeme("K5_Ayna", (0.60, 0.62, 0.63), puruz=0.03, metal=1.0)
+    boya = ortak.malzeme("K5_EczaBoya", (0.70, 0.67, 0.56), puruz=0.4)       # sararmış krem fırın boyası
+    ayna = ortak.malzeme("K5_Ayna", (0.62, 0.63, 0.63), puruz=0.03, metal=1.0)   # sağlam gümüşlü ayna
+    kararmis = ortak.malzeme("K5_AynaKararmis", (0.045, 0.038, 0.03), puruz=0.55, metal=0.3)   # gümüşü atmış kenar
+    cam_raf = ortak.malzeme("K5_CamRaf", (0.30, 0.42, 0.38), puruz=0.05)      # kalın camın yeşilimsi rengi
     bardak_m = ortak.malzeme("K5_Bardak", (0.30, 0.40, 0.38), puruz=0.1)
-    EN, DER, H = 0.50, 0.15, 0.60
-    K((EN, DER - 0.02, H), (0, -(DER - 0.02) / 2, 0), krem, 0.006)                           # gövde (arka y=0)
-    K((EN + 0.02, DER + 0.005, 0.03), (0, -(DER + 0.005) / 2, H / 2 + 0.015), krem, 0.008)   # üst korniş
-    K((EN - 0.02, 0.02, H - 0.03), (0, -DER + 0.01, 0), krem, 0.005)                         # kapak çerçevesi
-    K((EN - 0.08, 0.004, H - 0.10), (0, -DER - 0.002, 0), ayna)                              # ayna
-    K((0.012, 0.015, 0.05), (EN / 2 - 0.035, -DER - 0.009, 0), krom, 0.003)                  # kulp
-    # Altında cam raf: iki diş fırçası, bir bardak ve bir diş macunu.
-    K((EN - 0.06, 0.11, 0.008), (0, -0.065, -H / 2 - 0.06), bardak_m, 0.002)
-    for s in (-1, 1):
-        K((0.012, 0.10, 0.02), (s * (EN / 2 - 0.05), -0.05, -H / 2 - 0.05), krom, 0.003)
-    bz = -H / 2 - 0.056
-    bardak = ortak.silindir("Bardak", 0.03, 0.09, (-0.12, -0.07, bz + 0.045), bardak_m, 20)
-    ortak.oy(bardak, ortak.silindir("BardakIc", 0.026, 0.09, (-0.12, -0.07, bz + 0.05), bardak_m, 20))
+    pas = ortak.malzeme("K5_EczaPas", (0.17, 0.065, 0.02), puruz=0.9)
+    demir = ortak.malzeme("K5_EczaDemir", (0.03, 0.028, 0.025), puruz=0.7)
+    opal = ortak.malzeme("K5_OpalCam", (0.80, 0.78, 0.70), puruz=0.25)        # süt beyazı lamba camı
+    EN, DER = 0.50, 0.12                              # dolap gövdesinin eni ve derinliği (arka yüz y = 0)
+    Z_ALT, Z_UST = -0.20, 0.26                        # gövdenin alt ve üst kenarı (pivot askı hizasında, z = 0)
+    zo, H = (Z_ALT + Z_UST) / 2, Z_UST - Z_ALT        # gövdenin orta yüksekliği ve boyu
+    K((EN, DER, H), (0, -DER / 2, zo), boya, 0.006)                                           # sac gövde
+    K((EN + 0.02, DER + 0.01, 0.02), (0, -(DER + 0.01) / 2, Z_UST + 0.01), boya, 0.006)       # üst korniş
+    K((EN + 0.01, DER + 0.005, 0.012), (0, -(DER + 0.005) / 2, Z_ALT - 0.006), boya, 0.004)   # alt pervaz
+    # KAPAK: boyalı ince çerçeve, içinde iki katlı ayna. Alttaki katman kararmış gümüş, kenarları pahlı;
+    # üstteki parlak ayna ondan biraz küçük: aradaki koyu şerit "gümüşü kenardan atmış ayna" gibi okunur.
+    y_k = -DER                                        # kapağın arka yüzü gövdenin ön yüzüne yaslı
+    K((EN - 0.02, 0.018, H - 0.01), (0, y_k - 0.009, zo), boya, 0.004)                        # kapak çerçevesi
+    taban = K((EN - 0.06, 0.004, H - 0.06), (0, y_k - 0.020, zo), kararmis, 0.010)           # kararmış alt katman
+    taban.modifiers["Pah"].segments = 1               # tek bölümlü pah: yuvarlak değil, düz bizote kesim
+    y_ayna = y_k - 0.0225                             # parlak aynanın ön yüzü
+    K((EN - 0.10, 0.0012, H - 0.10), (0, y_ayna + 0.0006, zo), ayna)                         # parlak ayna
+    # Kararma kenardan içeri sızar: aynanın kenarı boyunca dizilmiş, içeri doğru kaydırılmış küçük koyu
+    # diskler; köşelerde daha iri ve sık (nem en çok köşeden girer). Merkezler kenardan içeride tutulur ki
+    # lekeler aynanın dışına, boyalı çerçevenin üstüne taşmasın.
+    yx, yz = (EN - 0.10) / 2, (H - 0.10) / 2          # parlak aynanın yarı eni ve yarı boyu
+    lekeler = []                                      # (x, z, yarıçap) listesi
+    for (kx_, kz_) in ((-1, -1), (1, -1), (-1, 1), (1, 1)):          # dört köşe
+        for _ in range(4):
+            r = rnd.uniform(0.008, 0.020) * (1.4 if kz_ < 0 else 1.0)   # alt köşeler daha çok kararmış
+            lekeler.append((kx_ * (yx - r * 0.7 - rnd.uniform(0, 0.02)), zo + kz_ * (yz - r * 0.7 - rnd.uniform(0, 0.02)), r))
+    for _ in range(14):                               # kenarlar boyunca serpiştirilmiş küçük lekeler
+        r = rnd.uniform(0.004, 0.011)
+        if rnd.random() < 0.5:                        # yarısı sol/sağ kenarda
+            kx_ = rnd.choice((-1, 1))
+            lekeler.append((kx_ * (yx - r * 0.8), zo + rnd.uniform(-yz, yz) * 0.85, r))
+        else:                                         # yarısı alt/üst kenarda (altta daha çok)
+            kz_ = -1 if rnd.random() < 0.7 else 1
+            lekeler.append((rnd.uniform(-yx, yx) * 0.85, zo + kz_ * (yz - r * 0.8), r))
+    for (x, z, r) in lekeler:
+        dik_disk(r, 0.0008, (x, y_ayna - 0.0002, z), kararmis, 10)
+    # Sol alt köşede çatlak: aynanın üstünde iki ince koyu çizgi (birbirinden ayrılan iki kırık hattı).
+    for (x, z, uz_, a_) in ((-0.12, zo - 0.13, 0.13, 0.55), (-0.15, zo - 0.10, 0.08, -0.35)):
+        KR((uz_, 0.0006, 0.0015), (x, y_ayna - 0.0004, z), siyah, (0, a_, 0))
+    # Menteşe (solda, boydan boya krom piyano menteşe) ve kulp (sağ kenarda küçük krom topuz).
+    cubuk((-EN / 2 + 0.008, y_k - 0.012, Z_ALT + 0.01), (-EN / 2 + 0.008, y_k - 0.012, Z_UST - 0.01), 0.004, krom)
+    dik_disk(0.005, 0.012, (EN / 2 - 0.022, y_k - 0.024, zo), krom, 12)                       # topuzun boynu
+    kure(0.008, (EN / 2 - 0.022, y_k - 0.032, zo), krom, (1, 0.7, 1))
+    # Boyanın atıp pasın göründüğü yerler: kapak çerçevesinin alt kenarı ve köşeleri (banyonun buharı
+    # yıllarca sacın kenarına oturmuş). Tek iri leke değil, kümelenmiş minik kabarcıklar.
+    for (x, z, n) in ((-EN / 2 + 0.03, Z_ALT + 0.012, 6), (EN / 2 - 0.035, Z_ALT + 0.011, 4), (0.08, Z_ALT + 0.01, 3),
+                      (-EN / 2 + 0.018, Z_ALT + 0.08, 3)):
+        for _ in range(n):
+            dik_disk(rnd.uniform(0.0015, 0.004), 0.0012,
+                     (x + rnd.uniform(-0.015, 0.015), y_k - 0.0186, z + rnd.uniform(-0.004, 0.004)), pas, 8)
+    # AYNA LAMBASI: kornişin üstünde krom ayak, opal cam tüp, iki ucunda krom başlık; sağdan sarkan çekme ipi.
+    K((0.40, 0.05, 0.016), (0, -0.07, Z_UST + 0.028), krom, 0.003)                            # krom taşıyıcı
+    yatay_silindir(0.02, 0.34, (0, -0.075, Z_UST + 0.052), opal, 20)                         # opal cam tüp
+    for s_ in (-1, 1):
+        yatay_silindir(0.023, 0.018, (s_ * 0.179, -0.075, Z_UST + 0.052), krom, 20)          # uç başlıkları
+    cubuk((0.19, -0.095, Z_UST + 0.045), (0.19, -0.158, Z_UST + 0.02), 0.0012, siyah, 6)      # ip başlıktan öne
+    cubuk((0.19, -0.158, Z_UST + 0.02), (0.19, -0.158, 0.06), 0.0012, siyah, 6)              # ve aşağı sarkar
+    kure(0.006, (0.19, -0.158, 0.054), ortak.malzeme("K5_IpBoncuk", (0.60, 0.55, 0.42), puruz=0.4), (1, 1, 1.6), seg=10)
+    # CAM RAF: iki krom konsol (duvar plakası, raf kolu, çapraz destek), kalın cam, önünde krom korkuluk.
+    z_raf = -0.33                                     # cam rafın üst yüzü
+    K((0.44, 0.11, 0.006), (0, -0.07, z_raf - 0.003), cam_raf, 0.0015)
+    for s_ in (-1, 1):
+        x = s_ * 0.19
+        K((0.022, 0.006, 0.05), (x, -0.003, z_raf - 0.02), krom, 0.002)                       # duvar plakası
+        K((0.012, 0.12, 0.007), (x, -0.066, z_raf - 0.0095), krom, 0.002)                    # rafın altındaki kol
+        cubuk((x, -0.005, z_raf - 0.04), (x, -0.085, z_raf - 0.012), 0.003, krom)            # çapraz destek
+        cubuk((x, -0.128, z_raf), (x, -0.128, z_raf + 0.024), 0.0025, krom)                  # korkuluk dikmesi
+    cubuk((-0.205, -0.128, z_raf + 0.024), (0.205, -0.128, z_raf + 0.024), 0.003, krom)       # ön korkuluk
+    # Kromun pas noktaları: kaplaması kalkmış küçük kahverengi kabarcıklar.
+    for (x, y_, z) in ((-0.12, -0.131, z_raf + 0.024), (0.03, -0.131, z_raf + 0.024), (0.15, -0.131, z_raf + 0.024),
+                       (0.19, -0.035, z_raf - 0.03), (-0.19, -0.06, z_raf - 0.026), (-0.19, -0.0065, z_raf - 0.03)):
+        kure(0.0035, (x, y_, z), pas, (1.3, 0.8, 1.0), seg=8)
+    # 1) Limon kolonyası: yassı köşeli cam şişe, içinde açık sarı kolonya, yaldızlı kapak (Türk evinin simgesi).
+    kolonya = ortak.malzeme("K5_Kolonya", (0.55, 0.52, 0.22), puruz=0.06)
+    yaldiz_k = ortak.malzeme("K5_KolonyaKapak", (0.55, 0.40, 0.12), puruz=0.3, metal=0.9)
+    K((0.052, 0.03, 0.085), (-0.17, -0.07, z_raf + 0.0425), kolonya, 0.008)
+    K((0.03, 0.0012, 0.035), (-0.17, -0.0856, z_raf + 0.04), ortak.malzeme("K5_KolonyaEtiket", (0.60, 0.50, 0.25), puruz=0.7))
+    S(0.008, 0.014, (-0.17, -0.07, z_raf + 0.092), kolonya, 12)                               # boyun
+    S(0.011, 0.018, (-0.17, -0.07, z_raf + 0.108), yaldiz_k, 16, 0.002)                       # kapak
+    # 2) Kahverengi cam saç losyonu şişesi: gövde, omuz, boyun, siyah kapak, krem etiket.
+    kahve_cam = ortak.malzeme("K5_KahveCam", (0.16, 0.06, 0.015), puruz=0.08)
+    S(0.02, 0.07, (-0.105, -0.05, z_raf + 0.035), kahve_cam, 18)
+    koni(0.02, 0.008, 0.016, (-0.105, -0.05, z_raf + 0.078), kahve_cam, 18)
+    S(0.008, 0.012, (-0.105, -0.05, z_raf + 0.092), kahve_cam, 12)
+    S(0.0095, 0.012, (-0.105, -0.05, z_raf + 0.104), siyah, 12)
+    S(0.0205, 0.035, (-0.105, -0.05, z_raf + 0.035), ortak.malzeme("K5_LosyonEtiket", (0.62, 0.56, 0.42), puruz=0.7), 18)
+    # 3) Bardak ve öne yaslanmış iki eski tip düz saplı diş fırçası (başları kabin önüne taşar).
+    bx, by = -0.035, -0.10
+    bardak = ortak.silindir("Bardak", 0.027, 0.085, (bx, by, z_raf + 0.0425), bardak_m, 20)
+    ortak.oy(bardak, ortak.silindir("BardakIc", 0.023, 0.085, (bx, by, z_raf + 0.048), bardak_m, 20))
     p.append(bardak)
     for dx, renk in ((-0.008, (0.40, 0.05, 0.04)), (0.01, (0.04, 0.10, 0.35))):
-        cubuk((-0.12 + dx, -0.07, bz + 0.01), (-0.12 + dx * 3, -0.075, bz + 0.17), 0.004, ortak.malzeme("K5_Firca%d" % int(dx * 1000 + 10), renk, puruz=0.4))
-    KR((0.15, 0.03, 0.03), (0.08, -0.07, bz + 0.015), ortak.malzeme("K5_Macun", (0.75, 0.75, 0.75), puruz=0.3), (0, 0, 0.15), 0.01)
+        alt = (bx + dx, by, z_raf + 0.008)            # sapın bardak dibindeki ucu
+        ust = (bx + dx * 2.5, by - 0.058, z_raf + 0.158)   # sapın öne yaslanmış üst ucu
+        cubuk(alt, ust, 0.0035, ortak.malzeme("K5_Firca%d" % int(dx * 1000 + 10), renk, puruz=0.4))
+        # Kıl demeti: sapın üst ucunda, sapa paralel duran küçük blok; fırçanın ön (−y) yüzüne bakar.
+        # Sap öne doğru θ kadar eğik; blok da aynı açıyla x ekseni etrafında döndürülür.
+        teta = math.atan2(ust[1] - alt[1], ust[2] - alt[2]) * -1   # sapın dikeyle yaptığı açı
+        kx2, ky2, kz2 = ust[0], ust[1] - 0.006 * math.cos(teta), ust[2] - 0.010 - 0.006 * math.sin(teta)
+        KR((0.009, 0.010, 0.024), (kx2, ky2, kz2), ortak.malzeme("K5_FircaKil", (0.62, 0.60, 0.55), puruz=0.9), (teta, 0, 0), 0.002)
+    # 4) Tıraş fırçası: fildişi renkli sap, üstünde kabarık porsuk kılı.
+    S(0.011, 0.04, (0.04, -0.06, z_raf + 0.02), ortak.malzeme("K5_TirasSap", (0.62, 0.56, 0.42), puruz=0.3), 16, 0.002)
+    kure(0.016, (0.04, -0.06, z_raf + 0.056), ortak.malzeme("K5_TirasKil", (0.30, 0.24, 0.17), puruz=0.95), (1, 1, 1.3), seg=12)
+    # 5) Sabunluk: oval, içi çukur pastel yeşil plastik; içinde kenarları erimiş bir kalıp sabun.
+    sabunluk_m = ortak.malzeme("K5_Sabunluk", (0.30, 0.48, 0.38), puruz=0.35)
+    sabunluk = ortak.silindir("Sabunluk", 0.045, 0.014, (0.135, -0.07, z_raf + 0.007), sabunluk_m, 24, 0.003)
+    ortak.oy(sabunluk, ortak.silindir("SabunlukIc", 0.039, 0.014, (0.135, -0.07, z_raf + 0.011), sabunluk_m, 24))
+    sabunluk.scale = (1.0, 0.7, 1.0)                  # daireyi ovale bas (silindirin pivotu kendi merkezinde)
+    p.append(sabunluk)
+    K((0.058, 0.034, 0.016), (0.135, -0.07, z_raf + 0.013), ortak.malzeme("K5_Sabun", (0.62, 0.55, 0.38), puruz=0.5), 0.007)
     ad, h, uzak = "Banyo_Dolabi_K5", 0.8, 1.2
     kaldir = 0.42
 

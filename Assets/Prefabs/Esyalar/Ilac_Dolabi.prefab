@@ -52,8 +52,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.4185, y: 0.55, z: 0.53}
-  m_Center: {x: -0.009249993, y: 0, z: 0.265}
+  m_Size: {x: 0.4385, y: 0.54999995, z: 0.53}
+  m_Center: {x: -0.014249995, y: 0, z: 0.265}
 --- !u!1 &3367627242626459156
 GameObject:
   m_ObjectHideFlags: 0
@@ -121,12 +121,21 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -586040460341817917, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: -5672504035429776147, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
   - {fileID: -5259748634145673866, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
-  - {fileID: 6257115807137395582, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
-  - {fileID: 7056100147029175600, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
-  - {fileID: 4791007867131319919, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
-  - {fileID: -3714879002245454615, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
   - {fileID: 7554205149113351978, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: 4791007867131319919, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: 806048628123798575, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: -358617488568106188, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: 6257115807137395582, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: 8551457222217685683, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: -3037654174800243405, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: 1847084936584720123, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: 7056100147029175600, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: -8496065904454605727, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: -3714879002245454615, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: 7080310366666720988, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
+  - {fileID: -1638223099343742416, guid: eb2a3f43a13521049b0a37a94b502090, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

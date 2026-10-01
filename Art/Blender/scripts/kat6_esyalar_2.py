@@ -14,7 +14,10 @@
 #   askilik     Elbise_Askisi_K6      : tekerlekli krom askılık; askılarda iki ceket, bir elbise, bir palto ve
 #                                       naylon kılıflı uzun bir gece elbisesi.
 #   dikiskutu   Dikis_Kutusu_K6       : AÇILIR (Govde + Kapak) kakmalı ahşap dikiş kutusu, içi oyuk.
-#   buzdolabi   Buzdolabi_K6          : AÇILIR (Govde + Kapi_1) 80'ler küçük beyaz buzdolabı; buzluk, iki tel raf, sebzelik.
+#   buzdolabi   Buzdolabi_K6          : AÇILIR (Govde + Kapi_1) 1974'ten kalma yuvarlak hatlı, sararmış emaye buzdolabı;
+#                                       krom kollu kulp ve el yazısı marka, içte alüminyum buzluk, iki tel raf, sebzelik.
+#   puf         Puf_K6                : 70'lerin döşemeli pufu: kilim dokumalı yanlar, düğmeli aşınmış kadife üst, biye,
+#                                       kısa torna ayaklar; üstü çökmüş, bir köşesi yırtık.
 #   teneke      Dugme_Tenekesi_K6     : AÇILIR (Govde + Kapak) yuvarlak köşeli mavi bisküvi tenekesi (düğme kutusu).
 #   raf         Raf_K6                : delikli köşebent metal raf; kumaş kırpıntısı dolu karton kutular.
 #   sepet       Camasir_Sepeti_K6     : oval hasır çamaşır sepeti, kapağı aralık, bir gömlek kolu sarkıyor.
@@ -429,6 +432,176 @@ def kanca_zinciri(noktalar, r, mat, kose=6):
         cubuk(a, b, r, mat, kose)
 
 
+# ---------- YUVARLAK HATLI ESKİ EŞYA YARDIMCILARI (60'lar buzdolabı, 70'ler puf) ----------
+
+def yuvarlak_dikdortgen(x0, x1, z0, z1, r_ust, r_alt, n=6):
+    """
+    xz düzleminde (önden bakınca) köşeleri yuvarlatılmış dikdörtgenin çevre noktaları.
+    Üst iki köşe r_ust, alt iki köşe r_alt yarıçaplı: 60'ların buzdolabı önden bakınca tepesi yuvarlak, altı düzdür.
+    Her köşe n+1 noktadan oluşur; aynı n ile kurulan iki dikdörtgenin noktaları BİREBİR karşılık gelir,
+    bu yüzden 'cerceve' ikisinin arasını dörtgenlerle örebilir.
+    """
+    nokta = []                                              # sonuç: (x, z) çiftleri, saat yönünün tersine
+    koseler = ((x1 - r_alt, z0 + r_alt, r_alt, -90),        # sağ alt köşenin merkezi, yarıçapı, başlangıç açısı
+               (x1 - r_ust, z1 - r_ust, r_ust, 0),          # sağ üst
+               (x0 + r_ust, z1 - r_ust, r_ust, 90),         # sol üst
+               (x0 + r_alt, z0 + r_alt, r_alt, 180))        # sol alt
+    for (cx, cz, r, a0) in koseler:
+        for i in range(n + 1):                              # her köşede çeyrek daire: 90° n parçaya bölünür
+            a = math.radians(a0 + 90 * i / n)
+            nokta.append((cx + r * math.cos(a), cz + r * math.sin(a)))
+    return nokta
+
+
+def cerceve(ad, dis, ic, y0, y1, mat):
+    """
+    İki iç içe çevre çizgisinin (dis, ic; aynı nokta sayısı) arasını y0'dan y1'e kalınlaştırır: ortası delik
+    bir halka/kabuk. Buzdolabının gövde kabuğu (önü açık), kapı contası ve iç astar bununla kurulur;
+    boolean (oyma) gerekmez, dörtgenler temiz kalır.
+    """
+    k = len(dis)
+    v = ([(x, y0, z) for x, z in dis] + [(x, y0, z) for x, z in ic] +       # ön yüzün dış ve iç köşeleri
+         [(x, y1, z) for x, z in dis] + [(x, y1, z) for x, z in ic])        # arka yüzün dış ve iç köşeleri
+    f = []
+    for i in range(k):
+        j = (i + 1) % k                                     # bir sonraki nokta (son noktadan sonra ilk nokta)
+        f.append((i, j, k + j, k + i))                      # ön yüz: dış kenarla iç kenar arası şerit
+        f.append((2 * k + i, 3 * k + i, 3 * k + j, 2 * k + j))   # arka yüz
+        f.append((i, 2 * k + i, 2 * k + j, j))              # dış yan yüz (gövdenin dışı)
+        f.append((k + i, k + j, 3 * k + j, 3 * k + i))      # iç yan yüz (deliğin duvarı)
+    return yeni_mesh(ad, v, f, mat)                         # yeni_mesh yüzleri dışa çevirir ve listeye ekler
+
+
+def boru_yol(noktalar, r, mat, kose=6, kapali=False, ref=(0, 0, 1), ad="Boru"):
+    """
+    Noktalar boyunca TEK PARÇA boru (biye, krom yazı). cubuk+kure zinciri her eklemde ayrı parça ve küre
+    üretir, üçgen sayısı şişer; bu ise her noktada bir halka kurup halkaları örer.
+    ref: borunun kesitini döndürmemek için sabit bir yön. Yol xy düzlemindeyse z, xz düzlemindeyse y verilir;
+    yoksa yol dikleştiği yerde kesit aniden döner ve boru burkulur.
+    kapali: son nokta ilkine bağlanır (pufun kenar biyesi gibi halka).
+    """
+    P = [Vector(q) for q in noktalar]
+    N = len(P)
+    R = Vector(ref)
+    v, f = [], []
+    for i in range(N):
+        if kapali:
+            t = P[(i + 1) % N] - P[i - 1]                   # teğet: komşu iki noktanın farkı
+        else:
+            t = P[min(i + 1, N - 1)] - P[max(i - 1, 0)]
+        t.normalize()
+        a = t.cross(R).normalized()                         # kesitin birinci ekseni (teğete ve ref'e dik)
+        b = t.cross(a)                                      # ikinci ekseni
+        for k in range(kose):
+            aci = 2 * math.pi * k / kose
+            v.append(tuple(P[i] + r * (math.cos(aci) * a + math.sin(aci) * b)))
+    for i in range(N if kapali else N - 1):
+        j = (i + 1) % N
+        for k in range(kose):
+            k2 = (k + 1) % kose
+            f.append((i * kose + k, i * kose + k2, j * kose + k2, j * kose + k))
+    if not kapali:                                          # açık borunun iki ucu kapatılır (içi görünmesin)
+        f.append(tuple(range(kose)))
+        f.append(tuple(range((N - 1) * kose, N * kose)))
+    return yeni_mesh(ad, v, f, mat)
+
+
+def leke(merkez, eksen, r, mat, kal=0.0008, tohum=0):
+    """
+    Düzensiz kenarlı ince pul: emayenin attığı yer, pas çiçeği, aşınma. Yüzeyin içine yarı gömülür, yarısı
+    (0,4 mm) taşar. eksen: yüzeyin normal ekseni ('x', 'y', 'z'). Kenarı rastgele olduğu için içbükey olabilir;
+    Unity içbükey çokgeni yanlış üçgenleyebilir, bu yüzden ortadaki noktadan YELPAZE üçgenlerle kurulur.
+    """
+    rr = random.Random(tohum)                               # her leke kendi tohumuyla: aynı betik hep aynı lekeyi verir
+    k = 9                                                   # kenar nokta sayısı
+    kenar = []
+    for i in range(k):
+        a = 2 * math.pi * i / k
+        rad = r * rr.uniform(0.55, 1.15)                    # yarıçap her noktada farklı: tırtıklı kenar
+        kenar.append((rad * math.cos(a), rad * math.sin(a) * rr.uniform(0.8, 1.0)))
+    v = []
+    for t in (-kal / 2, kal / 2):                           # alt ve üst katman
+        for (a, b) in [(0.0, 0.0)] + kenar:                 # ilk nokta merkez
+            if eksen == "x":
+                v.append((merkez[0] + t, merkez[1] + a, merkez[2] + b))
+            elif eksen == "y":
+                v.append((merkez[0] + a, merkez[1] + t, merkez[2] + b))
+            else:
+                v.append((merkez[0] + a, merkez[1] + b, merkez[2] + t))
+    m = k + 1                                               # bir katmandaki nokta sayısı
+    f = []
+    for i in range(k):
+        a, b = 1 + i, 1 + (i + 1) % k
+        f.append((0, b, a))                                 # alt katmanın yelpaze üçgeni
+        f.append((m, m + a, m + b))                         # üst katmanın yelpaze üçgeni
+        f.append((a, b, m + b, m + a))                      # kenar şeridi
+    return yeni_mesh("Leke", v, f, mat)
+
+
+def kutu_uv(n):
+    """
+    Bütün yüzlere metre ölçekli KUTU İZDÜŞÜMÜ UV verir. from_pydata ile kurulan meshlerin UV'si yoktur; Unity'deki
+    kir dokusu UV'ye göre serilir, UV'siz yüzde tek renk kalır. Her yüz, normalinin en büyük olduğu eksene
+    dik düzlemden izdüşürülür (yan yüz yz'den, ön yüz xz'den, üst yüz xy'den): 1 m = 1 UV birimi, her yerde aynı yoğunluk.
+    """
+    me = n.data
+    uv = me.uv_layers[0] if len(me.uv_layers) else me.uv_layers.new(name="UVMap")
+    for poly in me.polygons:
+        nx, ny, nz = (abs(c) for c in poly.normal)
+        for li in poly.loop_indices:
+            co = me.vertices[me.loops[li].vertex_index].co
+            if nx >= ny and nx >= nz:
+                uv.data[li].uv = (co.y, co.z)
+            elif ny >= nz:
+                uv.data[li].uv = (co.x, co.z)
+            else:
+                uv.data[li].uv = (co.x, co.y)
+
+
+def superelips(A, B, us, N):
+    """
+    Süper elips |x/A|^us + |y/B|^us = 1 üzerinde EŞİT ARALIKLI N nokta (xy düzlemi). us büyüdükçe köşeleri yuvarlak
+    dikdörtgene yaklaşır (8: yumuşak köşeli puf). Açıyla eşit adım atılırsa noktalar köşelere yığılır; burada önce
+    çok sık örneklenip çevre uzunluğu ölçülür, sonra uzunluğa göre eşit bölünür: kilim deseninin kareleri eşit olsun.
+    Başlangıç noktası (A, 0): sağ yüzün ortası; noktalar saat yönünün tersine ilerler.
+    """
+    M = 4000
+    ham = []
+    for i in range(M + 1):
+        a = 2 * math.pi * i / M
+        c, s = math.cos(a), math.sin(a)
+        ham.append((A * math.copysign(abs(c) ** (2 / us), c), B * math.copysign(abs(s) ** (2 / us), s)))
+    L = [0.0]                                               # her ham noktaya kadarki çevre uzunluğu
+    for i in range(1, M + 1):
+        L.append(L[-1] + math.dist(ham[i], ham[i - 1]))
+    sonuc, j = [], 0
+    for k in range(N):
+        hedef = L[-1] * k / N                               # k. noktanın çevre üzerindeki uzaklığı
+        while L[j + 1] < hedef:
+            j += 1
+        u = (hedef - L[j]) / max(1e-9, L[j + 1] - L[j])     # iki ham nokta arasında doğrusal ara değer
+        sonuc.append((ham[j][0] + (ham[j + 1][0] - ham[j][0]) * u, ham[j][1] + (ham[j + 1][1] - ham[j][1]) * u))
+    return sonuc
+
+
+def cok_malzemeli(ad, v, f, idx, mats):
+    """
+    Her yüzü kendi malzemesiyle tek mesh: kilim deseni dokusuz, yüz yüz boyanır (kilimin kendisi de basamaklı
+    kare desendir). idx[i]: f[i] yüzünün mats içindeki sırası. Yüz yönleri burada köşe sırasıyla doğru verilir.
+    """
+    me = bpy.data.meshes.new(ad)
+    me.from_pydata(v, [], f)
+    me.update()
+    for m in mats:
+        me.materials.append(m)                              # malzeme yuvaları
+    for poly, k in zip(me.polygons, idx):
+        poly.material_index = k                             # her yüz kendi yuvasını gösterir
+    n = bpy.data.objects.new(ad, me)
+    bpy.context.collection.objects.link(n)
+    p.append(n)
+    return n
+
+
 # ---------- ORTAK MALZEMELER (terzi evi: kumaş, metal, eski boya) ----------
 metal = ortak.malzeme("K6B_Metal", (0.30, 0.30, 0.29), puruz=0.45, metal=0.85)
 krom = ortak.malzeme("K6B_Krom", (0.62, 0.62, 0.60), puruz=0.2, metal=1.0)
@@ -840,60 +1013,242 @@ elif hangi == "dikiskutu":
     ad, h, uzak = "Dikis_Kutusu_K6", 0.2, 0.7
 
 elif hangi == "buzdolabi":
+    # 1974'te alınmış, yirmi yıldır aynı köşede duran yerli buzdolabı: tepesi yuvarlak gövde, kalın kapı,
+    # büyük krom kollu kulp, kapıda krom el yazısı marka, içte küçük alüminyum buzluk. Emaye sararmış,
+    # kulp çevresinde ve alt köşelerde emaye atmış, pas çiçeklenmiş.
+    # ZİNCİR SÖZLEŞMESİ (GrayboxKurucu_Kat6.cs okur, DEĞİŞMEZ): alt tel rafın üstü z = 0,50 (anahtar 0,504'e konur),
+    # ampul (0, 0,10, 1,00)'da (iç ışık oraya konur), kapının menteşe çizgisi x = 0,275, y = -0,27, alt ucu z = 0,065;
+    # kapı menteşenin -x yanında durur (Unity açılma yönünü buradan bulur). Gövde içi boş, önü açık.
     acik = True
-    beyaz = ortak.malzeme("Buz6_Beyaz", (0.78, 0.78, 0.74), puruz=0.3)
-    astar = ortak.malzeme("Buz6_Astar", (0.66, 0.67, 0.63), puruz=0.35)
-    conta = ortak.malzeme("Buz6_Conta", (0.12, 0.12, 0.12), puruz=0.6)
-    izgara = ortak.malzeme("Buz6_Izgara", (0.03, 0.03, 0.03), puruz=0.5)
+    emaye = ortak.malzeme("Buz6_Emaye", (0.72, 0.69, 0.58), puruz=0.25)       # sararmış fırın emayesi (doğrusal renk)
+    astar = ortak.malzeme("Buz6_Astar", (0.60, 0.61, 0.56), puruz=0.35)       # iç kabın emayesi, biraz grimsi
+    conta = ortak.malzeme("Buz6_Conta", (0.09, 0.09, 0.085), puruz=0.75)      # sertleşmiş kauçuk conta
+    izgara = ortak.malzeme("Buz6_Izgara", (0.04, 0.04, 0.04), puruz=0.5, metal=0.5)
     sebzelik = ortak.malzeme("Buz6_Sebzelik", (0.45, 0.50, 0.48), puruz=0.15)
-    EN, Y0, Y1, Z0, Z1, T = 0.55, -0.24, 0.29, 0.06, 1.25, 0.035
+    alu = ortak.malzeme("Buz6_Aluminyum", (0.50, 0.50, 0.48), puruz=0.5, metal=0.8)   # buzluk: donuk alüminyum
+    bkrom = ortak.malzeme("Buz6_Krom", (0.60, 0.60, 0.58), puruz=0.28, metal=1.0)     # yıllanmış, hafif donuk krom
+    pas = ortak.malzeme("Buz6_Pas", (0.16, 0.06, 0.02), puruz=0.9)
+    kirik = ortak.malzeme("Buz6_Kirik", (0.03, 0.03, 0.03), puruz=0.6, metal=0.3)     # emaye atınca görünen kararmış sac
+    EN, Y0, Y1, Z0, Z1, T = 0.55, -0.24, 0.29, 0.06, 1.25, 0.035   # gövde: en, ön/arka y, alt/üst z, duvar kalınlığı
     X = EN / 2
+    RU, RA = 0.09, 0.012                     # önden bakınca üst köşelerin ve alt köşelerin yarıçapı
+    YD = yuvarlak_dikdortgen
     lev = ac.levha
-    # Gövde kabuğu: kalın (yalıtımlı) yan, üst, alt, arka levhalar; önü açık. Altta ızgaralı kaide.
-    p += [lev("Yan", -X, -X + T, Y0, Y1, Z0, Z1, beyaz, 0.006),
-          lev("Yan", X - T, X, Y0, Y1, Z0, Z1, beyaz, 0.006),
-          lev("Ust", -X + T, X - T, Y0, Y1, Z1 - T, Z1, beyaz, 0.004),
-          lev("Alt", -X + T, X - T, Y0, Y1, Z0, Z0 + T, astar, 0.002),
-          lev("Arka", -X + T, X - T, Y1 - T, Y1, Z0 + T, Z1 - T, astar, 0.0),
-          lev("Kaide", -X + 0.01, X - 0.01, Y0 + 0.02, Y1 - 0.01, 0.0, Z0, conta, 0.004),
-          lev("Izgara", -X + 0.03, X - 0.03, Y0 + 0.015, Y0 + 0.02, 0.01, Z0 - 0.01, izgara, 0.0)]
-    for x in (-X + 0.04, X - 0.04):
-        K("Ayak", (0.04, 0.04, 0.012), (x, Y0 + 0.05, 0.006), conta)
-    # İç: üstte küçük buzluk (kapaklı), altında lamba kutusu; iki tel raf; altta sebzelik ve cam örtüsü.
-    K("Buzluk", (0.40, 0.39, 0.17), (0, 0.055, 1.12), astar, 0.01)
-    K("BuzlukKapak", (0.40, 0.012, 0.16), (0, -0.146, 1.12), sebzelik, 0.004)
-    K("BuzlukKulp", (0.08, 0.015, 0.015), (0, -0.157, 1.06), astar, 0.004)
-    K("LambaKutusu", (0.08, 0.05, 0.025), (0, 0.10, 1.022), astar, 0.004)
+
+    # GÖVDE KABUĞU: dış çevre (tepesi yuvarlak) ile iç çevre arası, önden arkaya; önü açık, içi oyuk.
+    dis = YD(-X, X, Z0, Z1, RU, RA)
+    ic = YD(-X + T, X - T, Z0 + T, Z1 - T, RU - T, 0.004)              # iç köşe yarıçapı dıştakinden T kadar küçük: et her yerde eşit
+    kabuk = cerceve("Kabuk", dis, ic, Y0, Y1, emaye)
+    ortak.pah(kabuk, 0.012, 2)                                          # kenarlar yuvarlak: 60'ların preste bükülmüş sacı
+    prizma("Arka", ic, Y1 - T, Y1, astar, "xz")                         # arka duvar: iç deliği arkadan kapatır
+    cerceve("Astar", ic, YD(-X + T + 0.004, X - T - 0.004, Z0 + T + 0.004, Z1 - T - 0.004, RU - T - 0.004, 0.004),
+            Y0 + 0.002, Y1 - T, astar)                                  # 4 mm'lik iç kap: içerisi astar renginde, ağzında ince bir kenar
+    # Kaide: içeri çekik koyu taban, önünde yatay havalandırma ızgarası; altında dört lastik ayak.
+    p.append(lev("Kaide", -X + 0.012, X - 0.012, Y0 + 0.025, Y1 - 0.01, 0.0, Z0 + 0.002, conta, 0.004))
+    for z in (0.014, 0.027, 0.040):
+        p.append(lev("Izgara", -X + 0.04, X - 0.04, Y0 + 0.018, Y0 + 0.026, z, z + 0.006, izgara, 0.0))
+    for x in (-X + 0.05, X - 0.05):
+        for y in (Y0 + 0.06, Y1 - 0.05):
+            S("Ayak", 0.018, 0.012, (x, y, 0.006), conta, kose=10)
+    # Menteşe: kapının döndüğü çizgide (x = X, y = -0,27) altta ve üstte krom topuz, gövdenin yanına vidalı yaprak.
+    for zm in (0.12, 1.08):
+        S("Mentese", 0.009, 0.05, (X, -0.27, zm), bkrom, kose=12, pah=0.002)
+        p.append(lev("MenteseYaprak", X - 0.001, X + 0.003, -0.266, -0.236, zm - 0.022, zm + 0.022, bkrom, 0.0))
+    # Yıpranma: yan sacların altında pas, üstte emaye atığı (kir dokusunu Unity ayrıca ekler).
+    leke((-X - 0.0003, -0.10, 0.15), "x", 0.035, pas, tohum=1)
+    leke((-X - 0.0006, -0.10, 0.15), "x", 0.014, kirik, kal=0.0012, tohum=2)
+    leke((-X - 0.0003, 0.05, 0.10), "x", 0.022, pas, tohum=6)
+    leke((X + 0.0003, 0.16, 0.11), "x", 0.028, pas, tohum=3)
+    leke((X + 0.0006, 0.16, 0.11), "x", 0.010, kirik, kal=0.0012, tohum=7)
+    leke((0.05, 0.12, Z1 + 0.0003), "z", 0.007, kirik, tohum=4)
+    leke((-0.12, -0.05, Z1 + 0.0003), "z", 0.012, pas, tohum=5)
+
+    # İÇ: üstte küçük alüminyum buzluk (önü menteşeli kapakçık), altında damla tavası; arkada lamba kutusu.
+    p.append(lev("Buzluk", -0.17, 0.17, -0.13, 0.245, 1.06, 1.205, alu, 0.004))
+    p.append(lev("BuzlukKapak", -0.165, 0.165, -0.142, -0.13, 1.064, 1.20, alu, 0.003))
+    for z in (1.10, 1.16):
+        p.append(lev("BuzlukOluk", -0.15, 0.15, -0.1435, -0.142, z, z + 0.004, izgara, 0.0))   # preslenmiş oluklar
+    K("BuzlukMandal", (0.05, 0.012, 0.012), (0, -0.148, 1.188), bkrom, 0.003)
+    p.append(lev("DamlaTavasi", -0.18, 0.18, -0.15, 0.04, 1.035, 1.043, sebzelik, 0.002))
+    p.append(lev("DamlaTavasiOn", -0.18, 0.18, -0.152, -0.146, 1.035, 1.056, sebzelik, 0.0))
+    K("LambaKutusu", (0.08, 0.05, 0.05), (0, 0.10, 1.035), astar, 0.004)
     S("Ampul", 0.012, 0.02, (0, 0.10, 1.0), ortak.malzeme("Buz6_Ampul", (0.8, 0.78, 0.7), puruz=0.2), kose=12)
+    # Termostat düğmesi: sağ iç duvarda bakalit topuz ve çizgisi.
+    disk(0.022, 0.012, (X - T - 0.010, -0.08, 0.97), (-1, 0, 0), conta, kose=16)
+    K("TermostatCizgi", (0.002, 0.004, 0.016), (X - T - 0.0165, -0.08, 0.978), astar)
+    # İki krom tel raf: üst yüzleri 0,50 (anahtar bunun üstünde) ve 0,78; yanlarda taşıyıcı raylar.
+    xi = X - T - 0.004                                     # iç kabın iç yüzü
     for zr in (0.50, 0.78):
-        for x in (-X + T, X - T):
-            K("Ray", (0.01, 0.38, 0.008), (x - 0.005 if x > 0 else x + 0.005, 0.05, zr - 0.012), astar)
-        K("RafOn", (2 * (X - T) - 0.004, 0.008, 0.008), (0, -0.155, zr - 0.004), krom)
-        K("RafArka", (2 * (X - T) - 0.004, 0.008, 0.008), (0, 0.245, zr - 0.004), krom)
+        for sx in (-1, 1):
+            K("Ray", (0.01, 0.38, 0.008), (sx * (xi - 0.005), 0.05, zr - 0.012), astar)
+        K("RafOn", (2 * xi - 0.004, 0.008, 0.008), (0, -0.155, zr - 0.004), bkrom)
+        K("RafArka", (2 * xi - 0.004, 0.008, 0.008), (0, 0.245, zr - 0.004), bkrom)
         for i in range(12):
-            x = -X + T + 0.01 + i * (2 * (X - T) - 0.02) / 11
-            K("RafTel", (0.004, 0.40, 0.004), (x, 0.045, zr - 0.004), krom)
+            x = -xi + 0.012 + i * (2 * xi - 0.024) / 11
+            K("RafTel", (0.004, 0.40, 0.004), (x, 0.045, zr - 0.004), bkrom)
+    # Sebzelik: dört ince duvar ve üstünde camı.
+    zt = Z0 + T + 0.004
     for (a, b, c, d) in ((-0.22, 0.22, -0.162, -0.155), (-0.22, 0.22, 0.235, 0.242), (-0.22, -0.213, -0.155, 0.235), (0.213, 0.22, -0.155, 0.235)):
-        p.append(lev("Sebzelik", a, b, c, d, Z0 + T, 0.235, sebzelik, 0.0))
-    p.append(lev("SebzelikCam", -0.235, 0.235, -0.165, 0.25, 0.235, 0.245, sebzelik, 0.002))
-    for zb in (Z0, Z1):
-        K("MenteseKapak", (0.03, 0.03, 0.012), (X - 0.02, -0.265, zb + (0.006 if zb == Z1 else -0.006)), astar, 0.003)
-    # Kapı: dış levha, contası, iç astar ve üç kapı balkonu; sol kenarda dikey kulp; sağ kenardan menteşeli.
-    kp = [lev("Kapi", -X, X, -0.29, -0.25, Z0 + 0.005, Z1 - 0.005, beyaz, 0.012),
-          lev("Conta", -0.255, 0.255, -0.25, -0.24, 0.08, 0.095, conta, 0.0),
-          lev("Conta", -0.255, 0.255, -0.25, -0.24, 1.215, 1.23, conta, 0.0),
-          lev("Conta", -0.255, -0.24, -0.25, -0.24, 0.095, 1.215, conta, 0.0),
-          lev("Conta", 0.24, 0.255, -0.25, -0.24, 0.095, 1.215, conta, 0.0),
-          lev("KapiAstar", -0.22, 0.22, -0.24, -0.225, 0.12, 1.19, astar, 0.004),
-          lev("Kulp", -X + 0.03, -X + 0.055, -0.305, -0.29, 0.80, 1.05, astar, 0.005),
-          lev("Marka", -0.06, 0.06, -0.2915, -0.29, 1.17, 1.19, krom, 0.0)]
+        p.append(lev("Sebzelik", a, b, c, d, zt, 0.235, sebzelik, 0.0))
+    p.append(lev("SebzelikCam", -0.225, 0.225, -0.165, 0.245, 0.235, 0.245, sebzelik, 0.002))
+
+    # KAPI: bütün ön yüzü kaplayan kalın kapı; aynı yuvarlak hat, yuvarlatılmış kalın kenar.
+    bas = len(p)                                           # bundan sonra eklenen her parça kapıya ait
+    D = YD(-X + 0.003, X - 0.003, Z0 + 0.005, Z1 - 0.003, RU - 0.003, RA)
+    ortak.pah(prizma("Kapi", D, -0.29, -0.25, emaye, "xz"), 0.014, 2)
+    # Conta: gövdenin ağız kenarına basan kauçuk halka; içte kapı astarı (kapanınca ağızdan içeri girer).
+    cerceve("Conta", YD(-X + 0.015, X - 0.015, Z0 + 0.017, Z1 - 0.015, RU - 0.015, 0.004),
+            YD(-X + 0.033, X - 0.033, Z0 + 0.035, Z1 - 0.033, RU - 0.033, 0.004), -0.2515, -0.2405, conta)
+    ortak.pah(prizma("KapiAstar", YD(-X + 0.053, X - 0.053, Z0 + 0.058, Z1 - 0.053, RU - 0.053, 0.004),
+                     -0.25, -0.225, astar, "xz"), 0.006, 2)
+    # Kapı balkonları: astar renkli tabla, iki yanağı ve önünde iki krom tel (60'larda plastik değil tel).
     for zb in (0.30, 0.62, 0.92):
-        kp.append(lev("Balkon", -0.20, 0.20, -0.225, -0.175, zb, zb + 0.008, astar, 0.0))
-        kp.append(lev("BalkonOn", -0.20, 0.20, -0.18, -0.175, zb, zb + 0.05, sebzelik, 0.0))
+        p.append(lev("Balkon", -0.19, 0.19, -0.225, -0.18, zb, zb + 0.008, astar, 0.0))   # küçük parçalarda pah yok: üçgen tasarrufu
+        for sx in (-1, 1):
+            p.append(lev("BalkonYanak", sx * 0.19 - 0.004, sx * 0.19 + 0.004, -0.225, -0.18, zb, zb + 0.06, astar, 0.0))
+        for dz in (0.022, 0.05):
+            cubuk((-0.19, -0.184, zb + dz), (0.19, -0.184, zb + dz), 0.0035, bkrom, 6)
+    # Kulp: serbest kenarda (sol, -x) krom taban levhası, önünde D biçimli kavrama ve tepesinde basılan dil.
+    xk = -0.215
+    K("KulpTaban", (0.042, 0.008, 0.25), (xk, -0.293, 0.90), bkrom, 0.003)
+    boru_yol([(xk, -0.296, 1.00), (xk, -0.306, 0.993), (xk, -0.3135, 0.975), (xk, -0.316, 0.94), (xk, -0.316, 0.86),
+              (xk, -0.3135, 0.825), (xk, -0.306, 0.807), (xk, -0.296, 0.80)], 0.0095, bkrom, kose=12, ref=(1, 0, 0), ad="Kavrama")
+    dil = K("KulpDili", (0.034, 0.028, 0.011), (xk, -0.297 - 0.014, 1.022), bkrom, 0.003)
+    donustur(dil, don("X", math.radians(-22), (xk, -0.297, 1.022)))   # dil öne-yukarı kalkık: kapıyı açmak için bastırılır
+    # Krom el yazısı marka (uydurma, okunmayan bir eğri: gerçek marka kullanılmaz) ve altında kuyruklu çizgisi,
+    # onun altında kapı boyunca ince krom şerit.
+    yazi = []
+    for i in range(56):
+        t = i / 55
+        w = 2 * math.pi * 6 * t                              # altı ilmek: el yazısının birbirine bağlı harfleri
+        z = 1.118 - 0.010 * math.cos(w) * (1.0 if 0.12 < t < 0.9 else 1.6)   # baş harf ve son harf büyük
+        x = -0.095 + 0.19 * t - 0.011 * math.sin(w) + 0.35 * (z - 1.118)     # 0,35: yazı sağa yatık
+        yazi.append((x, -0.2912, z))
+    boru_yol(yazi, 0.0026, bkrom, kose=5, ref=(0, 1, 0), ad="Yazi")
+    boru_yol([(-0.11 + 0.22 * i / 23, -0.2912, 1.094 + 0.006 * math.sin(math.pi * i / 23) - 0.004 * i / 23) for i in range(24)],
+             0.0022, bkrom, kose=5, ref=(0, 1, 0), ad="YaziAlti")
+    K("KromSerit", (0.40, 0.003, 0.010), (0.03, -0.2912, 1.05), bkrom, 0.001)
+    # Kapı yıpranması: kulp çevresinde elle aşınmış emaye, alt köşelerde pas, ortada birkaç darbe izi.
+    # Her satır: (x, z, yarıçap, malzeme, tohum). Pasın ortasında kararmış sac (kirik) biraz daha önde durur.
+    for (x, z, r, m, tohum) in ((-0.225, 0.12, 0.032, pas, 11), (-0.228, 0.118, 0.013, kirik, 12),
+                                (0.205, 0.11, 0.024, pas, 13), (0.207, 0.108, 0.009, kirik, 19),
+                                (-0.10, 0.10, 0.016, pas, 18), (0.04, 0.098, 0.012, pas, 20),          # alt kenar boyunca pas
+                                (-0.243, 0.96, 0.012, kirik, 14), (-0.188, 0.83, 0.009, kirik, 15),   # kulp çevresi: tırnak ve yüzük izi
+                                (-0.243, 0.80, 0.007, kirik, 21), (0.08, 0.43, 0.010, kirik, 16),
+                                (0.12, 0.70, 0.006, kirik, 17), (-0.02, 0.55, 0.005, kirik, 22)):
+        leke((x, -0.2902 - (0.0004 if m is kirik else 0.0), z), "y", r, m, kal=0.0008, tohum=tohum)
+    kp = p[bas:]                                           # kapı parçaları ana listeden ayrılır
+    del p[bas:]
     kapi = ortak.birlestir(kp, "Kapi_1")
-    ortak.pivotu_tasi(kapi, (X, -0.27, Z0 + 0.005))
+    ortak.yumusat(kapi, 35)
+    kutu_uv(kapi)
+    ortak.pivotu_tasi(kapi, (X, -0.27, Z0 + 0.005))        # menteşe çizgisinin alt ucu (eskisiyle aynı)
     parcalar.append(kapi)
     ad, h, uzak = "Buzdolabi_K6", 1.3, 2.0
+
+elif hangi == "puf":
+    # 70'lerin döşemeli pufu (Poly Haven'ın siyah deri modern pufunun yerine): yanları kilim dokumalı kumaş,
+    # üstü aşınmış kahverengi kadife, düğmeli (kapitone), kenarlarında biye, altında dört kısa torna ahşap ayak.
+    # Üstü yıllarca oturulmaktan ortası ve sol yanı çökmüş; ön sağ köşesinde kadife yırtılmış, sünger görünüyor.
+    # Ölçü: 0,88 x 0,62 x ~0,42 m. Pivot tabanın ortası, ön yüz -y.
+    A, B, US = 0.43, 0.30, 8.0               # gövde kesiti: süper elipsin yarı eni, yarı derinliği ve üssü (yumuşak köşe)
+    Z0, Z1 = 0.085, 0.375                    # yan kumaşın altı (ayakların üstü) ve üstü (kadife tablanın kenarı)
+    SISKIN = 0.012                           # yanların ortada dışa şişmesi (dolgu bastırır): oran
+    kadife = ortak.malzeme("Puf6_Kadife", (0.08, 0.04, 0.02), puruz=0.85)          # koyu kahve kadife
+    asinmis = ortak.malzeme("Puf6_Asinmis", (0.11, 0.065, 0.035), puruz=0.65)          # oturulan yerde tüyü yatmış, açılmış kadife
+    yirtik = ortak.malzeme("Puf6_Yirtik", (0.03, 0.015, 0.008), puruz=0.95)         # yırtığın karanlık ağzı
+    sunger = ortak.malzeme("Puf6_Sunger", (0.45, 0.36, 0.14), puruz=0.95)           # sararmış sünger
+    alt_bez = ortak.malzeme("Puf6_AltBez", (0.05, 0.04, 0.03), puruz=1.0)           # alttaki kaba bez
+    kirmizi = ortak.malzeme("Puf6_KilimKirmizi", (0.24, 0.04, 0.028), puruz=0.95)  # kök boya kırmızı (zemin)
+    lacivert = ortak.malzeme("Puf6_KilimLacivert", (0.025, 0.03, 0.09), puruz=0.95) # çivit
+    hardal = ortak.malzeme("Puf6_KilimHardal", (0.38, 0.22, 0.04), puruz=0.95)      # cehri sarısı
+    krem = ortak.malzeme("Puf6_KilimKrem", (0.50, 0.43, 0.30), puruz=0.95)          # boyanmamış yün
+    kahve = ortak.malzeme("Puf6_KilimKahve", (0.07, 0.035, 0.018), puruz=0.95)      # kenar şeridi
+
+    # YAN KUMAŞ: süper elips halkaları alttan üste örülür; her yüz kilim deseninin bir "ilmeği" kadar
+    # (yaklaşık 3,2 x 2,6 cm) ve kendi renginde. 90 sütun = 10 tam desen tekrarı: başlangıç dikişinde desen kesilmez.
+    NS, NR = 90, 11                          # çevre boyunca sütun, yükseklikte satır sayısı
+    cevre = superelips(A, B, US, NS)
+    v, f, idx = [], [], []
+    for j in range(NR + 1):
+        t = j / NR
+        z = Z0 + (Z1 - Z0) * t
+        s = 1 + SISKIN * math.sin(math.pi * t)               # ortada şişkin, alt ve üst kenarda biyeye oturur
+        for (x, y) in cevre:
+            v.append((x * s, y * s, z))
+    MATS = [kirmizi, lacivert, hardal, krem, kahve, alt_bez]
+
+    def desen(i, j):
+        """Kilim deseni: kenarlarda kahve ve krem şerit, ortada basamaklı baklava (göbek hardal, çerçeve lacivert)."""
+        if j in (0, NR - 1):
+            return 4                                         # en alt ve en üst satır: kahve kenar
+        if j in (1, NR - 2):
+            return 3                                         # krem şerit
+        du, dv = (i % 9) - 4, j - NR // 2                    # baklavanın merkezine uzaklık (sütun, satır)
+        d = abs(du) + abs(dv)                                # "basamaklı" uzaklık: kilimin kırık çizgili baklavası
+        if d <= 1:
+            return 2                                         # hardal göbek
+        if d == 3:
+            return 1                                         # lacivert çerçeve
+        if abs(du) == 4 and dv == 0:
+            return 3                                         # iki baklava arasında krem "küpe" motifi
+        return 0                                             # kırmızı zemin
+    for j in range(NR):
+        for i in range(NS):
+            a, b = j * NS + i, j * NS + (i + 1) % NS
+            f.append((a, b, b + NS, a + NS))                 # saat yönü tersine halka + yukarı = normal dışa bakar
+            idx.append(desen(i, j))
+    f.append(tuple(reversed(range(NS))))                     # alt kapak (yere bakan bez)
+    idx.append(5)
+    cok_malzemeli("Yan", v, f, idx, MATS)
+
+    # ÜST TABLA: kare ızgara süper elipse "şişirilerek" kurulur; yüksekliği kabarıklık - çökme - düğme çukurları.
+    NU, NV = 31, 23
+    dugmeler = [(-0.24, -0.10), (0.0, -0.10), (0.24, -0.10), (-0.12, 0.10), (0.12, 0.10)]   # kapitone düğmeleri
+
+    def tabla_z(x, y, rho):
+        kabar = 0.034 * max(0.0, 1 - rho ** 4) ** 0.5        # kenarda dik kalkan, ortada düz kabarıklık
+        cokme = 0.024 * math.exp(-((x + 0.09) ** 2 / (2 * 0.21 ** 2) + (y + 0.01) ** 2 / (2 * 0.16 ** 2)))  # sol-ortada oturma çukuru
+        cukur = sum(0.022 * math.exp(-((x - bx) ** 2 + (y - by) ** 2) / (2 * 0.028 ** 2)) for bx, by in dugmeler)
+        return Z1 + kabar - cokme - cukur * (1 - rho ** 6)
+    v, f, idx = [], [], []
+    for jv in range(NV):
+        for iu in range(NU):
+            u, w = -1 + 2 * iu / (NU - 1), -1 + 2 * jv / (NV - 1)
+            m = max(abs(u), abs(w))                          # karedeki "halka" numarası (kenarda 1)
+            nrm = (abs(u) ** US + abs(w) ** US) ** (1 / US)
+            k = m / nrm if nrm > 1e-9 else 1.0               # kareyi süper elipse şişiren çarpan: kenar tam elips üstüne düşer
+            x, y = A * u * k, B * w * k
+            v.append((x, y, tabla_z(x, y, m)))
+    for jv in range(NV - 1):
+        for iu in range(NU - 1):
+            a = jv * NU + iu
+            f.append((a, a + 1, a + NU + 1, a + NU))         # +x, +y sırası: normal yukarı
+            q = [v[a], v[a + 1], v[a + NU + 1], v[a + NU]]
+            cx, cy = sum(c[0] for c in q) / 4, sum(c[1] for c in q) / 4
+            if ((cx - 0.30) / 0.045) ** 2 + ((cy + 0.21) / 0.03) ** 2 < 1:
+                idx.append(2)                                # ön sağ köşede yırtık
+            elif ((cx + 0.10) / 0.22) ** 2 + ((cy + 0.02) / 0.14) ** 2 < 0.85 + 0.25 * math.sin(cx * 41) * math.sin(cy * 37):
+                idx.append(1)                                # oturulan yer: tüyü yatmış kadife (sınırı sinüslerle tırtıklı, elips gibi durmasın)
+            else:
+                idx.append(0)
+    cok_malzemeli("Tabla", v, f, idx, [kadife, asinmis, yirtik])
+    # Yırtıktan taşan sünger ve kapitone düğmeleri (kumaş kaplı, çukurun dibinde).
+    kure(0.028, (0.30, -0.21, tabla_z(0.30, -0.21, 0.75) + 0.002), sunger, olcek=(1.3, 0.8, 0.35), seg=10)
+    for (bx, by) in dugmeler:
+        rho = max(abs(bx) / A, abs(by) / B)
+        kure(0.012, (bx, by, tabla_z(bx, by, rho) + 0.003), kadife, olcek=(1, 1, 0.45), seg=8)
+
+    # BİYE: üst ve alt kenarda kumaş kaplı kordon; yan kumaşla tabla arasındaki dikişi örter.
+    for (z, mat) in ((Z1, kadife), (Z0, kahve)):
+        boru_yol([(x, y, z) for (x, y) in superelips(A, B, US, 64)], 0.0085, mat, kose=5, kapali=True, ref=(0, 0, 1), ad="Biye")
+    # Ayaklar: dört kısa, aşağı doğru incelen torna ceviz ayak; uçta pirinç pabuç.
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            q = (sx * 0.34, sy * 0.21, 0.0)
+            torna("Ayak", [(0.016, 0.008), (0.019, 0.03), (0.024, 0.065), (0.028, 0.075), (0.028, Z0)], koyu, kose=10, konum=q)
+            torna("Pabuc", [(0.0155, 0.0), (0.0165, 0.008)], pirinc, kose=10, konum=q)
+    ad, h, uzak = "Puf_K6", 0.45, 1.5
 
 elif hangi == "teneke":
     acik = True
@@ -1082,13 +1437,20 @@ else:   # perdeterzi: pileli gri perde ve krom çubuğu
 
 # Önizlemede kaldırma: perde aşağı sarkar, duvar eşyasının yarısı zemin altındadır.
 kaldir = {"perdeterzi": 1.8, "havlu": 0.28}.get(hangi, 0.0)
+# Kendi meshini from_pydata ile kuran (UV'siz parçası olan) yeni modeller: sonda kutu izdüşümü UV alırlar.
+# Eski modeller listede yok; onların FBX'i bu değişiklikle değişmesin.
+YENI_UV = ("buzdolabi", "puf")
 if acik:
     govde = ortak.birlestir(p, "Govde")
     ortak.yumusat(govde, 35)
+    if hangi in YENI_UV:
+        kutu_uv(govde)                       # metre ölçekli UV: Unity'nin kir dokusu her yüzde aynı yoğunlukta serilsin
     ortak.pivotu_tasi(govde, (0, 0, 0))
     ortak.calistir_ve_bitir(ad, [govde] + parcalar, h, uzak)
 else:
     nesne = ortak.birlestir(p, ad)
     ortak.yumusat(nesne, 35)
+    if hangi in YENI_UV:
+        kutu_uv(nesne)
     ortak.pivotu_tasi(nesne, (0, 0, 0))
     ortak.calistir_ve_bitir(ad, [nesne], h, uzak, onizlemede_kaldir=kaldir)

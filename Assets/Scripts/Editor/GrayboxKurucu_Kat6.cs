@@ -44,7 +44,7 @@ public static partial class GrayboxKurucu
         foreach (string ad in new[] { "Sapka_Askisi_K6", "Telefon_Masasi_K6", "Yolluk_K6", "Takvim_1994_K6", "Avize_K6", "Perde_K6",
                                       "Pikap_K6", "Eski_TV_K6", "Tel_Dolap_K6", "Ocak_K6", "Mutfak_Masasi_K6", "Bos_Raf_K6", "Karyola_K6",
                                       "Manken_K6", "Endustriyel_Makine_K6", "Kumas_Toplari_K6", "Terzi_Masasi_K6", "Elbise_Askisi_K6",
-                                      "Raf_K6", "Camasir_Sepeti_K6", "Havlu_K6", "Boy_Aynasi_K6", "Perde_Terzi_K6" })
+                                      "Raf_K6", "Camasir_Sepeti_K6", "Havlu_K6", "Boy_Aynasi_K6", "Perde_Terzi_K6", "Puf_K6" })
             ParcaSablonuKur(ad, ad);
         AcilirSablonKur("Ceyiz_Sandigi_K6");
         AcilirSablonKur("Dikis_Kutusu_K6");
@@ -191,7 +191,7 @@ public static partial class GrayboxKurucu
             // ODA A: dip duvarda gündüz yatağı, karşısında prova aynası ve puf.
             M("vintage_day_bed", 10.50f - 0.43f - 0.02f, 0f, 6.60f, -1f, 0f, B),
             D("Boy_Aynasi_K6", 7.70f + 0.21f, 0f, 6.50f, 1f, 0f, B),
-            M("Ottoman_01", 7.70f + 0.32f, 0f, 7.60f, 1f, 0f, B),   // köşede: odanın ortasındaki geçidi daraltıyordu (eksikler testi)
+            D("Puf_K6", 7.70f + 0.32f, 0f, 7.60f, 1f, 0f, B),   // 70'ler kumaş puf (eskiden modern deri puf, #81)   // köşede: odanın ortasındaki geçidi daraltıyordu (eksikler testi)
             D("Perde_Terzi_K6", 9.10f, 2.30f, 8.10f, 0f, -1f, B),
         };
         v.notlar = new List<KatNotu>

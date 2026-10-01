@@ -32,7 +32,8 @@ public static partial class GrayboxKurucu
                                       "Tuplu_TV_K3", "Boyama_Sehpasi_K3", "Oyun_Parki_K3", "Hali_K3", "Perde_K3", "Duvar_Rafi_K3",
                                       "Mama_Sandalyesi_K3", "Masa_K3", "Sandalye_K3", "Buzdolabi_K3", "Ocak_K3", "Camasir_Makinesi_K3", "Biberon_Takimi_K3",
                                       "Cocuk_Yatagi_K3", "Calisma_Masasi_K3", "Poster_K3", "Yerdeki_Cizimler_K3", "Gece_Lambasi_K3", "Perde_Cocuk_K3",
-                                      "Karyola_K3", "Besik_K3", "Sifonyer_K3", "Perde_OdaA_K3", "Kilim_K3" })
+                                      "Karyola_K3", "Besik_K3", "Sifonyer_K3", "Perde_OdaA_K3", "Kilim_K3",
+                                      "Kanepe_K3", "Cocuk_Sandalyesi_K3" })
             ParcaSablonuKur(ad, ad);
         AcilirSablonKur("Komodin_K3");
     }
@@ -125,8 +126,11 @@ public static partial class GrayboxKurucu
             // Şahan: "salonu biraz genişlet" (#83). Oyun parkı odanın ortasından kanepenin kuzeyine, pencere
             // duvarının köşesine; kanepe ve önündeki boyama sehpası hol tarafına kaydı: salonun ortası ve pencere
             // önü boş kaldı. Kerem'in çizim parçası (salon_yeri, v 6,45) yine kanepenin altında.
-            M("sofa_02", 5.00f - 0.41f - 0.02f, 0f, 5.905f, -1f, 0f),
-            M("throw_pillows_01", 4.62f, 0.40f, 5.905f, -1f, 0f),
+            // 90'lar kumaş kanepe (Blender; eskiden Poly Haven'ın siyah deri chesterfield'ı modern duruyordu, #81).
+            // Altı açık: Kerem'in çizim parçası altında yatar.
+            D("Kanepe_K3", 5.00f - 0.41f - 0.02f, 0f, 5.905f, -1f, 0f),
+            // (Poly Haven zikzak yastıklar kaldırıldı: desenleri modern duruyordu ve yeni kanepenin kendi sırt
+            // minderlerinin içine giriyordu, #81.)
             M("painted_wooden_cabinet", 0.03f + 0.31f + 0.01f, 0f, 6.45f, 1f, 0f),
             D("Tuplu_TV_K3", 0.36f, 1.18f, 6.45f, 1f, 0f),
             M("Chandelier_01", 2.50f, Tavan, 6.45f, 0f, 1f),
@@ -159,7 +163,7 @@ public static partial class GrayboxKurucu
             // yürüme yolu kalsın diye (yürünebilirlik denetimi; eski yerinde oda 2 m²'ye iniyordu).
             D("Cocuk_Yatagi_K3", 7.60f - 0.98f, 0f, 8.10f - 0.48f, -1f, 0f),
             D("Calisma_Masasi_K3", 5.10f + 0.27f, 0f, 6.10f, 1f, 0f),
-            M("SchoolChair_01", 5.95f, 0f, 6.10f, -1f, 0f),
+            D("Cocuk_Sandalyesi_K3", 5.95f, 0f, 6.10f, -1f, 0f),   // ahşap çocuk sandalyesi (eskiden plastik okul sandalyesi, #81)
             M("alarm_clock_01", 5.28f, 0.72f, 6.45f, 1f, 0f),
             D("Poster_K3", 5.10f, 1.55f, 6.10f, 1f, 0f),
             D("Yerdeki_Cizimler_K3", 6.55f, 0.002f, 6.40f, 0f, 1f),

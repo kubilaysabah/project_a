@@ -852,7 +852,7 @@ MonoBehaviour:
     OnU: 1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 5902982433520243845, guid: 7d6fa98f2460d534c8b686b82e22f2c0, type: 3}
+    Sablon: {fileID: 1210947024601006601, guid: 2c60efec5cf4bb44cb44dab759b9b399, type: 3}
     Metin: 
     Ad: 
   - Yol: 'B:'

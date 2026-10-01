@@ -52,7 +52,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.948, y: 0.88957804, z: 0.948}
+  m_Size: {x: 0.93981934, y: 0.88957804, z: 0.93981934}
   m_Center: {x: 0, y: 0.44478902, z: 0}
 --- !u!1 &9091515450979110555
 GameObject:
@@ -120,9 +120,16 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6100784590871867822, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
-  - {fileID: -5760420174121471702, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
-  - {fileID: -6875833434447846614, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: -2525850772399287030, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: 6515438004355331501, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: -1430867147640342704, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: -1747910677236991301, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: 4199671595735606302, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: 7649010789733142221, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: -5203501237335401789, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: -8689030147607360377, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: -6795357501210634125, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
+  - {fileID: -656383976852413292, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
   - {fileID: 6603901383671790584, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
   - {fileID: 6645710721479881872, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}
   - {fileID: 4097349753069503196, guid: fe9975f2ab53cc947ad162377a7628fc, type: 3}

@@ -68,13 +68,16 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 4776220700347426034, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: -3808856296124901652, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   - {fileID: 2386127979526108048, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   - {fileID: -951680698231959023, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   - {fileID: -8973544463126038880, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: 3420354324733779616, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: 351484396644401318, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: -6449906514476772818, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: -9206174555404294483, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   - {fileID: -2588447514926429174, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   - {fileID: 6944705533669942803, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
-  - {fileID: -2373005233984711946, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -202,11 +205,12 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 4776220700347426034, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: -3808856296124901652, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   - {fileID: -951680698231959023, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   - {fileID: 2386127979526108048, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
-  - {fileID: -2373005233984711946, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
-  - {fileID: -2588447514926429174, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: 3420354324733779616, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: 351484396644401318, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
+  - {fileID: -6449906514476772818, guid: f7b935041e8025d49acf03f7d03e9e61, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -249,8 +253,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.55, y: 1.1799998, z: 0.13000001}
-  m_Center: {x: 0.275, y: 0.5899999, z: -0.030000009}
+  m_Size: {x: 0.544, y: 1.1819999, z: 0.14549777}
+  m_Center: {x: 0.27500004, y: 0.59099996, z: -0.017251119}
 --- !u!114 &247095728031142724
 MonoBehaviour:
   m_ObjectHideFlags: 0

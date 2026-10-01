@@ -785,28 +785,138 @@ elif hangi == "cayocagi":
     ad, h, uzak, kaldir = "Cay_Ocagi_K8", 1.2, 2.0, 0.0
 
 elif hangi == "buzdolabi":
-    beyaz = ortak.malzeme("K8_BuzBeyaz", (0.72, 0.70, 0.62), puruz=0.3)
-    plastik = ortak.malzeme("K8_Surahi", (0.20, 0.30, 0.36), puruz=0.25)
-    seker = ortak.malzeme("K8_SekerKutusu", (0.40, 0.05, 0.03), puruz=0.6)
-    K("Govde", (0.50, 0.46, 0.83), (0, 0.02, 0.435), beyaz, 0.03)
+    # 80'lerin sonu / 90'ların başının yerli mini buzdolabı (büro ve çay ocağı tipi). Bugünün keskin köşeli,
+    # parlak beyaz kutusu değil: köşeleri iri yuvarlatılmış sac gövde, kalın kapı, krom çubuk kol, kırmızı
+    # zeminli krom harfli marka rozeti, sararmış fırın emayesi. Yıllarca silinmiş: kapı dibi paslı, kol
+    # çevresinde emaye atmış, yan yüzde bir göçük. Üstünde dantel örtü, termos, çay bardağı, şeker kutusu.
+    # Ölçü kutusu eskisiyle aynı: 0,50 x 0,52 x 1,07 m (gövde 0,85 m, üstündekilerle 1,07 m).
+    mine = ortak.malzeme("K8_BuzMine", (0.62, 0.57, 0.44), puruz=0.35)       # sararmış emaye (doğrusal renk)
+    pas = ortak.malzeme("K8_Pas", (0.20, 0.065, 0.02), puruz=0.9)             # pas lekesi: mat, koyu turuncu
+    kirik = ortak.malzeme("K8_EmayeKirigi", (0.035, 0.035, 0.04), puruz=0.55, metal=0.4)  # emayesi atmış çıplak sac
+    rozet_z = ortak.malzeme("K8_RozetZemin", (0.12, 0.012, 0.010), puruz=0.35)   # rozetin koyu kırmızı zemini
+    cikartma = ortak.malzeme("K8_Cikartma", (0.08, 0.16, 0.35), puruz=0.6)    # solmuş mavi yuvarlak çıkartma
+    termos_m = ortak.malzeme("K8_Termos", (0.30, 0.06, 0.02), puruz=0.35)     # solmuş turuncu-kırmızı plastik termos
+    krem = ortak.malzeme("K8_TermosKrem", (0.60, 0.55, 0.42), puruz=0.4)      # termosun krem kapağı ve çiçekleri
+    sari = ortak.malzeme("K8_CicekSari", (0.55, 0.38, 0.05), puruz=0.4)       # çiçek göbeği
+    dantel = ortak.malzeme("K8_Dantel", (0.70, 0.66, 0.52), puruz=0.95)       # elde örülmüş, sararmış dantel
+    seker = ortak.malzeme("K8_SekerKutusu", (0.40, 0.05, 0.03), puruz=0.6)    # kesme şeker kutusu
+
+    def yuvarla(n, bolum):
+        """K'nin eklediği pah değiştiricisine çok bölüm verir: köşe tek pahla kırılmaz, yuvarlak olur."""
+        n.modifiers["Pah"].segments = bolum   # bölüm sayısı arttıkça kavis yumuşar (eski sac kalıp köşesi)
+
+    pas_koyu = ortak.malzeme("K8_PasKoyu", (0.07, 0.028, 0.012), puruz=0.95)  # pasın kabuklanmış koyu göbeği
+
+    def leke(x, z, r, mat, y=-0.2483, adet=3):
+        """Kapının ön yüzüne yapışık düzensiz leke: üst üste binen birkaç küçük disk (pas, emaye kırığı)."""
+        for i in range(adet):                                                # birkaç disk: tek daire yapay durur
+            dik_disk(r * rnd.uniform(0.4, 1.0), 0.0012,                      # yarıçap rastgele küçülür; 1,2 mm kalınlık
+                     (x + rnd.uniform(-r, r) * 1.6, y, z + rnd.uniform(-r, r) * 0.6), mat, kose=6)
+
+    # GÖVDE: iri yuvarlatılmış sac kutu. Pah 4 cm, 4 bölüm: 80'lerin kalıptan çekilmiş köşesi.
+    g = K("Govde", (0.50, 0.46, 0.83), (0, 0.02, 0.435), mine, 0.04)
+    yuvarla(g, 4)                                                             # köşeleri yuvarla
+    # Sağ yan yüzde bir göçük. Boolean ile oymak, koca düz yüzü tek bir çokgene çevirip yumuşak gölgede
+    # yüz boyu bir çizgi bırakıyordu. Onun yerine: pahı uygula, yan yüzü ızgaraya böl, göçük bölgesindeki
+    # köşeleri içeri it. Izgara küçük olduğu için gölge yalnızca göçüğün çevresinde değişir.
+    import bmesh                                                              # meshi köşe köşe düzenleme kütüphanesi
+    sec(g)                                                                    # modifier_apply yalnız etkin nesneye uygulanır
+    bpy.ops.object.modifier_apply(modifier="Pah")                            # pahı meshe işle
+    bm = bmesh.new()
+    bm.from_mesh(g.data)                                                      # meshi düzenlenebilir hâle al
+    yan = [f for f in bm.faces if f.normal.x > 0.99 and f.calc_center_median().x > 0.24]   # sağ yanın düz yüzü
+    kenarlar = list({e for f in yan for e in f.edges})                        # o yüzün dört kenarı
+    bmesh.ops.subdivide_edges(bm, edges=kenarlar, cuts=18, use_grid_fill=True)   # yüzü 19 x 19 ızgaraya böl
+    GY, GZ, RY, RZ = 0.10, 0.34, 0.08, 0.065                                  # göçüğün merkezi ve iki yarıçapı (elips)
+    for v in bm.verts:
+        if v.co.x > 0.249:                                                    # yalnız yan yüzdeki köşeler
+            t = ((v.co.y - GY) / RY) ** 2 + ((v.co.z - GZ) / RZ) ** 2         # elips içinde mi (t < 1)
+            if t < 1:
+                v.co.x -= 0.008 * (1 - t) ** 2                                # ortada 8 mm, kenara doğru yumuşak sıfır
+    bm.to_mesh(g.data)                                                        # değişikliği meshe geri yaz
+    bm.free()
+    # Ayaklar: dört kısa lastik ayak.
     for x in (-0.21, 0.21):
         for y in (-0.17, 0.21):
             S("Ayak", 0.015, 0.02, (x, y, 0.01), lastik, kose=10)
-    K("Kapi", (0.48, 0.035, 0.78), (0, -0.2275, 0.45), beyaz, 0.025)
-    K("Conta", (0.47, 0.004, 0.77), (0, -0.2085, 0.45), lastik)
-    K("Kol", (0.025, 0.02, 0.30), (0.20, -0.253, 0.55), krom, 0.006)
-    K("Rozet", (0.08, 0.003, 0.02), (-0.12, -0.2465, 0.78), krom, 0.002)
-    K("Not", (0.10, 0.002, 0.07), (-0.05, -0.2455, 0.64), kagit, rot=(0, 0.05, 0))     # bantlı el yazısı uyarı
+    # Alt ön süpürgelik: kapının altında siyah plastik havalandırma ızgarası, iki sıra yarık.
+    K("Supurgelik", (0.42, 0.03, 0.034), (0, -0.197, 0.04), siyah_metal, 0.004)
+    for sira in range(2):
+        for i in range(6):
+            K("Yarik", (0.045, 0.002, 0.006), (-0.15 + i * 0.06, -0.2125, 0.033 + sira * 0.014), delik)
+    # KAPI: kalın, yuvarlak kenarlı; gövdeden 3 mm önde, arada siyah conta çizgisi görünür.
+    d = K("Kapi", (0.49, 0.035, 0.78), (0, -0.2305, 0.45), mine, 0.03)       # ön yüzü y = -0,248
+    yuvarla(d, 3)
+    K("Conta", (0.475, 0.004, 0.765), (0, -0.211, 0.45), lastik)              # kapı ile gövde arasındaki lastik
+    # Menteşe kapakları: sol üst ve sol alt köşede siyah plastik.
+    for z in (0.844, 0.056):
+        K("Mentese", (0.04, 0.032, 0.008), (-0.215, -0.2305, z), siyah_metal)
+    # Üstte yatay krom şerit ve altında marka rozeti: krom çerçeve, kırmızı zemin, krom harf blokları.
+    K("Serit", (0.43, 0.004, 0.010), (0, -0.2495, 0.785), krom, 0.002)
+    K("RozetCerceve", (0.125, 0.002, 0.036), (-0.12, -0.249, 0.748), krom, 0.002)
+    K("Rozet", (0.115, 0.003, 0.028), (-0.12, -0.2495, 0.748), rozet_z, 0.002)
+    for i in range(6):                                                        # okunmayan, soyut harf blokları
+        K("Harf", (0.010, 0.0015, 0.014 if i % 2 else 0.012), (-0.16 + i * 0.016, -0.2513, 0.748), krom)
+    # KOL: iki krom ayağa oturan dik krom çubuk; çubukta pas noktaları.
+    for z in (0.42, 0.66):
+        K("KolAyak", (0.022, 0.014, 0.03), (0.205, -0.255, z), krom)
+    S("Kol", 0.0075, 0.30, (0.205, -0.262, 0.54), krom, kose=12, pah=0.003)
+    for z in (0.47, 0.52, 0.61):
+        K("KolPas", (0.004, 0.003, 0.005), (0.205, -0.269, z + rnd.uniform(-0.01, 0.01)), pas_koyu)
+    # Yıllarca tutulan kolun çevresinde emaye atmış; kapı dibinde pas çiçeklenmiş.
+    for z in (0.50, 0.57, 0.63, 0.45):
+        leke(0.180 + rnd.uniform(-0.01, 0.01), z, rnd.uniform(0.003, 0.006), kirik, adet=2)
+    # Kapı dibi: alt kenar boyunca pas kümeleri; her kümenin ortası kabuklanmış (koyu), dibe doğru akıntı izi.
+    for x in (-0.19, -0.16, -0.06, 0.08, 0.15, 0.19):
+        z = 0.098 + rnd.uniform(0.0, 0.012)                                   # yuvarlak kenarın hemen üstü
+        leke(x, z, rnd.uniform(0.005, 0.010), pas, adet=3)                    # açık pas halesi
+        leke(x, z, 0.003, pas_koyu, y=-0.2486, adet=1)                        # koyu göbek, halenin önünde
+        if rnd.random() < 0.6:
+            K("PasAkinti", (0.0025, 0.0012, 0.02), (x + rnd.uniform(-0.004, 0.004), -0.2484, z - 0.008), pas)
+    # Sağ yanın dibinde de pas (yer silinirken su sıçramış).
+    for y in (-0.14, -0.06, 0.08, 0.17):
+        for i in range(3):
+            x_silindir(rnd.uniform(0.003, 0.009), 0.0012,
+                       (0.2503, y + rnd.uniform(-0.025, 0.025), 0.085 + rnd.uniform(0.0, 0.02)), pas, kose=6)
+    # Bantlı el yazısı not (eskiden de vardı), yanında eski bir bantın sararmış artığı ve yarısı kazınmış çıkartma.
+    K("Not", (0.10, 0.002, 0.07), (-0.05, -0.2492, 0.64), kagit_eski, rot=(0, 0.05, 0))
     for i in range(3):
-        K("NotYazi", (0.07, 0.001, 0.004), (-0.05, -0.2468, 0.655 - i * 0.015), murekkep, rot=(0, 0.05, 0))
-    K("Bant", (0.03, 0.001, 0.012), (-0.05, -0.2468, 0.676), etiket_m)
-    for i in range(6):                                                        # arka ızgara
+        K("NotYazi", (0.07, 0.001, 0.004), (-0.05, -0.2505, 0.655 - i * 0.015), murekkep, rot=(0, 0.05, 0))
+    K("Bant", (0.03, 0.001, 0.012), (-0.05, -0.2505, 0.676), etiket_m)
+    K("BantIzi", (0.03, 0.0008, 0.012), (0.06, -0.2486, 0.70), etiket_m, rot=(0, -0.3, 0))
+    dik_disk(0.02, 0.0012, (0.10, -0.2485, 0.30), cikartma, kose=20)
+    dik_disk(0.011, 0.0012, (0.104, -0.2492, 0.303), kagit_eski, kose=14)    # kazınıp beyazı açılmış yer
+    # Arka ızgara (kondenser): yatay çubuklar ve iki dik tel.
+    for i in range(6):
         K("Izgara", (0.40, 0.01, 0.006), (0, 0.255, 0.15 + i * 0.1), siyah_metal)
-    S("Surahi", 0.05, 0.20, (-0.10, 0.0, 0.95), plastik, kose=24, pah=0.01)
-    S("SurahiKapak", 0.035, 0.02, (-0.10, 0.0, 1.06), plastik, kose=20)
-    K("SurahiKulp", (0.015, 0.06, 0.12), (-0.10, 0.07, 0.95), plastik, 0.005)
-    K("Seker", (0.12, 0.08, 0.06), (0.12, 0.05, 0.88), seker, 0.004, rot=(0, 0, 0.2))
-    K("SekerEtiket", (0.08, 0.002, 0.03), (0.113, 0.011, 0.88), kagit, rot=(0, 0, 0.2))
+    for x in (-0.18, 0.18):
+        cubuk((x, 0.257, 0.12), (x, 0.257, 0.67), 0.003, siyah_metal, kose=6)
+    # ÜSTÜ (gövde üstü z = 0,85): dantel örtü, termos, boş çay bardağı, kesme şeker kutusu.
+    S("Dantel", 0.14, 0.002, (-0.03, 0.02, 0.851), dantel, kose=32)
+    for i in range(26):                                                       # tırtıllı dantel kenarı: sık, küçük fistolar
+        a = 2 * math.pi * i / 26
+        S("DantelKenar", 0.011, 0.0018, (-0.03 + 0.142 * math.cos(a), 0.02 + 0.142 * math.sin(a), 0.8509), dantel, kose=6)
+    for R in (0.10, 0.06):                                                    # örgü halkaları (kabarık iplik)
+        halka(R, 0.0016, (-0.03, 0.02, 0.852), dantel, seg=(24, 3))
+    TX, TY = -0.09, 0.07                                                      # termosun yeri
+    TR = 0.043                                                                # termos yarıçapı (8,6 cm çap, 1 litrelik)
+    S("Termos", TR, 0.15, (TX, TY, 0.927), termos_m, kose=24, pah=0.006)    # z 0,852..1,002
+    for z in (0.862, 0.992):
+        halka(TR, 0.0035, (TX, TY, z), krom, seg=(24, 3))                     # alt ve üst krom bilezik
+    koni(TR, 0.038, 0.015, (TX, TY, 1.0095), krem, kose=24)                   # omuz (z 1,002..1,017)
+    koni(0.039, 0.041, 0.05, (TX, TY, 1.042), krem, kose=24)                  # bardak olan kapak (üstü 1,067)
+    halka(0.0405, 0.0015, (TX, TY, 1.056), krem, seg=(24, 3))                 # kapağın tutma yivi
+    K("TermosKulp", (0.013, 0.02, 0.11), (TX + TR + 0.016, TY, 0.93), termos_m, 0.005)
+    for z in (0.88, 0.98):
+        K("KulpBag", (0.02, 0.016, 0.014), (TX + TR + 0.006, TY, z), termos_m)
+    for fi, z in ((-0.5, 0.94), (0.2, 0.91), (0.9, 0.95)):                    # yüzeye teğet çiçek baskıları
+        q = (TX + (TR + 0.0005) * math.sin(fi), TY - (TR + 0.0005) * math.cos(fi), z)
+        dondurulmus_silindir(0.010, 0.002, q, (math.pi / 2, 0, fi), krem, 10)
+        q = (TX + (TR + 0.0015) * math.sin(fi), TY - (TR + 0.0015) * math.cos(fi), z)
+        dondurulmus_silindir(0.0035, 0.002, q, (math.pi / 2, 0, fi), sari, 6)
+    cay_bardagi(0.10, -0.09, 0.85, dolu=False)                                # dibinde çay izi kalmış boş bardak
+    K("Seker", (0.12, 0.08, 0.06), (0.13, 0.10, 0.88), seker, 0.004, rot=(0, 0, 0.25))
+    K("SekerBant", (0.122, 0.082, 0.018), (0.13, 0.10, 0.885), kagit, rot=(0, 0, 0.25))   # beyaz bant
     ad, h, uzak, kaldir = "Buzdolabi_K8", 1.0, 1.6, 0.0
 
 elif hangi == "sandalye":
@@ -826,60 +936,270 @@ elif hangi == "sandalye":
     ad, h, uzak, kaldir = "Mutfak_Sandalyesi_K8", 0.85, 1.5, 0.0
 
 elif hangi == "araba":
-    galv = ortak.malzeme("K8_Galvaniz", (0.40, 0.41, 0.40), puruz=0.4, metal=0.8)
-    kova_m = ortak.malzeme("K8_KovaKirmizi", (0.30, 0.03, 0.02), puruz=0.4)
+    # 90'larda bir apartman hademesinin derme çatma "arabası": markalı plastik temizlik arabası değil.
+    # Meyve kasası tahtalarından çakılmış alçak bir platform, altına eski koltuk tekerlekleri vidalanmış
+    # (biri sonradan takılmış, rengi farklı), arkasına bükülmüş su borusundan bir itme kolu, kolu bez
+    # bantla sarılı. Üstünde: göçük, paslı galvaniz kova, içinde tahta saplı saçaklı paspas, kenarında
+    # yer bezi; sağda bir meyve kasası, içinde 5 litrelik çamaşır suyu bidonu ve dik duran saman süpürge;
+    # itme koluna tel çengelle asılmış teneke faraş; kovanın önünde kalıp yeşil sabun.
+    # Ölçü kutusu eskisiyle aynı: yaklaşık 0,79 x 0,42 x 1,15 m. Pivot tabanın ortası, ön yüz -y.
+    import bmesh                                                              # meshi köşe köşe düzenleme kütüphanesi
+    galv = ortak.malzeme("K8_Galvaniz", (0.40, 0.41, 0.40), puruz=0.6, metal=0.6)   # eskimiş, donuk çinko kaplama
+    galv_koyu = ortak.malzeme("K8_GalvanizKoyu", (0.18, 0.19, 0.18), puruz=0.7, metal=0.5)   # kararmış çinko
+    pas = ortak.malzeme("K8_Pas", (0.20, 0.065, 0.02), puruz=0.9)
+    tahta = ortak.malzeme("K8_KasaTahta", (0.30, 0.21, 0.11), puruz=0.85)    # ham kavak tahtası
+    tahta_gri = ortak.malzeme("K8_KasaTahtaGri", (0.17, 0.145, 0.11), puruz=0.9)   # yıllanıp grileşmiş tahta
+    sap = ortak.malzeme("K8_PaspasSap", (0.24, 0.13, 0.05), puruz=0.6)       # elle aşınmış çıplak kayın sap
+    tutamak_m = ortak.malzeme("K8_KovaTutamak", (0.06, 0.03, 0.015), puruz=0.6)   # kararmış tahta tutamak
+    sacak = ortak.malzeme("K8_PaspasSacak", (0.24, 0.22, 0.17), puruz=0.95)  # kirden grileşmiş pamuk saçak
+    bez_m = ortak.malzeme("K8_YerBezi", (0.26, 0.25, 0.22), puruz=0.95)      # gri yer bezi
+    bant_m = ortak.malzeme("K8_BezBant", (0.10, 0.085, 0.07), puruz=0.9)     # kola sarılmış kararmış bez şerit
     su = ortak.malzeme("K8_KirliSu", (0.10, 0.11, 0.08), puruz=0.08)
-    sacak = ortak.malzeme("K8_PaspasSacak", (0.45, 0.42, 0.35), puruz=0.95)
-    sap = ortak.malzeme("K8_PaspasSap", (0.12, 0.25, 0.10), puruz=0.5)
-    beyaz_s = ortak.malzeme("K8_SiseBeyaz", (0.75, 0.75, 0.72), puruz=0.4)
+    saman = ortak.malzeme("K8_Saman", (0.42, 0.30, 0.09), puruz=0.9)         # süpürge darısı (saman sarısı)
+    saman_koyu = ortak.malzeme("K8_SamanKoyu", (0.25, 0.16, 0.05), puruz=0.9)   # uçları kirlenmiş saman
+    iplik_k = ortak.malzeme("K8_SupurgeIpKirmizi", (0.30, 0.03, 0.02), puruz=0.8)
+    iplik_y = ortak.malzeme("K8_SupurgeIpYesil", (0.03, 0.15, 0.05), puruz=0.8)
+    bidon_m = ortak.malzeme("K8_Bidon", (0.60, 0.58, 0.50), puruz=0.45)      # sararmış beyaz plastik bidon
     mavi_k = ortak.malzeme("K8_KapakMavi", (0.03, 0.08, 0.35), puruz=0.4)
-    yesil_s = ortak.malzeme("K8_SiseYesil", (0.05, 0.22, 0.06), puruz=0.35)
-    bez = [ortak.malzeme("K8_Bez" + a, c, puruz=0.95) for a, c in (("Mavi", (0.08, 0.15, 0.35)), ("Sari", (0.55, 0.42, 0.05)))]
-    kutu_m = ortak.malzeme("K8_DeterjanKutu", (0.55, 0.18, 0.02), puruz=0.7)
-    # Tekerlekli galvaniz platform; sağ yarıda raflı çerçeve ve itme kolu, sol yarıda kova.
-    K("Platform", (0.78, 0.42, 0.02), (0, 0, 0.10), galv, 0.004)
-    for x in (-0.34, 0.34):
-        for y in (-0.17, 0.17):
-            K("Catal", (0.03, 0.03, 0.05), (x, y, 0.07), galv)
-            x_silindir(0.035, 0.025, (x, y, 0.035), lastik, kose=16)
-    for x in (0.05, 0.38):
-        for y in (-0.19, 0.19):
-            cubuk((x, y, 0.11), (x, y, 0.90), 0.01, galv)
-    K("UstRaf", (0.35, 0.40, 0.015), (0.215, 0, 0.62), galv, 0.003)
-    for y in (-0.19, 0.19):
-        cubuk((0.05, y, 0.66), (0.38, y, 0.66), 0.005, galv)
-    cubuk((0.39, -0.19, 0.90), (0.39, 0.19, 0.90), 0.014, lastik)          # itme kolu
-    cubuk((0.05, -0.19, 0.90), (0.05, 0.19, 0.90), 0.008, galv)
-    # Kova: içi oyuk, kirli su, kenar halkası; saçaklı paspas kovaya daldırılmış.
-    kx = -0.20
-    kova = koni(0.12, 0.15, 0.30, (kx, 0, 0.26), kova_m, kose=32)
-    bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=0.11, radius2=0.14, depth=0.30, location=(kx, 0, 0.275))
-    ortak.oy(kova, bpy.context.active_object)
-    halka(0.148, 0.006, (kx, 0, 0.405), kova_m, seg=(32, 6))
-    S("Su", 0.128, 0.004, (kx, 0, 0.29), su, kose=32)
-    # Paspas başı kova ağzının hemen üstünde: saçaklar oradan suya iner, suyun üstündeki kısmı görünür.
-    cubuk((kx, 0.02, 0.44), (-0.30, 0.10, 1.15), 0.012, sap)
-    S("PaspasBas", 0.03, 0.05, (kx, 0.02, 0.44), sap, kose=12)
-    for i in range(16):
-        a = 2 * math.pi * i / 16
-        r = rnd.uniform(0.06, 0.11)
-        cubuk((kx + 0.022 * math.cos(a), 0.02 + 0.022 * math.sin(a), 0.425),
-              (kx + r * math.cos(a), 0.02 + r * math.sin(a), 0.24), 0.009, sacak, kose=6)
-    # Üst rafta şişeler: çamaşır suyu (beyaz, mavi kapak), iki deterjan, bir fırça.
-    ust = 0.6275
-    S("CamasirSuyu", 0.04, 0.22, (0.11, -0.10, ust + 0.11), beyaz_s, kose=20, pah=0.01)
-    koni(0.02, 0.015, 0.03, (0.11, -0.10, ust + 0.235), mavi_k, kose=14)
-    for i, y in enumerate((0.02, 0.12)):
-        K("Deterjan", (0.09, 0.06, 0.20), (0.13, y, ust + 0.10), yesil_s, 0.012)
-        S("DKapak", 0.015, 0.025, (0.15, y, ust + 0.2125), beyaz_s, kose=12)
-        K("DEtiket", (0.06, 0.002, 0.08), (0.13, y - 0.031, ust + 0.09), kagit)
-    K("Firca", (0.14, 0.05, 0.03), (0.30, -0.06, ust + 0.015), maun_ac, 0.006)
-    K("FircaKil", (0.13, 0.045, 0.02), (0.30, -0.06, ust - 0.0 + 0.04), sacak)
-    # Alt platformun sağında katlanmış bezler ve deterjan kutusu.
+    kirmizi_m = ortak.malzeme("K8_EtiketKirmizi", (0.35, 0.04, 0.03), puruz=0.7)
+    sabun_m = ortak.malzeme("K8_SabunYesil", (0.09, 0.20, 0.05), puruz=0.3)  # kalıp yeşil sabun
+    teker_krem = ortak.malzeme("K8_TekerKrem", (0.45, 0.40, 0.30), puruz=0.5)  # sonradan takılmış teker
+
+    # ---------- PLATFORM: dört kasa tahtası, altında iki kayıt, dört eski teker ----------
+    UST = 0.093                                                               # platformun üst yüzü
+    for i, y in enumerate((-0.15, -0.05, 0.05, 0.15)):                         # tahtalar arasında 5 mm aralık
+        K("Tahta", (0.78 - rnd.uniform(0.0, 0.015), 0.095, 0.018), (rnd.uniform(-0.004, 0.004), y, UST - 0.009),
+          tahta if i % 2 else tahta_gri)
+        for x in (-0.30, 0.30):                                               # kayda çakılmış çivi başları
+            S("Civi", 0.004, 0.0015, (x + rnd.uniform(-0.01, 0.01), y, UST + 0.0004), pas, kose=6)
+    for x in (-0.30, 0.30):
+        K("Kayit", (0.05, 0.40, 0.02), (x, 0, UST - 0.028), tahta_gri)        # alttaki çapraz kayıtlar
+    for i, (x, y) in enumerate(((-0.32, -0.15), (-0.32, 0.15), (0.32, -0.15), (0.32, 0.15))):
+        K("TekerPlaka", (0.05, 0.05, 0.004), (x, y, 0.053), galv_koyu)       # kayda vidalı plaka
+        for s in (-1, 1):
+            K("TekerCatal", (0.03, 0.004, 0.035), (x, y + s * 0.013, 0.037), pas)   # paslı çatal
+        dik_disk(0.030, 0.020, (x, y, 0.030), teker_krem if i == 2 else lastik, kose=12)   # teker (y ekseninde döner)
+        dik_disk(0.010, 0.024, (x, y, 0.030), galv_koyu, kose=8)              # mil göbeği
+
+    # ---------- İTME KOLU: bükülmüş su borusu, bez bantla sarılı tutamak ----------
+    XK = 0.37                                                                 # borunun x'i
+    for y in (-0.16, 0.16):
+        S("Flans", 0.025, 0.006, (XK, y, UST + 0.003), galv_koyu, kose=10)
+        cubuk((XK, y, UST), (XK, y, 0.89), 0.011, galv, kose=10)              # dik boru
+        cubuk((XK, y, UST + 0.004), (XK, y, UST + 0.045), 0.0118, pas, kose=10)   # dipte pas halkası
+        kure(0.013, (XK, y, 0.89), galv, seg=8)                               # dirsek
+    cubuk((XK, -0.16, 0.89), (XK, 0.16, 0.89), 0.011, galv, kose=10)          # yatay kol
+    cubuk((XK, -0.10, 0.89), (XK, 0.10, 0.89), 0.0145, bant_m, kose=10)       # bez bant sargı
+    for y in (-0.085, -0.03, 0.025, 0.08):
+        halka(0.0148, 0.0022, (XK, y, 0.89), bant_m, rot=(math.pi / 2, 0, 0), seg=(10, 3))   # sargı katları
+
+    # ---------- KOVA: konik galvaniz kova, iki göçük, pas, tel sap ----------
+    KX, KY, TABAN, KH, RA, RU = -0.20, 0.0, UST, 0.28, 0.12, 0.15
+    AGIZ = TABAN + KH                                                         # kova ağzının yüksekliği
+
+    def kova_r(z):
+        """z yüksekliğinde kovanın dış yarıçapı (aşağıdan yukarı genişler)."""
+        return RA + (RU - RA) * (z - TABAN) / KH
+
+    # Kabuk: üstü açık koni, yan yüzü yatay halkalara bölünür (göçük için köşe lazım), göçük bölgesindeki
+    # köşeler eksene doğru itilir, sonra Solidify (kalınlık) ile 5 mm et kalınlığı verilir. Boolean ile
+    # oymaktan farkı: göçük duvarın iki yüzünü birlikte büker, duvar delinmez.
+    bpy.ops.mesh.primitive_cone_add(vertices=28, radius1=RA, radius2=RU, depth=KH,
+                                    location=(KX, KY, TABAN + KH / 2), end_fill_type="NGON")
+    kova = bpy.context.active_object                                          # köşeleri nesnenin kendi ekseninde
+    bm = bmesh.new()
+    bm.from_mesh(kova.data)
+    ust_yuz = [f for f in bm.faces if all(v.co.z > KH / 2 - 1e-4 for v in f.verts)]
+    bmesh.ops.delete(bm, geom=ust_yuz, context="FACES_ONLY")                  # ağzı aç
+    dik = [e for e in bm.edges if abs(e.verts[0].co.z - e.verts[1].co.z) > KH * 0.9]
+    bmesh.ops.subdivide_edges(bm, edges=dik, cuts=10, use_grid_fill=True)    # yan yüzü 11 halkaya böl
+    for aci, zg, R, derin in ((-0.75, TABAN + 0.14, 0.045, 0.011),            # önde, alt bantla dip arasında
+                              (2.30, TABAN + 0.235, 0.035, 0.008)):           # arkada, ağza yakın
+        zl = zg - (TABAN + KH / 2)                                            # dünya yüksekliği -> nesnenin ekseni
+        c = mathutils.Vector((kova_r(zg) * math.cos(aci), kova_r(zg) * math.sin(aci), zl))
+        for v in bm.verts:
+            d = (v.co - c).length
+            if d < R:
+                radyal = mathutils.Vector((v.co.x, v.co.y, 0)).normalized()  # eksenden dışarı doğru
+                v.co -= radyal * derin * (1 - (d / R) ** 2)                   # ortada derin, kenarda sıfır
+    bm.to_mesh(kova.data)
+    bm.free()
+    kal = kova.modifiers.new("Kalinlik", "SOLIDIFY")                          # birleştirmede uygulanır
+    kal.thickness = 0.005
+    kal.offset = -1                                                           # içeri doğru kalınlaş (dış ölçü aynı)
+    ortak.ata(kova, galv)
+    p.append(kova)
+    for zb in (TABAN + 0.09, TABAN + 0.19):                                    # sacı sertleştiren iki boğum
+        halka(kova_r(zb) + 0.001, 0.004, (KX, KY, zb), galv, seg=(28, 3))
+    halka(RU, 0.006, (KX, KY, AGIZ), galv, seg=(28, 4))                        # kıvrılmış ağız kenarı
+    halka(RA + 0.002, 0.005, (KX, KY, TABAN + 0.005), pas, seg=(28, 3))        # paslanmış dip çemberi
+    S("Su", kova_r(0.25) - 0.006, 0.004, (KX, KY, 0.25), su, kose=28)        # kirli su
+
+    def kova_lekesi(aci, z, en, boy, mat):
+        """Kova yüzüne teğet ince leke (pas, kararmış çinko)."""
+        r = kova_r(z) + 0.0005
+        K("KovaLeke", (en, 0.0015, boy), (KX + r * math.cos(aci), KY + r * math.sin(aci), z), mat,
+          rot=(0, 0, aci + math.pi / 2))                                     # kutunun ince ekseni dışarı bakar
+
+    for aci, z, en, boy in ((-0.25, 0.115, 0.02, 0.014), (-1.25, 0.12, 0.016, 0.02), (0.35, 0.11, 0.025, 0.012),
+                            (-0.55, 0.335, 0.012, 0.01)):
+        kova_lekesi(aci, z, en, boy, pas)
+    for aci, z, en, boy in ((-1.45, 0.30, 0.05, 0.035), (-0.05, 0.235, 0.04, 0.05)):
+        kova_lekesi(aci, z, en, boy, galv_koyu)
+    # Kulaklar ve tel sap: sap kulaklarda döner; biraz sağa (kasaya) yatmış, ortasında tahta tutamak.
+    ZK = AGIZ - 0.035
+    for s in (-1, 1):
+        K("Kulak", (0.03, 0.006, 0.035), (KX, s * (kova_r(ZK) + 0.003), ZK), galv_koyu)
+        dik_disk(0.004, 0.0075, (KX, s * (kova_r(ZK) + 0.004), ZK), galv, kose=6)   # perçin
+    RS, EGIM = kova_r(ZK) + 0.006, 0.35                                       # sapın yarıçapı ve yatma açısı
+    nok = []
+    for i in range(11):                                                       # yarım daire, 10 parça tel
+        t = math.pi * i / 10
+        nok.append((KX + math.sin(EGIM) * RS * math.sin(t), -RS * math.cos(t), ZK + math.cos(EGIM) * RS * math.sin(t)))
+    for a, b in zip(nok, nok[1:]):
+        cubuk(a, b, 0.0028, galv, kose=6)
+    cubuk(nok[4], nok[6], 0.011, tutamak_m, kose=10)                          # tahta tutamak
+    # Saçaklı paspas: sap duvara yaslı, başı kovanın içinde; saçakların bir kısmı suda, bir kısmı
+    # kova ağzından dışarı sarkmış (ıslak, birbirine yapışmış, uçları dağınık).
+    H = mathutils.Vector((KX + 0.01, 0.02, 0.335))                            # paspas başı: ağzın altında, suya yakın
+    T = mathutils.Vector((-0.25, 0.185, 1.13))                                # sapın tepesi (arkadaki duvara yaslı)
+    yon = (T - H).normalized()
+    cubuk(H, H + yon * 0.06, 0.02, galv_koyu, kose=12)                        # saçağı sıkan sac kelepçe
+    cubuk(H + yon * 0.05, T, 0.012, sap, kose=10)                            # tahta sap
+    S("SapUcu", 0.0125, 0.012, tuple(T), tutamak_m, kose=10)                 # elle kararmış sap ucu
+    for i in range(26):
+        a = 2 * math.pi * i / 26 + rnd.uniform(-0.1, 0.1)                     # saçaklar eşit aralıklı değil
+        r0 = rnd.uniform(0.008, 0.018)                                        # kelepçeden çıktığı halka
+        bas = (H.x + r0 * math.cos(a), H.y + r0 * math.sin(a), H.z - rnd.uniform(0.0, 0.015))
+        kal_s = rnd.uniform(0.005, 0.0075)                                    # her saçak farklı kalınlıkta (ıslak, topaklı)
+        if 3.5 < a < 5.0:                                                     # ön-sol: ağızdan dışarı sarkanlar
+            kenar = (KX + 0.152 * math.cos(a), KY + 0.152 * math.sin(a), AGIZ + 0.012)
+            ru = rnd.uniform(0.155, 0.168)
+            uc = (KX + ru * math.cos(a + rnd.uniform(-0.12, 0.12)), KY + ru * math.sin(a + rnd.uniform(-0.12, 0.12)),
+                  AGIZ - rnd.uniform(0.06, 0.17))                             # uçlar farklı boyda, yana savrulmuş
+            cubuk(bas, kenar, kal_s, sacak, kose=5)
+            cubuk(kenar, uc, kal_s, sacak, kose=5)
+        else:                                                                 # suya inenler (uçları su altında)
+            r = rnd.uniform(0.04, 0.12)
+            cubuk(bas, (KX + r * math.cos(a), KY + r * math.sin(a), 0.24), kal_s, sacak, kose=5)
+    # Yer bezi: kovanın ön-sağ ağzına atılmış; içeride biraz suya iner, kenardan aşıp dışarı sarkar.
+    # Izgara düzlemi (UV'si hazır) yol boyunca bükülür, sonra 3 mm kalınlık verilir.
+    yol = [(0.130, 0.30), (0.140, 0.355), (0.150, 0.383), (0.158, 0.386), (0.163, 0.36),
+           (0.166, 0.30), (0.168, 0.24), (0.170, 0.19)]                       # (eksenden uzaklık, yükseklik)
+    A0, A1 = 5.2, 6.05                                                        # bezin kapladığı açı aralığı
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=9, y_subdivisions=12, size=1, location=(0, 0, 0))
+    bez = bpy.context.active_object
+    for v in bez.data.vertices:
+        u, w = v.co.x + 0.5, v.co.y + 0.5                                     # 0..1: u bez eni, w yol boyu
+        s = w * (len(yol) - 1)
+        i = min(int(s), len(yol) - 2)
+        f = s - i
+        r = yol[i][0] + (yol[i + 1][0] - yol[i][0]) * f                       # yol üzerinde ara değer
+        z = yol[i][1] + (yol[i + 1][1] - yol[i][1]) * f
+        r += 0.008 * math.sin(u * 11 + w * 4) * w                             # kumaş kırışığı (dışarı sarktıkça artar)
+        if w > 0.6:
+            z += 0.025 * math.sin(u * 7 + 1.3) * (w - 0.6)                    # sarkan ucun düzensiz kenarı
+        a = A0 + (A1 - A0) * u
+        v.co = (KX + r * math.cos(a), KY + r * math.sin(a), z)
+    kal = bez.modifiers.new("Kalinlik", "SOLIDIFY")
+    kal.thickness = 0.003
+    kal.offset = 0
+    ortak.ata(bez, bez_m)
+    p.append(bez)
+    # Kovanın önünde, platformun köşesinde kullanılmış kalıp yeşil sabun.
+    K("Sabun", (0.085, 0.055, 0.028), (-0.27, -0.16, UST + 0.014), sabun_m, 0.009, rot=(0, 0, 0.25))
+
+    # ---------- MEYVE KASASI: köşe dikmeleri, uç tahtaları (el delikli), çıtalar; ön üst çıta kırık ----------
+    X0, X1, YK, KY2 = 0.0, 0.335, 0.175, 0.23                                 # sol/sağ kenar, yarı derinlik, yükseklik
+    for x in (X0 + 0.011, X1 - 0.011):
+        for y in (-YK + 0.011, YK - 0.011):
+            K("Dikme", (0.022, 0.022, KY2), (x, y, UST + KY2 / 2), tahta_gri)
+    for x, s in ((X0 + 0.006, -1), (X1 - 0.006, 1)):
+        K("UcAlt", (0.012, 2 * YK - 0.004, 0.09), (x, 0, UST + 0.055), tahta)
+        K("UcUst", (0.012, 2 * YK - 0.004, 0.09), (x, 0, UST + 0.175), tahta)
+        K("ElDeligi", (0.0016, 0.08, 0.024), (x + s * 0.0062, 0, UST + 0.19), delik)
+    for s in (-1, 1):                                                         # ön ve arka çıtalar
+        y = s * (YK - 0.005)
+        for j, z in enumerate((UST + 0.035, UST + 0.11, UST + 0.19)):
+            if s == -1 and j == 2:                                            # ön üst çıta kırık: iki parça
+                K("Cita", (0.15, 0.01, 0.045), (X0 + 0.075, y, z), tahta)
+                K("Cita", (0.10, 0.01, 0.045), (X1 - 0.05, y, z), tahta)
+                K("Kiymik", (0.04, 0.008, 0.012), (X0 + 0.165, y, z + 0.012), tahta, rot=(0, 0.35, 0))
+                K("Kiymik", (0.03, 0.008, 0.010), (X1 - 0.11, y, z - 0.01), tahta, rot=(0, -0.5, 0))
+            else:
+                K("Cita", (X1 - X0, 0.01, 0.045), ((X0 + X1) / 2, y, z), tahta if (j + s) % 2 else tahta_gri)
+            if s == -1:                                                       # öndeki çivi başları
+                for x in (X0 + 0.011, X1 - 0.011):
+                    dik_disk(0.0035, 0.0015, (x, -YK - 0.0005, z), pas, kose=6)
+    for y in (-0.12, 0.0, 0.12):
+        K("KasaTaban", (X1 - X0, 0.09, 0.01), ((X0 + X1) / 2, y, UST + 0.005), tahta_gri)
+    K("KasaEtiket", (0.0012, 0.13, 0.07), (X1 + 0.0006, 0.02, UST + 0.17), kagit_eski, rot=(0.06, 0, 0))
+    K("KasaEtiketBaski", (0.0014, 0.09, 0.012), (X1 + 0.0008, 0.02, UST + 0.185), kirmizi_m, rot=(0.06, 0, 0))
+
+    # ---------- ÇAMAŞIR SUYU BİDONU: 5 litre, sararmış beyaz, mavi kapak, kâğıt etiket ----------
+    BX, BY, BZ = 0.10, -0.06, UST + 0.01                                      # bidonun tabanı kasanın dibinde
+    bd = K("Bidon", (0.15, 0.105, 0.29), (BX, BY, BZ + 0.145), bidon_m, 0.02)
+    bd.modifiers["Pah"].segments = 3                                          # şişirme plastik: yuvarlak köşe
+    K("BidonOmuz", (0.12, 0.085, 0.03), (BX - 0.01, BY, BZ + 0.30), bidon_m, 0.012)
+    S("BidonAgiz", 0.017, 0.02, (BX - 0.045, BY, BZ + 0.32), bidon_m, kose=12)
+    S("BidonKapak", 0.019, 0.022, (BX - 0.045, BY, BZ + 0.338), mavi_k, kose=12, pah=0.003)
+    halka(0.032, 0.008, (BX + 0.03, BY, BZ + 0.305), bidon_m, rot=(math.pi / 2, 0, 0), seg=(14, 5))   # kulp
+    K("BidonEtiket", (0.11, 0.0012, 0.10), (BX, BY - 0.0531, BZ + 0.22), kagit_eski)
+    K("BidonBant", (0.11, 0.0014, 0.025), (BX, BY - 0.0533, BZ + 0.25), kirmizi_m)
     for i in range(3):
-        K("Bez", (0.20, 0.15, 0.03), (0.13, 0.08, 0.125 + i * 0.03), bez[i % 2], 0.01, rot=(0, 0, rnd.uniform(-0.1, 0.1)))
-    K("Kutu", (0.12, 0.18, 0.24), (0.30, -0.09, 0.23), kutu_m, 0.004)
-    K("KutuSerit", (0.002, 0.17, 0.05), (0.239, -0.09, 0.26), kagit)
+        K("BidonYazi", (0.07 - i * 0.012, 0.0014, 0.005), (BX, BY - 0.0533, BZ + 0.215 - i * 0.015), murekkep)
+    K("Akinti", (0.006, 0.0012, 0.08), (BX + 0.05, BY - 0.0531, BZ + 0.15), saman_koyu)   # sararmış akıntı izi
+
+    # ---------- SAMAN SÜPÜRGE: sapı kasada, başı yukarıda (saman ezilmesin diye), kola yaslı ----------
+    B0 = mathutils.Vector((0.26, 0.09, UST + 0.01))                           # sapın dibi (kasanın tabanı)
+    B1 = mathutils.Vector((0.326, 0.075, 0.76))                               # sapın süpürge başına girdiği yer
+    dy = (B1 - B0).normalized()
+    cubuk(B0, B1 + dy * 0.10, 0.012, sap, kose=10)                           # sap başın içine 10 cm girer
+    b = len(p)                                                                # süpürge başı: merkezde kurulur
+    for k in range(13):                                                       # yelpaze gibi açılan on üç ince demet
+        ang = (k - 6) / 6 * 0.32 + rnd.uniform(-0.02, 0.02)
+        L = 0.33 + rnd.uniform(-0.035, 0.03)                                  # uçlar düzensiz boyda
+        yon_d = mathutils.Vector((0, math.sin(ang), math.cos(ang)))
+        bas_d = mathutils.Vector((rnd.uniform(-0.004, 0.004), (k - 6) * 0.0055, 0))   # tek düz levha olmasın
+        K("Demet", (rnd.uniform(0.009, 0.015), 0.022, L), tuple(bas_d + yon_d * L / 2),
+          saman if k % 4 else saman_koyu, rot=(-ang, 0, 0))
+        K("DemetUc", (0.010, 0.021, 0.03), tuple(bas_d + yon_d * (L - 0.012)), saman_koyu, rot=(-ang, 0, 0))
+    for k in range(10):                                                       # demetlerden kaçmış tek tük saman çöpü
+        ang = rnd.uniform(-0.45, 0.45)
+        c0 = mathutils.Vector((rnd.uniform(-0.008, 0.008), math.sin(ang) * 0.18, math.cos(ang) * 0.18))
+        cubuk(tuple(c0), tuple(c0 + mathutils.Vector((rnd.uniform(-0.02, 0.02), math.sin(ang * 1.3),
+                                                      math.cos(ang * 1.3))) * rnd.uniform(0.14, 0.19)),
+              0.0016, saman, kose=4)
+    for j, l in enumerate((0.03, 0.07, 0.11, 0.15)):                          # renkli iplik dikiş sıraları
+        K("Iplik", (0.022, 0.085 + 2 * 0.31 * l, 0.008), (0, 0, l), iplik_k if j % 2 == 0 else iplik_y)
+    grup(b, pivot=(0, 0, 0), rot=(-math.asin(dy.y), math.atan2(dy.x, dy.z), 0), kaydir=tuple(B1))
+
+    # ---------- TENEKE FARAŞ: itme koluna tel çengelle asılı, içi dışarı (+x) bakar ----------
+    # Ağzı aşağıda asılı: taban sacı dik, yan duvarlar sapa (yukarı) doğru yükselir, ağza doğru incelir.
+    YD, XP, FD = -0.06, 0.36, 0.06                                            # faraşın y'si, taban sacının x'i, duvar derinliği
+    taban = K("FarasTaban", (0.0015, 0.20, 0.20), (XP, YD, 0.52), galv)       # z 0,42..0,62
+    for v in taban.data.vertices:                                             # yamuk taban: ağız (alt) daha geniş
+        if v.co.z < 0.52:
+            v.co.y = YD + (v.co.y - YD) * 1.2                                 # alt kenar 20 cm -> 24 cm
+    for s in (-1, 1):
+        yan = K("FarasYan", (FD, 0.0015, 0.20), (XP + FD / 2, YD + s * 0.10, 0.52), galv)
+        for v in yan.data.vertices:                                           # kutuyu kamaya çevir
+            if v.co.z < 0.52:
+                v.co.y += s * 0.02                                            # alt uç tabanın geniş kenarına gider
+                if v.co.x > XP + 0.01:
+                    v.co.x -= FD - 0.008                                      # ağız tarafında duvar 8 mm'ye iner
+    K("FarasArka", (FD, 0.20, 0.0015), (XP + FD / 2, YD, 0.62), galv)         # sapın bağlandığı arka duvar
+    K("FarasDudak", (0.004, 0.24, 0.004), (XP + 0.001, YD, 0.421), galv_koyu)   # ağızdaki kıvrık sac
+    cubuk((XP + 0.012, YD, 0.62), (0.372, YD, 0.845), 0.009, galv, kose=8)    # boru sap, kancaya uzanır
+    halka(0.03, 0.002, (XK, YD, 0.875), galv_koyu, rot=(math.pi / 2, 0, 0), seg=(14, 3))   # tel çengel
+    for y in (-0.08, -0.03, 0.05, 0.09):                                      # ağız kenarında pas
+        K("FarasPas", (0.0012, rnd.uniform(0.015, 0.03), rnd.uniform(0.006, 0.014)), (XP + 0.0009, YD + y, 0.428), pas)
+
+    # ---------- Yerde birkaç kopmuş saman çöpü ----------
+    for i in range(4):
+        x = rnd.uniform(-0.03, 0.28)
+        cubuk((x, -0.188, UST + 0.0015), (x + rnd.uniform(-0.06, 0.06), -0.188 + rnd.uniform(-0.006, 0.006),
+              UST + 0.0015), 0.0014, saman, kose=4)
     ad, h, uzak, kaldir = "Temizlik_Arabasi_K8", 1.0, 2.0, 0.0
 
 elif hangi == "arsivrafi":
