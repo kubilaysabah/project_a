@@ -164,6 +164,8 @@ public class AsansorPanosu : MonoBehaviour, IEtkilesimli
     /// <summary>Düğmeye basıldı (AsansorDugmesi çağırır).</summary>
     public void DugmeyeBasildi()
     {
+        // Bakalit çağır düğmesi (#99; eskiden radyo düğmesinin sesiydi).
+        if (dugmeSesi == null) dugmeSesi = Resources.Load<AudioClip>("Sesler/Dugme_Bakalit");
         if (dugmeSesi == null) dugmeSesi = Resources.Load<AudioClip>("Sesler/Radyo_Dugme");
         if (dugmeSesi != null) AudioSource.PlayClipAtPoint(dugmeSesi, DugmeNoktasi(), 0.6f);
         // Elektrik yoksa düğme ölü: yalnızca tık. Oyuncu panoya bakıp eksik sigortayı görür.

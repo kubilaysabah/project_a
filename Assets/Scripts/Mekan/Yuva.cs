@@ -28,6 +28,8 @@ public class Yuva : MonoBehaviour, IEtkilesimli
         beklenen = beklenenKimlik;
         kilit = bagliKilit;
         grup = hepsi;
+        // Tabak sofraya konunca seramik tınlar (#99; eskiden anahtar şıkırtısıydı).
+        if (koymaSesi == null) koymaSesi = Resources.Load<AudioClip>("Sesler/Al_Seramik");
         if (koymaSesi == null) koymaSesi = Resources.Load<AudioClip>("Sesler/Anahtar_Al");
     }
 

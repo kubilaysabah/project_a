@@ -56,7 +56,9 @@ public class FotografEkrani : MonoBehaviour
 
     private static void SesCal()
     {
-        if (kagitSesi == null) kagitSesi = Resources.Load<AudioClip>("Sesler/Poset_Hisirti");   // kâğıt hışırtısı
+        // Fotoğraf kâğıdı hışırtısı (#99; eskiden naylon poşet hışırtısıydı).
+        if (kagitSesi == null) kagitSesi = Resources.Load<AudioClip>("Sesler/Al_Kagit");
+        if (kagitSesi == null) kagitSesi = Resources.Load<AudioClip>("Sesler/Poset_Hisirti");
         if (kagitSesi != null && Camera.main != null) AudioSource.PlayClipAtPoint(kagitSesi, Camera.main.transform.position, 0.35f);
     }
 

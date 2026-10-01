@@ -121,30 +121,10 @@ public class AyakSesi : MonoBehaviour
         }
     }
 
-    // Ayağın altındaki zemin ne? Işın oyuncunun kendi kapsülünün içinden başlar; RaycastAll bütün
-    // çarpmaları verir, oyuncunun kendi parçaları atlanır (Etkilesimci'deki ders). En yakın çarpma:
-    // dairede değilse beton; adında halı/kilim/yolluk geçen bir süs eşyasıysa halı; "Daire_Fayans"
-    // kutusuysa fayans; dairenin başka her zemini parke.
+    // Ayağın altındaki zemin ne? Kural ZeminSesi'nde (#99): Gölge'nin adımları da aynı kuralı kullanır.
+    // İki sayımın (enum) sırası aynı: Beton, Parke, Fayans, Hali.
     private Zemin ZeminBul()
     {
-        RaycastHit[] vuruslar = Physics.RaycastAll(transform.position + Vector3.up * 0.3f, Vector3.down, 0.8f,
-                                                   ~0, QueryTriggerInteraction.Ignore);
-        float enYakin = float.MaxValue;
-        Transform zemin = null;
-        foreach (RaycastHit v in vuruslar)
-        {
-            if (v.collider.transform.IsChildOf(transform)) continue;
-            if (v.distance < enYakin) { enYakin = v.distance; zemin = v.collider.transform; }
-        }
-        if (zemin == null || zemin.GetComponentInParent<DaireEksenleri>() == null) return Zemin.Beton;
-        // Halı: çarpılan nesnenin ya da ebeveynlerinin adı (süs eşyası "Sus_Hali_K3" gibi).
-        for (Transform t = zemin; t != null && t.GetComponent<DaireEksenleri>() == null; t = t.parent)
-        {
-            string ad = t.name;
-            if (ad.Contains("Hali") || ad.Contains("Kilim") || ad.Contains("Yolluk") || ad.Contains("Pacavra") || ad.Contains("Paspas"))
-                return Zemin.Hali;
-        }
-        if (zemin.name.StartsWith("Daire_Fayans")) return Zemin.Fayans;
-        return Zemin.Parke;
+        return (Zemin)(int)ZeminSesi.Bul(transform.position, transform);
     }
 }

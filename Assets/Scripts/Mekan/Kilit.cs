@@ -124,6 +124,8 @@ public class Kilit : MonoBehaviour
         if (Cozuk) return;
         Cozuk = true;
         KapiyiKilitle(false);
+        // Oda kapısının ve asma kilidin küçük kilidi (#99; eskiden demir kat kapısının büyük kilidiydi).
+        if (acilmaSesi == null) acilmaSesi = Resources.Load<AudioClip>("Sesler/Kilit_Kucuk");
         if (acilmaSesi == null) acilmaSesi = Resources.Load<AudioClip>("Sesler/KatKapisi_Kilit");
         if (acilmaSesi != null) AudioSource.PlayClipAtPoint(acilmaSesi, transform.position, 0.7f);
         // Asma kilit açılınca kapıdan düşer (şimdilik yalnızca kaldırılıyor).

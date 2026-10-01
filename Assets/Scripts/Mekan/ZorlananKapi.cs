@@ -47,6 +47,8 @@ public class ZorlananKapi : MonoBehaviour, IEtkilesimli
     public void Etkilesim(GameObject oyuncu)
     {
         if (!EtkilesimeAcik) return;
+        // Ağır mobilya zorlanınca yerinde sürtünür (#99; eskiden oda kapısı kolu sesiydi).
+        if (kilitliSes == null) kilitliSes = Resources.Load<AudioClip>("Sesler/Agir_Surtunme");
         if (kilitliSes == null) kilitliSes = Resources.Load<AudioClip>("Sesler/IcKapi_Kilitli");
         if (kilitliSes != null) AudioSource.PlayClipAtPoint(kilitliSes, mentese.position, 0.7f);
         zorlama = StartCoroutine(Esne());

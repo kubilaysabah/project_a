@@ -31,7 +31,9 @@ public class TakilmaIpucu : MonoBehaviour
     // doğal bir sesi, "oyun bana ipucu veriyor" diye değil "orada bir şey bastı" diye okunur. Kilitli
     // kapı sarsıntısı (IcKapi_Kilitli) kapıyla, anahtar şıngırtısı (Anahtar_Al) eşyayı almakla
     // karışırdı. Gicirti_2 1,5 sn ile üçünün en uzunu: kulağın yön bulmasına zaman tanır.
-    private const string YedekSes = "Sesler/Gicirti_2";
+    // Küçük bir eşyanın yerinde kıpırdaması (#99): ipucu sesi aranan eşyanın yanından gelir; mutfakta,
+    // banyoda parke gıcırtısı (eski hâli) yerine her zeminde inandırıcı olan küçük bir tıkırtı.
+    private const string YedekSes = "Sesler/Kucuk_Tikirti";
 
     // ---------- SES AYARLARI ----------
     private const float SesDuzeyi = 0.35f;           // hafif: korkutmak değil, dikkat çekmek

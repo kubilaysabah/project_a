@@ -40,7 +40,8 @@ public class KirilanKavanoz : MonoBehaviour, IEtkilesimli
         if (kirildi) return;
         if (!Aletler.Var(alet))
         {
-            // Alet yok: kapağı sıkışık, açılmıyor. İç kapıların "kilitli" sesi.
+            // Alet yok: kapağı sıkışık, açılmıyor. Kavanoz camı tıkırdar (#99; eskiden oda kapısı kolu sesiydi).
+            if (kilitliSes == null) kilitliSes = Resources.Load<AudioClip>("Sesler/Cam_Tikirti");
             if (kilitliSes == null) kilitliSes = Resources.Load<AudioClip>("Sesler/IcKapi_Kilitli");
             if (kilitliSes != null) AudioSource.PlayClipAtPoint(kilitliSes, transform.position, 0.5f);
             return;

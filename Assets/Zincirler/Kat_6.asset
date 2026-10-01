@@ -911,7 +911,7 @@ MonoBehaviour:
     TetikEsya: 
     TetikKilit: 
     Gecikme: 1
-    Klip: {fileID: 8300000, guid: 3a7a73ae0d622ba42acf9beb1d849e7e, type: 3}
+    Klip: {fileID: 8300000, guid: 463d6871267728f49875a68215e5beb3, type: 3}
     Ses: 0.45
     Sayi: 4
     Genlik: 7

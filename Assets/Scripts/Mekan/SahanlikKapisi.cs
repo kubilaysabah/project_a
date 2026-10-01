@@ -43,7 +43,8 @@ public class SahanlikKapisi : MonoBehaviour, IEtkilesimli
         mentese = transform.Find("Mentese");
         Transform hol = transform.Find("Daire_Ici");
         karanlikHol = hol != null ? hol.gameObject : null;
-        if (gicirti == null) gicirti = Resources.Load<AudioClip>("Sesler/KatKapisi_Gicirti");
+        // Ahşap daire kapısı: oda kapısının gıcırtısı (#99; eskiden demir parmaklıklı kat kapısınındı).
+        if (gicirti == null) gicirti = Resources.Load<AudioClip>("Sesler/IcKapi_Acilma");
         acildi = false;
     }
 

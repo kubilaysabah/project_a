@@ -164,9 +164,24 @@ public class Esya : MonoBehaviour, IEtkilesimli
         return null;
     }
 
+    // Alma sesi eşyanın türünden (#99, SesMalzemesi): anahtar şıkırdar, tornavida tıngırdar, tabak
+    // tınlar, kâğıt hışırdar. Eskiden her eşya anahtar şıkırtısı çalıyordu.
+    private static readonly System.Collections.Generic.Dictionary<AlmaSesTuru, AudioClip> almaSesleri =
+        new System.Collections.Generic.Dictionary<AlmaSesTuru, AudioClip>();
+
     private void SikirtiCal()
     {
-        if (sikirti == null) sikirti = Resources.Load<AudioClip>("Sesler/Anahtar_Al");
-        if (sikirti != null) AudioSource.PlayClipAtPoint(sikirti, transform.position, 0.6f);
+        AlmaSesTuru t = SesMalzemesi.AlmaTuru(tur);
+        if (!almaSesleri.TryGetValue(t, out AudioClip klip) || klip == null)
+        {
+            klip = Resources.Load<AudioClip>(SesMalzemesi.AlmaDosyasi(t));
+            if (klip == null)
+            {
+                if (sikirti == null) sikirti = Resources.Load<AudioClip>("Sesler/Anahtar_Al");
+                klip = sikirti;
+            }
+            almaSesleri[t] = klip;
+        }
+        if (klip != null) AudioSource.PlayClipAtPoint(klip, transform.position, 0.6f);
     }
 }

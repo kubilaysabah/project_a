@@ -29,11 +29,21 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
     // Not açıkken ikinci kez açılmasın.
     public bool EtkilesimeAcik { get { return !acik; } }
 
+    private static AudioClip kagitSesi;
+
     public void Etkilesim(GameObject oyuncu)
     {
         acik = true;
         acilisKaresi = Time.frameCount;
         Kayit.NotOkundu(metinAnahtari);   // kapıcı odasının panosunda görünsün (#56)
+
+        // Kâğıt açılınca hışırdar (#99: not okurken hiç ses yoktu). Telefon konuşması da bu ekranı
+        // kullanır; ahizeden kâğıt sesi gelmesin diye telefonun çocuğuysa çalmaz.
+        if (GetComponentInParent<Telefon>() == null)
+        {
+            if (kagitSesi == null) kagitSesi = Resources.Load<AudioClip>("Sesler/Al_Kagit");
+            if (kagitSesi != null && Camera.main != null) AudioSource.PlayClipAtPoint(kagitSesi, Camera.main.transform.position, 0.4f);
+        }
 
         // Oyuncunun yürümesini, bakmasını ve başka şeylerle etkileşimini durdur.
         // "enabled = false" bir bileşeni kapatır: Update'i artık çağrılmaz.

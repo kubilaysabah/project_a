@@ -188,7 +188,9 @@ public class GezenGolge : MonoBehaviour
             if (adimSayaci >= AdimAraligi && adimlar != null)
             {
                 adimSayaci = 0f;
-                AudioClip ad = adimlar[Random.Range(0, adimlar.Length)];
+                // Bastığı zeminin adımı (#99, ZeminSesi): merdivende beton, mutfakta fayans.
+                AudioClip ad = ZeminSesi.AdimKlibi(golge.transform.position, golge.transform);
+                if (ad == null) ad = adimlar[Random.Range(0, adimlar.Length)];
                 if (ad != null) AdimCal(ad, golge.transform.position);
             }
             yield return null;

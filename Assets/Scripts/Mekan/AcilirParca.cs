@@ -33,7 +33,22 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
     private float oran;                  // 0 kapalı, 1 açık
     private bool acik;
     private Coroutine hareketEden;
-    private static AudioClip acilmaSesi, kilitliSesi;
+    // Her parçanın KENDİ sesi (#99): eskiden "static" idi, yani bütün parçalar ilk uyananın seçtiği
+    // sesi paylaşıyordu (çekmece de buzdolabı da aynı sesi çalardı). Yüklenen sesler aşağıdaki ortak
+    // önbellekte durur; her parça yalnızca hangisini kullandığını tutar.
+    private AudioClip acilmaSesi, kilitliSesi;
+    private static readonly System.Collections.Generic.Dictionary<string, AudioClip> sesOnbellegi =
+        new System.Collections.Generic.Dictionary<string, AudioClip>();
+
+    private static AudioClip SesYukle(string yol)
+    {
+        if (!sesOnbellegi.TryGetValue(yol, out AudioClip c) || c == null)
+        {
+            c = Resources.Load<AudioClip>(yol);
+            sesOnbellegi[yol] = c;
+        }
+        return c;
+    }
 
     public bool Acik { get { return acik; } }
     public bool Kilitli { get { return kilitli; } }
@@ -43,9 +58,23 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
         // Kapalı hâl, sahnede kurulduğu hâldir; açıklık her zaman buna göre hesaplanır.
         kapaliKonum = transform.localPosition;
         kapaliDonus = transform.localRotation;
-        // Şimdilik oda kapısının seslerini kullanıyoruz (tahta ve dil tıkırtısı).
-        if (acilmaSesi == null) acilmaSesi = Resources.Load<AudioClip>("Sesler/IcKapi_Acilma");
-        if (kilitliSesi == null) kilitliSesi = Resources.Load<AudioClip>("Sesler/IcKapi_Kilitli");
+        // Ses nesnenin türünden (#99, SesMalzemesi): çekmece kayar, buzdolabının contası ayrılır, sac
+        // dolap tınlar, kavanoz kapağı gıcırdar. Eskiden hepsi oda kapısının gıcırtısını çalıyordu.
+        // Tür, parçanın ve ebeveynlerinin adlarından bulunur ("Gardirop_Cemal/Govde/Kapi_1").
+        AcilirSesTuru tur = SesMalzemesi.AcilirTuru(AdYolu(transform), hareket == Hareket.Kaydir);
+        if (acilmaSesi == null) acilmaSesi = SesYukle(SesMalzemesi.AcilmaDosyasi(tur));
+        if (kilitliSesi == null) kilitliSesi = SesYukle(SesMalzemesi.KilitliDosyasi(tur));
+        // Yeni sesler henüz içe aktarılmadıysa eski sesler (bir şey hiç çalmamaktan iyidir).
+        if (acilmaSesi == null) acilmaSesi = SesYukle("Sesler/IcKapi_Acilma");
+        if (kilitliSesi == null) kilitliSesi = SesYukle("Sesler/IcKapi_Kilitli");
+    }
+
+    /// <summary>Nesnenin ve ebeveynlerinin adları, "/" ile (en fazla 5 basamak; sahnenin köküne kadar gerek yok).</summary>
+    public static string AdYolu(Transform t)
+    {
+        var sb = new System.Text.StringBuilder();
+        for (int i = 0; t != null && i < 5; i++, t = t.parent) { sb.Insert(0, t.name); sb.Insert(0, '/'); }
+        return sb.ToString();
     }
 
     public string Ipucu

@@ -320,10 +320,18 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
         return fark.magnitude < mesafe && Mathf.Abs(t.position.y - nokta.y) < 1.5f;
     }
 
+    // Dolabın kapı sesi dolabın kendisine uyar (#99): çelik dolap tınlar, ahşap gardırobun kapağı
+    // gıcırdar. Eskiden hepsi parke gıcırtısıydı.
     private void GicirtiCal()
     {
-        if (gicirti == null) gicirti = Resources.Load<AudioClip>("Sesler/Gicirti_1");
-        if (gicirti != null) AudioSource.PlayClipAtPoint(gicirti, OnNoktasi() + Vector3.up * 1.2f, GicirtiSesi);
+        bool metal = SesMalzemesi.MetalMi(AcilirParca.AdYolu(transform));
+        AudioClip klip = Resources.Load<AudioClip>(metal ? "Sesler/Metal_Kapak_Acilma" : "Sesler/Kapak_Acilma");
+        if (klip == null)
+        {
+            if (gicirti == null) gicirti = Resources.Load<AudioClip>("Sesler/Gicirti_1");
+            klip = gicirti;
+        }
+        if (klip != null) AudioSource.PlayClipAtPoint(klip, OnNoktasi() + Vector3.up * 1.2f, GicirtiSesi);
     }
 
     // ---------- DAİREYE EKLEME ----------

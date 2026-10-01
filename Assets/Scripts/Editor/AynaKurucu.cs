@@ -141,7 +141,9 @@ public static class AynaKurucu
         GameObject golge = AssetDatabase.LoadAssetAtPath<GameObject>(GolgeYolu);
         if (golge == null) Debug.LogWarning($"[AYNA] {GolgeYolu} yok; aynadaki korku çalışmaz.");
         korkuSeri.FindProperty("sablon").objectReferenceValue = golge;
-        AudioClip ses = AssetDatabase.LoadAssetAtPath<AudioClip>(SesYolu);
+        // Fayanslı banyoda arkandan tek bir ağır adım (#99): eskiden parke gıcırtısıydı, fayansta parke olmaz.
+        AudioClip ses = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Sesler/Adim_Fayans_1.wav");
+        if (ses == null) ses = AssetDatabase.LoadAssetAtPath<AudioClip>(SesYolu);
         if (ses == null) Debug.LogWarning($"[AYNA] {SesYolu} yok; korku sessiz olur.");
         korkuSeri.FindProperty("vurgu").objectReferenceValue = ses;
         korkuSeri.ApplyModifiedPropertiesWithoutUndo();

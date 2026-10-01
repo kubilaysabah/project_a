@@ -424,12 +424,16 @@ public class Varlik : MonoBehaviour
 
     private void AdimCal(Vector3 yer)
     {
+        // Bastığı zeminin adımı (#99, ZeminSesi): merdivende beton, mutfakta fayans, halıda boğuk.
+        AudioClip klip = golge != null ? ZeminSesi.AdimKlibi(yer, golge.transform) : null;
+        if (klip == null) klip = adim;
+        if (klip == null) return;
         GameObject g = new GameObject("Av_Adim");
         g.transform.position = yer;
         AudioSource a = g.AddComponent<AudioSource>();
-        a.clip = adim; a.spatialBlend = 1f; a.pitch = 0.62f; a.volume = 1f; a.maxDistance = 16f;
+        a.clip = klip; a.spatialBlend = 1f; a.pitch = 0.62f; a.volume = 1f; a.maxDistance = 16f;
         a.Play();
-        Destroy(g, adim.length / a.pitch + 0.1f);
+        Destroy(g, klip.length / a.pitch + 0.1f);
     }
 
     private void OnDisable() { AvIptal(); }

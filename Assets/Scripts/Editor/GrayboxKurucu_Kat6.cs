@@ -219,9 +219,11 @@ public static partial class GrayboxKurucu
         v.an = new KatAniVerisi
         {
             Tur = KatAniTuru.BakmayincaDon, Yol = B + "Manken_Hol_Sabri", TetikOda = B + "Hol", Gecikme = 1f,
-            Sayi = 4, Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Sesler/Gicirti_2.wav"), Ses = 0.45f,
+            Sayi = 4, Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anlar/An_Surtunme.wav"), Ses = 0.45f,
         };
-        if (v.an.Klip == null) Debug.LogError("[ZINCIR] Resources/Sesler/Gicirti_2.wav bulunamadı.");
+        // An_Surtunme (#99): mankenin ahşap ayağının döşemede dönmesi. Yoksa eski parke gıcırtısı.
+        if (v.an.Klip == null) v.an.Klip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Sesler/Gicirti_2.wav");
+        if (v.an.Klip == null) Debug.LogError("[ZINCIR] mankenin sesi bulunamadı.");
 
         var odalar = new List<string>();
         foreach (DairePlani.Oda o in DairePlani.Odalar) { odalar.Add(o.Ad); odalar.Add(KilitZinciri.IkinciOnek + o.Ad); }

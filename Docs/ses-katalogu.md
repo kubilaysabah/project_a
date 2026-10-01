@@ -126,3 +126,31 @@ Oyundaki bütün sesler, numarasıyla (2026-09-27, #74 için baştan sayıldı; 
 | S55 | `Audio/Anlar/An_Vizilti.wav` · 1,05 sn | 4. kat: hol lambası titreyerek yanarken elektrik vızıltısı (3B) (#96). | Sentez: an_sesleri_uret.py | yeni, Şahan dinleyecek |
 | S56 | `Audio/Anlar/An_Damla.wav` · 5,2 sn | 5. kat: su kesikken kovaya hızlanarak damlayan su (3B) (#96). | Sentez: an_sesleri_uret.py | yeni, Şahan dinleyecek |
 | S57 | `Audio/Anlar/An_Parazit.wav` · 5,8 sn | 8. kat: tepegöz kendiliğinden açılır: şalter, uğultu, fan, çatırtı (3B) (#96). | Sentez: an_sesleri_uret.py | yeni, Şahan dinleyecek |
+
+---
+
+## 9. Nesneye uyan sesler (2026-10-01, #99 #100; Şahan dinleyecek)
+
+Hepsi `esya_sesleri_uret.py` ile gürültüden üretildi (sinüs yok, indirme yok). Hangi nesnenin hangisini çaldığına `SesMalzemesi` (saf C#, testli) karar verir.
+
+| No | Dosya · süre | Ne zaman, nerede | Kaynak | Karar |
+|---|---|---|---|---|
+| S58 | `Resources/Sesler/Cekmece_Acilma.wav` · 0,6 sn | Ahşap çekmece açılınca (komodin, tezgâh, portmanto) | Sentez: esya_sesleri_uret.py → cekmece | yeni, Şahan dinleyecek |
+| S59 | `Resources/Sesler/Kapak_Acilma.wav` · 0,6 sn | Küçük ahşap dolap kapağı, sandık kapağı, ahşap gardırop kapısı | Sentez → kapak | yeni |
+| S60 | `Resources/Sesler/Buzdolabi_Acilma.wav` · 0,75 sn | Buzdolabı kapısı: conta ayrılır, raftaki şişeler tınlar | Sentez → buzdolabi | yeni |
+| S61 | `Resources/Sesler/Metal_Kapak_Acilma.wav` · 0,8 sn | Sac/çelik dolap, dosya dolabı, alet kutusu, sigorta kutusu kapağı; metal gardıroplar (saklanma) | Sentez → metal_kapak | yeni |
+| S62 | `Resources/Sesler/Kavanoz_Acilma.wav` · 0,5 sn | Kavanozun vidalı kapağı, sökülen lavabo sifonu | Sentez → kavanoz | yeni |
+| S63 | `Resources/Sesler/Agir_Surtunme.wav` · 1,3 sn | İtilen ağır gardırop; ekipman olmadan zorlanan ağır mobilya | Sentez → agir_surtunme | yeni |
+| S64 | `Resources/Sesler/Cekmece_Kilitli.wav` · 0,36 sn | Kilitli çekmece/kapak çekiştirilince | Sentez → cekmece_kilitli | yeni |
+| S65 | `Resources/Sesler/Cam_Tikirti.wav` · 0,3 sn | Alet olmadan kavanoz zorlanınca | Sentez → cam_tikirti | yeni |
+| S66 | `Resources/Sesler/Al_Metal.wav` · 0,42 sn | Tornavida, levye, kaydırıcı alınınca | Sentez → al_metal | yeni |
+| S67 | `Resources/Sesler/Al_Kagit.wav` · 0,42 sn | Not, çizim parçası alınınca; not ve fotoğraf açılınca | Sentez → al_kagit | yeni |
+| S68 | `Resources/Sesler/Al_Seramik.wav` · 0,42 sn | Tabak alınınca ve sofraya konunca | Sentez → al_seramik | yeni |
+| S69 | `Resources/Sesler/Al_Kucuk.wav` · 0,24 sn | Sigorta alınınca | Sentez → al_kucuk | yeni |
+| S70 | `Resources/Sesler/Kilit_Kucuk.wav` · 0,45 sn | Oda kapısı kilidi, asma kilit açılınca | Sentez → kilit_kucuk | yeni |
+| S71 | `Resources/Sesler/Dugme_Bakalit.wav` · 0,16 sn | Elektrik düğmesi (#100), asansör çağır düğmesi | Sentez → dugme_bakalit | yeni |
+| S72 | `Resources/Sesler/Kucuk_Tikirti.wav` · 0,16 sn | Takılma ipucu: aranan eşyanın yerinden küçük tıkırtı (#98) | Sentez → kucuk_tikirti | yeni |
+| S73 | `Audio/Anlar/An_Surtunme.wav` · 0,75 sn | 6. kat: manken ahşap ayağında döner (#96) | Sentez → an_surtunme | yeni |
+| S74 | `Resources/Sesler/Kapi_Gicirti_Dongu.wav` · 2,0 sn (döngü) | Oda kapısı sürüklenirken menteşe gıcırtısı; sesi dönüş hızına göre (#100) | Sentez → kapi_gicirti_dongu | yeni |
+
+Değişen bağlantılar: ayna korkusu artık fayansta tek adım (`Adim_Fayans_1`), 7. kattaki ahşap daire kapısı oda kapısı gıcırtısı (`IcKapi_Acilma`), Gölge'nin adımları bastığı zemine göre (`Merdiven_Adim`, `Adim_1`, `Adim_Fayans`, `Adim_Hali`).
