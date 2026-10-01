@@ -23,8 +23,6 @@ using UnityEngine;
 
 public static partial class GrayboxKurucu
 {
-    // Çalışma masasının üstü (kat5_esyalar.py raporu): salon anahtarının ucu masada yatar.
-    const float Masa5Ustu = 0.75f;
 
     static void Kat5SablonlariniKur()
     {
@@ -52,19 +50,25 @@ public static partial class GrayboxKurucu
         v.yalnizSecilenEsyalar = true;
         var z = new KilitZinciri();
         z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 1.60f, Y = 0.004f, V = 0.60f, Donus = 70f });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "hol_yer", PlandaNokta = true, Oda = "Hol", U = 9.70f, Y = 0.004f, V = 3.30f, Donus = 15f });
+        // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
+        // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
+        // Kaydırıcılar salondaki kanepenin altında, duvar dibinde (0/5): holün ortasındaydı (150 noktadan açık).
+        // Hol düz bir koridor; saklanacak yeri yok. Salon gardırobun odası, kaydırıcılar da onun için.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "kanepe_alti", PlandaNokta = true, Oda = "Salon", U = 4.72f, Y = 0.004f, V = 6.67f, Donus = 15f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "cekmece", Yol = "Esyalar/Tezgah/Cekmece_2", Oda = "Mutfak" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "masa_yer", PlandaNokta = true, Oda = "Oda_B", U = 6.05f, Y = Masa5Ustu + 0.005f, V = 7.72f, Donus = 30f });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "levye_yer", PlandaNokta = true, Oda = "Oda_A", U = 9.05f, Y = 0.004f, V = 6.22f, Donus = 80f });
+        // Anahtar ucu çalışma odasının kapı tarafındaki köşede, yerde (10/10): masanın üstündeydi (80 noktadan açık).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "oda_kosesi", PlandaNokta = true, Oda = "Oda_B", U = 5.62f, Y = 0.004f, V = 5.07f, Donus = 30f });
+        // Levye yatakla komodinin arasında, yerde (11/12): odanın ortasındaydı (80 noktadan açık).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "levye_yer", PlandaNokta = true, Oda = "Oda_A", U = 10.22f, Y = 0.004f, V = 6.67f, Donus = 80f });
         // Vananın kilidi gardırobun kendisinde (KilitYolu): gardırop itilmeden vanaya ulaşılmaz.
         z.Yerler.Add(new ZincirYeri { Kimlik = "vana", Yol = "Esyalar/Vana/Cark", Oda = "Salon", KilitYolu = "Esyalar/Gardirop" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "sifon", Yol = "Esyalar/Lavabo/Sifon", Oda = "Banyo" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "antre_yer" });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kaydirici", Tur = EsyaTuru.Kaydirici, Yer = "hol_yer" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kaydirici", Tur = EsyaTuru.Kaydirici, Yer = "kanepe_alti" });
         // Tezgâhın ikinci çekmecesinin tabanı: x 0,59, y 0,39, z 0,04 (tezgah.py).
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari_bas", Tur = EsyaTuru.AnahtarParcasi, Yer = "cekmece", X = 0.59f, Y = 0.39f, Z = 0.04f, Donus = 40f });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "masa_yer" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "oda_kosesi" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "levye", Tur = EsyaTuru.Levye, Yer = "levye_yer" });
         // Anahtar sifonun ağzında, kenarın hemen altında (sifonun pivotu kendi üst ortası).
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "sifon", Y = -0.02f, Donus = 30f });

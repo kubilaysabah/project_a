@@ -47,9 +47,9 @@ MonoBehaviour:
       Oda: Banyo
       KilitYolu: 
       PlandaNokta: 1
-      U: 4.2
+      U: 4.02
       Y: 0.004
-      V: 0.8
+      V: 0.12
       Donus: -25
       OnU: 0
       OnV: 0
@@ -75,15 +75,15 @@ MonoBehaviour:
       Donus: 0
       OnU: 0
       OnV: 0
-    - Kimlik: mutfak_cekmece
-      Yol: Esyalar/Tezgah/Cekmece_1
+    - Kimlik: mutfak_dip
+      Yol: 
       Oda: Mutfak
       KilitYolu: 
-      PlandaNokta: 0
-      U: 0
-      Y: 0
-      V: 0
-      Donus: 0
+      PlandaNokta: 1
+      U: 8.32
+      Y: 0.004
+      V: -0.68
+      Donus: 35
       OnU: 0
       OnV: 0
     - Kimlik: hol_ruhsat
@@ -154,11 +154,11 @@ MonoBehaviour:
       Donus: 20
     - Kimlik: salon_anahtari
       Tur: 2
-      Yer: mutfak_cekmece
-      X: 0.59
-      Y: 0.64
-      Z: 0.04
-      Donus: 35
+      Yer: mutfak_dip
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
     - Kimlik: dosya_anahtari
       Tur: 2
       Yer: anahtar_dolabi

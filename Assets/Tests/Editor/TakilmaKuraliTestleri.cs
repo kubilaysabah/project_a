@@ -19,7 +19,9 @@ public class TakilmaKuraliTestleri
         return sayi;
     }
 
-    private static TakilmaKurali Yeni(int kat = 3)
+    // Varsayılan 1. kat: tempo testleri 1. katın sayılarıyla (150 / 75 / 4) yazıldı; üst katların
+    // temposu BulmaZorlugu'ndan gelir (#102) ve aşağıdaki kendi testinde denenir.
+    private static TakilmaKurali Yeni(int kat = 1)
     {
         var k = new TakilmaKurali();
         k.KatAyarla(kat);
@@ -27,6 +29,28 @@ public class TakilmaKuraliTestleri
     }
 
     // ---------- SAAT ----------
+
+    [Test]
+    public void Ust_katta_ipucu_daha_gec_ve_daha_az_gelir()
+    {
+        // #102: 8. katta ilk ipucu BulmaZorlugu'nun süresinde (270 sn), en çok 2 ipucu.
+        var k = Yeni(8);
+        float ilk = BulmaZorlugu.IlkIpucu(8);
+        Assert.AreEqual(0, Oynat(k, ilk - 0.5f), "8. katta ilk süreden önce ipucu yok");
+        Assert.AreEqual(1, Oynat(k, 1f), "8. katta ilk süre dolunca ilk ipucu");
+        Assert.AreEqual(BulmaZorlugu.EnCokIpucu(8) - 1, Oynat(k, 5000f), "kalan ipuçları tavana kadar");
+        Assert.AreEqual(BulmaZorlugu.EnCokIpucu(8), k.IpucuSayisi);
+        Assert.Greater(ilk, BulmaZorlugu.IlkIpucu(1));
+    }
+
+    [Test]
+    public void Kat_degisince_yeni_katin_temposuna_gecilir()
+    {
+        var k = Yeni(8);
+        k.KatAyarla(2);
+        Assert.AreEqual(BulmaZorlugu.IlkIpucu(2), k.IlkIpucu);
+        Assert.AreEqual(BulmaZorlugu.EnCokIpucu(2), k.EnCok);
+    }
 
     [Test]
     public void Ilk_ipucu_150_saniyede_gelir()
@@ -52,7 +76,7 @@ public class TakilmaKuraliTestleri
     {
         var k = Yeni();
         // 150 + 3 × 75 = 375 saniyede dördüncü; çok daha uzun beklense de beşinci gelmez.
-        Assert.AreEqual(TakilmaKurali.EnCokIpucu, Oynat(k, 2000f));
+        Assert.AreEqual(k.EnCok, Oynat(k, 2000f));
         Assert.AreEqual(4, k.IpucuSayisi);
     }
 
@@ -82,11 +106,12 @@ public class TakilmaKuraliTestleri
     [Test]
     public void Yeni_kat_her_seyi_sifirlar()
     {
-        var k = Yeni(3);
+        // 1. ve 2. kat aynı tempoda (150 / 75 sn, #102): burada denenen sıfırlanmadır, tempo değil.
+        var k = Yeni(1);
         Oynat(k, 260f);                                      // iki ipucu (150 ve 225. saniye)
         Assert.AreEqual(2, k.IpucuSayisi);
-        k.KatAyarla(4);
-        Assert.AreEqual(4, k.Kat);
+        k.KatAyarla(2);
+        Assert.AreEqual(2, k.Kat);
         Assert.AreEqual(0, k.IpucuSayisi);
         Assert.AreEqual(0, Oynat(k, 149f));
         Assert.AreEqual(1, Oynat(k, 2f));

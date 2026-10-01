@@ -64,9 +64,12 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "ayakkabilik", Yol = "Sahanlik:Kapi_{n}/Ayakkabilik", Oda = KilitZinciri.SahanlikOdasi });
         // Okul çantası antrede yerde (u 1,9, v 1,9); parça onun üst yüzünde.
         z.Yerler.Add(new ZincirYeri { Kimlik = "canta", PlandaNokta = true, Oda = "Antre", U = 1.975f, Y = CantaUstu3, V = 1.90f, Donus = -20f });
-        // Kanepe (sofa_02, 0,82 derin) Oda B duvarının önünde, ön kenarı u 4,16; altında 19 cm boşluk.
-        // Parça ön kenardan 15 cm içeride: ayakta dururken kanepenin kenarı görüşü kapatır.
-        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_yeri", PlandaNokta = true, Oda = "Salon", U = 4.31f, Y = 0.004f, V = 6.45f, Donus = 25f });
+        // Kanepe (Kanepe_K3) Oda B duvarının önünde, altı açık. Parça kanepenin altında, duvara yakın:
+        // ayakta görülmez, eğilince görülür; oyunun ilk "eğil ve bak" anı (#79).
+        // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
+        // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
+        // Eski yer u 4,31 v 6,45: kanepenin ön kenarına yakındı, ayakta 44 noktadan görülüyordu. Yeni: 0/111.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "salon_yeri", PlandaNokta = true, Oda = "Salon", U = 4.72f, Y = 0.004f, V = 6.47f, Donus = 25f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "cekmece", Yol = "Esyalar/Tezgah/Cekmece_1", Oda = "Mutfak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "oyuncak", Yol = "Esyalar/Oyuncak_Kutusu", Oda = "Oda_B" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "komodin", Yol = "Komodin_Ayla/Cekmece_1", Oda = "Oda_A" });

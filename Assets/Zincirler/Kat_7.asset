@@ -76,15 +76,15 @@ MonoBehaviour:
       Donus: 0
       OnU: 0
       OnV: 0
-    - Kimlik: mutfak_cekmece
-      Yol: Esyalar/Tezgah/Cekmece_1
+    - Kimlik: mutfak_kose
+      Yol: 
       Oda: Mutfak
       KilitYolu: 
-      PlandaNokta: 0
-      U: 0
-      Y: 0
-      V: 0
-      Donus: 0
+      PlandaNokta: 1
+      U: 10.12
+      Y: 0.004
+      V: 0.12
+      Donus: 50
       OnU: 0
       OnV: 0
     - Kimlik: hol_konsol
@@ -144,11 +144,11 @@ MonoBehaviour:
       Donus: -40
     - Kimlik: odaA_anahtari_uc
       Tur: 9
-      Yer: mutfak_cekmece
-      X: 0.59
-      Y: 0.64
-      Z: 0.04
-      Donus: 50
+      Yer: mutfak_kose
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
     - Kimlik: kat_anahtari
       Tur: 1
       Yer: sandik

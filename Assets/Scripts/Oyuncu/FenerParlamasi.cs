@@ -8,7 +8,8 @@
 // Her karede:
 //   1. Lamba yanmıyorsa parıltı söner.
 //   2. Lambadan eşyaya giden yönün lambanın baktığı yönle açısı ve mesafe ölçülür;
-//      ParlamaKurali ne kadar parlayacağını söyler (koninin dışı ve 5 m'den uzak = hiç).
+//      ParlamaKurali ne kadar parlayacağını söyler (koninin dışı ve menzilden uzak = hiç).
+//      Menzil ve güç kata göredir (#102, BulmaZorlugu): 1. katta 5 m ve tam güç, 8. katta 2 m ve soluk.
 //   3. Arada bir engel (duvar, dolap kapağı) varsa parıltı yok: ışık eşyaya ulaşmıyor.
 //   4. Parıltı kameraya döndürülür (billboard: her açıdan yüzü görünen düz resim), eşyanın 4 cm
 //      önüne alınır ki çekmecenin tabanına gömülüp yarısı kaybolmasın, yavaşça kendi etrafında döner.
@@ -30,6 +31,7 @@ public class FenerParlamasi : MonoBehaviour
     private const float Parlaklik = 4f;
 
     private static KafaLambasi lamba;             // sahnede tek lamba: bir kez bulunur, herkes paylaşır
+    private static KatYoneticisi yonetici;        // oyuncunun bulunduğu kat ondan sorulur (#102); o da tek
     private Transform parilti;
     private Esya esya;                            // bu eşya (kabı açık mı diye sorulur)
     private Renderer cizici;
@@ -100,7 +102,10 @@ public class FenerParlamasi : MonoBehaviour
             Vector3 fark = merkez - kaynak.position;
             float mesafe = fark.magnitude;
             float aci = Vector3.Angle(kaynak.forward, fark);
-            hedef = ParlamaKurali.Guc(aci, mesafe, KafaLambasi.DisAci / 2f, ParlamaKurali.Menzil);
+            // Kat kat zorlaşma (#102): üst katta parıltı daha yakından ve daha soluk görünür.
+            int kat = BulunulanKat();
+            hedef = ParlamaKurali.Guc(aci, mesafe, KafaLambasi.DisAci / 2f, BulmaZorlugu.ParlamaMenzili(kat))
+                    * BulmaZorlugu.ParlamaCarpani(kat);
             // Işık eşyaya ulaşıyor mu? Ölçüm pahalı olduğu için yalnızca konideyse bakılır.
             if (hedef > 0f && !IsikUlasiyor(kaynak.position, merkez, mesafe)) hedef = 0f;
         }
@@ -135,6 +140,14 @@ public class FenerParlamasi : MonoBehaviour
         cizici.GetPropertyBlock(blok);
         blok.SetColor("_BaseColor", KafaLambasi.Renk * parlaklik * Parlaklik);
         cizici.SetPropertyBlock(blok);
+    }
+
+    // Oyuncunun bulunduğu kat (zemin katta 0: BulmaZorlugu onu 1. kat sayar). Yönetici yoksa 1. kat.
+    // "yonetici == null" Unity'de yok edilmiş nesneyi de yakalar: sahne yeniden yüklenince yeniden bulunur.
+    private static int BulunulanKat()
+    {
+        if (yonetici == null) yonetici = FindAnyObjectByType<KatYoneticisi>();
+        return yonetici != null ? yonetici.BulunulanKat : 1;
     }
 
     // Lambadan eşyaya giden ışının önünde başka bir şey var mı? Oyuncunun kendi gövdesi, eşyanın

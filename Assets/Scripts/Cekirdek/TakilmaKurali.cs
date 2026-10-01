@@ -14,9 +14,11 @@
 // ---------- 1. SAAT ----------
 // Saat, bulunulan katta SON İLERLEMEDEN beri geçen süreyi sayar. İlerleme = bir eşya bulundu ya da
 // bir kilit çözüldü (sahne tarafı söyler: Ilerleme()). Kurallar (Şahan'ın istediği tempo):
-//   - İlk ipucu 150 saniye ilerlemesizlikten sonra (2,5 dakika: oyuncu önce kendi arasın).
+//   - 1. katta ilk ipucu 150 saniye ilerlemesizlikten sonra (2,5 dakika: oyuncu önce kendi arasın).
 //   - Sonra her 75 saniyede bir.
 //   - Bir ilerleme döneminde en çok 4 ipucu: bina ısrarcı bir öğretmene dönüşmesin.
+//   - Üst katlarda ipucu daha geç, daha seyrek ve daha az gelir (#102, kat kat zorlaşma): sayılar
+//     BulmaZorlugu tablosundan, katı kurarken (KatAyarla) okunur. 8. katta ilk ipucu 270 sn, en çok 2.
 //   - Saat yalnızca "uygun" anlarda işler: oyuncu açık dairenin içinde, menüde ya da yakın bakış
 //     ekranında değil, av yok, gerilim düşük. Yani merdivende dolaşmak, menüde beklemek ya da
 //     Gölge'den saklanmak "takılmak" sayılmaz.
@@ -58,12 +60,17 @@ public struct TakilmaHedefi
 public class TakilmaKurali
 {
     // ---------- TEMPO ----------
-    /// <summary>İlk ipucuna kadar geçmesi gereken ilerlemesiz süre (saniye).</summary>
-    public const float IlkIpucu = 150f;
-    /// <summary>Sonraki ipuçları arası (saniye).</summary>
-    public const float IpucuAra = 75f;
-    /// <summary>Bir ilerleme döneminde en çok bu kadar ipucu.</summary>
-    public const int EnCokIpucu = 4;
+    // Katın temposu (#102): KatAyarla bunları BulmaZorlugu'ndan doldurur. Kat kurulmadan önce 1. katın değerleri.
+    private float ilkIpucu = 150f;   // ilk ipucuna kadar geçmesi gereken ilerlemesiz süre (saniye)
+    private float ipucuAra = 75f;    // sonraki ipuçları arası (saniye)
+    private int enCok = 4;           // bir ilerleme döneminde en çok bu kadar ipucu
+
+    /// <summary>Bu katta ilk ipucuna kadar beklenen ilerlemesiz süre (saniye).</summary>
+    public float IlkIpucu { get { return ilkIpucu; } }
+    /// <summary>Bu katta sonraki ipuçları arası (saniye).</summary>
+    public float IpucuAra { get { return ipucuAra; } }
+    /// <summary>Bu katta bir ilerleme döneminde en çok bu kadar ipucu.</summary>
+    public int EnCok { get { return enCok; } }
 
     private int kat;                 // saatin ait olduğu kat
     private int ipucuSayisi;         // bu ilerleme döneminde verilen ipucu sayısı
@@ -72,15 +79,19 @@ public class TakilmaKurali
 
     /// <summary>Saatin ait olduğu kat (henüz kurulmadıysa 0).</summary>
     public int Kat { get { return kat; } }
-    /// <summary>Bu ilerleme döneminde verilmiş ipucu sayısı (0-4).</summary>
+    /// <summary>Bu ilerleme döneminde verilmiş ipucu sayısı (0 ile EnCok arası).</summary>
     public int IpucuSayisi { get { return ipucuSayisi; } }
     /// <summary>Son ilerlemeden beri "uygun" geçen saniye (hata ayıklama için).</summary>
     public float IlerlemesizSure { get { return ilerlemesizSure; } }
 
-    /// <summary>Yeni kata varıldı: saat ve ipucu sayısı sıfırdan başlar.</summary>
+    /// <summary>Yeni kata varıldı: saat ve ipucu sayısı sıfırdan başlar, katın temposu okunur.</summary>
     public void KatAyarla(int yeniKat)
     {
         kat = yeniKat;
+        // Üst katta bina daha az yardım eder (#102): tempo katın tablosundan.
+        ilkIpucu = BulmaZorlugu.IlkIpucu(yeniKat);
+        ipucuAra = BulmaZorlugu.IpucuAra(yeniKat);
+        enCok = BulmaZorlugu.EnCokIpucu(yeniKat);
         Ilerleme();
     }
 
@@ -102,17 +113,17 @@ public class TakilmaKurali
         // "!(gecen > 0f)" yazımı NaN'ı (sayı olmayan bozuk değer) da yakalar: NaN ile her karşılaştırma
         // false döner, "gecen <= 0f" NaN'ı geçirirdi.
         if (!uygun || !(gecen > 0f)) return false;
-        if (ipucuSayisi >= EnCokIpucu) return false;   // tavan doldu: bir sonraki ilerlemeyi bekle
+        if (ipucuSayisi >= enCok) return false;   // tavan doldu: bir sonraki ilerlemeyi bekle
 
         ilerlemesizSure += gecen;
         sayac += gecen;
 
-        // İlk ipucu için 150, sonrakiler için 75 saniye beklenir.
-        float esik = ipucuSayisi == 0 ? IlkIpucu : IpucuAra;
+        // İlk ipucu için katın ilk süresi (1. katta 150), sonrakiler için aralığı (1. katta 75) beklenir.
+        float esik = ipucuSayisi == 0 ? ilkIpucu : ipucuAra;
         if (sayac < esik) return false;
 
         // Sayaç sıfırlanır (eşiğin üstündeki kısmı taşınmaz): çok uzun tek bir kare (takılan bir
-        // yükleme) üst üste iki ipucu çaldırmasın, her ipucu en az 75 saniye arayla gelsin.
+        // yükleme) üst üste iki ipucu çaldırmasın, her ipucu en az katın aralığı kadar arayla gelsin.
         sayac = 0f;
         ipucuSayisi++;
         return true;

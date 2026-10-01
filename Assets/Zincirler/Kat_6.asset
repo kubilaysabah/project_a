@@ -183,9 +183,9 @@ MonoBehaviour:
       Oda: B:Banyo
       KilitYolu: 
       PlandaNokta: 1
-      U: 4.1
+      U: 3.02
       Y: 0.004
-      V: 0.7
+      V: 0.32
       Donus: -15
       OnU: 0
       OnV: 0
@@ -194,9 +194,9 @@ MonoBehaviour:
       Oda: B:Oda_A
       KilitYolu: 
       PlandaNokta: 1
-      U: 9
+      U: 10.22
       Y: 0.004
-      V: 5.9
+      V: 6.47
       Donus: 35
       OnU: 0
       OnV: 0

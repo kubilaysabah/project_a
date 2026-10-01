@@ -43,14 +43,14 @@ MonoBehaviour:
       Donus: 70
       OnU: 0
       OnV: 0
-    - Kimlik: hol_yer
+    - Kimlik: kanepe_alti
       Yol: 
-      Oda: Hol
+      Oda: Salon
       KilitYolu: 
       PlandaNokta: 1
-      U: 9.7
+      U: 4.72
       Y: 0.004
-      V: 3.3
+      V: 6.67
       Donus: 15
       OnU: 0
       OnV: 0
@@ -76,14 +76,14 @@ MonoBehaviour:
       Donus: 0
       OnU: 0
       OnV: 0
-    - Kimlik: masa_yer
+    - Kimlik: oda_kosesi
       Yol: 
       Oda: Oda_B
       KilitYolu: 
       PlandaNokta: 1
-      U: 6.05
-      Y: 0.755
-      V: 7.72
+      U: 5.62
+      Y: 0.004
+      V: 5.07
       Donus: 30
       OnU: 0
       OnV: 0
@@ -92,9 +92,9 @@ MonoBehaviour:
       Oda: Oda_A
       KilitYolu: 
       PlandaNokta: 1
-      U: 9.05
+      U: 10.22
       Y: 0.004
-      V: 6.22
+      V: 6.67
       Donus: 80
       OnU: 0
       OnV: 0
@@ -130,7 +130,7 @@ MonoBehaviour:
       Donus: 0
     - Kimlik: kaydirici
       Tur: 8
-      Yer: hol_yer
+      Yer: kanepe_alti
       X: 0
       Y: 0
       Z: 0
@@ -144,7 +144,7 @@ MonoBehaviour:
       Donus: 40
     - Kimlik: salon_anahtari_uc
       Tur: 9
-      Yer: masa_yer
+      Yer: oda_kosesi
       X: 0
       Y: 0
       Z: 0

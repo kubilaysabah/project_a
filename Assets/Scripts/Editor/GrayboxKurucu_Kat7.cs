@@ -88,7 +88,11 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_kimlik", Yol = "Esyalar/Lavabo", Oda = "Banyo" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "salon_bufe", Yol = "Bufe_Cemal", Oda = "Salon", KilitYolu = "Bufe_Cemal/Kapi_1" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "mutfak_cekmece", Yol = "Esyalar/Tezgah/Cekmece_1", Oda = "Mutfak" });
+        // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
+        // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
+        // Anahtar ucu mutfağın dip köşesinde, tezgâhın dibinde (0/13). Eskiden tezgâhın üst çekmecesindeydi:
+        // 3. ve 8. katta da AYNI çekmecenin aynı köşesinde anahtar vardı (Şahan: "hep benzer yerlerde").
+        z.Yerler.Add(new ZincirYeri { Kimlik = "mutfak_kose", PlandaNokta = true, Oda = "Mutfak", U = 10.12f, Y = 0.004f, V = 0.12f, Donus = 50f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "hol_konsol", Yol = "Hol_Konsolu_Cemal/Cekmece_1", Oda = "Hol" });
         // Yatak odasının dip duvarı: dış duvar odanın dışına örülür, iç yüzü u = 10,5. Yazı yüzün yarım
         // santim önünde (5 cm öndeyken havada duruyordu: eksikler testi), göz hizasının üstünde, odaya (-u) bakar.
@@ -98,7 +102,7 @@ public static partial class GrayboxKurucu
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "antre_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kiler_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "salon_bufe", X = Bufe7KapiX, Y = Bufe7Taban, Z = 0.004f, Donus = 20f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_bas", Tur = EsyaTuru.AnahtarParcasi, Yer = "hol_konsol", Y = 0.004f, Donus = -40f });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "mutfak_cekmece", X = 0.59f, Y = 0.64f, Z = 0.04f, Donus = 50f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "mutfak_kose" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "sandik", Y = Sandik7Taban, Donus = 20f });
 
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "banyo", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "Banyo", Gerekli = "tornavida" });

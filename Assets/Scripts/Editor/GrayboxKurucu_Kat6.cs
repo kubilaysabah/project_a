@@ -84,8 +84,12 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_dikis", Yol = "B:Dikis_Kutusu_Sabri", Oda = "B:Salon", KilitYolu = "B:Dikis_Kutusu_Sabri/Kapak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_buzdolabi", Yol = "B:Buzdolabi_Sabri", Oda = "B:Mutfak", KilitYolu = "B:Buzdolabi_Sabri/Kapi_1" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_teneke", Yol = "B:Dugme_Tenekesi_Sabri", Oda = "B:Oda_C", KilitYolu = "B:Dugme_Tenekesi_Sabri/Kapak" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "b_banyo_yer", PlandaNokta = true, Oda = "B:Banyo", U = 4.10f, Y = 0.004f, V = 0.70f, Donus = -15f });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "b_odaA_yer", PlandaNokta = true, Oda = "B:Oda_A", U = 9.00f, Y = 0.004f, V = 5.90f, Donus = 35f });
+        // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
+        // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
+        // Hasan'ın tabağı banyonun köşesinde (1/19): banyonun ortasındaydı (47 noktadan açık).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_banyo_yer", PlandaNokta = true, Oda = "B:Banyo", U = 3.02f, Y = 0.004f, V = 0.32f, Donus = -15f });
+        // Kapıcının tabağı yatağın altında (0/78): odanın yerindeydi (77 noktadan açık).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_odaA_yer", PlandaNokta = true, Oda = "B:Oda_A", U = 10.22f, Y = 0.004f, V = 6.47f, Donus = 35f });
 
         // EŞYALAR
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "b_antre_yer" });

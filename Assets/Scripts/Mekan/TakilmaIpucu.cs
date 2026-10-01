@@ -191,7 +191,7 @@ public class TakilmaIpucu : MonoBehaviour
                 if (lamba != null) lamba.Titret(TitremeSuresi);
             }
 
-            Debug.Log($"[IPUCU] {kat}. kat: {aday.Kimlik} ipucu {kural.IpucuSayisi}/{TakilmaKurali.EnCokIpucu}.");
+            Debug.Log($"[IPUCU] {kat}. kat: {aday.Kimlik} ipucu {kural.IpucuSayisi}/{kural.EnCok}.");
             return;
         }
         Debug.LogWarning($"[IPUCU] {kat}. kat: ipucu zamanı geldi ama işaret edilecek nesne sahnede bulunamadı.");

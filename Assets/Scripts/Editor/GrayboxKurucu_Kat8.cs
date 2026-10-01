@@ -68,10 +68,15 @@ public static partial class GrayboxKurucu
         var z = new KilitZinciri();
         z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 2.0f, Y = 0.004f, V = -0.4f, Donus = 70f });
         // Banyonun kapıya göre sağ köşesi: menteşesi sökülen kapının devrildiği şeridin (v 0,9-2,9) dışında.
-        z.Yerler.Add(new ZincirYeri { Kimlik = "banyo_yer", PlandaNokta = true, Oda = "Banyo", U = 4.2f, Y = 0.004f, V = 0.80f, Donus = -25f });
+        // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
+        // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
+        // Kiler anahtarı klozetin arkasında (0/6): banyonun ortasındaydı (43 noktadan açık).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "banyo_yer", PlandaNokta = true, Oda = "Banyo", U = 4.02f, Y = 0.004f, V = 0.12f, Donus = -25f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "evrak", Yol = "Evrak_Dolabi_Toplanti/Cekmece_1", Oda = "Oda_B" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "mutfak_cekmece", Yol = "Esyalar/Tezgah/Cekmece_1", Oda = "Mutfak" });
+        // Salon anahtarı mutfağın dip duvarının dibinde (2/17). Eskiden tezgâhın üst çekmecesindeydi: 3. ve 7.
+        // katta da aynı çekmecenin aynı köşesindeydi (#102).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "mutfak_dip", PlandaNokta = true, Oda = "Mutfak", U = 8.32f, Y = 0.004f, V = -0.68f, Donus = 35f });
         // İskân ruhsatı holün kuzey duvarında (salon ile Oda B kapılarının arasında): şifrenin kaynağı.
         z.Yerler.Add(new ZincirYeri { Kimlik = "hol_ruhsat", PlandaNokta = true, Oda = "Hol", U = 2.7f, Y = 1.55f, V = 4.60f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "anahtar_dolabi", Yol = "Anahtar_Dolabi_Arsiv", Oda = "Oda_A", KilitYolu = "Anahtar_Dolabi_Arsiv/Kapi_1" });
@@ -83,7 +88,7 @@ public static partial class GrayboxKurucu
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "antre_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kiler_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "banyo_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "mutfak_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "evrak", Y = 0.004f, Donus = 20f });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "mutfak_cekmece", X = 0.59f, Y = 0.64f, Z = 0.04f, Donus = 35f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "mutfak_dip" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "dosya_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "anahtar_dolabi", Y = AnahtarDolabi8RafY, Z = AnahtarDolabi8RafZ, Donus = -15f });
         // Çekmecenin tabanı 1,0 m'de (dosya_dolabi.py: üst yuvanın tepsisi); sigorta sağda, not solda.
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "asansor_sigortasi", Tur = EsyaTuru.Sigorta, Yer = "dosya_ust", X = 0.09f, Y = 1.0f, Z = 0.02f, Donus = 80f });
