@@ -22,6 +22,8 @@
 #   Dugme_Bakalit       90'ların bakalit lamba anahtarı / asansör çağırma düğmesi: tek sert plastik "tak"
 #   Kucuk_Tikirti       sessiz odada küçük bir şeyin yerine oturması: tek yumuşak tık (ipucu, kısık)
 #   Kapi_Gicirti_Dongu  kapı sürüklenirken çalan, dikişsiz dönen eski menteşe gıcırtısı (sesi kod açıp kısar)
+#   Vana_Cark           paslı dökme demir vananın çarkı bir buçuk tur çevrilir: mil gıcırtısı, diş cızırtısı,
+#                       kavrama tıkları, kapanırken borudaki suyun hışırtısı
 # ve Assets/Audio/Anlar/ altına:
 #   An_Surtunme         tahta ayaklı manken yerde döner: tahta-tahta burulma sürtünmesi ve gıcırtı
 #
@@ -648,6 +650,90 @@ def kapi_gicirti_dongu():
     yaz(SESLER, "Kapi_Gicirti_Dongu", yumusak_sinirla(sonuc, 1.6), ESYA_DB)
 
 
+# ---------- 18. VANA ÇARKI ----------
+# Eski, dökme demir bir su vanasının el çarkı bir buçuk tur çevrilir (5. kat, #65). Oyun çarkı 540°'yi
+# KolAyari.sure = 1,6 saniyede döndürür (GrayboxKurucu_Daire.cs); ses de o kadar sürer, üstüne kısa bir
+# yankı kuyruğu. Çevirirken dört şey duyulur:
+#   GICIRTI: vananın mili, "salmastra" denen sıkı bir keçe halkasının içinden geçer (suyun milin yanından
+#     sızmasını o önler). Yıllardır dönmemiş, paslı bir mil salmastrada düzgün dönmez: takılır, kurtulur,
+#     yine takılır (yapış-kay). Mil kalın ve yavaş döndüğü için takılmalar SEYREKTİR (saniyede 60-140) ve
+#     metal gövdenin modlarında (700 / 1500 / 2900 Hz, q 10-20: metal uzun çınlar) "ıııı" diye bir inilti olur.
+#     El çarkı sürekli çevirmez: bir el boyu çevirir, durur, yeniden kavrar. Gıcırtı o yüzden ÜÇ PARÇADIR
+#     ve her parçanın içinde de kesik kesiktir (pas bir yerde tutar, bir yerde bırakır).
+#   DİŞ SÜRTÜNMESİ: milin vida dişleri gövdenin dişlerinde kayar. Metal-metal, kuru ve kumlu: 2-6 kHz arası
+#     taneli bir cızırtı (kavanoz kapağının dişleri gibi ama daha kısık ve daha kaba taneli).
+#   TIK TIK: el yeniden kavrarken parmaklar çarkın parmaklıklarına (kollarına) çarpar ve çark milin üstünde
+#     bir milim boşluk yapıp oturur: dökme demir çarkın kısa, sert "tank"ı (520 / 1240 / 2650 Hz, q 12-18)
+#     ve elin yumuşak teması (220 Hz, q 2). Başta bir kavrama, arada iki yeniden kavrama.
+#   SU: vana kapandıkça borudaki suyun geçtiği aralık daralır; su o daralmada hışırdar, sonra kesilir. Bu,
+#     duvarın içindeki borudan gelen ALÇAK bir hışırtıdır (200-900 Hz), suyun çalkantısıyla hafif dalgalanır,
+#     sona doğru biraz kabarır ve vana oturunca söner. Son anda vananın yuvasına oturması: küçük, tok bir "tok".
+# Yankı kısa ve parlak: fayanslı küçük bir oda (sert yüzeyler tizi yutmaz, sonum küçük).
+def vana_cark():
+    random.seed(9718)
+    L = 1.85                                                 # 1,6 sn çevirme + yankı kuyruğu
+    n = int(L * HIZ)
+    s = [0.0] * n
+    # Üç çevirme parçası (bas, bit, takılma sıklığının başı ve sonu). İlki en zor: pas henüz kırılmadı,
+    # mil seyrek takılır (alçak perde); sonrakilerde pas gevşer, takılmalar sıklaşır (perde yükselir).
+    parcalar = ((0.04, 0.50, 62, 95), (0.60, 1.05, 80, 125), (1.15, 1.58, 95, 140))
+    # Kesik kesiklik: 40-120 ms'lik parçalarda gücü rastgele değişen bir dalgalanma; karesi alınınca
+    # zayıf yerler sıfıra yaklaşır: pasın "tuttu-bıraktı"sı, gıcırtıda gerçek boşluklar.
+    kesik = [x * x for x in tane_zarfi(n, 0.04, 0.12, 0.0, 1.0, yumusak=0.004)]
+    mot = [0.0] * n
+    for bas, bit, f0, f1 in parcalar:
+        def siklik(t, bas=bas, bit=bit, f0=f0, f1=f1):
+            e = max(0.0, min(1.0, (t - bas) / (bit - bas)))
+            return f0 + (f1 - f0) * e + 8 * math.sin(2 * math.pi * 3.3 * t)   # elin basıncı titrer
+        def guc(t, bas=bas, bit=bit):
+            e = (t - bas) / (bit - bas)
+            # Her parça yumuşak başlar ve biter (el kuvveti yavaş yüklenir, yavaş bırakır).
+            return math.sin(math.pi * max(0.0, min(1.0, e))) ** 0.5 * (0.25 + 0.75 * kesik[min(n - 1, int(t * HIZ))])
+        parca = yapis_kay(n, bas, bit, siklik, guc, darbe_suresi=0.0016, titreklik=0.15)
+        for i in range(n):
+            mot[i] += parca[i]
+    gic = tepeyi_esitle(modlar(mot, HIZ, [(700, 10, 1.0), (1500, 15, 0.7), (2900, 20, 0.4)]))
+    ekle(s, gic, 0, 0.55)
+    # Diş sürtünmesi: aynı üç parçada, kaba taneli metal cızırtı (2-6 kHz), gıcırtının altında kısık.
+    for bas, bit, _, _ in parcalar:
+        m = int((bit - bas) * HIZ)
+        tane = tane_zarfi(m, 0.001, 0.005, 0.0, 1.0, yumusak=0.12)   # kumlu, düzensiz taneler
+        dis = alcak(yuksek(gurultu(m), 2000, HIZ), 6000, HIZ)
+        dis = [x * tane[i] * math.sin(math.pi * i / m) ** 0.6 for i, x in enumerate(dis)]
+        ekle(s, tepeyi_esitle(dis), int(bas * HIZ), 0.16)
+    # Kavramalar: başta bir, iki parça arasında iki yeniden kavrama. Her biri çarkın demir "tank"ı ve elin
+    # yumuşak teması; yeniden kavramalar biraz daha hafif, çarkın modu her vuruşta biraz farklı (başka kol).
+    for t, guc_k in ((0.012, 0.8), (0.545, 1.0), (1.095, 0.85)):
+        k = random.uniform(0.96, 1.04)
+        tank = modlar(darbe(int(0.25 * HIZ), HIZ, 0.0007), HIZ, [(520 * k, 12, 0.8), (1240 * k, 16, 1.0), (2650 * k, 18, 0.5)])
+        el = modlar(darbe(int(0.08 * HIZ), HIZ, 0.004), HIZ, [(220, 2, 1.0)])
+        ekle(s, tepeyi_esitle(tank), int(t * HIZ), 0.45 * guc_k)
+        ekle(s, tepeyi_esitle(el), int(t * HIZ), 0.25 * guc_k)
+    # Su: 0,95 sn'de duyulmaya başlar, kapanmaya doğru kabarır, 1,58'de vana oturunca 0,15 sn'de söner.
+    g = gurultu(n)
+    su = alcak(alcak(yuksek(g, 200, HIZ), 900, HIZ), 900, HIZ)    # iki kez alçak geçiren: duvar arkası boğukluk
+    calkanti = tane_zarfi(n, 0.03, 0.09, 0.55, 1.0, yumusak=0.002)  # suyun çalkantısı
+    su = tepeyi_esitle([x * calkanti[i] for i, x in enumerate(su)])
+    for i in range(n):
+        t = i / HIZ
+        if t < 0.95:
+            e = 0.0
+        elif t < 1.5:
+            e = ((t - 0.95) / 0.55) ** 1.5                   # aralık daraldıkça hışırtı artar
+        else:
+            e = max(0.0, 1 - (t - 1.5) / 0.23) ** 2          # vana kapanır, su kesilir
+        s[i] += 0.13 * su[i] * e
+    # Vananın yuvasına oturması: kısa, tok, alçak bir metal "tok" (ağır gövde, dar değil).
+    tok = modlar(darbe(int(0.2 * HIZ), HIZ, 0.002), HIZ, [(310, 5, 1.0), (760, 8, 0.6), (1900, 10, 0.3)])
+    ekle(s, tepeyi_esitle(tok), int(1.585 * HIZ), 0.3)
+    s = yuksek(s, 60, HIZ)                                   # duyulmayan alt titreşimi at
+    s = zarf(s, 0.003, 0.12)
+    # Vana salonda, gardırobun arkasındaki duvarda (5. kat): halılı, eşyalı oda; banyo gibi parlak değil,
+    # daha boğuk ve kısa bir yankı (agir_surtunme ile aynı oda).
+    s = kucuk_oda(s, islak=0.12, boyut=0.4, oda=0.6)
+    yaz(SESLER, "Vana_Cark", yumusak_sinirla(s, 2.2), ESYA_DB)
+
+
 # ---------- RAPOR ----------
 
 def oku(yol):
@@ -688,6 +774,7 @@ URETICILER = {
     "cam_tikirti": cam_tikirti, "al_metal": al_metal, "al_kagit": al_kagit, "al_seramik": al_seramik,
     "al_kucuk": al_kucuk, "kilit_kucuk": kilit_kucuk, "dugme_bakalit": dugme_bakalit,
     "kucuk_tikirti": kucuk_tikirti, "an_surtunme": an_surtunme, "kapi_gicirti_dongu": kapi_gicirti_dongu,
+    "vana_cark": vana_cark,
 }
 
 if __name__ == "__main__":

@@ -152,5 +152,6 @@ Hepsi `esya_sesleri_uret.py` ile gürültüden üretildi (sinüs yok, indirme yo
 | S72 | `Resources/Sesler/Kucuk_Tikirti.wav` · 0,16 sn | Takılma ipucu: aranan eşyanın yerinden küçük tıkırtı (#98) | Sentez → kucuk_tikirti | yeni |
 | S73 | `Audio/Anlar/An_Surtunme.wav` · 0,75 sn | 6. kat: manken ahşap ayağında döner (#96) | Sentez → an_surtunme | yeni |
 | S74 | `Resources/Sesler/Kapi_Gicirti_Dongu.wav` · 2,0 sn (döngü) | Oda kapısı sürüklenirken menteşe gıcırtısı; sesi dönüş hızına göre (#100) | Sentez → kapi_gicirti_dongu | yeni |
+| S75 | `Resources/Sesler/Vana_Cark.wav` · 1,85 sn | 5. kat: salondaki vananın çarkı döndürülünce (paslı mil gıcırtısı, diş sürtünmesi, iki yeniden kavrama, kapanırken borudaki su) | Sentez → vana_cark | yeni, Şahan dinleyecek |
 
 Değişen bağlantılar: ayna korkusu artık fayansta tek adım (`Adim_Fayans_1`), 7. kattaki ahşap daire kapısı oda kapısı gıcırtısı (`IcKapi_Acilma`), Gölge'nin adımları bastığı zemine göre (`Merdiven_Adim`, `Adim_1`, `Adim_Fayans`, `Adim_Hali`).

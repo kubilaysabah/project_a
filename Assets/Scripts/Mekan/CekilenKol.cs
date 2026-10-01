@@ -27,7 +27,10 @@ public class CekilenKol : MonoBehaviour, IEtkilesimli
     private Quaternion ilkDonus;
     private bool cekildi;
     private bool harekette;
-    private static AudioClip ses;
+    // Kolun KENDİ sesi (#99): eskiden "static" idi, duvardaki kol ile 5. kattaki vana çarkı aynı sesi
+    // paylaşıyordu. Çark (adında "Cark" ya da "Vana" geçen parça) dökme demir vananın dönme sesini,
+    // öbür kollar kol çekme sesini çalar.
+    private AudioClip ses;
 
     /// <summary>Uygulayıcı kolu hazırlar: çekilince açılacak kilit ve kolun döneceği açı.</summary>
     public void KilitEkle(Kilit kilit, float donusAcisi)
@@ -54,7 +57,12 @@ public class CekilenKol : MonoBehaviour, IEtkilesimli
     private IEnumerator Cek()
     {
         harekette = true;
-        if (ses == null) ses = Resources.Load<AudioClip>("Sesler/Kol_Cekme");
+        if (ses == null)
+        {
+            string yol = AcilirParca.AdYolu(transform).ToLowerInvariant();
+            if (yol.Contains("cark") || yol.Contains("vana")) ses = Resources.Load<AudioClip>("Sesler/Vana_Cark");
+            if (ses == null) ses = Resources.Load<AudioClip>("Sesler/Kol_Cekme");
+        }
         if (ses != null) AudioSource.PlayClipAtPoint(ses, transform.position, 0.7f);
         Varlik.Gurultu(0.1f);    // kol çekildi: bina duydu (#86)
         for (float t = 0f; t < sure; t += Time.deltaTime)
