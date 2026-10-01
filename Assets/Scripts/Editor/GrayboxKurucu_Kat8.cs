@@ -70,8 +70,9 @@ public static partial class GrayboxKurucu
         // Banyonun kapıya göre sağ köşesi: menteşesi sökülen kapının devrildiği şeridin (v 0,9-2,9) dışında.
         // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
         // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
-        // Kiler anahtarı klozetin arkasında (0/6): banyonun ortasındaydı (43 noktadan açık).
-        z.Yerler.Add(new ZincirYeri { Kimlik = "banyo_yer", PlandaNokta = true, Oda = "Banyo", U = 4.02f, Y = 0.004f, V = 0.12f, Donus = -25f });
+        // Kiler anahtarı temizlik arabasıyla klozetin arasında (0/35): banyonun ortasındaydı (43 noktadan açık).
+        // Bir önceki deneme 20 cm geride, arabanın altıydı (0/6): fener ışığı arabaya takılıyor, parlamıyordu.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "banyo_yer", PlandaNokta = true, Oda = "Banyo", U = 4.02f, Y = 0.004f, V = 0.32f, Donus = -25f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "evrak", Yol = "Evrak_Dolabi_Toplanti/Cekmece_1", Oda = "Oda_B" });
         // Salon anahtarı mutfağın dip duvarının dibinde (2/17). Eskiden tezgâhın üst çekmecesindeydi: 3. ve 7.

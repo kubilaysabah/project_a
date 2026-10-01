@@ -52,9 +52,10 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 1.60f, Y = 0.004f, V = 0.60f, Donus = 70f });
         // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
         // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
-        // Kaydırıcılar salondaki kanepenin altında, duvar dibinde (0/5): holün ortasındaydı (150 noktadan açık).
-        // Hol düz bir koridor; saklanacak yeri yok. Salon gardırobun odası, kaydırıcılar da onun için.
-        z.Yerler.Add(new ZincirYeri { Kimlik = "kanepe_alti", PlandaNokta = true, Oda = "Salon", U = 4.72f, Y = 0.004f, V = 6.67f, Donus = 15f });
+        // Kaydırıcılar kilerde, rafın altında (0/25): holün ortasındaydı (150 noktadan açık). Hol düz bir koridor,
+        // saklanacak yeri yok. İlk deneme salondaki kanepenin altıydı (0/5) ama görüş fotoğrafı onu yalnızca 4,5 m
+        // ötedeki bir kapı aralığından gösterdi: adil değildi.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "raf_alti", PlandaNokta = true, Oda = "Oda_C", U = 4.72f, Y = 0.004f, V = 0.52f, Donus = 15f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "cekmece", Yol = "Esyalar/Tezgah/Cekmece_2", Oda = "Mutfak" });
         // Anahtar ucu çalışma odasının kapı tarafındaki köşede, yerde (10/10): masanın üstündeydi (80 noktadan açık).
@@ -65,7 +66,7 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "vana", Yol = "Esyalar/Vana/Cark", Oda = "Salon", KilitYolu = "Esyalar/Gardirop" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "sifon", Yol = "Esyalar/Lavabo/Sifon", Oda = "Banyo" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "antre_yer" });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kaydirici", Tur = EsyaTuru.Kaydirici, Yer = "kanepe_alti" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kaydirici", Tur = EsyaTuru.Kaydirici, Yer = "raf_alti" });
         // Tezgâhın ikinci çekmecesinin tabanı: x 0,59, y 0,39, z 0,04 (tezgah.py).
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari_bas", Tur = EsyaTuru.AnahtarParcasi, Yer = "cekmece", X = 0.59f, Y = 0.39f, Z = 0.04f, Donus = 40f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "oda_kosesi" });

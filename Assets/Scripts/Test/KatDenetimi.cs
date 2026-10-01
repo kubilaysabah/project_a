@@ -398,6 +398,98 @@ public static class KatDenetimi
         return $"{kimlik} @({u:0.00},{y:0.000},{v:0.00}) = {sinif} ({g.x}/{g.y}) s:{secen}";
     }
 
+    // ---------- GÖRÜŞ FOTOĞRAFI (#102) ----------
+    // Bir eşyayı, gözle GÖRÜLDÜĞÜ noktaların en yakınından (ayakta görülüyorsa ayakta, yoksa eğilmiş göz
+    // yüksekliğinden) oyunun gerçek karanlığında kafa lambasıyla çeker. Denetle'nin fotoğrafı nişanın en iyi
+    // noktasından çekilir; nişan mobilyanın içinden geçebildiği için (IcindeMi) o kare eşyayı göstermeyebilir.
+    // Mobilyanın altına saklanan eşyanın gerçekten "eğilince görünür" olduğunu görüntüyle doğrulamak için.
+    public static string GorusFotografi(int kat, string klasor, string kimlikler)
+    {
+        BirinciSahisKontrolcu oyuncu = Object.FindAnyObjectByType<BirinciSahisKontrolcu>();
+        Etkilesimci etk = Object.FindAnyObjectByType<Etkilesimci>();
+        if (oyuncu == null || etk == null) return "oyun modunda değil";
+        const BindingFlags Gizli = BindingFlags.NonPublic | BindingFlags.Instance;
+        Varlik.Kapali = true;
+        // Kapılar ve sahanlık (Bulunabilirlik'teki gibi); kaplara dokunulmaz.
+        foreach (IcKapi k in Object.FindObjectsByType<IcKapi>())
+            if (k.gameObject.activeInHierarchy && !k.name.Contains("Balkon")) { k.Kilitle(false); k.Ayarla(true); }
+        var daireler = new List<DaireEksenleri>();
+        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>()) if (d.gameObject.activeInHierarchy) daireler.Add(d);
+        if (daireler.Count == 0) return "açık daire yok";
+        Transform sahanlik = daireler[0].transform.parent;
+        foreach (DaireEksenleri d in daireler)
+        {
+            Transform mentese = sahanlik.Find("Kapi_" + d.name.Replace("Daire_", "") + "/Mentese");
+            if (mentese != null) mentese.localRotation = Quaternion.Euler(0f, 80f, 0f);
+        }
+        Physics.SyncTransforms();
+        SahanligaTasi(oyuncu, sahanlik, daireler);
+        var hucreler = new Dictionary<Vector2Int, Hucre>();
+        Dolas(oyuncu.transform.position, sahanlik, oyuncu.transform, hucreler, new Dictionary<string, int>());
+
+        Transform kamera = (Transform)typeof(Etkilesimci).GetField("kamera", Gizli).GetValue(etk);
+        Camera cam = kamera.GetComponent<Camera>();
+        KafaLambasi lamba = Object.FindAnyObjectByType<KafaLambasi>();
+        if (lamba != null) lamba.Tak();
+        Vector3 eskiKonum = kamera.position; Quaternion eskiDonus = kamera.rotation;
+        var rt = new RenderTexture(800, 500, 24);
+        var doku = new Texture2D(800, 500, TextureFormat.RGB24, false);
+        RenderTexture eskiHedef = cam.targetTexture;
+        var rapor = new StringBuilder();
+        List<GameObject> kabuklar = GorusKabuguKur(sahanlik);
+        foreach (string kimlik in kimlikler.Split(','))
+        {
+            Esya esya = null;
+            foreach (Esya e in Object.FindObjectsByType<Esya>()) if (e.isActiveAndEnabled && e.Kimlik == kimlik) { esya = e; break; }
+            if (esya == null) { rapor.Append($"{kimlik}=YOK "); continue; }
+            Bounds b = new Bounds(esya.transform.position, Vector3.zero);
+            bool ilk = true;
+            foreach (Renderer r in esya.GetComponentsInChildren<Renderer>())
+            {
+                if (!r.enabled) continue;
+                if (ilk) { b = r.bounds; ilk = false; } else b.Encapsulate(r.bounds);
+            }
+            // En iyi nokta: önce ayakta görülen en yakın nokta; yoksa eğilmiş görülen en yakın nokta.
+            Vector3 enIyi = Vector3.zero, bakis = b.center; float enYakin = 99f; bool ayaktaBulundu = false;
+            Vector3[] noktalar = BesNokta(b);
+            foreach (bool ayaktaTur in new[] { true, false })
+            {
+                foreach (var h in hucreler)
+                {
+                    if (h.Key.x % 2 != 0 || h.Key.y % 2 != 0) continue;
+                    if (ayaktaTur && !h.Value.Ayakta) continue;
+                    Vector3 goz = new Vector3(h.Key.x * Adim, h.Value.Y, h.Key.y * Adim) + Vector3.up * (ayaktaTur ? AyaktaGoz : EgikGoz);
+                    float m = (b.center - goz).magnitude;
+                    if (m < 0.5f || m >= enYakin) continue;
+                    foreach (Vector3 n in noktalar)
+                        if (GorusAcik(goz, n, esya.transform, oyuncu.transform)) { enYakin = m; enIyi = goz; bakis = n; ayaktaBulundu = ayaktaTur; break; }
+                }
+                if (enYakin < 99f) break;
+            }
+            if (enYakin >= 99f) { rapor.Append($"{kimlik}=GÖRÜLMÜYOR "); continue; }
+            GorusKabuguSil(kabuklar); kabuklar.Clear();   // fotoğrafta kabuk çarpışmaları önemsiz ama temiz olsun
+            kamera.position = enIyi;
+            kamera.rotation = Quaternion.LookRotation(bakis - enIyi);
+            // Kafa lambası kameranın arkasından gecikmeli döner (#92, KameraHareketi): kamera bir anda taşınınca
+            // lamba hâlâ eski yöne bakar ve eşya fenerin ışığında olmaz. Çekimden önce lamba kameraya hizalanır.
+            if (lamba != null) lamba.IsikYonu.rotation = kamera.rotation;
+            foreach (FenerParlamasi fp in Object.FindObjectsByType<FenerParlamasi>()) fp.Guncelle(true);
+            cam.targetTexture = rt;
+            cam.Render();
+            RenderTexture.active = rt;
+            doku.ReadPixels(new Rect(0, 0, 800, 500), 0, 0); doku.Apply();
+            RenderTexture.active = null;
+            cam.targetTexture = eskiHedef;
+            System.IO.File.WriteAllBytes($"{klasor}/gorus_kat{kat}_{kimlik}.jpg", ImageConversion.EncodeToJPG(doku, 85));
+            rapor.Append($"{kimlik}={(ayaktaBulundu ? "ayakta" : "egik")}:{enYakin:0.0}m ");
+            kabuklar = GorusKabuguKur(sahanlik);
+        }
+        GorusKabuguSil(kabuklar);
+        Object.Destroy(rt);
+        kamera.position = eskiKonum; kamera.rotation = eskiDonus;
+        return rapor.ToString();
+    }
+
     // ---------- SAKLAMA YERİ ARAMASI (#102) ----------
     // Bir odanın zeminini 20 cm'lik ızgarayla tarar, eşyayı her noktaya geçici olarak koyup ölçer ve oyunun
     // nişanıyla seçilebilen iki tür yeri yazar:
@@ -488,15 +580,8 @@ public static class KatDenetimi
             if (!r.enabled) continue;
             if (ilk) { b = r.bounds; ilk = false; } else b.Encapsulate(r.bounds);
         }
-        // Beş nokta: kutunun ortası ve üst yüzünün dört köşesine yakın noktalar (kenarın %70'i).
-        Vector3 c = b.center, e = b.extents;
-        float ust = b.max.y - 0.002f;
-        Vector3[] noktalar =
-        {
-            c,
-            new Vector3(c.x + e.x * 0.7f, ust, c.z + e.z * 0.7f), new Vector3(c.x - e.x * 0.7f, ust, c.z + e.z * 0.7f),
-            new Vector3(c.x + e.x * 0.7f, ust, c.z - e.z * 0.7f), new Vector3(c.x - e.x * 0.7f, ust, c.z - e.z * 0.7f),
-        };
+        Vector3[] noktalar = BesNokta(b);
+        Vector3 c = b.center;
         int ayaktaSay = 0, egikSay = 0;
         foreach (var h in hucreler)
         {
@@ -512,6 +597,20 @@ public static class KatDenetimi
             }
         }
         return new Vector2Int(ayaktaSay, egikSay);
+    }
+
+    // Beş nokta: kutunun ortası ve üst yüzünün dört köşesine yakın noktalar (kenarın %70'i). Eşyanın bir köşesi
+    // görünüyorsa oyuncu onu görmüş sayılır (bir anahtarın ucu kanepenin altından görünür).
+    static Vector3[] BesNokta(Bounds b)
+    {
+        Vector3 c = b.center, e = b.extents;
+        float ust = b.max.y - 0.002f;
+        return new[]
+        {
+            c,
+            new Vector3(c.x + e.x * 0.7f, ust, c.z + e.z * 0.7f), new Vector3(c.x - e.x * 0.7f, ust, c.z + e.z * 0.7f),
+            new Vector3(c.x + e.x * 0.7f, ust, c.z - e.z * 0.7f), new Vector3(c.x - e.x * 0.7f, ust, c.z - e.z * 0.7f),
+        };
     }
 
     // ---------- GÖRÜŞ KABUKLARI ----------
