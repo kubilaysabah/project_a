@@ -257,5 +257,5 @@ borcu öder. Kararlar: **zorunlu** (seçim yok; bina çağırır), **bulmacasız
   (anahtar tabağa, Gölge sandalyeye, lamba oyuncuya); kayıt değişmez, 8. katın zinciri de bozulmaz.
 - 8. katın zincirinde artık kat anahtarı YOK: kural (`KilitZinciri`) asansör kilidi çözülünce zinciri bitmiş
   sayar. T listesinde çatı anahtarı görünmez.
-- Henüz yapılmadı: sahanlığın "taze boya, parlak mozaik" hâli (1994'ün kirli dokuları duruyor); tespih ve kasket
+- Henüz yapılmadı (#109): sahanlığın "taze boya, parlak mozaik" hâli (1994'ün kirli dokuları duruyor); tespih ve kasket
   basit modeller; boş çivi parıldamaz (nişangâhın el simgesi tek işaret).
