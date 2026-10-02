@@ -32,6 +32,7 @@ public class CatiKapisi : MonoBehaviour, IEtkilesimli
     {
         get { return Cep.Tasiyor(EsyaTuru.KatAnahtari, KatSayaci.CatiKati) ? Dil.Getir("ipucu.ac") : Dil.Getir("ipucu.kilitli"); }
     }
+    public NisanSimgesi Simge { get { return Cep.Tasiyor(EsyaTuru.KatAnahtari, KatSayaci.CatiKati) ? NisanSimgesi.Anahtar : NisanSimgesi.Kilitli; } }   // #104
 
     public bool EtkilesimeAcik { get { return Yonetici != null; } }
 

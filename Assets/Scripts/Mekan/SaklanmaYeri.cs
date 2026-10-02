@@ -78,6 +78,7 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
     // ---------- SÖZLEŞME (IEtkilesimli) ----------
 
     public string Ipucu { get { return Dil.Getir("ipucu.saklan"); } }
+    public NisanSimgesi Simge { get { return NisanSimgesi.Saklan; } }   // #104
 
     /// <summary>
     /// Şu an saklanılabilir mi? Hayır, eğer: zaten bir yerde saklanılıyorsa, dolabın (ya da kapağının)

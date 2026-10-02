@@ -90,6 +90,19 @@ public class AcilirParca : MonoBehaviour, IEtkilesimli
 
     public bool EtkilesimeAcik { get { return hareketEden == null; } }
 
+    // Nişangâh simgesi (#104): Ipucu ile aynı sıra. Zincir kilidi varsa onun simgesi; kilitliyse kilit;
+    // açıksa KAPAT, kapalıysa AÇ. İtilen gardırop gibi "AÇ" yerine başka söz söyleyen parçalar da ok alır.
+    public NisanSimgesi Simge
+    {
+        get
+        {
+            Kilit kilit = GetComponent<Kilit>();
+            if (kilit != null && !kilit.Cozuk) return kilit.Simge;
+            if (kilitli) return NisanSimgesi.Kilitli;
+            return acik ? NisanSimgesi.Kapat : NisanSimgesi.Ac;
+        }
+    }
+
     public void Etkilesim(GameObject oyuncu)
     {
         Kilit kilit = GetComponent<Kilit>();

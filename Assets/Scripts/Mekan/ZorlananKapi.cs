@@ -30,6 +30,7 @@ public class ZorlananKapi : MonoBehaviour, IEtkilesimli
 
     // IEtkilesimli sözleşmesi. Yazı ekranda gösterilmiyor (#72); ipucu yine de "KİLİTLİ".
     public string Ipucu { get { return Dil.Getir("ipucu.kilitli"); } }
+    public NisanSimgesi Simge { get { return NisanSimgesi.Kilitli; } }   // #104
 
     // Etkileşime açık: bileşen açıksa, kapı şu an esnemiyorsa ve kapıda "çal" bileşeni yoksa.
     // enabled: bileşen kapatılmışsa (açık dairenin kapısı) Etkilesimci onu yine de bulur; bu yüzden

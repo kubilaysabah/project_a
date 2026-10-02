@@ -76,6 +76,7 @@ public class Yonlendirici : MonoBehaviour, IEtkilesimli
     }
 
     public string Ipucu { get { IEtkilesimli h = Hedef; return h != null ? h.Ipucu : ""; } }
+    public NisanSimgesi Simge { get { IEtkilesimli h = Hedef; return h != null ? h.Simge : NisanSimgesi.El; } }   // #104: yönlendirilen parçanınki
 
     public bool EtkilesimeAcik { get { return Hedef != null; } }
 

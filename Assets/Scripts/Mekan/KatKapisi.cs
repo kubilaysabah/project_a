@@ -48,6 +48,7 @@ public class KatKapisi : MonoBehaviour, IEtkilesimli
     {
         get { return Cep.Tasiyor(EsyaTuru.KatAnahtari, kat) ? Dil.Getir("ipucu.ac") : Dil.Getir("ipucu.kilitli"); }
     }
+    public NisanSimgesi Simge { get { return Cep.Tasiyor(EsyaTuru.KatAnahtari, kat) ? NisanSimgesi.Anahtar : NisanSimgesi.Kilitli; } }   // #104
 
     public bool EtkilesimeAcik { get { return !acik && hareket == null; } }
 

@@ -30,6 +30,7 @@ public class KirilanKavanoz : MonoBehaviour, IEtkilesimli
     // IEtkilesimli sözleşmesi. Yazı ekranda gösterilmiyor (#72) ama sözleşme bir ipucu ister;
     // zincir kavanozunun kilidiyle aynı sözcükler.
     public string Ipucu { get { return Dil.Getir(Aletler.Var(alet) ? "ipucu.kir" : "ipucu.kilitli"); } }
+    public NisanSimgesi Simge { get { return Aletler.Var(alet) ? NisanSimgesi.El : NisanSimgesi.Kilitli; } }   // #104
 
     // Kırılmamışsa her zaman açık: tornavida yokken de nişangâh dolar ve kilitli sesi duyulur,
     // zincir kavanozuyla aynı davranış (oyuncu hangisinin farklı olduğunu buradan anlayamasın).

@@ -47,6 +47,7 @@ public class AileFotografi : MonoBehaviour, IEtkilesimli
     }
 
     public string Ipucu { get { return Dil.Getir("ipucu.bak"); } }
+    public NisanSimgesi Simge { get { return NisanSimgesi.Goz; } }   // #104
 
     public bool EtkilesimeAcik { get { return album != null && album.Bul(kimlik) != null && !FotografEkrani.Acik; } }
 

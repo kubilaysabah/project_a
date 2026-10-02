@@ -205,27 +205,26 @@ public class Etkilesimci : MonoBehaviour
 
         if (enYakin == null) return null;
 
-        // KABIN İÇİNDEKİ EŞYA (#54). Çekmecedeki anahtar, çekmecenin (ve komodinin) çarpışma
+        // KABIN İÇİNDEKİ ŞEY (#54, #104). Çekmecedeki anahtar, çekmecenin (ve komodinin) çarpışma
         // kutusunun İÇİNDE durur; en yakın çarpışma hep kabın kendisi olur ve anahtar hiç
-        // seçilemezdi. Kural: bir eşyanın önündeki bütün çarpışmalar onu içinde taşıyan
-        // kaplarsa (eşya onların çocuğuysa) eşya seçilir. Arada kapalı bir kapak ya da kapı
-        // varsa (onlar eşyanın ebeveyni değil) seçilmez; araya duvar girerse de seçilmez.
-        Collider icteki = null;
-        float icMesafe = float.MaxValue;
-        foreach (RaycastHit h in carpmalar)
-        {
-            if (h.collider.transform.IsChildOf(transform)) continue;
-            Esya esya = h.collider.GetComponentInParent<Esya>();
-            if (esya == null || !esya.EtkilesimeAcik || h.distance >= icMesafe) continue;
-            bool onundekilerKap = true;
-            foreach (RaycastHit o in carpmalar)
-            {
-                if (o.collider.transform.IsChildOf(transform) || o.distance >= h.distance) continue;
-                if (!esya.transform.IsChildOf(o.collider.transform) && !IcindeMi(h.collider, o.collider)) { onundekilerKap = false; break; }
-            }
-            if (onundekilerKap) { icteki = h.collider; icMesafe = h.distance; }
-        }
-        IEtkilesimli bulunan = icteki != null ? Kullanilabilir(icteki) : null;
+        // seçilemezdi. Kural: bir içeriğin önündeki bütün çarpışmalar onu içinde taşıyan
+        // kaplarsa (içerik onların çocuğuysa) içerik seçilir. Arada kapalı bir kapak ya da kapı
+        // varsa (onlar içeriğin ebeveyni değil) seçilmez; araya duvar girerse de seçilmez.
+        // #104: kural eskiden yalnızca EŞYA (Esya) içindi; çekmecedeki NOT eşya olmadığı için
+        // nişan çekmeceyi seçiyor ve E çekmeceyi kapatıyordu (Şahan). Şimdi kabın içindeki her
+        // etkileşim (not, fotoğraf, tabak yuvası, kavanoz...) kabın kendisinden önce gelir.
+        // İnce ışın (yarıçapsız): bir şeyin içeriğin ÖNÜNÜ kapatıp kapatmadığına bununla bakılır. Küre
+        // 6 cm geniş olduğu için yoldaki başka şeylere sürter (açık çekmecedeki nota bakarken alttaki
+        // kapalı çekmecenin ön yüzüne değiyordu) ve not "önü kapalı" sayılıp eleniyordu.
+        RaycastHit[] inceCarpmalar = Physics.RaycastAll(isin, menzil);
+        IEtkilesimli bulunan = IctekiniBul(carpmalar, inceCarpmalar);
+
+        // AÇIK KAP NİŞANI AFFEDER (#104). Nişan tam notun üstünde değilse küre notun çarpışmasına
+        // değmez; en yakın çarpışma açık çekmece olur ve E onu KAPATIR. Oyuncu açık bir çekmeceye
+        // bakarken niyeti neredeyse hep içindekidir: o durumda iki kat geniş bir küreyle içerik yeniden
+        // aranır. Çekmeceyi kapatmak için ön yüzüne, içindekinin olmadığı yere bakmak yeter.
+        if (bulunan == null && Kullanilabilir(enYakin) is AcilirParca acikKap && acikKap.Acik)
+            bulunan = IctekiniBul(Physics.SphereCastAll(isin, NisanYaricapi * 2.5f, menzil), inceCarpmalar);
 
         // KABIN İÇİNDEKİ NESNE (#61). En yakın çarpışmanın kendi etkileşimi yoksa ama arkasında
         // onun ÇOCUĞU olan bir çarpışma varsa (tezgâhın üstündeki kavanoz; tezgâhın çarpışma
@@ -266,6 +265,42 @@ public class Etkilesimci : MonoBehaviour
         return bulunan;
     }
 
+    // Çarpışmalar (küre) arasında, bakış çizgisinin (ince ışın) önünde yalnızca kendi kapları olan en yakın
+    // İÇERİĞİ bulur (yoksa null). Küre içeriği yakalar; önü kapatanı ince ışın belirler.
+    private IEtkilesimli IctekiniBul(RaycastHit[] carpmalar, RaycastHit[] inceCarpmalar)
+    {
+        Collider icteki = null;
+        float icMesafe = float.MaxValue;
+        foreach (RaycastHit h in carpmalar)
+        {
+            if (h.collider.transform.IsChildOf(transform)) continue;
+            MonoBehaviour icerik = Icerik(h.collider);
+            if (icerik == null || h.distance >= icMesafe) continue;
+            bool onundekilerKap = true;
+            foreach (RaycastHit o in inceCarpmalar)
+            {
+                if (o.collider.transform.IsChildOf(transform) || o.distance >= h.distance) continue;
+                if (!icerik.transform.IsChildOf(o.collider.transform) && !IcindeMi(h.collider, o.collider)) { onundekilerKap = false; break; }
+            }
+            if (onundekilerKap) { icteki = h.collider; icMesafe = h.distance; }
+        }
+        return icteki != null ? Kullanilabilir(icteki) : null;
+    }
+
+    // İÇERİK (#104): bu çarpışma, bir kabın içinde duran ve kendi etkileşimi olan bir şeye mi ait
+    // (eşya, not, fotoğraf, tabak yuvası, kavanoz, radyo)? Kapların kendisi (çekmece/kapak/kapı, oda kapısı,
+    // gövdeden parçaya yönlendiren) içerik DEĞİLDİR. Çarpışmadan yukarı çıkarken ilk bulunan etkileşim bir
+    // kapsa, bu çarpışma kabın kendisidir; içerik değilse ya da şu an yapılamıyorsa null.
+    private static MonoBehaviour Icerik(Collider c)
+    {
+        foreach (IEtkilesimli e in c.GetComponentsInParent<IEtkilesimli>())
+        {
+            if (e is AcilirParca || e is Yonlendirici || e is IcKapi || e is SaklanmaYeri) return null;
+            return e.EtkilesimeAcik ? e as MonoBehaviour : null;
+        }
+        return null;
+    }
+
     // İÇİNDE Mİ (#83): "ic" çarpışmasının ortası "kab" çarpışmasının kutusunun (bounds) içinde mi? Eşya bir
     // mobilyanın çocuğu olmadan da onun çarpışma kutusunun içinde durabilir: tamir tezgâhının kutusu arkadaki pano ve
     // radyo yüzünden üstündeki tenekeyi, çalışma masasının kutusu lamba yüzünden masadaki anahtarı içine alıyordu
@@ -291,19 +326,23 @@ public class Etkilesimci : MonoBehaviour
 
     // ---------- İPUCU ----------
 
-    // ---------- NİŞANGÂH (#72) ----------
+    // ---------- NİŞANGÂH (#72, simge #104) ----------
     // Ekranın tam ortasında küçük, yuvarlak, beyaz bir halka. Baktığın şeyle etkileşime
-    // girebiliyorsan (eşya, kapı, çekmece, not...) halkanın içi kırmızıyla dolar ve biraz büyür.
-    // Hangi eylemin yapılacağı yazmaz (AÇ, AL, KİLİTLİ); oyuncu dener ve görür.
+    // girebiliyorsan (eşya, kapı, çekmece, not...) halkanın içi kırmızıyla dolar, büyür ve ortasında
+    // E'nin NE YAPACAĞINI söyleyen küçük beyaz bir simge belirir: el (al), göz (oku), ok (aç / kapat),
+    // kilit, anahtar, kol, dolap. Yazı yine yok (#72); simge, çekmeceyi kapatmakla içindekini almayı
+    // basmadan önce ayırt ettirir (Şahan'ın çekmece şikâyeti).
     //
     // OnGUI: Unity'nin ekrana düz (iki boyutlu) çizim yaptığı fonksiyon; her karede çağrılır.
     // Bütün arayüz gibi sanal 1080 piksel yüksekliğindeki ekrana çizilir (ArayuzOlcegi, #34):
     // halka her çözünürlükte ekranın aynı oranını kaplar.
     private const float NisanBoyu = 14f;          // halkanın çapı (sanal piksel)
-    private const float DoluBoyu = 20f;           // hedef varken
+    private const float DoluBoyu = 36f;           // hedef varken (simge sığacak kadar)
+    private const float SimgeBoyu = 26f;          // simgenin kenarı (16 piksellik desen ~1,6 kat)
     private static readonly Color HalkaRengi = new Color(1f, 1f, 1f, 0.85f);
     private static readonly Color DolguRengi = new Color(0.86f, 0.08f, 0.06f, 0.95f);
     private static Texture2D halkaDokusu, diskDokusu;
+    private static Texture2D[] simgeDokulari;     // NisanSimgesi sırasıyla
 
     private void OnGUI()
     {
@@ -317,7 +356,8 @@ public class Etkilesimci : MonoBehaviour
 
         bool hedefVar = Hedef != null && Hedef.EtkilesimeAcik;
         float boy = hedefVar ? DoluBoyu : NisanBoyu;
-        Rect alan = new Rect(ArayuzOlcegi.Genislik / 2f - boy / 2f, ArayuzOlcegi.Yukseklik / 2f - boy / 2f, boy, boy);
+        float ox = ArayuzOlcegi.Genislik / 2f, oy = ArayuzOlcegi.Yukseklik / 2f;
+        Rect alan = new Rect(ox - boy / 2f, oy - boy / 2f, boy, boy);
         if (hedefVar)
         {
             GUI.color = DolguRengi;
@@ -325,6 +365,13 @@ public class Etkilesimci : MonoBehaviour
         }
         GUI.color = HalkaRengi;
         GUI.DrawTexture(alan, halkaDokusu);
+        if (hedefVar)
+        {
+            // Simge: hedefin söylediği işaret, kırmızı diskin ortasında beyaz.
+            Texture2D simge = simgeDokulari[(int)Hedef.Simge];
+            GUI.color = Color.white;
+            GUI.DrawTexture(new Rect(ox - SimgeBoyu / 2f, oy - SimgeBoyu / 2f, SimgeBoyu, SimgeBoyu), simge);
+        }
         GUI.color = Color.white;
     }
 
@@ -353,5 +400,176 @@ public class Etkilesimci : MonoBehaviour
         diskDokusu.filterMode = FilterMode.Bilinear;
         halkaDokusu.Apply();
         diskDokusu.Apply();
+        SimgeleriUret();
+    }
+
+    // ---------- SİMGELER (#104) ----------
+    // Her simge 16 × 16'lık bir desen: '#' dolu, '.' boş. Desen metin olarak burada durur; bir dosyaya
+    // gerek yok (build'e girmesi dert olmaz) ve bir simgeyi değiştirmek metni düzeltmekten ibaret.
+    // Sıra NisanSimgesi'ndeki sırayla AYNI olmalı: El, Goz, Ac, Kapat, Kilitli, Anahtar, Kol, Saklan.
+    private static readonly string[][] SimgeDesenleri =
+    {
+        new[] {   // EL: işaret parmağı kalkık bir el
+            "......##........",
+            ".....#..#.......",
+            ".....#..#.......",
+            ".....#..#.......",
+            ".....#..####....",
+            ".....#..#..##...",
+            ".....#..#..#.##.",
+            "..##.#..#..#..#.",
+            ".#..##........#.",
+            ".#............#.",
+            "..#...........#.",
+            "..#..........#..",
+            "...#.........#..",
+            "...#........#...",
+            "....########....",
+            "................",
+        },
+        new[] {   // GÖZ
+            "................",
+            "................",
+            "................",
+            "......####......",
+            "....##....##....",
+            "..##...##...##..",
+            ".#....####....#.",
+            "#....######....#",
+            "#....######....#",
+            ".#....####....#.",
+            "..##...##...##..",
+            "....##....##....",
+            "......####......",
+            "................",
+            "................",
+            "................",
+        },
+        new[] {   // AÇ: çubuktan dışarı çıkan ok (çekmece dışarı)
+            "................",
+            ".##.............",
+            ".##.............",
+            ".##......#......",
+            ".##......##.....",
+            ".##.......##....",
+            ".##........##...",
+            ".##.##########..",
+            ".##.##########..",
+            ".##........##...",
+            ".##.......##....",
+            ".##......##.....",
+            ".##......#......",
+            ".##.............",
+            ".##.............",
+            "................",
+        },
+        new[] {   // KAPAT: çubuğa doğru giden ok (çekmece içeri)
+            "................",
+            ".............##.",
+            ".............##.",
+            "......#......##.",
+            "......##.....##.",
+            ".......##....##.",
+            "........##...##.",
+            "..##########.##.",
+            "..##########.##.",
+            "........##...##.",
+            ".......##....##.",
+            "......##.....##.",
+            "......#......##.",
+            ".............##.",
+            ".............##.",
+            "................",
+        },
+        new[] {   // KİLİTLİ: asma kilit
+            "................",
+            ".....######.....",
+            "....##....##....",
+            "....#......#....",
+            "....#......#....",
+            "....#......#....",
+            "..############..",
+            "..############..",
+            "..####....####..",
+            "..####....####..",
+            "..#####..#####..",
+            "..############..",
+            "..############..",
+            "..############..",
+            "...##########...",
+            "................",
+        },
+        new[] {   // ANAHTAR
+            "................",
+            ".....####.......",
+            "....#....#......",
+            "...#......#.....",
+            "...#......#.....",
+            "....#....#......",
+            ".....####.......",
+            ".......##.......",
+            ".......##.......",
+            ".......##.......",
+            ".......####.....",
+            ".......##.......",
+            ".......####.....",
+            ".......##.......",
+            "................",
+            "................",
+        },
+        new[] {   // KOL: tabanından yükselen eğik kol ve topuzu
+            "................",
+            "...........##...",
+            "..........####..",
+            "..........####..",
+            ".........##.##..",
+            "........##......",
+            ".......##.......",
+            "......##........",
+            ".....##.........",
+            "....##..........",
+            "...##...........",
+            "..##............",
+            ".############...",
+            ".############...",
+            "................",
+            "................",
+        },
+        new[] {   // SAKLAN: iki kapaklı dolap
+            "................",
+            "..###########...",
+            "..#....#....#...",
+            "..#....#....#...",
+            "..#....#....#...",
+            "..#..#.#.#..#...",
+            "..#....#....#...",
+            "..#....#....#...",
+            "..#....#....#...",
+            "..#....#....#...",
+            "..#....#....#...",
+            "..#....#....#...",
+            "..#....#....#...",
+            "..###########...",
+            "..#.........#...",
+            "................",
+        },
+    };
+
+    // Desenleri dokuya çevirir. Desenin ilk satırı dokunun ÜSTÜ olmalı: Unity dokularında y = 0 alt
+    // satırdır, bu yüzden satır sırası ters çevrilerek yazılır. Point süzme: küçük desen bulanmasın.
+    private static void SimgeleriUret()
+    {
+        simgeDokulari = new Texture2D[SimgeDesenleri.Length];
+        for (int s = 0; s < SimgeDesenleri.Length; s++)
+        {
+            string[] desen = SimgeDesenleri[s];
+            var doku = new Texture2D(16, 16, TextureFormat.RGBA32, false);
+            for (int y = 0; y < 16; y++)
+                for (int x = 0; x < 16; x++)
+                    doku.SetPixel(x, 15 - y, desen[y][x] == '#' ? Color.white : Color.clear);
+            doku.filterMode = FilterMode.Point;
+            doku.Apply();
+            simgeDokulari[s] = doku;
+        }
     }
 }

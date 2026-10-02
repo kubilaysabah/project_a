@@ -50,6 +50,7 @@ public class Pano : MonoBehaviour, IEtkilesimli
     }
 
     public string Ipucu { get { return Dil.Getir("ipucu.oku"); } }
+    public NisanSimgesi Simge { get { return NisanSimgesi.Goz; } }   // #104
 
     public bool EtkilesimeAcik { get { return !acik && Kayit.OkunanNotlar().Count > 0; } }
 

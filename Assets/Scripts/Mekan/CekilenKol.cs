@@ -44,6 +44,7 @@ public class CekilenKol : MonoBehaviour, IEtkilesimli
     }
 
     public string Ipucu { get { return Dil.Getir(ipucuAnahtari); } }
+    public NisanSimgesi Simge { get { return NisanSimgesi.Kol; } }   // #104: çekilecek kol / çevrilecek çark
 
     // Bir kez çekilir; aşağıda kalır.
     public bool EtkilesimeAcik { get { return !cekildi && !harekette; } }

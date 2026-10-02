@@ -67,6 +67,27 @@ public class Kilit : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Nişangâh simgesi (#104): Ipucu ile aynı kararlar, yazı yerine işaret. Anahtarla ya da tamamlanan
+    /// parçalarla açılacaksa ANAHTAR; aletle sökülecek / kırılacak / itilecekse EL; şifre KİLİTLİ (çevirmeli
+    /// kilit görüntüsü zaten şifreyi anlatır); eksik bir şey varsa KİLİTLİ.
+    /// </summary>
+    public NisanSimgesi Simge
+    {
+        get
+        {
+            switch (Veri.Tur)
+            {
+                case KilitTuru.Anahtar: return Cep.KimligiTasiyor(Veri.Gerekli) ? NisanSimgesi.Anahtar : NisanSimgesi.Kilitli;
+                case KilitTuru.KirikAnahtar: return ParcalarTamam() ? NisanSimgesi.Anahtar : NisanSimgesi.Kilitli;
+                case KilitTuru.Tornavida:
+                case KilitTuru.Kirma: return Aletler.Var(Veri.Gerekli) ? NisanSimgesi.El : NisanSimgesi.Kilitli;
+                case KilitTuru.Ekipman: return EkipmanTamam() ? NisanSimgesi.El : NisanSimgesi.Kilitli;
+                default: return NisanSimgesi.Kilitli;
+            }
+        }
+    }
+
     /// <summary>Oyuncu kilitli kapıya dokundu. true: kilit bu dokunuşu karşıladı.</summary>
     public bool Etkilesim(GameObject oyuncu)
     {

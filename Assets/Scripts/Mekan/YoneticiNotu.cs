@@ -25,6 +25,7 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
 
     // ---------- SÖZLEŞME ----------
     public string Ipucu { get { return Dil.Getir("ipucu.oku"); } }
+    public NisanSimgesi Simge { get { return NisanSimgesi.Goz; } }   // #104: okunacak şey
 
     // Not açıkken ikinci kez açılmasın.
     public bool EtkilesimeAcik { get { return !acik; } }

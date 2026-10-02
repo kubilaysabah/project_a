@@ -59,6 +59,18 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
         }
     }
 
+    // Nişangâh simgesi (#104): Ipucu ile aynı kararlar.
+    public NisanSimgesi Simge
+    {
+        get
+        {
+            Kilit kilit = GetComponent<Kilit>();
+            if (kilit != null && !kilit.Cozuk) return kilit.Simge;
+            if (kilitli) return NisanSimgesi.Kilitli;
+            return acik ? NisanSimgesi.Kapat : NisanSimgesi.Ac;
+        }
+    }
+
     // Kapı dönerken ikinci bir basış yok sayılır; dönüş bitince yeniden etkileşilebilir.
     // Kilitli kapı da etkileşime açık: oyuncu dener, "kilitli" sesini duyar (Şahan, 2026-09-29: bu
     // katta açılmayan oda kapılarında da nişangâh dolsun, eski hâli).
