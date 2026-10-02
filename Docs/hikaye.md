@@ -202,3 +202,40 @@ Final (c), kaçış bedeli (katın kapısında uyanma) ve telefon (isteğe bağl
 yukarıdaki bölümlere işlendi.
 
 1. **Kat kimlikleri (§7):** Şahan değişiklik istiyor; hangi katların ne olacağı bekleniyor.
+
+## 16. Dokuzuncu kat (final bölümü) — Şahan'ın kararı, 2026-10-02
+
+**Neden:** oyunun her parçası dokuzuncu kata işaret ediyor (ruhsatta olmayan kat, gizli plandaki 33-36 numaralı
+daireler, personel dosyaları, Nuri'nin "dokuzuncu kattakiler"i, Cemal'in "asansör beni bekliyor" notu, 6. katın
+dört tabaklı sofra daveti, "9"dan inen asansör, finaldeki yanan pencere) ama oyuncu orayı hiç görmüyordu. Bu bölüm o
+borcu öder. Kararlar: **zorunlu** (seçim yok; bina çağırır), **bulmacasız** (4-6 dakikalık yürüyüş ve tek kaçış),
+**lamba çiviye asılır**.
+
+**Akış**
+1. **Asansör gelir, anahtar kabinde değildir.** 8. katın zinciri sigorta → çağır ile biter. Oyuncu kabine girince
+   kapılar kendiliğinden kapanır, gösterge 8'den 9'a geçer, kabin sarsılır; kapılar 1974'te açılır.
+2. **Sahanlık, 1974.** Aynı sahanlık, ama yeni: boyası taze, mozaiği parlak, kapı numaraları 33-36. Merdiven iki yöne de
+   **tuğlayla örülü** ("merdiven çıkmaz, asansör çıkar"). Elektrik yok; tek açık kapı, ışığı dışarıdan görülen
+   pencerenin dairesi; yalnızca o dairenin salonu yanıyor. Takvim: Ekim 1974.
+3. **Daire: binanın sakladıkları.** Aynı 3+1 plan. Holde üç çivi: Rıza Efendi'nin tespihi, Hasan'ın kasketi (çıkıp
+   gidenlerin bıraktıkları) ve BOŞ üçüncü çivi. Salon kapısı kapalı. Oyuncu Cemal'in lambasını boş çiviye asınca
+   (etkileşim "AS"; çividen alındığı gibi) salon kapısı kendiliğinden açılır. Bu bir kapı anıdır, bulmaca değil: holde
+   etkileşilecek tek şey çividir ve parıldar. Odalarda öteki katlardan tanıdık eşyalar (Nuri'nin radyosunun ikizi
+   çalıyor, Hasan'ın kamp yatağı, Cemal'in sandığı): burada model tekrarı bilerek vardır, tekrar hikâyenin kendisidir.
+4. **Sofra.** Salonda 6. katın sofrası kurulu: dört tabak. Rıza'nın ve Hasan'ın tabakları boş, sandalyeleri geri
+   itilmiş (kalkıp gitmişler). Cemal'in sandalyesinde Gölge OTURUYOR, sırtı dönük, önünde anahtarlığı. Dördüncü tabak
+   oyuncunun: üstünde çatı anahtarı, sandalye çekilmiş. Kural yazısızdır: oturan kalmaz. Anahtar alınır, oturulmaz.
+5. **Kaçış.** Anahtar alındığı an anahtarlık şıkırdar, salonun ışığı söner, Gölge kalkar. Oyuncunun kendi lambası
+   çivide; yol yalnızca kabinin ışığıyla görülür. 7. katın kovalamacası (iz sürme), hedef asansör. Kabine girince
+   kapılar kapanır, Gölge kapıya çarpar, kabin 8'e iner. Yakalanırsa bölüm kabinin açılışından yeniden başlar (anahtar
+   tabağa, Gölge sandalyesine döner; kayıt değişmez).
+6. **Çatı.** 8. katta kapılar açılır; merdivenle çatı kapısına, bugünkü final. Dış görüntü değişmez: dokuz kat ve yanan
+   pencere. Oyuncu artık o pencerenin hangi oda olduğunu bilir ve ışığın kendi lambası olduğunu anlar: sofra hâlâ
+   kurulu, bir sandalye hâlâ boş.
+
+**Kurallar**
+- Varlık tektir (Cemal); Rıza ve Hasan kurtulmuştur (dosyalar ve Hasan'ın telefonu). Gölge'nin anahtarlığı (#105)
+  burada masada görünür.
+- Dokuzuncu kat kayda GİRMEZ: oyun burada kapatılırsa 8. katın başından açılır (#84 kuralı). Gerilim kuralı ve
+  takılma ipucu bu bölümde kapalıdır; tek tehdit sofradaki Gölge.
+- Açık karar: final fotoğrafındaki "Yeni kapıcı, 1994" satırı olduğu gibi kalır (Şahan dokunmadı).
