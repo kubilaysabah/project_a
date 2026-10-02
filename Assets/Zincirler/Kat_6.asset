@@ -867,6 +867,11 @@ MonoBehaviour:
     Metin: 
     Ad: 
   sesler: []
+  anons:
+    Yol: Sus_Eski_TV_K6
+    Gecikme: 28
+    Dosya: radyo_kat6
+    Ses: 0.7
   parcalar: []
   yananOdalar: []
   ikinciDaire: 4

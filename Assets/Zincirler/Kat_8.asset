@@ -424,6 +424,17 @@ MonoBehaviour:
     Ad: 
   - Yol: 
     X: 2.6
+    Y: 0.77
+    Z: 7.36
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 6728877149674131968, guid: 53c622d9b7419de43800fff9baec42ce, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
+    X: 2.6
     Y: 0
     Z: 7.7
     Donus: 0
@@ -698,6 +709,11 @@ MonoBehaviour:
     Metin: 
     Ad: 
   sesler: []
+  anons:
+    Yol: Sus_Radyo_Masa_K8
+    Gecikme: 18
+    Dosya: radyo_kat8
+    Ses: 0.7
   parcalar: []
   yananOdalar:
   - Salon

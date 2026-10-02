@@ -80,6 +80,20 @@ public class KatSesi
 }
 
 /// <summary>
+/// Katın radyo anonsu (#106): oyuncu daireye girdikten Gecikme sn sonra Yol'daki cihaz (radyo, TV) cızırtıyla
+/// açılır, Dosya adlı seslendirmeyi (Resources/Sesler/Konusmalar) söyler, cızırtıya döner. Dosya yoksa
+/// yalnızca cızırtı. Yol boşsa bu katta anons yok.
+/// </summary>
+[System.Serializable]
+public class KatAnonsu
+{
+    public string Yol = "";
+    public float Gecikme = 25f;
+    public string Dosya = "";
+    [Range(0f, 1f)] public float Ses = 0.7f;
+}
+
+/// <summary>
 /// Yırtık bir çizimin bir parçası (#63). Kimlik: zincirdeki Parca eşyasının kimliği; Doku: tam
 /// resim boyunda, yalnızca bu parçanın bölgesi opak doku; Bolge: o bölgenin dokudaki yeri (UV,
 /// 0-1, sol alttan). Dünyadaki kâğıt parçası yalnızca Bolge'yi gösterir; yakın bakış ekranı
@@ -126,6 +140,7 @@ public class KatZinciriVarligi : ScriptableObject
     public List<KatNotu> notlar = new List<KatNotu>();
     public List<KatSusu> suslar = new List<KatSusu>();
     public List<KatSesi> sesler = new List<KatSesi>();
+    public KatAnonsu anons = new KatAnonsu();   // #106: katın tek haber cümlesi (Yol boşsa yok)
     public List<KatParcasi> parcalar = new List<KatParcasi>();
     // Bu katta tavan lambası yanabilen odalar (#64): dairede elektrik varken yanarlar. Boş: hiçbiri.
     public List<string> yananOdalar = new List<string>();

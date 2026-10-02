@@ -96,6 +96,7 @@ public static partial class GrayboxKurucu
         }
         v.cizimBoyu = 0.30f;
         v.sesler = new List<KatSesi>();
+        v.anons = new KatAnonsu { Yol = "Sus_Tuplu_TV_K3", Gecikme = 22f, Dosya = "radyo_kat3" };   // #106: salondaki tüplü TV
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;
         v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Tezgah" };

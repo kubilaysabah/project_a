@@ -330,6 +330,13 @@ public class ZincirUygulayici
             c.Hazirla(ks.Klip, ks.Gecikme, ks.Ses, KilitZinciri.OdaAdi(ks.Oda), KapiBul(daire, ks.Oda), t.GetComponentInParent<DaireEksenleri>(),
                       ks.Kapatilabilir, ks.SusturanKilit, kat);
         }
+        // Radyo anonsu (#106): katın ses cihazına RadyoAnonsu eklenir (dekor "Sus_<şablon>" adıyla, adlı dekor adıyla).
+        if (varlik.anons != null && !string.IsNullOrEmpty(varlik.anons.Yol))
+        {
+            Transform t = Cozum(daire, varlik.anons.Yol);
+            if (t == null) Debug.LogWarning($"[ZINCIR] Anons cihazı '{varlik.anons.Yol}' bulunamadı.");
+            else t.gameObject.AddComponent<RadyoAnonsu>().Hazirla(varlik.anons.Gecikme, varlik.anons.Dosya, varlik.anons.Ses, t.GetComponentInParent<DaireEksenleri>());
+        }
     }
 
     // Katın anını kurar (#96): dairenin köküne bir KatAni bileşeni, tarifi ve bulduğu nesnelerle.
@@ -588,6 +595,7 @@ public class ZincirUygulayici
         foreach (CekilenKol kol in daire.GetComponentsInChildren<CekilenKol>(true)) { kol.Sifirla(); Object.DestroyImmediate(kol); }
         // Çalan eşyalar susar, sesleri ve ışıkları sökülür (#62).
         foreach (CalanEsya c in daire.GetComponentsInChildren<CalanEsya>(true)) { c.Sifirla(); Object.DestroyImmediate(c); }
+        foreach (RadyoAnonsu r in daire.GetComponentsInChildren<RadyoAnonsu>(true)) { r.Sifirla(); Object.DestroyImmediate(r); }   // #106
         // Çizim ekranı ve planda nokta olan yerlerin çapaları (#63).
         foreach (CizimEkrani c in daire.GetComponentsInChildren<CizimEkrani>(true)) Object.DestroyImmediate(c);
         // Sofranın yerleri (#66).

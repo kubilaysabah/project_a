@@ -95,3 +95,27 @@ Bir kaydı yeniden okursan aynı komut dosyanın üstüne yazar; Unity `.meta` d
 
 Oyun, arama açılınca `Resources/Sesler/Konusmalar/telefon_katN` dosyasını arar ve **varsa** ahizeden çalar;
 yoksa bugünkü gibi yalnızca not ekranı görünür. Dosyayı koymak yeter, kod ya da sahne değişikliği gerekmez.
+
+## 6. Radyo haber cümleleri (#106)
+
+Her katta daireye girdikten bir süre sonra o katın ses cihazı (radyo ya da televizyon) cızırtıyla açılır,
+**tek bir cümle** söyler ve cızırtıya döner. Sekiz cümle aynı olaya (1974, Huzur Apartmanı'nın yapımı ve
+sayılmayan dokuzuncu kat) başka başka açılardan değinir; hiçbiri oyuncuya ne arayacağını söylemez (#83).
+Hepsi 90'ların TRT haber / gece kuşağı tonunda okunur: düz, resmî, hafif yorgun bir spiker sesi; 2. ve 4. kat
+cümleleri "dinleyici notu" olarak biraz daha samimi okunabilir. Her cümle 8-14 saniye.
+
+Dosya adları `radyo_kat1` … `radyo_kat8`; işleme: `python Art/Ses/scripts/kayit_isle.py radyo_anons <girdi> radyo_katN`
+(AM bandı 250-4200 Hz, hafif sıkıştırma, parazit yatağı; çıktı `Assets/Resources/Sesler/Konusmalar/`).
+2. katın cümlesi şimdilik oyunda ÇALMAZ: o katın radyosu bulmacanın parçası (tango yayını); cümle ileride
+tango istasyonunun şarkı arasına girecek.
+
+| Kat | Cihaz | TR | EN |
+|---|---|---|---|
+| 1 | koli üstündeki radyo-teyp | Saatlerimiz gece on ikiyi gösteriyor. Belediye Fen İşleri, 1974'teki arşiv yangınında kaybolan yapı ruhsatlarının yenilenmesi için son başvuru tarihini uzattı. Ayrıntılar sabah bülteninde. | It is now midnight. The Municipal Works Department has extended the deadline to replace the building permits lost in the archive fire of 1974. Details in the morning bulletin. |
+| 2 | Nuri'nin radyosu (tango arası, ileride) | Gece Kuşağı'na bir dinleyici notu: "Bizim apartmanda geceleri üst kattan ayak sesi geliyor, ama üst kat yok." Şakacı dinleyicimize iyi geceler. | A listener's note for the night programme: "In our building you hear footsteps from the floor above at night, but there is no floor above." Good night to our joker. |
+| 3 | tüplü televizyon | Şehir haberleri: Eski Fen İşleri binasındaki tadilatta, 1974 tarihli bir projede bir katın sonradan silindiği görüldü. Yetkililer "kayıt hatası" dedi. | City news: during repairs at the old Works Department, a 1974 project was found to have one floor erased after the fact. Officials called it a clerical error. |
+| 4 | kamp yatağındaki cep radyosu | Dinleyicimiz soruyor: "Elektrikler kesilince komşunun penceresi nasıl yanıyor?" Elektrik İdaresi, yirmi yıldır tespit edilemeyen kaçak hatlar olduğunu kabul etti. | A listener asks: "How does the neighbour's window stay lit during a power cut?" The electricity board has admitted there are illegal lines it has failed to trace for twenty years. |
+| 5 | TV ünitesi | Kayıp ilanı: Çarşamba gecesinden beri haber alınamayan bir apartman görevlisi için ailesi yardım istiyor. Son görüldüğünde iş önlüğü ve el feneriyle merdivenlere çıkmış. | Missing person: the family of a building caretaker unheard of since Wednesday night asks for help. He was last seen going up the stairs in his work apron, carrying a torch. |
+| 6 | eski televizyon | Arşivden: 1974 Ekim'inde bu mahallede teslim edilen bir apartmanın açılışına yüklenici gelmedi. Gazete "dokuzuncu kattan inmedi" yazmış, düzeltmeyi ertesi gün basmıştı. | From the archive: in October 1974 the contractor failed to attend the opening of a building delivered in this district. The paper wrote "he never came down from the ninth floor" and printed a correction the next day. |
+| 7 | taburedeki portatif TV | Gece yarısı bülteni: İtfaiye, bir apartmanın çatısından gelen ışık ihbarına gitti; çatıda kimse yoktu. İhbarı yapan, "her gece aynı pencere" dedi. | Midnight bulletin: the fire brigade answered a report of a light on an apartment building's roof; no one was there. The caller said, "the same window every night." |
+| 8 | yönetimin masa radyosu | Son dakika: Belediye, iskân ruhsatı olmayan katlar için af yasasının bu gece yarısı yürürlüğe girdiğini duyurdu. Yirmi yıldır "olmayan" katlar artık kayıtlara geçecek. | Breaking: the municipality announced that the amnesty for floors without an occupancy permit takes effect at midnight tonight. Floors that "did not exist" for twenty years will now enter the records. |

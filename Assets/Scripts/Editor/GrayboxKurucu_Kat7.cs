@@ -130,6 +130,7 @@ public static partial class GrayboxKurucu
         };
         v.parcalar = new List<KatParcasi>();
         v.sesler = new List<KatSesi>();
+        v.anons = new KatAnonsu { Yol = "Sus_TV_Taburesi_K7", Gecikme = 20f, Dosya = "radyo_kat7" };   // #106: taburedeki portatif TV
         v.yananOdalar = new List<string>();
         v.esyaYazilari = new List<EsyaYazisi>();
         v.acikParcalar = new List<AcikParca>();

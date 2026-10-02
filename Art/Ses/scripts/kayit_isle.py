@@ -735,9 +735,65 @@ def telefon(dosya_adi, cikti_adi, klasor=None):
     return hedef
 
 
+# ---------- RADYO ANONSU (#106) ----------
+# Her katta radyodan ya da televizyondan 1974'teki olaya dolaylı değinen bir haber cümlesi gelir
+# (RadyoAnonsu bileşeni): önce parazit, sonra seslendirilmiş cümle, sonra yine parazit.
+DAIRE = os.path.join(KOK, "Assets", "Audio", "Daire")
+
+
+def radyo_parazit():
+    """Resources/Sesler/Radyo_Parazit.wav: 2,5 sn bant gürültüsü ve seyrek çıtırtı; anonsun önü ve arkası. Döngü için kenarlar
+    birbirine karışır (son 0,2 sn başın üstüne)."""
+    import random
+    random.seed(106)
+    H = H44
+    n = int(2.5 * H)
+    parazit = ortak.tepeyi_esitle(ortak.bant(ortak.gurultu(n), 1800, H, 0.6))
+    for _ in range(12):
+        cit = ortak.darbe(int(0.02 * H), H, 0.004)
+        ortak.ekle(parazit, cit, random.randrange(n - int(0.02 * H)), random.uniform(0.3, 1.0))
+    gecis = int(0.2 * H)
+    for i in range(gecis):
+        a = i / gecis
+        parazit[i] = parazit[n - gecis + i] * (1 - a) + parazit[i] * a
+    parazit = parazit[:n - gecis]
+    ortak.kaydet(os.path.join(SESLER, "Radyo_Parazit.wav"), parazit, H, 0.6)
+
+
+def radyo_anons(dosya_adi, cikti_adi, klasor=None):
+    """Temiz bir okuma kaydını 90'lar radyo yayınına çevirir: AM bandı (250-4200 Hz, iki geçiş), hafif
+    sıkıştırma, -32 dB parazit yatağı. Çıktı Konusmalar/<cikti_adi>.wav (RadyoAnonsu adıyla yükler).
+    Kullanım: python kayit_isle.py radyo_anons <girdi> <cikti_adi>   (ör. radyo_anons radyo_kat3.wav radyo_kat3)"""
+    import math, random
+    H = H44
+    girdi = os.path.abspath(dosya_adi) if os.path.isfile(dosya_adi) else dosya_adi
+    ses = oku(girdi, H)
+    for _ in range(2):
+        ses = ortak.alcak(ortak.yuksek(ses, 250, H), 4200, H)
+    ses = ortak.yumusak_sinirla(ses, 2.5)
+    n = len(ses)
+    random.seed(7)
+    taban = 10 ** (-32 / 20)
+    hisirti = ortak.tepeyi_esitle(ortak.bant(ortak.gurultu(n), 1800, H, 0.6))
+    for i in range(n):
+        ses[i] += taban * hisirti[i]
+    hedef = os.path.join(klasor or KONUSMALAR, cikti_adi + ".wav")
+    os.makedirs(os.path.dirname(hedef), exist_ok=True)
+    ortak.kaydet(hedef, ses, H, 0.8)
+    return hedef
+
+
+URETICILER["radyo_parazit"] = radyo_parazit   # (#106) üretici tablosu yukarıda kuruldu; fonksiyon burada tanımlı
+
+
 if __name__ == "__main__":
     argumanlar = sys.argv[1:]
-    if argumanlar and argumanlar[0] == "telefon":
+    if argumanlar and argumanlar[0] == "radyo_anons":
+        if len(argumanlar) != 3:
+            print("Kullanım: python kayit_isle.py radyo_anons <girdi> <cikti_adi>")
+            sys.exit(1)
+        radyo_anons(argumanlar[1], argumanlar[2])
+    elif argumanlar and argumanlar[0] == "telefon":
         # Konuşma işlemcisi argüman ister: python kayit_isle.py telefon <girdi> <cikti_adi>
         if len(argumanlar) != 3:
             print("Kullanım: python kayit_isle.py telefon <girdi> <cikti_adi>   (ör. telefon telefon_kat2.wav telefon_kat2)")

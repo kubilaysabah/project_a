@@ -632,6 +632,11 @@ MonoBehaviour:
     Metin: 
     Ad: 
   sesler: []
+  anons:
+    Yol: Sus_TV_Taburesi_K7
+    Gecikme: 20
+    Dosya: radyo_kat7
+    Ses: 0.7
   parcalar: []
   yananOdalar: []
   ikinciDaire: 0

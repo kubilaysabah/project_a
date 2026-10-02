@@ -789,6 +789,11 @@ MonoBehaviour:
     Ses: 0.8
     Kapatilabilir: 1
     SusturanKilit: 
+  anons:
+    Yol: 
+    Gecikme: 25
+    Dosya: 
+    Ses: 0.7
   parcalar: []
   yananOdalar: []
   ikinciDaire: 0

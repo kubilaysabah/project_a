@@ -256,6 +256,11 @@ MonoBehaviour:
   notlar: []
   suslar: []
   sesler: []
+  anons:
+    Yol: 
+    Gecikme: 25
+    Dosya: 
+    Ses: 0.7
   parcalar: []
   yananOdalar: []
   ikinciDaire: 0

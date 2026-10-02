@@ -718,6 +718,11 @@ MonoBehaviour:
     Ses: 0.7
     Kapatilabilir: 0
     SusturanKilit: sifon
+  anons:
+    Yol: Sus_TV_Unitesi_K5
+    Gecikme: 25
+    Dosya: radyo_kat5
+    Ses: 0.7
   parcalar: []
   yananOdalar: []
   ikinciDaire: 0

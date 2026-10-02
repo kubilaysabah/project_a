@@ -88,6 +88,7 @@ public static partial class GrayboxKurucu
             new KatNotu { Metin = "not.kat5_liste", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
         };
         v.parcalar = new List<KatParcasi>();
+        v.anons = new KatAnonsu { Yol = "Sus_TV_Unitesi_K5", Gecikme = 25f, Dosya = "radyo_kat5" };   // #106: salondaki TV ünitesi
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;
         v.yananOdalar = new List<string>();

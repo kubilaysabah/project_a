@@ -210,6 +210,7 @@ public static partial class GrayboxKurucu
         v.saklanmaSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
         v.parcalar = new List<KatParcasi>();
         v.sesler = new List<KatSesi>();
+        v.anons = new KatAnonsu { Yol = "Sus_Eski_TV_K6", Gecikme = 28f, Dosya = "radyo_kat6" };   // #106: 1974 dairesinin eski televizyonu (A dairesi)
         v.yananOdalar = new List<string>();
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;

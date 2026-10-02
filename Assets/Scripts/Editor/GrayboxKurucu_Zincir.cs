@@ -84,6 +84,7 @@ public static partial class GrayboxKurucu
         TabloIziSablonuKur("Bos_Civi", 0f, 0f);
         // Salon dekoru (#83).
         ParcaSablonuKur("Carsafli_Kanepe", "Carsafli_Kanepe");
+        ParcaSablonuKur("Radyo_Kutu_K1", "Radyo_Kutu_K1");   // #106: salondaki koli yığınının üstünde kalmış radyo-teyp
         ParcaSablonuKur("TV_Ustu", "TV_Ustu");
         ParcaSablonuKur("Fincan", "Fincan");
         HaliYariSablonuKur();
@@ -594,6 +595,8 @@ public static partial class GrayboxKurucu
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_A", Gerekli = "odaA_anahtari" });
         v.zincir = z;
         v.sesler = new List<KatSesi>();
+        // Radyo anonsu (#106): oyuncu daireye girdikten 30 sn sonra kolinin üstündeki radyo-teyp açılır.
+        v.anons = new KatAnonsu { Yol = "Sus_Radyo_Kutu_K1", Gecikme = 30f, Dosya = "radyo_kat1" };
         v.parcalar = new List<KatParcasi>();
 
         // Dairenin kalıcı eşyalarından bu katta görünenler (oda oda seçildikçe eklenir).
@@ -693,6 +696,8 @@ public static partial class GrayboxKurucu
             // Koliler: balkon kapısının yanındaki köşede.
             Sus(koliBuyuk, 4.50f, 0f, 8.10f - 0.21f, 0f, -1f),
             Sus(koliKucuk, 4.48f, 0.40f, 8.10f - 0.21f, 0.15f, -1f),
+            // #106: iki kolinin üstünde radyo-teyp (küçük kolinin üstü 0,40 + 0,30 = 0,70); katın haber cümlesi buradan.
+            Sus(Sablon("Radyo_Kutu_K1"), 4.48f, 0.70f, 8.10f - 0.21f, 0.1f, -1f),
             // Halı: ortada, bir ucundan yarıya kadar sarılmış; sarılan kısmın altında parkede halının izi.
             Sus(Sablon("Hali_Izi"), 2.55f, 0f, 6.55f, 0f, 1f),
             Sus(Sablon("Hali_Yari"), 2.55f, 0f, 6.55f, 0f, 1f),

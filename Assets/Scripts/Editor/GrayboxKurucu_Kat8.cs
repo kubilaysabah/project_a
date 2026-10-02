@@ -30,7 +30,7 @@ public static partial class GrayboxKurucu
 
     static void Kat8SablonlariniKur()
     {
-        foreach (string ad in new[] { "Bekleme_Sandalyeleri_K8", "Ilan_Panosu_K8", "Arsiv_Kutulari_K8", "Mudur_Masasi_K8", "Makam_Koltugu_K8",
+        foreach (string ad in new[] { "Bekleme_Sandalyeleri_K8", "Ilan_Panosu_K8", "Arsiv_Kutulari_K8", "Mudur_Masasi_K8", "Makam_Koltugu_K8", "Radyo_Masa_K8",
                                       "Misafir_Koltugu_K8", "Dosya_Rafi_K8", "Kasa_K8", "Jaluzi_K8", "Duvar_Saati_K8", "Cay_Ocagi_K8",
                                       "Buzdolabi_K8", "Mutfak_Sandalyesi_K8", "Temizlik_Arabasi_K8", "Arsiv_Rafi_K8", "Eski_Daktilolar_K8",
                                       "Arsiv_Dolabi_K8", "Harita_Masasi_K8", "Plan_Cercevesi_K8", "Toplanti_Masasi_K8",
@@ -122,6 +122,7 @@ public static partial class GrayboxKurucu
         };
         v.parcalar = new List<KatParcasi>();
         v.sesler = new List<KatSesi>();
+        v.anons = new KatAnonsu { Yol = "Sus_Radyo_Masa_K8", Gecikme = 18f, Dosya = "radyo_kat8" };   // #106
         // Yönetim'in bürosu (salon) ve hol aydınlık; öbür odalar kafa lambasıyla.
         v.yananOdalar = new List<string> { "Salon", "Hol" };
         v.esyaYazilari = new List<EsyaYazisi>();
@@ -145,6 +146,8 @@ public static partial class GrayboxKurucu
             // Hol duvarında dairenin dosya dolabı (kalıcı eşya, u 4,4). Pencerenin önünde makam masası ve koltuğu,
             // karşısında iki misafir koltuğu; landing duvarında klasör rafı; köşede kasa.
             D("Mudur_Masasi_K8", 2.60f, 0f, 7.10f, 0f, -1f),
+            // #106: yönetimin masa radyosu masanın arka kenarında (masa üstü 0,77; o şerit boş: tepe taraması).
+            D("Radyo_Masa_K8", 2.60f, 0.77f, 7.36f, 0f, -1f),
             D("Makam_Koltugu_K8", 2.60f, 0f, 7.70f, 0f, -1f),   // pencere duvarına giriyordu (çakışma testi)
             D("Misafir_Koltugu_K8", 2.15f, 0f, 6.25f, 0.2f, 1f),
             D("Misafir_Koltugu_K8", 3.05f, 0f, 6.25f, -0.2f, 1f),

@@ -30,7 +30,7 @@ public static partial class GrayboxKurucu
     {
         foreach (string ad in new[] { "Gazete_Yigini_K4", "Sarkan_Kablo_K4", "Bos_Koliler_K4", "Ortulu_Koltuk_K4", "Mumlar_K4",
                                       "Yikik_Sehpa_K4", "Kova_Paspas_K4", "Kirik_Sandalye_K4", "Kamp_Yatagi_K4", "Termos_K4",
-                                      "Gaz_Lambasi_K4", "Duvar_Tebesir_K4" })
+                                      "Gaz_Lambasi_K4", "Duvar_Tebesir_K4", "Radyo_Cep_K4" })
             ParcaSablonuKur(ad, ad);
         AcilirSablonKur("Buzdolabi_K4", Buzdolabi4Isik);
         AcilirSablonKur("Alet_Kutusu_K4");
@@ -76,6 +76,7 @@ public static partial class GrayboxKurucu
         };
         v.parcalar = new List<KatParcasi>();
         v.sesler = new List<KatSesi>();
+        v.anons = new KatAnonsu { Yol = "Sus_Radyo_Cep_K4", Gecikme = 35f, Dosya = "radyo_kat4" };   // #106: elektriksiz dairede pilli radyo
         // Hasan'ın gardırobunun bir kapağı aralık başlar (#97): %12 açık (~13°). Boş dairede biri az önce içine
         // girip çıkmış gibi; oyuncu dokununca kapanır (AcilirParca.Aralik).
         v.acikParcalar = new List<AcikParca> { new AcikParca { Yol = "Gardirop_Hasan/Kapi_1", Oran = 0.12f } };
@@ -117,6 +118,8 @@ public static partial class GrayboxKurucu
             // ---------- ODA B (Hasan'ın gece geçirdiği oda) ---------- (u 5,1-7,6, v 4,75-8,1; kapının önü boş)
             // Oda A duvarı boyunca kamp yatağı; başucunda termos, gaz lambası ve alet kutusu; duvarda gün çizgileri.
             D("Kamp_Yatagi_K4", 7.60f - 0.37f, 0f, 6.90f, 0f, -1f),
+            // #106: Hasan'ın pilli cep radyosu yatağın ayak ucunda, yatık (yatağın o ucunun üstü 0,41).
+            D("Radyo_Cep_K4", 7.33f, 0.41f, 6.35f, 0f, -1f),
             DA("Alet_Kutusu_Hasan", "Alet_Kutusu_K4", 6.55f, 0f, 7.70f, 0f, -1f),
             D("Termos_K4", 6.55f, 0f, 6.30f, 1f, 0f),
             D("Gaz_Lambasi_K4", 6.20f, 0f, 7.85f, 0f, -1f),

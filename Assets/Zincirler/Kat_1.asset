@@ -509,6 +509,17 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
+    X: 4.48
+    Y: 0.7
+    Z: 7.8900003
+    Donus: 0
+    OnU: 0.1
+    OnV: -1
+    Yatik: 0
+    Sablon: {fileID: 6732159790962917611, guid: c3f8a5eef115a944f8050fa7fde0699b, type: 3}
+    Metin: 
+    Ad: 
+  - Yol: 
     X: 2.55
     Y: 0
     Z: 6.55
@@ -729,6 +740,11 @@ MonoBehaviour:
     Metin: 
     Ad: 
   sesler: []
+  anons:
+    Yol: Sus_Radyo_Kutu_K1
+    Gecikme: 30
+    Dosya: radyo_kat1
+    Ses: 0.7
   parcalar: []
   yananOdalar: []
   ikinciDaire: 0
