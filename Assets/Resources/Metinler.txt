@@ -14,6 +14,7 @@ ipucu.kapat	KAPAT	CLOSE
 ipucu.sifre	ŞİFRE	CODE
 ipucu.cek	ÇEK	PULL
 ipucu.tak	TAK	INSERT
+ipucu.as	AS	HANG
 ipucu.sok	SÖK	UNSCREW
 ipucu.it	İT	PUSH
 ipucu.cevir	ÇEVİR	TURN
@@ -94,6 +95,7 @@ bina.isim_riza	Rıza Efendi	Rıza Efendi
 bina.isim_hasan	Hasan	Hasan
 bina.isim_cemal	Cemal	Cemal
 bina.isim_kapici	Yeni Kapıcı	New Janitor
+bina.takvim_1974	EKİM 1974	OCTOBER 1974
 bina.takvim	EKİM\n1994	<size=66>OCTOBER</size>\n1994
 bina.asansor_notu	ARIZALI\n<size=48>Yönetim</size>	<size=78>OUT OF\nORDER</size>\n<size=44>Management</size>
 
@@ -111,7 +113,6 @@ esya.kaydirici	Mobilya kaydırıcıları	Furniture sliders
 esya.sigorta	Sigorta	Fuse
 esya.asansor_sigortasi	Asansör sigortası	Elevator fuse
 esya.kat_anahtari	Kat kapısının anahtarı	Floor door key
-esya.cati_anahtari	Çatı kapısının anahtarı	Roof door key
 esya.odaA_anahtari	Yatak odası anahtarı	Bedroom key
 esya.odaB_anahtari	Çocuk odası anahtarı	Children's room key
 esya.salon_anahtari	Salon anahtarı	Living room key

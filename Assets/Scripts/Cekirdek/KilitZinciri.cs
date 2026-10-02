@@ -186,9 +186,27 @@ public class KilitZinciri
 
         ZincirEsyasi katAnahtari = null;
         foreach (ZincirEsyasi e in Esyalar) if (e.Tur == EsyaTuru.KatAnahtari) katAnahtari = e;
-        sonuc.KatAnahtarinaUlasildi = katAnahtari != null && EsyayaUlasilir(katAnahtari, acilan);
-        if (katAnahtari != null && !sonuc.KatAnahtarinaUlasildi) sonuc.Hatalar.Add("katın anahtarına ulaşılamıyor");
+        if (katAnahtari != null)
+        {
+            sonuc.KatAnahtarinaUlasildi = EsyayaUlasilir(katAnahtari, acilan);
+            if (!sonuc.KatAnahtarinaUlasildi) sonuc.Hatalar.Add("katın anahtarına ulaşılamıyor");
+        }
+        else
+        {
+            // Anahtarsız zincir (#108): katın anahtarı bu katta değil, asansörün götürdüğü dokuzuncu kattadır.
+            // O zaman "kata ulaşıldı" demek, asansör kilidinin çözülmesidir (asansör geldi, kabin açık).
+            ZincirKilidi asansor = AsansorKilidi();
+            sonuc.KatAnahtarinaUlasildi = asansor != null && acilan.Contains(asansor.Kimlik);
+            if (!sonuc.KatAnahtarinaUlasildi) sonuc.Hatalar.Add("asansör kilidi çözülemiyor (kat anahtarı yok, asansör gelmeli)");
+        }
         return sonuc;
+    }
+
+    /// <summary>Zincirin asansör kilidi (varsa): kabinin yerine bağlı KilitTuru.Asansor (#68, #108).</summary>
+    public ZincirKilidi AsansorKilidi()
+    {
+        foreach (ZincirKilidi k in Kilitler) if (k.Tur == KilitTuru.Asansor) return k;
+        return null;
     }
 
     // ---------- ULAŞILABİLİRLİK ----------
@@ -278,9 +296,13 @@ public class KilitZinciri
         foreach (ZincirEsyasi e in Esyalar)
             if (YerBul(e.Yer) == null) sonuc.Hatalar.Add($"'{e.Kimlik}' eşyasının yeri '{e.Yer}' tanımlı değil");
 
+        // Kat anahtarı: tam bir tane olmalı. Tek istisna (#108): zincir asansör kilidiyle bitiyorsa anahtar
+        // bu katta değil, asansörün götürdüğü dokuzuncu kattadır; o zincirde kat anahtarı OLMAZ.
         int katAnahtari = 0;
         foreach (ZincirEsyasi e in Esyalar) if (e.Tur == EsyaTuru.KatAnahtari) katAnahtari++;
-        if (katAnahtari != 1) sonuc.Hatalar.Add($"zincirde tam bir kat anahtarı olmalı ({katAnahtari} var)");
+        if (katAnahtari > 1) sonuc.Hatalar.Add($"zincirde en çok bir kat anahtarı olmalı ({katAnahtari} var)");
+        if (katAnahtari == 0 && AsansorKilidi() == null) sonuc.Hatalar.Add("zincirde kat anahtarı yok ve asansör kilidi de yok");
+        if (katAnahtari == 1 && AsansorKilidi() != null) sonuc.Hatalar.Add("asansörlü zincirde kat anahtarı olmaz (anahtar dokuzuncu katta, #108)");
 
         // Menteşesi sökülen kapı odanın içine devrilir (MenteseSokucu). Odada, kapının düşeceği
         // şeritte yerde duran eşya kapının altında kalır ve görünmez: 8. katta kiler anahtarı

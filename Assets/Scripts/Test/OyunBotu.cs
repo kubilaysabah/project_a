@@ -146,7 +146,7 @@ public class OyunBotu : MonoBehaviour
             int kat = yonetici.MevcutKat;
             Yaz($"{kat}. kat başlıyor");
             yield return KatiCoz(kat);
-            if (kat >= KatSayaci.CatiKati) { yield return Cati(); break; }
+            if (kat >= KatSayaci.CatiKati) { yield return Dokuz(); yield return Cati(); break; }
             yield return SahanligaGec();
             yield return Merdivenden(kat);
             yield return new WaitForSeconds(2f);
@@ -208,7 +208,9 @@ public class OyunBotu : MonoBehaviour
         // Katın anahtarı.
         ZincirEsyasi anahtar = z.Esyalar.Find(e => e.Tur == EsyaTuru.KatAnahtari);
         if (anahtar != null) yield return Al(kat, anahtar.Kimlik);
-        if (!Cep.Tasiyor(EsyaTuru.KatAnahtari, kat)) Sorun($"{kat}. kat: kat anahtarı elde değil");
+        // Asansörle biten zincirde (8. kat, #108) anahtar bu katta değil: dokuzuncu katta alınır (Dokuz()).
+        if (anahtar == null && z.AsansorKilidi() != null) { }
+        else if (!Cep.Tasiyor(EsyaTuru.KatAnahtari, kat)) Sorun($"{kat}. kat: kat anahtarı elde değil");
     }
 
     private Kilit KilitBul(int kat, string kimlik)
@@ -280,11 +282,13 @@ public class OyunBotu : MonoBehaviour
                 break;
             case KilitTuru.Asansor:
                 yield return Al(kat, veri.Gerekli);
-                AsansorPanosu pano = FindAnyObjectByType<AsansorPanosu>();
+                // Sahanlık A'nın panosu ve düğmesi: dokuzuncu katın asansörü de sahnede (#108), rastgele bulunmaz.
+                Transform asansorA = GameObject.Find("Sahanlik_A/Asansor")?.transform;
+                AsansorPanosu pano = asansorA != null ? asansorA.GetComponentInChildren<AsansorPanosu>() : null;
                 if (pano == null) { Sorun("asansör panosu yok"); break; }
                 if (!pano.EtkilesimeAcik) Sorun($"asansör panosu takmaya açık değil (el: {Cep.Tasinan})");
                 pano.Etkilesim(o);
-                FindAnyObjectByType<AsansorDugmesi>().Etkilesim(o);
+                asansorA.GetComponentInChildren<AsansorDugmesi>().Etkilesim(o);
                 for (float t = 0; t < 15f && pano.Hal != AsansorPanosu.Durum.Geldi; t += 0.5f) yield return new WaitForSeconds(0.5f);
                 break;
         }
@@ -449,6 +453,71 @@ public class OyunBotu : MonoBehaviour
     }
 
     // ---------- ÇATI ----------
+    // ---------- DOKUZUNCU KAT (#108) ----------
+    // 8. katın asansörü geldi, kabin boş: bot kabine yürür, yolculuğu bekler, lambayı çiviye asar, salon
+    // açılınca anahtarı tabaktan alır ve (yol bulmadan, ışınlanarak) kabine kaçar; iniş bitince çatıya.
+    private IEnumerator Dokuz()
+    {
+        Yaz("8. kat: kabine biniyor (dokuzuncu kat)");
+        DokuzuncuKat dk = DokuzuncuKat.Ornek;
+        if (dk == null) { Sorun("DokuzuncuKat yok (graybox yeniden kurulmalı)"); yield break; }
+        yield return Yuru(new[] { new Vector3(0f, 0f, -4.3f) }, "kabin önüne");
+        // Kabine adım adım: pano oyuncuyu içeride görür görmez yolculuk başlar (kontrol kapanır, oyuncu
+        // ışınlanır); Yuru() o anda "takıldı" sanıp geri ışınlardı. Burada yolculuk başlayınca durulur.
+        for (float t = 0; t < 12f && !DokuzuncuKat.Icinde; t += Time.deltaTime)
+        {
+            if (kontrol.enabled) { kontrol.transform.rotation = Quaternion.LookRotation(Vector3.back); govde.Move(Vector3.back * Hiz * Time.deltaTime); }
+            yield return null;
+        }
+        if (!DokuzuncuKat.Icinde) { Sorun("asansör dokuzuncu kata çıkmadı (oyuncu kabinde görülmedi)"); yield break; }
+        for (float t = 0; t < 20f && !kontrol.enabled; t += 0.25f) yield return new WaitForSeconds(0.25f);
+        if (!kontrol.enabled) { Sorun("dokuzuncu kat yolculuğu bitmedi (kontrol geri gelmedi)"); yield break; }
+        Vector3 kok = dk.transform.position;
+        if (Vector3.Distance(new Vector3(kontrol.transform.position.x, 0, 0), new Vector3(kok.x, 0, 0)) > 20f)
+            Sorun($"oyuncu dokuzuncu katta değil (x {kontrol.transform.position.x:0.0})");
+        Yaz("9. kat: lambayı çiviye asıyor");
+        CiviAskisi civi = dk.GetComponentInChildren<CiviAskisi>(true);
+        if (civi == null) { Sorun("dokuzuncu katta boş çivi yok"); yield break; }
+        Isinla(civi.transform.position + dk.transform.TransformDirection(Vector3.zero) + (civi.transform.forward * 0.9f), kok.y);
+        if (!civi.EtkilesimeAcik) Sorun("boş çivi asmaya açık değil (lamba kafada değil mi?)");
+        civi.Etkilesim(kontrol.gameObject);
+        yield return new WaitForSeconds(2.2f);
+        IcKapi salon = null;
+        foreach (IcKapi k in dk.GetComponentsInChildren<IcKapi>(true)) if (k.name == "Kapi_Salon") salon = k;
+        if (salon == null) Sorun("dokuzuncu katta salon kapısı bulunamadı");
+        else if (!salon.Acik) Sorun("salon kapısı lamba asılınca açılmadı");
+        Yaz("9. kat: sofradan çatı anahtarını alıyor");
+        Esya anahtar = null;
+        foreach (Esya e in dk.GetComponentsInChildren<Esya>(true)) if (e.Tur == EsyaTuru.KatAnahtari) anahtar = e;
+        if (anahtar == null) { Sorun("sofrada çatı anahtarı yok"); yield break; }
+        Transform masa = anahtar.transform.parent != null ? anahtar.transform.parent.parent : null;   // Yer_2 -> Masa
+        Vector3 sandalyeTarafi = masa != null ? masa.forward : Vector3.forward;
+        Isinla(anahtar.transform.position + sandalyeTarafi * 0.75f, kok.y);
+        if (!anahtar.EtkilesimeAcik) Sorun("çatı anahtarı alınmaya açık değil");
+        anahtar.Etkilesim(kontrol.gameObject);
+        yield return new WaitForSeconds(0.5f);
+        if (!Cep.Tasiyor(EsyaTuru.KatAnahtari, KatSayaci.CatiKati)) { Sorun("çatı anahtarı cebe girmedi"); yield break; }
+        Yaz("9. kat: kabine kaçıyor");
+        Transform kabin9 = dk.transform.Find("Sahanlik_9/Asansor/Kabin");
+        if (kabin9 == null) { Sorun("dokuzuncu katın kabini yok"); yield break; }
+        Isinla(kabin9.TransformPoint(new Vector3(0f, 0f, -MekanOlculeri.SahanlikDerin - MekanOlculeri.DuvarKalin - 0.6f)), kok.y);
+        for (float t = 0; t < 25f && DokuzuncuKat.Icinde; t += 0.25f) yield return new WaitForSeconds(0.25f);
+        if (DokuzuncuKat.Icinde) { Sorun("asansör 8. kata inmedi"); yield break; }
+        for (float t = 0; t < 10f && !kontrol.enabled; t += 0.25f) yield return new WaitForSeconds(0.25f);
+        if (!DokuzuncuKat.Yasandi) Sorun("dokuzuncu kat 'yaşandı' işaretlenmedi");
+        if (Mathf.Abs(kontrol.transform.position.x) > 20f) Sorun($"oyuncu 8. kata dönmedi (x {kontrol.transform.position.x:0.0})");
+        Yaz("8. kata dönüldü; çatı anahtarı elde");
+    }
+
+    // Botu bir noktaya ışınlar (CharacterController kapat-taşı-aç). y: zemin kotu (+0,05 düşsün diye).
+    private void Isinla(Vector3 nokta, float zeminY)
+    {
+        govde.enabled = false;
+        kontrol.transform.position = new Vector3(nokta.x, zeminY + 0.05f, nokta.z);
+        govde.enabled = true;
+        Physics.SyncTransforms();
+    }
+
     private IEnumerator Cati()
     {
         Yaz("8. kat bitti; çatıya çıkıyor");

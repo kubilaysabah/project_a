@@ -126,26 +126,33 @@ public static partial class GrayboxKurucu
     // ---------- DÖRT DAİRE ----------
     static void DaireleriKur(Transform sahanlik)
     {
-        for (int n = 1; n <= DaireSayisi; n++)
-        {
-            GameObject daire = new GameObject($"Daire_{n}");
-            daire.transform.SetParent(sahanlik, false);
-            DaireKur(daire.transform, DaireYonuBul(n));
-            // Dairede elektrik var mı (#54): sigorta kilidi olan katta zincir kapatır.
-            daire.AddComponent<DaireElektrigi>();
-            // Dairenin eksenleri (#55): kat dosyasındaki plan konumlarını bu daireye çevirir.
-            DaireYonu yonu = DaireYonuBul(n);
-            var eksen = new SerializedObject(daire.AddComponent<DaireEksenleri>());
-            eksen.FindProperty("yon").floatValue = yonu.yon;
-            eksen.FindProperty("sv").floatValue = yonu.sv;
-            eksen.FindProperty("kapiZ").floatValue = yonu.kapiZ;
-            eksen.FindProperty("disX").floatValue = SahanlikGen / 2f + DuvarKalin;
-            eksen.ApplyModifiedPropertiesWithoutUndo();
-            // Duvar lekeleri (#87): kat açılınca DaireLekeleri kurar; malzemeleri kurucu bağlar.
-            LekeKurucu.Bagla(daire);
-            // Kapalı kurulur: kayıtlı sahnede dört daire de gizli, kapılar kapalı.
-            daire.SetActive(false);
-        }
+        for (int n = 1; n <= DaireSayisi; n++) DaireKokuKur(sahanlik, n);
+    }
+
+    /// <summary>
+    /// Bir dairenin kökünü kurar: Daire_n nesnesi, 3+1 plan (DaireKur), elektrik, eksenler, lekeler; kapalı
+    /// saklanır (KatYoneticisi katın dairesini açar). Dokuzuncu kat da aynı kökü kullanır (#108).
+    /// </summary>
+    static GameObject DaireKokuKur(Transform sahanlik, int n)
+    {
+        GameObject daire = new GameObject($"Daire_{n}");
+        daire.transform.SetParent(sahanlik, false);
+        DaireKur(daire.transform, DaireYonuBul(n));
+        // Dairede elektrik var mı (#54): sigorta kilidi olan katta zincir kapatır.
+        daire.AddComponent<DaireElektrigi>();
+        // Dairenin eksenleri (#55): kat dosyasındaki plan konumlarını bu daireye çevirir.
+        DaireYonu yonu = DaireYonuBul(n);
+        var eksen = new SerializedObject(daire.AddComponent<DaireEksenleri>());
+        eksen.FindProperty("yon").floatValue = yonu.yon;
+        eksen.FindProperty("sv").floatValue = yonu.sv;
+        eksen.FindProperty("kapiZ").floatValue = yonu.kapiZ;
+        eksen.FindProperty("disX").floatValue = SahanlikGen / 2f + DuvarKalin;
+        eksen.ApplyModifiedPropertiesWithoutUndo();
+        // Duvar lekeleri (#87): kat açılınca DaireLekeleri kurar; malzemeleri kurucu bağlar.
+        LekeKurucu.Bagla(daire);
+        // Kapalı kurulur: kayıtlı sahnede dört daire de gizli, kapılar kapalı.
+        daire.SetActive(false);
+        return daire;
     }
 
     static void DaireKur(Transform daire, DaireYonu d)
@@ -477,6 +484,10 @@ public static partial class GrayboxKurucu
         // dünya koordinatından aldığı için örtüşen yüzeyler aynı görünür.
         float bas = (uKenari ? oda.V0 : oda.U0) - kalin;
         float son = (uKenari ? oda.V1 : oda.U1) + kalin;
+        // Sahanlığa dayanan odanın (u0 = 0) v kenarı duvarı sahanlık duvarının İÇİNE kadar uzar (u -0,2'ye);
+        // ucu sahanlık duvarının iç yüzüyle aynı düzlemde kalıyor ve iki malzeme titreşiyordu: kapının yanında
+        // duvar kâğıdı renginde dik bir şerit (dokuzuncu katta fark edildi, #108). Uç 1,2 cm içeride kalır.
+        if (!uKenari && oda.U0 <= 0.001f) bas += 0.012f;
 
         // Bu kenara düşen açıklıklar: aynı eksende, çizgisi kenara yakın, ortası kenar boyunca.
         var bosluklar = new List<float[]>();   // {başlangıç, bitiş, alt, üst}

@@ -208,6 +208,13 @@ public class AsansorPanosu : MonoBehaviour, IEtkilesimli
     private void Update()
     {
         if (!hazir || Hal != Durum.Geldi || hareket != null) return;
+        // 8. katta kabin boştur (#108): oyuncu içine girince asansör onu dokuzuncu kata çıkarır. Yolculuğu
+        // DokuzuncuKat yönetir; biz yalnızca "oyuncu kabinde" deyip onun akışını başlatırız.
+        if (kat == KatSayaci.CatiKati && DokuzuncuKat.Ornek != null && DokuzuncuKat.Ornek.Baslayabilir && OyuncuKabinde())   // yalnız 8. katın panosu (9'unki değil)
+        {
+            hareket = StartCoroutine(DokuzaGotur());
+            return;
+        }
         if (!Cep.Tasiyor(EsyaTuru.KatAnahtari, kat)) return;
         // Oyuncu kabinin içindeyken ya da kapıların dibindeyken kapılar kapanmaz: içeride
         // kapalı kalmak istemeyiz. Asansörün kendi ekseninde oyuncu kapıdan 1,2 m uzakta olmalı.
@@ -284,6 +291,75 @@ public class AsansorPanosu : MonoBehaviour, IEtkilesimli
     }
 
     // ---------- YARDIMCILAR ----------
+    // ---------- DOKUZUNCU KAT (#108) ----------
+    // Aşağıdaki parçalar DokuzuncuKat'ın yolculuk akışı için dışarıya açılmıştır: kapıları oynatmak,
+    // göstergeyi yazmak, uğultuyu açıp kapamak, kabini göstermek, sesleri çalmak. Pano kendi hâlini korur.
+
+    /// <summary>Oyuncunun kamerası kabinin İÇİNDE mi? (Kapı düzleminin ardında, kabin genişliğinde.)</summary>
+    public bool OyuncuKabinde()
+    {
+        Camera kamera = Camera.main;
+        if (kamera == null || transform.parent == null) return false;
+        Vector3 yerel = transform.parent.InverseTransformPoint(kamera.transform.position);
+        return yerel.z < -MekanOlculeri.SahanlikDerin - MekanOlculeri.DuvarKalin - 0.05f && Mathf.Abs(yerel.x) < 0.7f;
+    }
+
+    private IEnumerator DokuzaGotur()
+    {
+        yield return DokuzuncuKat.Ornek.Yolculuk(this);
+        hareket = null;
+    }
+
+    /// <summary>Kabinin kökü (oyuncu kabinler arasında aynı yerel konumla taşınır).</summary>
+    public Transform Kabin { get { return kabin != null ? kabin.transform : null; } }
+
+    /// <summary>Kapıları verilen açıklıktan verilen açıklığa kaydırır (0 kapalı, 1 açık), 1,6 sn.</summary>
+    public IEnumerator KapilariOynat(float bas, float son) { yield return KapilariKaydir(bas, son); }
+
+    /// <summary>Kapıları bir anda verilen açıklığa koyar.</summary>
+    public void KapilariKoyDisaridan(float aciklik) { KapalilariOku(); KapilariKoy(aciklik); }
+
+    public void GostergeYaz(string metin) { if (gosterge != null) gosterge.text = metin; }
+    public void Ugultu(bool acik) { if (acik) UgultuyuBaslat(); else UgultuyuDurdur(); }
+    public void VarisSesiCal()
+    {
+        if (varisSesi == null) varisSesi = Resources.Load<AudioClip>("Sesler/Asansor_Varis");
+        if (varisSesi != null) AudioSource.PlayClipAtPoint(varisSesi, KuyuNoktasi(), 0.9f);
+    }
+    public void KalkisSesiCal()
+    {
+        if (kalkisSesi == null) kalkisSesi = Resources.Load<AudioClip>("Sesler/Asansor_Kalkis");
+        if (kalkisSesi != null) AudioSource.PlayClipAtPoint(kalkisSesi, KuyuNoktasi(), 0.9f);
+    }
+    public void DingCal() { if (dingSesi != null) AudioSource.PlayClipAtPoint(dingSesi, GostergeNoktasi(), 0.9f); }
+
+    /// <summary>Kabin bu kattan ayrıldı (oyuncu içindeyken başka kata taşındı): kuyu görünür, kabin yok.</summary>
+    public void KabinAyrildi(string gostergeMetni)
+    {
+        if (kabin != null) kabin.SetActive(false);
+        if (kuyu != null) kuyu.SetActive(true);
+        UgultuyuDurdur();
+        GostergeYaz(gostergeMetni);
+        Hal = Durum.Gitti;
+    }
+
+    /// <summary>
+    /// Kabin bu kata geldi, kapılar KAPALI (oyuncu içinde): dokuzuncu katın panosu yolculuğun sonunda, 8. katın
+    /// panosu dönüşte böyle başlar. Elektrik var sayılır (lamba yeşil); kapıları sonra KapilariOynat açar.
+    /// </summary>
+    public void KabinGeldiKapali(int katNo, string gostergeMetni)
+    {
+        KapalilariOku();
+        hazir = true;
+        kat = katNo;
+        ElektrikVer();
+        if (kuyu != null) kuyu.SetActive(false);
+        if (kabin != null) kabin.SetActive(true);
+        KapilariKoy(0f);
+        GostergeYaz(gostergeMetni);
+        Hal = Durum.Geldi;
+    }
+
     private Vector3 GostergeNoktasi() { return gosterge != null ? gosterge.transform.position : transform.position; }
 
     // Kuyunun ağzı: kapıların ardında, bel hizası (kabinin ve motorun sesi buradan gelir).

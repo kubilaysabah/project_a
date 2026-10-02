@@ -44,6 +44,16 @@ public class KacisAni : MonoBehaviour
     private Transform oyuncu;
     private static AudioClip[] adimlar;
 
+    // ---- Dokuzuncu kat (#108) ----
+    // HazirGolge: şablondan kopya yerine sahnede zaten duran bir Gölge kovalar (sofrada oturan). Verilirse
+    // bekleme bitince olduğu yerden kalkıp izi sürmeye başlar; yok edilmez, yalnızca durdurulur.
+    // YakalanmaIsleyici: yakalanınca KatYoneticisi'nin kat baştan kurması yerine çağrılacak iş (dokuzuncu kat
+    // kayda girmez, kendi başa dönüşü var). Bir "delegate" (temsilci): bir fonksiyonu değişken gibi tutar.
+    // KapidanKacis: 7. katta kaçış kat kapısı açılınca biter; dokuzuncu katta kabin kapısı kapanınca (Kacti()).
+    public GameObject HazirGolge;
+    public System.Action<int> YakalanmaIsleyici;
+    public bool KapidanKacis = true;
+
     public void Hazirla(int katNo, GameObject golgeSablonu, float bekleme, float hizi, AudioClip ilkSes, AudioClip haberci)
     {
         kat = katNo;
@@ -55,7 +65,7 @@ public class KacisAni : MonoBehaviour
         BirinciSahisKontrolcu k = FindAnyObjectByType<BirinciSahisKontrolcu>();
         oyuncu = k != null ? k.transform : null;
         // Kat kapısı açılınca kaçış biter. Olay (event): kapı açıldığında haber veren liste.
-        foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi += KapiAcildi;
+        if (KapidanKacis) foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi += KapiAcildi;
         if (adimlar == null)
         {
             // Yedek adım: zemin bulunamazsa parke adımı (#101'den beri gerçek kayıt).
@@ -66,7 +76,7 @@ public class KacisAni : MonoBehaviour
     private void OnDestroy()
     {
         foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi -= KapiAcildi;
-        if (golge != null) Destroy(golge);
+        if (golge != null && golge != HazirGolge) Destroy(golge);   // hazır Gölge sahnenin malı, yok edilmez
     }
 
     private void Update()
@@ -88,8 +98,8 @@ public class KacisAni : MonoBehaviour
         if (golge == null)
         {
             if (Time.time - baslangicZamani < gecikme) return;
-            golge = Instantiate(sablon, izler[0], Quaternion.identity);
-            golge.name = "Kacis_Golgesi";
+            if (HazirGolge != null) { golge = HazirGolge; golge.SetActive(true); }   // oturan Gölge kalkar, olduğu yerden
+            else { golge = Instantiate(sablon, izler[0], Quaternion.identity); golge.name = "Kacis_Golgesi"; }
             // Siluetin çevresindeki uğultu #74'te kalktı; gelişini üst kattan adımlar haber verir.
             hedefIz = 1;
             Debug.Log("[KACIS] Siluet belirdi.");
@@ -166,8 +176,29 @@ public class KacisAni : MonoBehaviour
     {
         durum = Durum.Bitti;
         Debug.Log($"[KACIS] {kat}. kat: yakalandı; kat baştan başlıyor.");
+        if (YakalanmaIsleyici != null) { YakalanmaIsleyici(kat); return; }   // dokuzuncu kat kendi başa dönüşünü yapar
         KatYoneticisi y = FindAnyObjectByType<KatYoneticisi>();
         if (y != null) y.KacistaYakalandi(kat);
+    }
+
+    /// <summary>Dışarıdan bildirilen kaçış (#108: kabin kapıları kapandı). Kayda yazılmaz.</summary>
+    public void Kacti()
+    {
+        // Bekliyor'ken de biter: oyuncu anahtarı alıp aynı anda kabine girmişse kaçış hiç başlamaz.
+        if (durum == Durum.Bitti) return;
+        durum = Durum.Bitti;
+        if (golge != null && golge != HazirGolge) Destroy(golge);
+        Debug.Log($"[KACIS] {kat}. kat: kaçtı (kabin kapıları kapandı).");
+    }
+
+    /// <summary>Bölüm başa dönerken: yine anahtarın alınmasını bekler; iz ve Gölge sıfırlanır.</summary>
+    public void YenidenBekle()
+    {
+        if (golge != null && golge != HazirGolge) Destroy(golge);
+        golge = null;
+        izler.Clear();
+        hedefIz = 0;
+        durum = Durum.Bekliyor;
     }
 
     // Kaçtı: anahtar katın kapısına takıldı (kanadın açılması beklenmez).

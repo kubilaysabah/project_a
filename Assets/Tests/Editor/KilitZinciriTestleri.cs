@@ -37,6 +37,46 @@ public class KilitZinciriTestleri
         return z;
     }
 
+    // #108: 8. katın zincirinde kat anahtarı yok; anahtar asansörün götürdüğü dokuzuncu katta. Kural, asansör
+    // kilidi çözülünce zinciri "bitti" sayar; anahtarsız ama asansörsüz zincir ise hatadır.
+    private static KilitZinciri AsansorluKat()
+    {
+        var z = new KilitZinciri();
+        z.Yerler.Add(Yer("dolap", "Mutfak"));
+        z.Yerler.Add(Yer("kabin", KilitZinciri.SahanlikOdasi));
+        z.Esyalar.Add(Esya("sigorta", EsyaTuru.Sigorta, "dolap"));
+        z.Kilitler.Add(YerKilidi("asansor", KilitTuru.Asansor, "kabin", "sigorta"));
+        return z;
+    }
+
+    [Test]
+    public void Anahtarsiz_asansor_zinciri_asansor_gelince_cozulur()
+    {
+        var s = AsansorluKat().Cozumle(Odalar());
+        Assert.IsTrue(s.Cozulebilir, string.Join("; ", s.Hatalar));
+        CollectionAssert.AreEqual(new[] { "asansor" }, s.AcilanKilitler);
+    }
+
+    [Test]
+    public void Anahtarsiz_zincirde_asansor_de_yoksa_hata()
+    {
+        var z = AsansorluKat();
+        z.Kilitler.Clear();
+        var s = z.Cozumle(Odalar());
+        Assert.IsFalse(s.Cozulebilir);
+        StringAssert.Contains("asansör", string.Join("; ", s.Hatalar));
+    }
+
+    [Test]
+    public void Asansorlu_zincirde_kat_anahtari_olmaz()
+    {
+        var z = AsansorluKat();
+        z.Esyalar.Add(Esya("kat_anahtari", EsyaTuru.KatAnahtari, "dolap"));
+        var s = z.Cozumle(Odalar());
+        Assert.IsFalse(s.Cozulebilir);
+        StringAssert.Contains("dokuzuncu", string.Join("; ", s.Hatalar));
+    }
+
     [Test]
     public void Birinci_kat_zinciri_cozulur()
     {

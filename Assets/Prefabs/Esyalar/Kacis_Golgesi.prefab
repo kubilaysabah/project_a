@@ -315,6 +315,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb682f96ac9a0094a80b7e2893e4c53f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GolgeAnimasyonu
+  Oturuyor: 0
 --- !u!1 &4456387873738035187
 GameObject:
   m_ObjectHideFlags: 0

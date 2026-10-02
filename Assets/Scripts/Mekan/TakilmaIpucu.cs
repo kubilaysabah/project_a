@@ -135,6 +135,7 @@ public class TakilmaIpucu : MonoBehaviour
     {
         if (!hedefVar) return false;                                   // işaret edilecek bir şey yok
         if (Varlik.Kapali) return false;                               // test botu / kat denetimi çalışıyor
+        if (DokuzuncuKat.Icinde) return false;                         // dokuzuncu kat bulmacasız: ipucu yok (#108)
         if (DuraklatmaMenusu.BaslikEkraninda || Time.timeScale <= 0f) return false;   // başlık, menü
         if (yonetici.AcilisModunda || yonetici.TurBitti) return false; // açılış (zemin kat) ya da final
         if (yonetici.BulunulanKat != kat) return false;                // oyuncu aşağı inmiş, başka kattaki dairede

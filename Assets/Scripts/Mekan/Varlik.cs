@@ -140,6 +140,7 @@ public class Varlik : MonoBehaviour
     private bool Etkin()
     {
         if (Kapali || sablon == null) return false;
+        if (DokuzuncuKat.Icinde) return false;                               // dokuzuncu katın tek tehdidi sofradaki Gölge (#108)
         if (!yonetici.enabled || !yonetici.GolgeSayabilir) return false;   // açılış, kapı açık, çatı, final
         if (DuraklatmaMenusu.BaslikEkraninda) return false;
         // Menü, not, şifre ekranı, karartma: kontrolcü kapalı. Dolapta saklanırken de kapalıdır ama kural

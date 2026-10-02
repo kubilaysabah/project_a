@@ -25,6 +25,11 @@ public class GolgeAnimasyonu : MonoBehaviour
     private const float Sekme = 0.03f;         // gövde sekmesi (metre)
     private const float NefesGenligi = 0.004f, NefesHizi = 1.3f;
     private const float BasDonusHizi = 6f;     // saniyede kalan yolun katı (yumuşak takip)
+    // Oturma (#108): bacaklar kalçadan öne (-X ekseni: aşağı sarkan bacak +Z'ye, yani öne döner), kollar masaya.
+    // Tek parça bacak dizden kırılmaz; öne uzanan bacak sofra örtüsünün altında kalır, görünmez.
+    private const float OturmaBacak = -85f, OturmaKol = -40f;   // -62'de uzun kol masanın öbür ucuna uzanıyordu
+    /// <summary>Sandalyede oturuyor: yürüyüş yok, bacaklar öne, kollar masada; nefes ve baş takibi sürer.</summary>
+    public bool Oturuyor;
 
     private Transform govde, bas, kolSol, kolSag, bacakSol, bacakSag, oyuncu;
     private Quaternion govdeTemel, basTemel, kolSolTemel, kolSagTemel, bacakSolTemel, bacakSagTemel;
@@ -67,15 +72,16 @@ public class GolgeAnimasyonu : MonoBehaviour
         if (yol > 2f) yol = 0f;
         hiz = Mathf.Lerp(hiz, yol / dt, 1f - Mathf.Exp(-10f * dt));
         faz += yol / AdimBoyu * Mathf.PI * 2f;
-        float yurume = Mathf.Clamp01(hiz / 0.5f);   // 0,5 m/sn'den hızlı = tam yürüyüş
+        float yurume = Oturuyor ? 0f : Mathf.Clamp01(hiz / 0.5f);   // 0,5 m/sn'den hızlı = tam yürüyüş; otururken yok
+        float oturma = Oturuyor ? 1f : 0f;
 
         float s = Mathf.Sin(faz);
-        if (bacakSol != null) bacakSol.localRotation = bacakSolTemel * Quaternion.Euler(s * BacakAcisi * yurume, 0f, 0f);
-        if (bacakSag != null) bacakSag.localRotation = bacakSagTemel * Quaternion.Euler(-s * BacakAcisi * yurume, 0f, 0f);
+        if (bacakSol != null) bacakSol.localRotation = bacakSolTemel * Quaternion.Euler(s * BacakAcisi * yurume + OturmaBacak * oturma, 0f, 0f);
+        if (bacakSag != null) bacakSag.localRotation = bacakSagTemel * Quaternion.Euler(-s * BacakAcisi * yurume + OturmaBacak * oturma, 0f, 0f);
         // Kollar bacakların tersine; dururken hafifçe sarkık (nefesle birlikte 2° salınır).
         float sarkma = Mathf.Sin(Time.time * NefesHizi * Mathf.PI * 2f) * 2f * (1f - yurume);
-        if (kolSol != null) kolSol.localRotation = kolSolTemel * Quaternion.Euler(-s * KolAcisi * yurume + sarkma, 0f, 0f);
-        if (kolSag != null) kolSag.localRotation = kolSagTemel * Quaternion.Euler(s * KolAcisi * yurume + sarkma, 0f, 0f);
+        if (kolSol != null) kolSol.localRotation = kolSolTemel * Quaternion.Euler(-s * KolAcisi * yurume + sarkma + OturmaKol * oturma, 0f, 0f);
+        if (kolSag != null) kolSag.localRotation = kolSagTemel * Quaternion.Euler(s * KolAcisi * yurume + sarkma + OturmaKol * oturma, 0f, 0f);
 
         // Gövde: adım sekmesi + nefes.
         float sekme = Mathf.Abs(Mathf.Sin(faz * 2f)) * Sekme * yurume;

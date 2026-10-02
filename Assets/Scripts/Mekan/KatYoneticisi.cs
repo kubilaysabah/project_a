@@ -45,7 +45,7 @@ public class KatYoneticisi : MonoBehaviour
     /// </summary>
     public bool GolgeSayabilir
     {
-        get { return sayac != null && !acilisModu && !catiAcildi && !acilanKatlar.Contains(sayac.MevcutKat); }
+        get { return sayac != null && !acilisModu && !catiAcildi && !DokuzuncuKat.Icinde && !acilanKatlar.Contains(sayac.MevcutKat); }
     }
 
     // Çatı kapısı açıldı mı (final başladı)?
@@ -862,6 +862,23 @@ public class KatYoneticisi : MonoBehaviour
     }
 
     // Dairenin kaplanan parçalarına bu katın malzemelerini takar.
+    /// <summary>
+    /// Sahanlık dışındaki bir daireye (dokuzuncu kat, #108) bir katın kaplamalarını giydirir: duvar kâğıdı,
+    /// parke, fayans. Leke yok (1974: bina yeni). Daire kökü verilir, kaplama yerleri o anda bulunur.
+    /// </summary>
+    public void KaplamayiGiydir(Transform daire, int kat)
+    {
+        if (daire == null || kaplamalar == null || kaplamalar.Length < KatKaplamalari.KatSayisi * KatKaplamalari.YuzeySayisi) return;
+        int k = Mathf.Clamp(kat, 1, KatKaplamalari.KatSayisi) - 1;
+        foreach (KaplamaYeri yer in KaplamaYerleriniBul(daire))
+        {
+            Material[] mats = yer.cizici.sharedMaterials;
+            for (int i = 0; i < mats.Length; i++)
+                if (yer.yuzeyler[i] >= 0) mats[i] = kaplamalar[k * KatKaplamalari.YuzeySayisi + yer.yuzeyler[i]];
+            yer.cizici.sharedMaterials = mats;
+        }
+    }
+
     private void KaplamayiGiydir(int daire, int kat)
     {
         if (kaplamalar == null || kaplamalar.Length < KatKaplamalari.KatSayisi * KatKaplamalari.YuzeySayisi) return;

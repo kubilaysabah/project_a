@@ -173,13 +173,6 @@ MonoBehaviour:
       Y: 1
       Z: 0.02
       Donus: 80
-    - Kimlik: cati_anahtari
-      Tur: 1
-      Yer: kabin
-      X: 0.12
-      Y: 0.012
-      Z: -5.75
-      Donus: 35
     Kilitler:
     - Kimlik: banyo
       Tur: 4

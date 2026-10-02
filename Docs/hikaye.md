@@ -239,3 +239,23 @@ borcu öder. Kararlar: **zorunlu** (seçim yok; bina çağırır), **bulmacasız
 - Dokuzuncu kat kayda GİRMEZ: oyun burada kapatılırsa 8. katın başından açılır (#84 kuralı). Gerilim kuralı ve
   takılma ipucu bu bölümde kapalıdır; tek tehdit sofradaki Gölge.
 - Açık karar: final fotoğrafındaki "Yeni kapıcı, 1994" satırı olduğu gibi kalır (Şahan dokunmadı).
+
+**Kurulan hâli (2026-10-02, #108)** — tasarımdan ayrılan ya da netleşen noktalar:
+- Dokuzuncu kat sahnede ayrı bir settir (`Dokuzuncu_Kat`, x = -400; dış cephe gibi). Oyuncu oraya asansörle
+  gider: 8. katın kabinine binince kapılar kapanır, kapılar kapalıyken dokuzuncu katın birebir aynı kabinine
+  ışınlanır (`DokuzuncuKat.Yolculuk`), kapılar 1974'te açılır. Dönüş aynı yolla.
+- Daire 34 (sol-uzak daire). Açık odalar: antre, hol, salon (lamba asılınca), Oda A (Nuri'nin radyosunun ikizi
+  komodinin üstünde çalar), Oda B (Hasan'ın kamp yatağı, Cemal'in sandığı). Banyo, mutfak, Oda C, balkon kilitli.
+  Takvim "EKİM 1974" salonda. Kaplamalar 6. katın (1974 evi) duvar kâğıdı ve parkesi; leke yok.
+- **Çivideki lamba yanık kalır.** Anahtar alınınca salonun ışığı söner, çividekini bina söndürmez (titrer ve
+  kalır): kaçışın yolu holdeki o ışıkla ve kabinin ışığıyla görülür, ve finaldeki pencere ışığı budur. Asılan
+  lamba geri alınamaz; oyuncu çatıya lambasız çıkar (8. katın sahanlık ampulleri yanar).
+- Sofra: 1 Cemal (Gölge oturur, sırtı kapıya), 2 oyuncu (sandalye çekilmiş, anahtar tabakta), 3 Rıza ve 4 Hasan
+  (tabaklar boş, sandalyeler geri itilmiş); isim kartları 6. kattaki gibi. Gölge'nin anahtarlığı tabağının önünde.
+- Kovalamaca 7. katın `KacisAni`'sidir (oturan Gölge kalkar, 2,5 sn sonra izi sürer, 2,0 m/sn). Kaçış: kabine
+  girince kapılar kapanır, Gölge kapıya iki kez vurur. Yakalanma: kararma, bölüm kabinin açılışından yeniden
+  (anahtar tabağa, Gölge sandalyeye, lamba oyuncuya); kayıt değişmez, 8. katın zinciri de bozulmaz.
+- 8. katın zincirinde artık kat anahtarı YOK: kural (`KilitZinciri`) asansör kilidi çözülünce zinciri bitmiş
+  sayar. T listesinde çatı anahtarı görünmez.
+- Henüz yapılmadı: sahanlığın "taze boya, parlak mozaik" hâli (1994'ün kirli dokuları duruyor); tespih ve kasket
+  basit modeller; boş çivi parıldamaz (nişangâhın el simgesi tek işaret).
