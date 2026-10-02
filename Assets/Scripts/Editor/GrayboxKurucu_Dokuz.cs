@@ -117,6 +117,12 @@ public static partial class GrayboxKurucu
             BoxCollider bc = bosCivi.AddComponent<BoxCollider>();
             bc.center = new Vector3(0f, -0.03f, 0.03f);
             bc.size = new Vector3(0.14f, 0.16f, 0.10f);
+            // Parıltı (#109): holde etkileşilecek tek şey bu çividir ve fenerin ışığında parıldar (eşyalar gibi,
+            // ParlamaEkle). Kat kat zorlaşma tablosu burada geçmez (8. katta 2 m, 0,30 güç olurdu): sabit 3,5 m.
+            ParlamaEkle(bosCivi, new Vector3(0f, -0.004f, 0.040f), 1f);
+            var fpSeri = new SerializedObject(bosCivi.GetComponent<FenerParlamasi>());
+            fpSeri.FindProperty("sabitMenzil").floatValue = 3.5f;
+            fpSeri.ApplyModifiedPropertiesWithoutUndo();
             GameObject asiliLamba = AsiliLambaKur(daire, civi3, civiDonusu, out asiliIsik);
             if (asiliLamba != null)
             {

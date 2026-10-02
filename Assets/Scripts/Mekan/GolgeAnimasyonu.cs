@@ -28,11 +28,16 @@ public class GolgeAnimasyonu : MonoBehaviour
     // Oturma (#108): bacaklar kalçadan öne (-X ekseni: aşağı sarkan bacak +Z'ye, yani öne döner), kollar masaya.
     // Tek parça bacak dizden kırılmaz; öne uzanan bacak sofra örtüsünün altında kalır, görünmez.
     private const float OturmaBacak = -85f, OturmaKol = -40f;   // -62'de uzun kol masanın öbür ucuna uzanıyordu
+    // Dirsek (#109): ön kol kendi pivotunda kıvrılır. Otururken üst kol -40° + ön kol -52° ≈ masaya yatan kol;
+    // yürürken ön kol üst kolun salınımına küçük bir pay ekler (gerçek kol dirsekten de sallanır).
+    private const float OturmaOnKol = -52f, OnKolSalinimi = 9f;
     /// <summary>Sandalyede oturuyor: yürüyüş yok, bacaklar öne, kollar masada; nefes ve baş takibi sürer.</summary>
     public bool Oturuyor;
 
     private Transform govde, bas, kolSol, kolSag, bacakSol, bacakSag, oyuncu;
+    private Transform onKolSol, onKolSag;        // dirsekten kıvrılan ön kollar (#109); eski şablonda yok, null olabilir
     private Quaternion govdeTemel, basTemel, kolSolTemel, kolSagTemel, bacakSolTemel, bacakSagTemel;
+    private Quaternion onKolSolTemel, onKolSagTemel;
     private Vector3 govdeKonum;
     private Vector3 oncekiKonum;
     private float faz, hiz, segirmeZamani, segirmeAcisi;
@@ -49,6 +54,10 @@ public class GolgeAnimasyonu : MonoBehaviour
         if (kolSag != null) kolSagTemel = kolSag.localRotation;
         if (bacakSol != null) bacakSolTemel = bacakSol.localRotation;
         if (bacakSag != null) bacakSagTemel = bacakSag.localRotation;
+        onKolSol = kolSol != null ? kolSol.Find("OnKol_Sol") : null;
+        onKolSag = kolSag != null ? kolSag.Find("OnKol_Sag") : null;
+        if (onKolSol != null) onKolSolTemel = onKolSol.localRotation;
+        if (onKolSag != null) onKolSagTemel = onKolSag.localRotation;
         oncekiKonum = transform.position;
         segirmeZamani = Time.time + Random.Range(3f, 7f);
     }
@@ -82,6 +91,10 @@ public class GolgeAnimasyonu : MonoBehaviour
         float sarkma = Mathf.Sin(Time.time * NefesHizi * Mathf.PI * 2f) * 2f * (1f - yurume);
         if (kolSol != null) kolSol.localRotation = kolSolTemel * Quaternion.Euler(-s * KolAcisi * yurume + sarkma + OturmaKol * oturma, 0f, 0f);
         if (kolSag != null) kolSag.localRotation = kolSagTemel * Quaternion.Euler(s * KolAcisi * yurume + sarkma + OturmaKol * oturma, 0f, 0f);
+        // Ön kollar: salınımın gerisinde kalan küçük bir kıvrım (öne doğru, eksi X), otururken masaya.
+        float kivrim = -Mathf.Abs(s) * OnKolSalinimi * yurume;
+        if (onKolSol != null) onKolSol.localRotation = onKolSolTemel * Quaternion.Euler(kivrim + OturmaOnKol * oturma, 0f, 0f);
+        if (onKolSag != null) onKolSag.localRotation = onKolSagTemel * Quaternion.Euler(kivrim + OturmaOnKol * oturma, 0f, 0f);
 
         // Gövde: adım sekmesi + nefes.
         float sekme = Mathf.Abs(Mathf.Sin(faz * 2f)) * Sekme * yurume;

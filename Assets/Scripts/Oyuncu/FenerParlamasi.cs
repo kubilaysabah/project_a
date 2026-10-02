@@ -23,6 +23,9 @@ public class FenerParlamasi : MonoBehaviour
     // Parıltının rengi: lambanın sıcak beyazı. Kâğıt parçalarında şablon daha düşük bir çarpan verir.
     [SerializeField] private float gucCarpani = 1f;
     [SerializeField] private float boy = 0.12f;   // parıltının dünyadaki genişliği (metre)
+    // #109: eşya olmayan bir işaret (dokuzuncu katın boş çivisi) kat kat zorlaşmadan muaf tutulur: parıltı
+    // her katta aynı menzilden ve tam güçle görünür. 0 = katın tablosu (BulmaZorlugu) kullanılır.
+    [SerializeField] private float sabitMenzil = 0f;
 
     private const float SonmeHizi = 4f;           // saniyede bu kadar yaklaşır (ani yanıp sönmesin)
     private const float OneAlma = 0.07f;          // kameraya doğru bu kadar öne alınır (metre)
@@ -34,6 +37,7 @@ public class FenerParlamasi : MonoBehaviour
     private static KatYoneticisi yonetici;        // oyuncunun bulunduğu kat ondan sorulur (#102); o da tek
     private Transform parilti;
     private Esya esya;                            // bu eşya (kabı açık mı diye sorulur)
+    private IEtkilesimli etkilesim;               // eşya değilse (#109: çivi) aynı soru ona sorulur
     private Renderer cizici;
     private Vector3 yerel;                        // parıltının şablondaki yeri (eşyaya göre)
     private float faz;                            // kırpışma fazı: her eşyada farklı
@@ -64,6 +68,7 @@ public class FenerParlamasi : MonoBehaviour
         if (parilti == null) { enabled = false; return; }
         cizici = parilti.GetComponent<Renderer>();
         esya = GetComponent<Esya>();
+        if (esya == null) etkilesim = GetComponent<IEtkilesimli>();   // çivi gibi eşyasız işaretler
         yerel = parilti.localPosition;
         // Rastgele bir faz: aynı sahnede iki eşya aynı anda kırpışmasın. Oynanışı etkilemeyen, yalnızca
         // görüntüye ait bir değer olduğu için tohumlu üretici gerekmez (UnityEngine.Random yeter).
@@ -95,7 +100,7 @@ public class FenerParlamasi : MonoBehaviour
         // Kabı kapalıysa (kapalı çekmece, buzdolabı, sandık) parlamaz: parıltı kameraya doğru öne
         // alındığı için ince bir kapağın önüne taşıp içeride ne olduğunu ele verebilirdi.
         // EtkilesimeAcik tam da "kabı açık mı, alınabilir mi" sorusunu cevaplar (Esya).
-        bool kabiAcik = esya == null || esya.EtkilesimeAcik;
+        bool kabiAcik = esya != null ? esya.EtkilesimeAcik : etkilesim == null || etkilesim.EtkilesimeAcik;
         if (kabiAcik && lamba != null && lamba.IsikYaniyor)
         {
             Transform kaynak = lamba.IsikYonu;
@@ -104,8 +109,10 @@ public class FenerParlamasi : MonoBehaviour
             float aci = Vector3.Angle(kaynak.forward, fark);
             // Kat kat zorlaşma (#102): üst katta parıltı daha yakından ve daha soluk görünür.
             int kat = BulunulanKat();
-            hedef = ParlamaKurali.Guc(aci, mesafe, KafaLambasi.DisAci / 2f, BulmaZorlugu.ParlamaMenzili(kat))
-                    * BulmaZorlugu.ParlamaCarpani(kat);
+            hedef = sabitMenzil > 0f
+                ? ParlamaKurali.Guc(aci, mesafe, KafaLambasi.DisAci / 2f, sabitMenzil)
+                : ParlamaKurali.Guc(aci, mesafe, KafaLambasi.DisAci / 2f, BulmaZorlugu.ParlamaMenzili(kat))
+                  * BulmaZorlugu.ParlamaCarpani(kat);
             // Işık eşyaya ulaşıyor mu? Ölçüm pahalı olduğu için yalnızca konideyse bakılır.
             if (hedef > 0f && !IsikUlasiyor(kaynak.position, merkez, mesafe)) hedef = 0f;
         }

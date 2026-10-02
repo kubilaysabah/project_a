@@ -260,5 +260,6 @@ borcu öder. Kararlar: **zorunlu** (seçim yok; bina çağırır), **bulmacasız
 - #109'da yapıldı: sahanlık 1974'te yeni (temiz beyaz sıva, cilalı mozaik, yeni vernikli kapılar, parlak pirinç;
   duvarların alt 1,15 m'si çağla yeşili parlak yağlı boya ve koyu bordür — `GrayboxKurucu.DokuzuncuKatiTazele`,
   Dokula'dan sonra ad eşlemesiyle `Taze_*` malzemeler); tespih ve kasket yeniden modellendi; kabin yolculuğunda
-  gösterge bir an boş kalır ve kabin lambası titrer. Henüz yapılmadı (#109): boş çivi parıldamaz (nişangâhın el
-  simgesi tek işaret); Gölge'nin kolu tek parça (dirsek yok).
+  gösterge bir an boş kalır ve kabin lambası titrer. Boş çivi fenerin ışığında eşyalar gibi parıldar
+  (`FenerParlamasi`, eşyasız; sabit 3,5 m), lamba asılınca söner. Gölge'nin kolu dirsekten iki parça
+  (`Kol_*/OnKol_*`); otururken ön kol masaya yatar, yürürken dirsekten de salınır.

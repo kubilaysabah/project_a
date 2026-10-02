@@ -1432,6 +1432,15 @@ public static partial class GrayboxKurucu
         foreach (string parca in new[] { "Bas", "Kol_Sol", "Kol_Sag", "Bacak_Sol", "Bacak_Sag" })
             if (Model(parca, govde.transform, "Golge", parca, Vector3.zero, 0f, carpisma: false) == null)
                 Debug.LogWarning($"[ZINCIR] Golge.fbx içinde '{parca}' parçası yok (golge.py yeniden çalıştırılmalı).");
+        // Ön kollar (#109): dirsek pivotlu, üst kolun ÇOCUĞU. Model() parçayı FBX'teki yerine koyar; gövdenin
+        // altında kurulup dünya konumu korunarak üst kola bağlanır (yerel konumu dirsek − omuz olur).
+        foreach (string yan in new[] { "Sol", "Sag" })
+        {
+            GameObject onKol = Model("OnKol_" + yan, govde.transform, "Golge", "OnKol_" + yan, Vector3.zero, 0f, carpisma: false);
+            Transform kol = govde.transform.Find("Kol_" + yan);
+            if (onKol == null) { Debug.LogWarning($"[ZINCIR] Golge.fbx içinde 'OnKol_{yan}' yok (golge.py yeniden çalıştırılmalı)."); continue; }
+            if (kol != null) onKol.transform.SetParent(kol, true);
+        }
         // Canlılık (#90): yürüyüş, nefes, oyuncuya dönen baş; parçaları adlarıyla bulur.
         gecici.AddComponent<GolgeAnimasyonu>();
         GameObject sablon = PrefabUtility.SaveAsPrefabAsset(gecici, $"{SablonKlasoru}/Kacis_Golgesi.prefab");

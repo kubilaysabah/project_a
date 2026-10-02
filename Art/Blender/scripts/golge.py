@@ -93,13 +93,24 @@ bas = parca_bitir(bas_parcalar, "Bas", (0, BOYUN_Y, BOYUN_Z))
 # Dizlerin altına kadar sarkan, orantısız uzun kollar (eskisiyle aynı kutu: 0,705-1,655).
 # Omuzda bir küre: gövdenin kenarına 5 mm girer ve kol sallanınca eklemi örter.
 # Figürün sağı Blender -x (bkz. baş yorum).
+# #109: kol DİRSEKTEN iki parça. Üst kol (Kol_*) omuzdan dirseğe (1,655-1,18), ön kol (OnKol_*) dirsekten
+# ele (1,18-0,705); ön kolun pivotu dirsekte, dirsekte küçük bir küre eklemi örter. Unity'de OnKol, Kol'un
+# çocuğudur (GolgeSablonuKur): üst kol dönünce ön kol onunla gider, ön kol ayrıca kendi başına kıvrılır
+# (otururken masaya yatar). Dışarıdan görünen toplam boy ve kalınlık eskisiyle aynı.
+DIRSEK_Z = 1.18
 kollar = {}
+on_kollar = {}
 for ad, x in (("Kol_Sag", -0.22), ("Kol_Sol", 0.22)):
     parcalar = [
-        ortak.kutu("Kol", (0.07, 0.08, 0.95), (x, -0.02, 1.18), kara, 0.02),
+        ortak.kutu("Kol", (0.07, 0.08, OMUZ_Z - DIRSEK_Z + 0.015), (x, -0.02, (OMUZ_Z + DIRSEK_Z) / 2 + 0.0075), kara, 0.02),
         kure("Omuz", 0.055, (x, -0.02, OMUZ_Z), kara),
     ]
     kollar[ad] = parca_bitir(parcalar, ad, (x, -0.02, OMUZ_Z))
+    on_parcalar = [
+        ortak.kutu("OnKol", (0.065, 0.075, DIRSEK_Z - 0.705), (x, -0.02, (DIRSEK_Z + 0.705) / 2), kara, 0.02),
+        kure("Dirsek", 0.045, (x, -0.02, DIRSEK_Z), kara),
+    ]
+    on_kollar["On" + ad] = parca_bitir(on_parcalar, "On" + ad, (x, -0.02, DIRSEK_Z))
 
 # ---------- BACAKLAR ----------
 # İnce ve uzun bacaklar. Eskiden 0,95 m'ydi; şimdi 1,00 m: üst 7,5 cm'i kalça kutusunun İÇİNDE
@@ -113,9 +124,10 @@ for ad, x in (("Bacak_Sag", -0.09), ("Bacak_Sol", 0.09)):
     ]
     bacaklar[ad] = parca_bitir(parcalar, ad, (x, 0, KALCA_Z))
 
-# Altı parça tek FBX'e: Unity'de GolgeSablonuKur her birini adıyla alır (GrayboxKurucu.Model
+# Sekiz parça tek FBX'e (#109: ön kollar eklendi): Unity'de GolgeSablonuKur her birini adıyla alır (GrayboxKurucu.Model
 # parçanın FBX içindeki pivot konumunu kendisi ekler, buzdolabı kapısında olduğu gibi).
 ortak.calistir_ve_bitir("Golge",
                         [govde, bas, kollar["Kol_Sol"], kollar["Kol_Sag"],
+                         on_kollar["OnKol_Sol"], on_kollar["OnKol_Sag"],
                          bacaklar["Bacak_Sol"], bacaklar["Bacak_Sag"]],
                         2.0, 4.0)
