@@ -585,10 +585,38 @@ def adimlar():
               f"({', '.join(f'{a[0]:.2f}' for a in secilen)} sn)")
 
 
+# ---------- GÖLGE'NİN İMZASI: ANAHTARLIK (#105) ----------
+# Şahan'ın kıyaslama turu (2026-10-02): varlığın yüzü ve sesi yok, her belirişi rastgele hissediliyor.
+# Korku oyunlarında canavarın bir İMZA SESİ olur (Amnesia'nın hırıltısı, Phasmophobia'nın kalp atışı);
+# oyuncu ikinci karşılaşmada o sesi duyunca donar. Bizim varlığımız eski bir kapıcı: imzası bir kapıcının
+# anahtarlığıdır. Üç kısa şıkırtı, her biri bir öncekinden biraz daha pes (anahtarlık yavaşça sallanıyor),
+# uzak bir koridordan gelir gibi boğuk ve yankılı. Kaynak mevcut anahtar kaydı (S24, CC0); indirme yok.
+def _yeniden_ornekle(ornekler, oran):
+    """Sesi 'oran' kat yavaş çalar (0,9 = daha pes ve uzun). En yakın örneği alır; şıkırtı için yeter."""
+    n = int(len(ornekler) / oran)
+    return [ornekler[min(len(ornekler) - 1, int(i * oran))] for i in range(n)]
+
+
+def rev_anahtarlik():
+    """S76: anahtarlığın üç şıkırtısı, koridor yankısıyla (Gölge'nin imzası, GolgeImzasi.Cal)."""
+    k = oku("248037__sophiehall3535__pick-up-keys-1.wav", H44)
+    toplam = sessizlik(2.6, H44)
+    # Kayıttan üç farklı kesit; her biri biraz daha pes, aralar 0,33 ve 0,30 sn (düzensiz: elle sallanıyor).
+    for bas, oran, zaman, guc in ((0.05, 1.00, 0.00, 1.0), (0.40, 0.92, 0.33, 0.85), (0.75, 0.85, 0.63, 0.7)):
+        parca = kes(k, bas, bas + 0.34, giris=0.003, cikis=0.12, hiz=H44)
+        parca = _yeniden_ornekle(parca, oran)
+        i0 = int(zaman * H44)
+        for i, v in enumerate(parca):
+            if i0 + i < len(toplam): toplam[i0 + i] += v * guc
+    s = ortak.alcak(toplam, 3200, H44)                                        # uzaktan: tizler duvarlarda kaybolur
+    s = ortak.yanki(s, H44, boyut=0.9, sonum=0.5, islak=0.45, kuru=0.8, oda=1.6)   # uzun koridor
+    _kaydet(SESLER, "Anahtarlik.wav", s, 0.8)
+
+
 URETICILER_74 = {"damla": rev_damla, "anahtar": rev_anahtar, "cam": rev_cam, "devrilme": rev_devrilme,
                  "vida": rev_vida, "demir_sarsma": rev_demir_sarsma, "kol": rev_kol, "sigorta": rev_sigorta,
                  "sifre": rev_sifre, "zil": rev_zil, "ic_kilitli": rev_ic_kilitli, "asansor_zili": rev_asansor_zili,
-                 "gicirti": rev_gicirti, "adimlar": adimlar}
+                 "gicirti": rev_gicirti, "adimlar": adimlar, "anahtarlik": rev_anahtarlik}
 
 
 def rev_ic_acilma():

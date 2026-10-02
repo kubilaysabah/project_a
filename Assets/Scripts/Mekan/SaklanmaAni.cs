@@ -108,7 +108,8 @@ public class SaklanmaAni : MonoBehaviour
         sayac = 0f;
         KafaLambasi lamba = FindAnyObjectByType<KafaLambasi>();
         if (lamba != null) lamba.Titret(1.6f);
-        // Tıklatma dairenin giriş kapısından: oyuncu nereden geleceğini duyar.
+        // İmza (#105) ve tıklatma dairenin giriş kapısından: oyuncu nereden geleceğini duyar.
+        GolgeImzasi.Cal(yol[0] + Vector3.up * 1.2f);
         if (tiklatma != null) AudioSource.PlayClipAtPoint(tiklatma, yol[0] + Vector3.up * 1.4f, 1f);
         ArkaMuzik.Ornek?.Kabar();
         Debug.Log($"[SAKLANMA] {kat}. kat: kapı tıklatıldı; {Uyari:0} sn içinde saklanmalı.");

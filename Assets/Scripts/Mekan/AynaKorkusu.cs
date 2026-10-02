@@ -157,7 +157,8 @@ public class AynaKorkusu : MonoBehaviour
         belirmeZamani = Time.time;
         yasananlar.Add(Anahtar());
 
-        // Arkadan kısa bir gıcırtı (Gölge'nin durduğu yerden, 3B), müzik kabarır, Varlık duyar.
+        // İmza (#105) ve arkadan kısa bir gıcırtı (Gölge'nin durduğu yerden, 3B), müzik kabarır, Varlık duyar.
+        GolgeImzasi.Cal(yer + Vector3.up * 1.2f, 0.7f);
         if (vurgu != null)
         {
             GameObject g = new GameObject("Ayna_Sesi");

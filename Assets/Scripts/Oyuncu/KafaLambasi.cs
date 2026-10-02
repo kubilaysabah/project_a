@@ -39,6 +39,17 @@ public class KafaLambasi : MonoBehaviour
     private Light isik;
     private AudioSource kaynak;
     private AudioClip tik;
+
+    // ---------- GERİLİM GÖSTERGESİ (#105) ----------
+    // Kural LambaGerilimKurali'nde (saf C#). Burada yalnızca uygulanır: ışığın rengi sıcak beyazdan
+    // SariRenk'e kayar, gücü düşer, ince bir vınlama yükselir. Değerler hedefe yumuşakça gider
+    // (saniyede ~0,6): av bitip gerilim sıfırlanınca lamba bir anda değil, iki saniyede toparlar.
+    public static readonly Color SariRenk = new Color(1f, 0.93f, 0.45f);   // sodyum lambası sarısı
+    private const float GostergeHizi = 0.6f;    // karışımın saniyede en çok ne kadar değiştiği
+    private const float VinlamaTavani = 0.22f;  // vınlamanın en yüksek ses gücü (kalp atışının altında)
+    private float karisim;                      // şu anki sararma (0-1)
+    private float incelemeCarpani = 1f;         // inceleme kısması: %12 (IncelemeKismasi)
+    private AudioSource vinlama;
     private bool acik = true;
     private bool takili = true;   // lamba oyuncunun kafasında mı (açılışta çividen alınana kadar değil)
     private Coroutine titreme;
@@ -53,7 +64,20 @@ public class KafaLambasi : MonoBehaviour
     /// </summary>
     public void IncelemeKismasi(bool acik)
     {
-        if (isik != null) isik.intensity = acik ? Siddet * 0.12f : Siddet;
+        incelemeCarpani = acik ? 0.12f : 1f;
+        SiddetiUygula();
+    }
+
+    // Işığın gücü: temel şiddet × inceleme kısması × gerilim çarpanı (#105).
+    private void SiddetiUygula()
+    {
+        if (isik != null) isik.intensity = Siddet * incelemeCarpani * LambaGerilimKurali.GucCarpani(GerilimDegeri());
+    }
+
+    // Binanın gerilimi (0-1). Varlık yoksa ya da testler için kapalıysa 0: lamba normal.
+    private static float GerilimDegeri()
+    {
+        return Varlik.Ornek != null && !Varlik.Kapali ? Varlik.Ornek.Gerilim : 0f;
     }
 
     /// <summary>Lamba şu an yanıyor mu (senaryolu sönme sırasında da false).</summary>
@@ -80,6 +104,38 @@ public class KafaLambasi : MonoBehaviour
         kaynak.playOnAwake = false;
         kaynak.spatialBlend = 0f;             // kendi kafandaki lamba: 2B
         tik = Resources.Load<AudioClip>("Sesler/Lamba_Sonme");   // eski anahtar tıkı (#25'teki ses)
+
+        // Vınlama (#105): kendi kaynağı, döngülü, 2B, oda yankısından muaf (lamba kafada, odada değil).
+        GameObject vinNesnesi = new GameObject("Lamba_Vinlama");
+        vinNesnesi.transform.SetParent(transform, false);
+        vinlama = vinNesnesi.AddComponent<AudioSource>();
+        vinlama.clip = Resources.Load<AudioClip>("Sesler/Lamba_Vinlama");
+        vinlama.loop = true;
+        vinlama.playOnAwake = false;
+        vinlama.spatialBlend = 0f;
+        vinlama.bypassListenerEffects = true;
+        vinlama.volume = 0f;
+    }
+
+    // Gerilim göstergesi her karede (#105): renk, güç ve vınlama hedefe yumuşakça yaklaşır.
+    private void LateUpdate()
+    {
+        if (isik == null) return;
+        float hedef = LambaGerilimKurali.Karisim(GerilimDegeri());
+        // MoveTowards: değeri hedefe en fazla "adım" kadar yaklaştırır (ani sıçrama olmaz).
+        karisim = Mathf.MoveTowards(karisim, hedef, GostergeHizi * Time.deltaTime);
+        isik.color = Color.Lerp(Renk, SariRenk, karisim);
+        // Güç: karışımla aynı eğride, ama çarpan olarak (kural güç çarpanını gerilimden verir; burada
+        // yumuşatılmış karışımdan türetilir ki renk ve güç birlikte hareket etsin).
+        isik.intensity = Siddet * incelemeCarpani * (1f - (1f - LambaGerilimKurali.EnDusukGuc) * karisim);
+
+        if (vinlama == null || vinlama.clip == null) return;
+        // Vınlama yalnızca lamba yanarken: sesi çıkaran lambanın kendisi. Menüde (zaman durur) kısılır.
+        float vinHedef = IsikYaniyor && Time.timeScale > 0f ? LambaGerilimKurali.Vinlama(GerilimDegeri()) * VinlamaTavani : 0f;
+        vinlama.volume = Mathf.MoveTowards(vinlama.volume, vinHedef, 0.3f * Time.deltaTime);
+        vinlama.pitch = LambaGerilimKurali.VinlamaPerdesi(GerilimDegeri());
+        if (vinlama.volume > 0.001f && !vinlama.isPlaying) vinlama.Play();
+        else if (vinlama.volume <= 0.001f && vinlama.isPlaying) vinlama.Stop();
     }
 
     private void Start()

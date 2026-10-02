@@ -111,6 +111,34 @@ def kalp_atisi():
     kaydet_hiz(os.path.join(SESLER, "Kalp_Atisi.wav"), s, H, 0.8)
 
 
+# ---------- LAMBA VINLAMASI (#105) ----------
+# Gerilim yükselince kafa lambasından gelen ince elektrik vınlaması (diyegetik gerilim göstergesi:
+# ekranda yazı yok, oyuncu lambasından anlar). Düzgün döngü için her bileşen 3 saniyeye TAM sığan
+# frekanslardan: 100 Hz'in katları (300 tam periyot) ve 1 Hz'lik dalgalanma (3 tam periyot). Böylece
+# dosyanın sonu başına dikişsiz bağlanır. İnce bir 7,8 kHz ıslık (eski transformatörlerin "cıyaklaması")
+# ve bant geçiren gürültü üstüne; gürültü döngüde takırdamasın diye kenarları 20 ms'de kısılır.
+def lamba_vinlama():
+    H = HIZ_KESKIN
+    random.seed(500)
+    sure = 3.0
+    N = int(sure * H)
+    s = [0.0] * N
+    for i in range(N):
+        t = i / H
+        dalga = 0.85 + 0.15 * math.sin(2 * math.pi * 1.0 * t)                 # yavaş nefes (1 Hz, 3 tam periyot)
+        vinlama = (math.sin(2 * math.pi * 100 * t) * 0.5 + math.sin(2 * math.pi * 200 * t) * 0.3
+                   + math.sin(2 * math.pi * 300 * t) * 0.15 + math.sin(2 * math.pi * 400 * t) * 0.08)
+        islik = math.sin(2 * math.pi * 7800 * t) * 0.06                         # 7800 = 100 × 78: tam periyot
+        s[i] = (vinlama + islik) * dalga
+    cizirti = bant(gurultu(N), 2400, H, 1.5)
+    kenar = int(0.02 * H)
+    for i in range(N):
+        zarf = min(1.0, i / kenar, (N - 1 - i) / kenar)                         # döngü dikişi için kenarlar kısık
+        s[i] += 0.18 * cizirti[i] * zarf
+    s = alcak(s, 9000, H)
+    kaydet_hiz(os.path.join(SESLER, "Lamba_Vinlama.wav"), s, H, 0.6)
+
+
 # ---------- LAMBA SÖNMESİ ----------
 # Eski bir duvar anahtarının "tık"ı: iki kısa darbe, 11 ms arayla (önce tuşun basılması,
 # sonra mekanizmanın oturması; ikincisi daha güçlü). Her darbe sert plastik gövdenin
@@ -210,7 +238,7 @@ def sabah():
 # #74: lamba cızırtısı kalktı; adım üreticisi yalnızca Adim_1'i üretir (öbür çeşitler kalktı).
 # #87: zemine göre iki yeni adım ailesi (fayans, halı).
 # #92: gerilimde duyulan kalp atışı.
-URETICILER = {"kalp_atisi": kalp_atisi,
+URETICILER = {"kalp_atisi": kalp_atisi, "lamba_vinlama": lamba_vinlama,
               "lamba_sonme": lamba_sonme, "poset": poset, "sabah": sabah}
 
 if __name__ == "__main__":

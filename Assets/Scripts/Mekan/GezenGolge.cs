@@ -75,6 +75,8 @@ public class GezenGolge : MonoBehaviour
     {
         haberciCaliyor = true;
         float yari = 1.5f;
+        // İmza (#105): anahtarlık, Gölge'nin belireceği taraftan (oyuncunun önü), adımlardan önce.
+        GolgeImzasi.Cal(oyuncu.position + oyuncu.forward * 3f + Vector3.up * 1.2f);
         if (haberci != null)
         {
             // Ses oyuncunun tam üstünden, üst kattan (3 m yukarıdan) gelir.

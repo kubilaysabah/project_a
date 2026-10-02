@@ -241,7 +241,8 @@ public class Varlik : MonoBehaviour
     // ---------- AV ----------
     private IEnumerator Av()
     {
-        // Üst kattan adımlar + lamba titrer: geliyor.
+        // İmza (#105): anahtarlık arkadan (Gölge izin gerisinden gelir), sonra üst kattan adımlar + lamba titrer.
+        GolgeImzasi.Cal(oyuncu.position - oyuncu.forward * 4f + Vector3.up * 1.2f);
         if (haberci != null) AudioSource.PlayClipAtPoint(haberci, oyuncu.position + Vector3.up * 3f, 0.9f);
         if (lamba != null) lamba.Titret(2f);
         ArkaMuzik.Ornek?.Kabar();

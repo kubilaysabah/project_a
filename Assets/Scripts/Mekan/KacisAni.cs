@@ -105,6 +105,7 @@ public class KacisAni : MonoBehaviour
         izler.Add(oyuncu.position);
         KafaLambasi lamba = FindAnyObjectByType<KafaLambasi>();
         if (lamba != null) lamba.Titret(2.2f);
+        GolgeImzasi.Cal(izler[0] + Vector3.up * 1.2f);   // imza (#105): siluetin belireceği yerden
         if (baslangicSesi != null) AudioSource.PlayClipAtPoint(baslangicSesi, oyuncu.position + Vector3.up, 0.9f);
         // Üst kattan ağır adımlar (#74, Şahan: "canavar gelmeden önce çalalım, sesin ortasında
         // canavar belirsin"): ses ~5,4 sn, siluet 3 sn sonra, yani sesin ortasında belirir.
