@@ -86,6 +86,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FenerParlamasi
   gucCarpani: 1
   boy: 0.12
+  sabitMenzil: 0
 --- !u!1 &5287813818585315018
 GameObject:
   m_ObjectHideFlags: 0

@@ -268,3 +268,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FenerParlamasi
   gucCarpani: 1
   boy: 0.12
+  sabitMenzil: 0
