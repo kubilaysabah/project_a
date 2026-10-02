@@ -56,6 +56,13 @@ public class DokuzuncuKat : MonoBehaviour
     /// <summary>Bölüm bu oturumda yaşandı: 8. katın asansörü bir daha çıkarmaz. Kayda girmez.</summary>
     public static bool Yasandi { get; private set; }
 
+    /// <summary>
+    /// Bileşen dokuzuncu kat setinde mi? Set sahnede HEP açık durur (x = -400); "açık olan daireleri / kapıları"
+    /// tarayan kodlar onu katın dairesi sanmasın diye eler (#110: takılma ipucu 6. katın ikinci dairesi yerine
+    /// Daire_9'u seçebiliyordu).
+    /// </summary>
+    public static bool SetinParcasi(Component c) { return c != null && c.GetComponentInParent<DokuzuncuKat>(true) != null; }
+
     private Transform oyuncu;
     private BirinciSahisKontrolcu kontrol;
     private CharacterController govde;

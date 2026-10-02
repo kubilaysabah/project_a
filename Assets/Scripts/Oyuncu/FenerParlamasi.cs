@@ -105,7 +105,8 @@ public class FenerParlamasi : MonoBehaviour
         {
             Transform kaynak = lamba.IsikYonu;
             Vector3 fark = merkez - kaynak.position;
-            float mesafe = fark.magnitude;
+            // Kaynak kafanın gerisinde (#110): menzil kat tablosuna göre kameradan ölçülür, geri alınan çıkarılır.
+            float mesafe = Mathf.Max(0f, fark.magnitude - lamba.GeriAlinan);
             float aci = Vector3.Angle(kaynak.forward, fark);
             // Kat kat zorlaşma (#102): üst katta parıltı daha yakından ve daha soluk görünür.
             int kat = BulunulanKat();

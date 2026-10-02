@@ -94,7 +94,8 @@ public class FenerSekmesi : MonoBehaviour
         }
         if (!var) { hedefSiddet = 0f; return; }
 
-        float mesafe = enYakin.distance;
+        // Kaynak kafanın gerisinde (#110): uzaklık kameradan ölçülür.
+        float mesafe = Mathf.Max(0.01f, enYakin.distance - lamba.GeriAlinan);
         // Yüzeyin rengi: malzemenin ana rengi (doku varsa orta ton varsayılır). Koyu yüzey az seker.
         Color yuzey = YuzeyRengi(enYakin.collider);
         float albedo = Mathf.Clamp(0.299f * yuzey.r + 0.587f * yuzey.g + 0.114f * yuzey.b, 0.15f, 0.9f);
@@ -104,8 +105,11 @@ public class FenerSekmesi : MonoBehaviour
         // Fenerin o anki gücü (#103): eşya incelenirken fener %12'ye kısılır; sekme tam güçle hesaplanınca
         // incelenen eşyanın arkasındaki oda fenerden parlak bir dolguyla aydınlanıyordu.
         Light fener = lamba.IsikYonu.GetComponent<Light>();
-        float fenerOrani = fener != null ? Mathf.Clamp01(fener.intensity / KafaLambasi.Siddet) : 1f;
-        hedefSiddet = KafaLambasi.Siddet * Oran * albedo * dusen * 3f * fenerOrani;
+        float fenerOrani = fener != null ? Mathf.Clamp01(fener.intensity / (KafaLambasi.Siddet * lamba.TelafiCarpani)) : 1f;
+        // Yakın yüzeyde sekme kısılır (#110): 40 cm'de sıfır, 1,6 m'de tam. Yüzü duvara dayamış oyuncunun
+        // duvarı fener + sekmeyle bembeyaz yanıyordu; o kadar yakında sekmenin aydınlatacağı bir oda da yok.
+        float yakinlik = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.4f, 1.6f, mesafe));
+        hedefSiddet = KafaLambasi.Siddet * Oran * albedo * dusen * 3f * fenerOrani * yakinlik;
         // Işık yüzeyden 90 cm önde durur (ama kameranın gerisine geçmez): yüzeyin kendisi değil,
         // çevresi aydınlansın; 25 cm'de duvarda parlak bir leke oluşuyordu.
         hedefNokta = enYakin.point + enYakin.normal * Mathf.Min(Aciklik, mesafe * 0.6f);

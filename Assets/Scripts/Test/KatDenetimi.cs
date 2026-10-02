@@ -38,6 +38,18 @@ public static class KatDenetimi
     // Bir ızgara hücresi: zeminin yüksekliği ve oyuncu orada ayakta durabiliyor mu (yoksa yalnızca eğilerek).
     struct Hucre { public float Y; public bool Ayakta; }
 
+
+    // Dokuzuncu kat seti (#108) sahnede hep açık durur; denetim yalnızca katın daireleri ve kapılarıyla ilgilenir.
+    // (#110: 6. katta Daire_9 ilk sırada gelince sahanlık yanlış bulunuyor, her eşya "0 nokta" çıkıyordu.)
+    static DaireEksenleri[] KatDaireleri()
+    {
+        return System.Array.FindAll(Object.FindObjectsByType<DaireEksenleri>(), d => !DokuzuncuKat.SetinParcasi(d));
+    }
+    static IcKapi[] KatKapilari()
+    {
+        return System.Array.FindAll(Object.FindObjectsByType<IcKapi>(), k => !DokuzuncuKat.SetinParcasi(k));
+    }
+
     public static string Denetle(int kat, string klasor)
     {
         var rapor = new StringBuilder();
@@ -49,12 +61,12 @@ public static class KatDenetimi
         Varlik.Kapali = true;   // denetim oyuncuyu ışınlar; Varlık (#86) işlemesin
 
         // Bütün oda kapıları açılır (balkon kapısı hep kilitli kalır; onu açmaya gerek yok).
-        foreach (IcKapi k in Object.FindObjectsByType<IcKapi>())
+        foreach (IcKapi k in KatKapilari())
             if (k.gameObject.activeInHierarchy && !k.name.Contains("Balkon")) { k.Kilitle(false); k.Ayarla(true); }
 
         // Açık daireler ve sahanlıktaki giriş kapıları (7. katta gerçek kapı normalde çalınınca açılır).
         var daireler = new List<DaireEksenleri>();
-        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>())
+        foreach (DaireEksenleri d in KatDaireleri())
             if (d.gameObject.activeInHierarchy) daireler.Add(d);
         Transform sahanlik = daireler.Count > 0 ? daireler[0].transform.parent : null;
         foreach (DaireEksenleri d in daireler)
@@ -265,10 +277,10 @@ public static class KatDenetimi
 
         // Oda kapıları ve dairelerin giriş kapıları açılır (Denetle'deki gibi): ölçülen, eşyanın odasına
         // girmiş bir oyuncunun onu ne kadar kolay gördüğüdür, kapının kilidi değil. Kaplara dokunulmaz.
-        foreach (IcKapi k in Object.FindObjectsByType<IcKapi>())
+        foreach (IcKapi k in KatKapilari())
             if (k.gameObject.activeInHierarchy && !k.name.Contains("Balkon")) { k.Kilitle(false); k.Ayarla(true); }
         var daireler = new List<DaireEksenleri>();
-        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>())
+        foreach (DaireEksenleri d in KatDaireleri())
             if (d.gameObject.activeInHierarchy) daireler.Add(d);
         Transform sahanlik = daireler.Count > 0 ? daireler[0].transform.parent : null;
         foreach (DaireEksenleri d in daireler)
@@ -287,7 +299,8 @@ public static class KatDenetimi
         // Ölçülecekler: kimliği olan, sahnede etkin görev eşyaları.
         var esyalar = new List<Esya>();
         foreach (Esya e in Object.FindObjectsByType<Esya>())
-            if (e.isActiveAndEnabled && !string.IsNullOrEmpty(e.Kimlik)) esyalar.Add(e);
+            if (e.isActiveAndEnabled && !string.IsNullOrEmpty(e.Kimlik) && e.GetComponentInParent<DokuzuncuKat>() == null)   // dokuzuncu katın anahtarı ayrı set (#108)
+                esyalar.Add(e);
         esyalar.Sort((a, b) => string.CompareOrdinal(a.Kimlik, b.Kimlik));
 
         Transform kamera = (Transform)typeof(Etkilesimci).GetField("kamera", Gizli).GetValue(etk);
@@ -354,7 +367,7 @@ public static class KatDenetimi
 
         // Daireler: kat_gir sırası (Daire_N adına göre) ilk = asıl daire, ikinci = B.
         var daireler = new List<DaireEksenleri>();
-        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>()) if (d.gameObject.activeInHierarchy) daireler.Add(d);
+        foreach (DaireEksenleri d in KatDaireleri()) if (d.gameObject.activeInHierarchy) daireler.Add(d);
         if (daireler.Count == 0) return "açık daire yok";
         Transform sahanlik = daireler[0].transform.parent;
         KatYoneticisi yonetici = Object.FindAnyObjectByType<KatYoneticisi>();
@@ -366,7 +379,7 @@ public static class KatDenetimi
 
         if (denemeHucreleri == null || denemeKati != kat || yenile)
         {
-            foreach (IcKapi k in Object.FindObjectsByType<IcKapi>())
+            foreach (IcKapi k in KatKapilari())
                 if (k.gameObject.activeInHierarchy && !k.name.Contains("Balkon")) { k.Kilitle(false); k.Ayarla(true); }
             foreach (DaireEksenleri d in daireler)
             {
@@ -411,10 +424,10 @@ public static class KatDenetimi
         const BindingFlags Gizli = BindingFlags.NonPublic | BindingFlags.Instance;
         Varlik.Kapali = true;
         // Kapılar ve sahanlık (Bulunabilirlik'teki gibi); kaplara dokunulmaz.
-        foreach (IcKapi k in Object.FindObjectsByType<IcKapi>())
+        foreach (IcKapi k in KatKapilari())
             if (k.gameObject.activeInHierarchy && !k.name.Contains("Balkon")) { k.Kilitle(false); k.Ayarla(true); }
         var daireler = new List<DaireEksenleri>();
-        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>()) if (d.gameObject.activeInHierarchy) daireler.Add(d);
+        foreach (DaireEksenleri d in KatDaireleri()) if (d.gameObject.activeInHierarchy) daireler.Add(d);
         if (daireler.Count == 0) return "açık daire yok";
         Transform sahanlik = daireler[0].transform.parent;
         foreach (DaireEksenleri d in daireler)
@@ -758,7 +771,7 @@ public static class KatDenetimi
     {
         var rapor = new StringBuilder();
         var eslesmeler = new HashSet<string>();
-        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>())
+        foreach (DaireEksenleri d in KatDaireleri())
         {
             if (!d.gameObject.activeInHierarchy) continue;
             var parcalar = new List<(Collider c, string kok, bool yapi)>();
@@ -802,7 +815,7 @@ public static class KatDenetimi
         const BindingFlags Gizli = BindingFlags.NonPublic | BindingFlags.Instance;
         var rapor = new StringBuilder();
         int havada = 0, carpismasiz = 0, malzeme = 0, kapi = 0;
-        foreach (DaireEksenleri d in Object.FindObjectsByType<DaireEksenleri>())
+        foreach (DaireEksenleri d in KatDaireleri())
         {
             if (!d.gameObject.activeInHierarchy) continue;
             float taban = d.transform.position.y;                     // dairenin döşemesi

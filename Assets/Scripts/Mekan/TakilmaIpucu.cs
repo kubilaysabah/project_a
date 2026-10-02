@@ -235,6 +235,7 @@ public class TakilmaIpucu : MonoBehaviour
         string anaAd = "Daire_" + DairePlani.AcikDaire(kat);
         foreach (DaireEksenleri e in FindObjectsByType<DaireEksenleri>())
         {
+            if (DokuzuncuKat.SetinParcasi(e)) continue;   // dokuzuncu kat seti hep açık; katın dairesi değil (#110)
             if (e.name == anaAd) ana = e.transform;
             else ikinci = e.transform;   // katın açık ikinci dairesi (#70)
         }

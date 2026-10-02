@@ -57,6 +57,24 @@ public class KafaLambasi : MonoBehaviour
     /// <summary>Lamba oyuncunun kafasında mı? Açılışta çividen alınana kadar false (#56).</summary>
     public bool Takili { get { return takili; } }
 
+    // ---------- KAYNAK KAFANIN GERİSİNDE (#110) ----------
+    // Tam testte fener yakındaki her şeyi bembeyaz yakıyordu (kapı kasası, 50 cm'deki duvar), oda içi ise
+    // kapkaraydı. Sebep fizik: ışık uzaklığın KARESİYLE azalır; kaynak gözün dibindeyken 0,5 m'deki duvar
+    // 3 m'deki eşyadan 36 kat parlak olur. Kaynağı kafanın 45 cm gerisine almak oranı 36'dan 12'ye indirir
+    // (0,95 m'ye karşı 3,45 m). Gücü de 3 m'de eskisiyle aynı parlaklığı verecek kadar artırırız (telafi):
+    // uzak aynı kalır, yakın üç kat sönükleşir. Gerçek bir kafa lambası da gözün değil alnın üstündedir.
+    // Arkada duvar varsa kaynak duvarın 10 cm önünde durur (duvarın içine girerse bütün sahneyi gölgede bırakırdı).
+    public const float GeriAlma = 0.45f;          // kaynağın kameranın ne kadar gerisinde durduğu (metre)
+    private const float TelafiMesafesi = 3f;      // gücün eskisiyle eşit olduğu uzaklık (metre)
+    private Vector3 temelKonum;                   // ışığın kameraya göre asıl yeri (alnın üstü)
+    /// <summary>Kaynağın şu an kameranın ne kadar gerisinde olduğu (arkada duvar varsa daha az).</summary>
+    public float GeriAlinan { get; private set; }
+    /// <summary>Uzaklık telafisi: 3 m'deki parlaklık eskisiyle aynı kalsın diye güç bu kadar artar.</summary>
+    public float TelafiCarpani
+    {
+        get { float k = (TelafiMesafesi + GeriAlinan) / TelafiMesafesi; return k * k; }
+    }
+
     /// <summary>
     /// İnceleme kısması (#88, IncelemeEkrani): eşya kameranın 42 cm önündeyken tam şiddetli lamba onu
     /// bembeyaz patlatır (ışık yakında kare-ters orantıyla kat kat güçlenir). Açıkken şiddet %12'ye
@@ -95,6 +113,7 @@ public class KafaLambasi : MonoBehaviour
     private void Awake()
     {
         isik = GetComponentInChildren<Light>(true);
+        if (isik != null) temelKonum = isik.transform.localPosition;
         // Ses kaynağı kameranın kendisine değil bir ALT nesneye konur (#87/#91): kamerada oda yankısı
         // filtresi (OdaYankisi) var ve Unity, aynı nesnede bir ses kaynağı bulunca filtreyi dinleyiciye değil
         // o kaynağa bağlar; yankı odadaki seslere değil lambanın tıkına uygulanırdı.
@@ -121,13 +140,14 @@ public class KafaLambasi : MonoBehaviour
     private void LateUpdate()
     {
         if (isik == null) return;
+        KaynagiGeriAl();
         float hedef = LambaGerilimKurali.Karisim(GerilimDegeri());
         // MoveTowards: değeri hedefe en fazla "adım" kadar yaklaştırır (ani sıçrama olmaz).
         karisim = Mathf.MoveTowards(karisim, hedef, GostergeHizi * Time.deltaTime);
         isik.color = Color.Lerp(Renk, SariRenk, karisim);
         // Güç: karışımla aynı eğride, ama çarpan olarak (kural güç çarpanını gerilimden verir; burada
         // yumuşatılmış karışımdan türetilir ki renk ve güç birlikte hareket etsin).
-        isik.intensity = Siddet * incelemeCarpani * (1f - (1f - LambaGerilimKurali.EnDusukGuc) * karisim);
+        isik.intensity = Siddet * TelafiCarpani * incelemeCarpani * (1f - (1f - LambaGerilimKurali.EnDusukGuc) * karisim);
 
         if (vinlama == null || vinlama.clip == null) return;
         // Vınlama yalnızca lamba yanarken: sesi çıkaran lambanın kendisi. Menüde (zaman durur) kısılır.
@@ -136,6 +156,24 @@ public class KafaLambasi : MonoBehaviour
         vinlama.pitch = LambaGerilimKurali.VinlamaPerdesi(GerilimDegeri());
         if (vinlama.volume > 0.001f && !vinlama.isPlaying) vinlama.Play();
         else if (vinlama.volume <= 0.001f && vinlama.isPlaying) vinlama.Stop();
+    }
+
+    // Kaynağı kameranın gerisine alır (#110). Arkaya kısa bir ışın atılır; oyuncunun kendi parçaları (kamera
+    // kapsülün içinde) atlanır, ilk engelin 10 cm önünde durulur. Menzil de geri alınan kadar uzar ki ışık
+    // eskisi kadar uzağa ulaşsın.
+    private void KaynagiGeriAl()
+    {
+        float geri = GeriAlma;
+        Transform kok = transform.root;
+        foreach (RaycastHit h in Physics.RaycastAll(transform.position, -transform.forward, GeriAlma + 0.1f, ~0, QueryTriggerInteraction.Ignore))
+        {
+            if (h.transform.IsChildOf(kok)) continue;
+            geri = Mathf.Min(geri, h.distance - 0.1f);
+        }
+        GeriAlinan = Mathf.Max(0f, geri);
+        // Işık kameranın çocuğu: yerel -Z kameranın arkası (alnın üstündeki asıl yerinden geri).
+        isik.transform.localPosition = temelKonum + Vector3.back * GeriAlinan;
+        isik.range = Menzil + GeriAlinan;
     }
 
     private void Start()
