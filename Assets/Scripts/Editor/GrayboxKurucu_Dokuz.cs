@@ -261,8 +261,12 @@ public static partial class GrayboxKurucu
     // ince şeritler; tuğla rengi doğrusal değer (ekranda kiremit kırmızısı).
     static void TuglaDuvarKur(Transform d)
     {
-        Material tugla = MalzemeBul("Assets/Materials/Tugla.mat", new Color(0.38f, 0.17f, 0.12f));
-        Material derz = MalzemeBul("Assets/Materials/Tugla_Derz.mat", new Color(0.55f, 0.52f, 0.47f));
+        // MalzemeBul var olan dosyayı olduğu gibi döndürür; renk her kuruluşta yeniden yazılır (asfalt gibi).
+        // 0,38'lik tuğla fenerin 6 m'sinde simsiyah okunuyordu (#109): kiremit kırmızısı biraz açıldı.
+        Material tugla = MalzemeBul("Assets/Materials/Tugla.mat", new Color(0.52f, 0.26f, 0.18f));
+        tugla.SetColor("_BaseColor", new Color(0.52f, 0.26f, 0.18f));
+        Material derz = MalzemeBul("Assets/Materials/Tugla_Derz.mat", new Color(0.62f, 0.58f, 0.52f));
+        derz.SetColor("_BaseColor", new Color(0.62f, 0.58f, 0.52f));
         GameObject kok = new GameObject("Tugla_Duvar");
         kok.transform.SetParent(d, false);
         const float Z = 0.65f, Kalin = 0.25f, Gen = CekirdekGen + 0.4f;
@@ -301,5 +305,114 @@ public static partial class GrayboxKurucu
     {
         Transform t = kok.Find(yol);
         if (t != null) Object.DestroyImmediate(t.gameObject);
+    }
+
+    // ---------- 1974: TAZE MALZEMELER (#109) ----------
+    // Dokula() her kutuya adına göre 1994'ün dokusunu verir (lekeli sıva, kirli mozaik, çizik kaplama). Bu kat
+    // 1974'te yenidir: aynı adların taze karşılıkları takılır. Kural ad eşlemesidir, kutu listesi değil: ileride
+    // sahanlığa eklenen her parça kendiliğinden tazelenir. Daire_9 dışarıda kalır (kaplamasını KatYoneticisi takar).
+    const float LambriYuk = 1.15f;   // yağlı boya bandının üst sınırı (70'lerin apartman sahanlığı)
+
+    public static void DokuzuncuKatiTazele()
+    {
+        GameObject kok = GameObject.Find("Dokuzuncu_Kat");
+        if (kok == null) return;
+        Transform daire = kok.transform.Find("Sahanlik_9/Daire_9");
+        var taze = new System.Collections.Generic.Dictionary<string, Material>
+        {
+            // ad → taze malzeme. Duvar ve tavan: temiz beyaz sıva (white_plaster_02), hafif kırık beyaz.
+            { "Doku_Duvar",   TazeMalzeme("Taze_Duvar",   "white_plaster_02",    new Color(0.93f, 0.91f, 0.85f), 0.22f) },
+            { "Doku_Tavan",   TazeMalzeme("Taze_Tavan",   "white_plaster_02",    new Color(0.95f, 0.95f, 0.92f), 0.15f) },
+            // Mozaik aynı, ama cilalı ve açık (yeni döşenmiş).
+            { "Doku_Zemin",   TazeMalzeme("Taze_Zemin",   "marble_mosaic_tiles", new Color(1f, 1f, 0.98f), 0.78f) },
+            // Kapı kaplaması aynı ağaç, verniği yeni: daha açık ve parlak.
+            { "Doku_Kapi",    TazeMalzeme("Taze_Kapi",    "sapele_veneer",       new Color(0.66f, 0.46f, 0.32f), 0.62f) },
+            { "Doku_Boya",    TazeMalzeme("Taze_Boya",    null,                  new Color(0.94f, 0.94f, 0.90f), 0.55f) },
+            { "Doku_Madeni",  TazeMalzeme("Taze_Madeni",  null,                  new Color(0.86f, 0.68f, 0.30f), 0.80f, metal: 0.7f) },
+            { "Doku_Demir",   TazeMalzeme("Taze_Demir",   null,                  new Color(0.10f, 0.13f, 0.11f), 0.60f) },
+            { "Doku_Tirabzan", TazeMalzeme("Taze_Tirabzan", null,                new Color(0.30f, 0.16f, 0.08f), 0.65f) },
+        };
+        int sayi = 0;
+        foreach (MeshRenderer r in kok.GetComponentsInChildren<MeshRenderer>(true))
+        {
+            if (daire != null && r.transform.IsChildOf(daire)) continue;
+            Material[] mats = r.sharedMaterials;
+            bool degisti = false;
+            for (int i = 0; i < mats.Length; i++)
+            {
+                if (mats[i] != null && taze.TryGetValue(mats[i].name, out Material t)) { mats[i] = t; degisti = true; }
+            }
+            if (degisti) { r.sharedMaterials = mats; sayi++; }
+        }
+        foreach (string sahanlikAdi in new[] { "Sahanlik_9", "Sahanlik_9_Ust" })
+        {
+            Transform sh = kok.transform.Find(sahanlikAdi);
+            if (sh != null) YagliBoyaBandiKur(sh);
+        }
+        Debug.Log($"[DOKUZ] 1974 tazelemesi: {sayi} parça taze malzeme aldı, yağlı boya bandı kuruldu.");
+    }
+
+    // Taze malzeme: DokuKurucu'nun yaptığı gibi URP Lit, aynı doku dosyaları (dokuyu DokuKurucu.DokuAl yükler ki
+    // içe aktarma ayarları aynı kalsın), kendi rengi ve parlaklığı. Var olan dosya güncellenir (GUID sabit).
+    static Material TazeMalzeme(string ad, string doku, Color renk, float parlaklik, float metal = 0f)
+    {
+        string yol = "Assets/Materials/" + ad + ".mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            AssetDatabase.CreateAsset(m, yol);
+        }
+        m.SetColor("_BaseColor", renk);
+        m.SetFloat("_Smoothness", parlaklik);
+        m.SetFloat("_Metallic", metal);
+        if (doku != null)
+        {
+            m.SetTexture("_BaseMap", DokuKurucu.DokuAl(doku + "_renk", false));
+            m.SetTexture("_BumpMap", DokuKurucu.DokuAl(doku + "_normal", true));
+            m.EnableKeyword("_NORMALMAP");
+        }
+        else
+        {
+            m.SetTexture("_BaseMap", null);
+            m.SetTexture("_BumpMap", null);
+            m.DisableKeyword("_NORMALMAP");
+        }
+        m.SetTextureScale("_BaseMap", Vector2.one);
+        EditorUtility.SetDirty(m);
+        return m;
+    }
+
+    // 70'lerin apartmanı: duvarın alt 1,15 metresi parlak yağlı boya (çağla yeşili), üstünde koyu bir bordür.
+    // Her "Duvar_*" kutusunun (lentolar hariç) sahanlığa bakan yüzüne 1,2 cm'lik bir band konur; çarpışmasız.
+    static void YagliBoyaBandiKur(Transform sahanlik)
+    {
+        Material boya = TazeMalzeme("Taze_YagliBoya", null, new Color(0.56f, 0.70f, 0.58f), 0.72f);
+        Material bordur = TazeMalzeme("Taze_Bordur", null, new Color(0.26f, 0.38f, 0.30f), 0.72f);
+        foreach (Transform duvar in sahanlik)
+        {
+            if (!duvar.name.StartsWith("Duvar_") || duvar.name.Contains("Lento")) continue;
+            if (duvar.Find("Lambri") != null) continue;   // yeniden çalıştırmada iki kez konmasın
+            // Sahanlığa bakan yön: sol duvar +x, sağ duvar -x, ön duvar +z, arka duvar -z.
+            Vector3 ic = duvar.name.Contains("_Sol") ? Vector3.right : duvar.name.Contains("_Sag") ? Vector3.left
+                       : duvar.name.Contains("_On") ? Vector3.forward : Vector3.back;
+            if (duvar.name.StartsWith("Duvar_Arka")) ic = Vector3.back;
+            bool yanDuvar = Mathf.Abs(ic.x) > 0.5f;
+            Vector3 olcek = duvar.localScale;
+            float uzunluk = yanDuvar ? olcek.z : olcek.x;
+            Vector3 yuz = duvar.localPosition + ic * (DuvarKalin / 2f);   // duvarın iç yüzü
+            GameObject band = Kutu("Lambri", duvar, Vector3.zero, Vector3.one);
+            band.transform.SetParent(sahanlik, false);
+            band.transform.localPosition = new Vector3(yuz.x, LambriYuk / 2f, yuz.z) + ic * 0.006f;
+            band.transform.localScale = yanDuvar ? new Vector3(0.012f, LambriYuk, uzunluk) : new Vector3(uzunluk, LambriYuk, 0.012f);
+            band.transform.SetParent(duvar, true);
+            Boya(band, boya);
+            Object.DestroyImmediate(band.GetComponent<Collider>());
+            GameObject cizgi = Kutu("Bordur", sahanlik, new Vector3(yuz.x, LambriYuk + 0.015f, yuz.z) + ic * 0.008f,
+                                    yanDuvar ? new Vector3(0.016f, 0.03f, uzunluk) : new Vector3(uzunluk, 0.03f, 0.016f));
+            cizgi.transform.SetParent(duvar, true);
+            Boya(cizgi, bordur);
+            Object.DestroyImmediate(cizgi.GetComponent<Collider>());
+        }
     }
 }

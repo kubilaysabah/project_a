@@ -364,7 +364,7 @@ public static class DokuKurucu
     // Dokuyu yükler; normal haritasıysa içe aktarma ayarını "Normal map" yapar. Normal
     // haritası bir renk değil, yüzeyin her noktasının hangi yöne baktığını saklar; Unity'ye
     // bunu söylemezsek onu renk sanıp yanlış çözer ve ışık tuhaf görünür.
-    static Texture2D DokuAl(string ad, bool normal)
+    public static Texture2D DokuAl(string ad, bool normal)
     {
         string yol = DokuKlasoru + ad + ".jpg";
         var ice = AssetImporter.GetAtPath(yol) as TextureImporter;

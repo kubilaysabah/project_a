@@ -123,9 +123,12 @@ public class DokuzuncuKat : MonoBehaviour
         pano8.Ugultu(true);
         if (radyo != null && radyo.clip != null) radyo.Play();   // yukarıda Nuri'nin radyosu çalıyor
         yield return new WaitForSeconds(1.4f);
-        pano8.GostergeYaz("9");
+        pano8.GostergeYaz("");                                    // 8 ile 9 arasında bir an boş: araya bir kat sığar (#109)
+        StartCoroutine(KabinLambasiniTitret(pano8.Kabin));
         KameraHareketi.Sars(0.04f, 2.0f);                         // kabin yolda hafifçe titrer
-        yield return new WaitForSeconds(2.2f);
+        yield return new WaitForSeconds(0.7f);
+        pano8.GostergeYaz("9");
+        yield return new WaitForSeconds(1.5f);
         // Işınlanma: kapılar kapalı, oyuncu iki kabinde de aynı yerel noktada; göz hiçbir şey fark etmez.
         OyuncuyuKabineTasi(pano8.Kabin, pano != null ? pano.Kabin : null);
         pano8.KabinAyrildi("9");
@@ -236,8 +239,11 @@ public class DokuzuncuKat : MonoBehaviour
         pano.Ugultu(true);
         KameraHareketi.Sars(0.10f, 0.7f);
         yield return new WaitForSeconds(1.4f);
+        pano.GostergeYaz("");
+        StartCoroutine(KabinLambasiniTitret(pano.Kabin));
+        yield return new WaitForSeconds(0.7f);
         pano.GostergeYaz("8");
-        yield return new WaitForSeconds(2.0f);
+        yield return new WaitForSeconds(1.3f);
         if (radyo != null) radyo.Stop();
         OyuncuyuKabineTasi(pano.Kabin, pano8 != null ? pano8.Kabin : null);
         pano.KabinAyrildi("8");
@@ -257,6 +263,21 @@ public class DokuzuncuKat : MonoBehaviour
         }
         if (kontrol != null) kontrol.enabled = true;
         Debug.Log("[DOKUZ] 8. kata dönüldü; çatı anahtarı elde. Bölüm bitti.");
+    }
+
+    // Kabinin tavan lambası yolda bir an titrer (#109): eski asansörün kontağı. Işık kabinin "Isik" çocuğu.
+    private IEnumerator KabinLambasiniTitret(Transform kabin)
+    {
+        Light isik = kabin != null ? kabin.GetComponentInChildren<Light>() : null;
+        if (isik == null) yield break;
+        float temel = isik.intensity;
+        float[] duraklar = { 0.25f, 1f, 0.15f, 0.6f, 1f };
+        foreach (float oran in duraklar)
+        {
+            isik.intensity = temel * oran;
+            yield return new WaitForSeconds(Random.Range(0.05f, 0.12f));
+        }
+        isik.intensity = temel;
     }
 
     private IEnumerator KapiyaVur()

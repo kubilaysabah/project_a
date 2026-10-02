@@ -206,6 +206,8 @@ public static partial class GrayboxKurucu
 
         // Düz beyaz kutuları gerçek dokularla kapla (#41). En sonda: bütün kutular kurulmuş olmalı.
         DokuKurucu.Dokula();
+        // Dokuzuncu kat 1974'te yenidir (#109): Dokula'nın verdiği 1994 dokuları taze malzemelerle değişir.
+        DokuzuncuKatiTazele();
 
         SahneyiKaydet("Graybox");
     }
