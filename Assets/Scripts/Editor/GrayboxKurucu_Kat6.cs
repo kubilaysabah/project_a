@@ -10,7 +10,8 @@
 // kaldırıldı); bir odada en fazla bir görev parçası.
 //
 // Kapı sırası ve görev parçaları (altı kilit; iki daire birbirinin kilidini açar):
-//   A Hol     : duvar takviminde 1994 -> B'nin kilerinin şifresi.
+//   A Hol     : duvar takviminde 1974 -> B'nin kilerinin şifresi. (#110: 1994'tü; bu daire 1974'te donup kalmış
+//               bir ev, takvimi de o yılda durmuş. Dokuzuncu katın EKİM 1974'ü ile aynı yıl.)
 //   A Kiler   : (kilitsiz) duvardaki kol -> B'nin yatak odasının sürgüsü.
 //   A Mutfak  : (anahtar, B'nin buzdolabında) tezgâh dolabında Rıza Efendi'nin tabağı.
 //   A Oda A   : (kırık anahtar) çeyiz sandığında Cemal'in tabağı.
@@ -18,7 +19,7 @@
 //   B Antre   : yerde tornavida (çantada zaten varsa konmaz).
 //   B Salon   : terzi masasındaki dikiş kutusunda A'nın yatak odası anahtarının ucu.
 //   B Mutfak  : buzdolabında A'nın mutfak anahtarı.
-//   B Kiler   : (şifre 1994) raftaki düğme tenekesinde A'nın yatak odası anahtarının başı.
+//   B Kiler   : (şifre 1974) raftaki düğme tenekesinde A'nın yatak odası anahtarının başı.
 //   B Banyo   : (menteşe, tornavida) yerde Hasan'ın tabağı.
 //   B Oda A   : (A'nın kilerindeki kol) yerde Yeni Kapıcı'nın tabağı.
 //   A banyo, A Oda B ve B Oda B kapalı.
@@ -105,7 +106,7 @@ public static partial class GrayboxKurucu
 
         // KİLİTLER
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "b_kiler", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "B:Oda_C", Gerekli = "a_takvim",
-                                          Sifre = "1994", IpucuMetni = "1994", IpucuX = Takvim6Yazi.x, IpucuY = Takvim6Yazi.y, IpucuZ = Takvim6Yazi.z });
+                                          Sifre = "1974", IpucuMetni = "1974", IpucuX = Takvim6Yazi.x, IpucuY = Takvim6Yazi.y, IpucuZ = Takvim6Yazi.z });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "a_mutfak", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "a_mutfak_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "a_odaA", Tur = KilitTuru.KirikAnahtar, OdaKapisi = true, Hedef = "Oda_A",
                                           Gerekenler = new List<string> { "odaA_anahtari_bas", "odaA_anahtari_uc" } });
@@ -139,7 +140,7 @@ public static partial class GrayboxKurucu
             // ANTRE (u 0-2,6, v -0,8-2,85; giriş kapısının köşesi boş): şapkalık ve telefon masası.
             D("Sapka_Askisi_K6", 2.28f, 0f, -0.48f, -1f, 0.3f),
             D("Telefon_Masasi_K6", 2.60f - 0.18f, 0f, 1.30f, -1f, 0f),
-            // HOL (u 0-10,5, v 2,95-4,65): yolluk; banyo ile kiler kapıları arasında takvim (1994); fotoğraf.
+            // HOL (u 0-10,5, v 2,95-4,65): yolluk; banyo ile kiler kapıları arasında takvim (1974); fotoğraf.
             D("Yolluk_K6", 5.60f, 0f, 3.80f, 0f, 1f),
             DA("Takvim_Hol", "Takvim_1994_K6", 4.60f, 1.45f, 2.95f, 0f, 1f),
             Foto("kat6", true, 3.80f, 1.60f, 4.65f, 0f, -1f),

@@ -30,7 +30,9 @@ public static partial class GrayboxKurucu
                                       "Kanepe_K5", "TV_Unitesi_K5", "Hali_K5", "Perde_K5", "Buzdolabi_K5", "Ocak_K5", "Mutfak_Masasi_K5",
                                       "Tabure_K5", "Ekmek_Sepeti_K5", "Camasir_Makinesi_K5", "Havlu_Askisi_K5", "Banyo_Dolabi_K5",
                                       "Legen_Kova_K5", "Raf_K5", "Is_Lambasi_K5", "Boya_Kovalari_K5", "Komodin_K5", "Sifonyer_K5",
-                                      "Perde_OdaA_K5", "Calisma_Masasi_K5", "Kitaplik_K5", "Sandalye_K5", "Perde_OdaB_K5" })
+                                      "Perde_OdaA_K5", "Calisma_Masasi_K5", "Kitaplik_K5", "Sandalye_K5", "Perde_OdaB_K5",
+                                      // #110: elektrikli su ısıtıcısı ve gotik karyolanın yerine dönemine uygun iki model.
+                                      "Caydanlik_K5", "Karyola_K5" })
             ParcaSablonuKur(ad, ad);
     }
 
@@ -61,7 +63,9 @@ public static partial class GrayboxKurucu
         // Anahtar ucu çalışma odasının kapı tarafındaki köşede, yerde (10/10): masanın üstündeydi (80 noktadan açık).
         z.Yerler.Add(new ZincirYeri { Kimlik = "oda_kosesi", PlandaNokta = true, Oda = "Oda_B", U = 5.62f, Y = 0.004f, V = 5.07f, Donus = 30f });
         // Levye yatakla komodinin arasında, yerde (11/12): odanın ortasındaydı (80 noktadan açık).
-        z.Yerler.Add(new ZincirYeri { Kimlik = "levye_yer", PlandaNokta = true, Oda = "Oda_A", U = 10.22f, Y = 0.004f, V = 6.67f, Donus = 80f });
+        // #110: gotik karyolanın yerine gelen sade karyolanın altı daha açık; 6,67'de ayakta 39 noktadan görünüyordu.
+        // 7,05'te karyolanın altında: ayakta 0, eğilince 53 noktadan görünür, 62 noktadan alınır (YerDene).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "levye_yer", PlandaNokta = true, Oda = "Oda_A", U = 10.22f, Y = 0.004f, V = 7.05f, Donus = 80f });
         // Vananın kilidi gardırobun kendisinde (KilitYolu): gardırop itilmeden vanaya ulaşılmaz.
         z.Yerler.Add(new ZincirYeri { Kimlik = "vana", Yol = "Esyalar/Vana/Cark", Oda = "Salon", KilitYolu = "Esyalar/Gardirop" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "sifon", Yol = "Esyalar/Lavabo/Sifon", Oda = "Banyo" });
@@ -139,7 +143,8 @@ public static partial class GrayboxKurucu
             M("painted_wooden_cabinet_02", 6.80f + 0.36f + 0.01f, 0f, 0.90f, 1f, 0f),
             D("Buzdolabi_K5", 7.20f, 0f, -0.80f + 0.34f, 0f, 1f),
             D("Ocak_K5", 8.00f, 0f, -0.80f + 0.35f, 0f, 1f),
-            M("vintage_electric_kettle", 8.10f, 0.86f, -0.36f, 0.3f, 1f),
+            // Ocağın üstünde çift katlı çaydanlık (#110: elektrikli su ısıtıcısı 1994 Türk mutfağına uymuyordu).
+            D("Caydanlik_K5", 8.10f, 0.86f, -0.36f, 0.3f, 1f),
             D("Mutfak_Masasi_K5", 8.60f, 0f, 1.40f, 0f, 1f),
             D("Tabure_K5", 8.60f, 0f, 2.00f, 0f, -1f),
             D("Tabure_K5", 8.60f, 0f, 0.80f, 0f, 1f),
@@ -160,12 +165,13 @@ public static partial class GrayboxKurucu
             D("Boya_Kovalari_K5", 6.30f, 0f, -0.50f, 0f, 1f),
 
             // ---------- ODA A ---------- (u 7,7-10,5, v 4,75-8,1; kapının önü boş)
-            // Gotik karyola (1,49 x 2,04 m) başı doğu duvarında, odanın kuzey şeridinde; komodin güneyinde,
+            // Karyola (1,45 x 2,02 m; #110'a kadar gotik karyola) başı doğu duvarında, odanın kuzey şeridinde; komodin güneyinde,
             // şifonyer batı duvarında kapıya yakın. Levye karyolanın güney kenarının dibinde, açık alanda yerde
             // (karyolanın batısında kalan 74 cm'lik şerit oyuncunun gövdesine dar geliyordu). Karyola ortadayken
             // kapının önünü, şifonyerle arasındaki geçidi ve levyeyi kapatıyordu; hazır mobilyaya çarpışma
             // takılınca odada 0,7 m² kaldığı görüldü (eksikler testi).
-            M("GothicBed_01", 10.50f - 1.02f - 0.02f, 0f, 7.20f, -1f, 0f),
+            // #110: gotik karyolanın yerine sade ceviz karyola (1,45 x 2,02; aynı taban, altı açık, krem örtü).
+            D("Karyola_K5", 10.50f - 1.01f - 0.02f, 0f, 7.20f, -1f, 0f),
             D("Komodin_K5", 10.50f - 0.20f, 0f, 6.20f, -1f, 0f),
             D("Sifonyer_K5", 7.70f + 0.23f, 0f, 5.65f, 1f, 0f),
             D("Perde_OdaA_K5", 9.10f, 2.30f, 8.10f, 0f, -1f),

@@ -19,9 +19,9 @@ Metinler `Assets/Resources/Metinler.txt` tablosundan, `not.telefon` ile başlaya
 `not.` ile başlayan öbür anahtarlar (`not.yonetici` kapıcı odasındaki yönetici notu, `not.katN_*` katlardaki
 notlar) hep yazılı kâğıtlardır; seslendirilecek başka satır yok.
 
-### `telefon_kat2` — Nuri (3 numara; yaşlı, hastanede, yorgun ama kibar; sonda sesi alçalır)
+### `telefon_kat2` — Nuri (7 numara; yaşlı, hastanede, yorgun ama kibar; sonda sesi alçalır)
 
-> — Alo? Kapıcı mısın? Ben Nuri, 3 numaradan.
+> — Alo? Kapıcı mısın? Ben Nuri, 7 numaradan.
 > Hastanedeyim, merak etme.
 >
 > Bir şey rica edeceğim evladım:

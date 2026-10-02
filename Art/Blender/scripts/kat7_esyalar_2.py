@@ -320,7 +320,7 @@ def uret(hangi):
         yay = ortak.malzeme("K7_Yatak_Yay", (0.15, 0.15, 0.14), puruz=0.5, metal=0.8)
         silte = ortak.malzeme("K7_Yatak_Silte", (0.50, 0.46, 0.36), puruz=0.9)
         cizgi = ortak.malzeme("K7_Yatak_Silte_Cizgi", (0.20, 0.22, 0.30), puruz=0.9)
-        batt = ortak.malzeme("K7_Yatak_Battaniye", (0.08, 0.05, 0.035), puruz=0.95)
+        batt = ortak.malzeme("K7_Yatak_Battaniye", (0.20, 0.21, 0.15), puruz=0.95)   # #110: haki-gri asker battaniyesi (koyu kahve kapıdan okunmuyordu)
         batt_s = ortak.malzeme("K7_Yatak_Battaniye_Serit", (0.30, 0.22, 0.10), puruz=0.95)
         yastik = ortak.malzeme("K7_Yatak_Yastik", (0.55, 0.53, 0.47), puruz=0.9)
         EN, BOY = 0.95, 1.95

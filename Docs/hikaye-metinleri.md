@@ -62,7 +62,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **TR**
 
-> — Alo? Kapıcı mısın? Ben Nuri, 3 numaradan.
+> — Alo? Kapıcı mısın? Ben Nuri, 7 numaradan.
 > Hastanedeyim, merak etme.
 >
 > Bir şey rica edeceğim evladım:
@@ -75,7 +75,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **EN**
 
-> — Hello? Is this the janitor? It's Nuri, from number 3.
+> — Hello? Is this the janitor? It's Nuri, from number 7.
 > I'm in the hospital, don't worry.
 >
 > I have a favour to ask, son:
@@ -92,7 +92,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > Kapıcı Bey,
 >
-> Siz yokken 3 numaradan Nuri Bey aradı, hastaneden.
+> Siz yokken 7 numaradan Nuri Bey aradı, hastaneden.
 > "Radyomu kapatmasın" dedi.
 > Neden diye sorduk, cevap vermedi.
 >
@@ -102,7 +102,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > Mr Janitor,
 >
-> Nuri Bey from number 3 called while you were out, from the hospital.
+> Nuri Bey from number 7 called while you were out, from the hospital.
 > "Tell him not to turn my radio off," he said.
 > We asked why. He didn't answer.
 >
@@ -328,7 +328,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **TR**
 
-> Karaca'lar, Daire 4, Ekim 1991.
+> Aydın'lar, Daire 16, Ekim 1991.
 >
 > Fotoğrafı ben çektim.
 > Arkalarında kimse yoktu.
@@ -337,7 +337,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **EN**
 
-> The Karacas, Flat 4, October 1991.
+> The Aydıns, Flat 16, October 1991.
 >
 > I took this photo myself.
 > There was no one behind them.
@@ -462,21 +462,33 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > T.C. NÜFUS CÜZDANI
 >
+> Seri: B03   No: 482617
 > Adı: CEMAL
 > Soyadı: YILMAZ
 > Baba Adı: OSMAN
+> Ana Adı: HATİCE
 > Doğum Yeri: SİVAS
 > Doğum Tarihi: 11.07.1961
+> Medeni Hali: BEKAR
+> Dini: İSLAM
+>
+> Cilt No: 41   Aile Sıra No: 112   Sıra No: 3
 
 **EN**
 
 > REPUBLIC OF TURKEY IDENTITY CARD
 >
+> Serial: B03   No: 482617
 > Name: CEMAL
 > Surname: YILMAZ
 > Father's name: OSMAN
+> Mother's name: HATİCE
 > Place of birth: SİVAS
 > Date of birth: 11.07.1961
+> Marital status: SINGLE
+> Religion: ISLAM
+>
+> Volume: 41   Family No: 112   Entry No: 3
 
 ### `not.kat7_son`
 

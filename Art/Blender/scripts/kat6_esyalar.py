@@ -701,7 +701,7 @@ elif hangi == "karyola":
     dosek = ortak.malzeme("Karyola6_Dosek", (0.52, 0.49, 0.42), puruz=0.95)
     cizgi = ortak.malzeme("Karyola6_Cizgi", (0.10, 0.14, 0.28), puruz=0.95)
     leke = ortak.malzeme("Karyola6_Leke", (0.42, 0.34, 0.20), puruz=0.95)
-    yorgan = ortak.malzeme("Karyola6_Yorgan", (0.32, 0.10, 0.12), puruz=0.5)        # soluk gül rengi saten
+    yorgan = ortak.malzeme("Karyola6_Yorgan", (0.55, 0.27, 0.28), puruz=0.5)        # soluk gül rengi saten (#110: 0,32 kapıdan simsiyah okunuyordu)
     EN, BOY = 1.40, 2.00
     X, Y = EN / 2, BOY / 2 - 0.02
     # Dört direk, tepelerinde pirinç topuz ve bilezik.

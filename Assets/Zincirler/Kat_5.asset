@@ -94,7 +94,7 @@ MonoBehaviour:
       PlandaNokta: 1
       U: 10.22
       Y: 0.004
-      V: 6.67
+      V: 7.05
       Donus: 80
       OnU: 0
       OnV: 0
@@ -498,7 +498,7 @@ MonoBehaviour:
     OnU: 0.3
     OnV: 1
     Yatik: 0
-    Sablon: {fileID: 6074168209427321076, guid: 928be3d2bd1d09e42ae7543543a36088, type: 3}
+    Sablon: {fileID: 1340063258560220456, guid: 612751d34a14cb247bf853c3b4e645b9, type: 3}
     Metin: 
     Ad: 
   - Yol: 
@@ -623,14 +623,14 @@ MonoBehaviour:
     Metin: 
     Ad: 
   - Yol: 
-    X: 9.459999
+    X: 9.469999
     Y: 0
     Z: 7.2
     Donus: 0
     OnU: -1
     OnV: 0
     Yatik: 0
-    Sablon: {fileID: 6776502682753000509, guid: 3ce7d472845f41a45905af3603230367, type: 3}
+    Sablon: {fileID: 6013614464986969776, guid: c613809f70bed144198c8685fded2ec9, type: 3}
     Metin: 
     Ad: 
   - Yol: 
