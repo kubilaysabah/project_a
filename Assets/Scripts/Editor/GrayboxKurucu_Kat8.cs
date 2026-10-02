@@ -12,11 +12,12 @@
 //   Banyo  : (menteşe, tornavida) yerde kilerin anahtarı.
 //   Kiler  : (anahtar) duvardaki kol -> toplantı odasının sürgüsü.
 //   Oda B  : (kol) evrak dolabının üst çekmecesinde mutfağın anahtarı.
-//   Mutfak : (anahtar) tezgâhın üst çekmecesinde salonun anahtarı.
+//   Mutfak : (anahtar) yerde, dip köşede salonun anahtarı (#102: tezgâhın üst çekmecesindeydi).
 //   Hol    : (kilitsiz) duvarda iskân ruhsatı: "yapım yılı 1974".
 //   Oda A  : (şifre 1974, arşiv) duvardaki anahtar dolabında dosya dolabının anahtarı.
 //   Salon  : (anahtar) dosya dolabının üst çekmecesi (anahtar): asansörün sigortası ve Cemal'in notu.
-//   Sahanlık: sigorta asansör panosuna takılır, asansör çağrılır, gösterge 9 der; kabinde ÇATI ANAHTARI.
+//   Sahanlık: sigorta asansör panosuna takılır, asansör çağrılır, gösterge 9 der; kabin BOŞ gelir.
+//   Kabine binen oyuncuyu asansör dokuzuncu kata çıkarır; ÇATI ANAHTARI oradaki sofradadır (#108, DokuzuncuKat).
 
 using System.Collections.Generic;
 using UnityEditor;
