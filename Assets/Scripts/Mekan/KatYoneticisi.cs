@@ -179,6 +179,18 @@ public class KatYoneticisi : MonoBehaviour
     // Sahanlıkların şu an hangi katı gösterdiği. -1 = henüz hiçbiri.
     private int gosterilenA = -1, gosterilenB = -1;
 
+    /// <summary>
+    /// Verilen nesnenin bulunduğu sahanlık şu an hangi katı gösteriyor (#111: asansörün arızalı lambası yalnızca
+    /// 8. katta yanar). Sahanlık A ya da B'nin parçası değilse -1.
+    /// </summary>
+    public int SahanlikKati(Transform t)
+    {
+        if (t == null) return -1;
+        if (sahanlikA != null && t.IsChildOf(sahanlikA)) return gosterilenA;
+        if (sahanlikB != null && t.IsChildOf(sahanlikB)) return gosterilenB;
+        return -1;
+    }
+
     // Yeni ilerlemede (eski kural kapalı) oyuncunun bulunduğu kattan kaç kat AŞAĞI indiği.
     // Aşağı inmek ceza da ilerleme de değildir; oyuncu bir şey almak için inebilir. Tek
     // sahanlık döngüsünde aşağıdaki katlar da bu katın görüntüsünü gösterir (aynı kat gibi);

@@ -45,6 +45,14 @@ public static partial class GrayboxKurucu
             Sil(s, $"Kapi_{n}/Ayakkabilar");                 // dağınık ayakkabı yok
         }
         Sil(s, "Kat_Anahtari");          // katın anahtarı bu katta sahanlıkta değil, sofrada
+        // Asansörün üstündeki arızalı lamba (#111) burada hep yanar: lamba çiviye asılınca sahanlığı o aydınlatır.
+        Transform arizaLambasi = s.Find("Asansor/Ariza_Lambasi");
+        if (arizaLambasi != null)
+        {
+            var aSeri9 = new SerializedObject(arizaLambasi.GetComponent<ArizaliLamba>());
+            aSeri9.FindProperty("herZaman").boolValue = true;
+            aSeri9.ApplyModifiedPropertiesWithoutUndo();
+        }
         Sil(s, "Asansor/Not");           // asansör 1974'te çalışıyor: "arızalı" notu yok
         Sil(s, "Asansor/Not_Yazi");
         Sil(s, "Ses_Ugultu");            // elektrik yok: uğultu, TV, bebek yok

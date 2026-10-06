@@ -485,6 +485,9 @@ public static partial class GrayboxKurucu
         // biri eksik: asansör bu yüzden arızalı. Her sahanlıkta aynı görünür (döngü aynı katları
         // göstermeli); yalnızca 8. katta zincirin parçasıdır.
         GameObject pano = PanoKur(a, yuz);
+        // Arızalı lamba (#111): asansör kapısının solunda, tavana yakın. Yalnızca sahanlık 8. katı gösterince yanar
+        // (ArizaliLamba yöneticiye sorar). Sahte katlarda yok (tam değil): orada hiçbir şey olmaz.
+        if (tam) ArizaliLambaKur(a, yuz);
 
         if (tam)
         {
@@ -528,6 +531,54 @@ public static partial class GrayboxKurucu
     // Asansörün sigorta panosu (#68): duvara vidalı koyu bir sac kutu, içinde üç sigorta yuvası
     // ve bir durum lambası. Kök boş bir nesne (ölçeksiz); parçalar onun çocuğu, yalnızca gövdenin
     // çarpışma kutusu var (nişan panoya bakınca gövdeye çarpar, bileşen kökte).
+    // Duvar duyu (bakalit gövde) + ampul camı + gölgesiz nokta ışığı + ArizaliLamba bileşeni.
+    static void ArizaliLambaKur(Transform a, float yuz)
+    {
+        GameObject kok = new GameObject("Ariza_Lambasi");
+        kok.transform.SetParent(a, false);
+        kok.transform.localPosition = new Vector3(-(AsansorGen / 2f + 0.45f), 2.50f, yuz);
+        Material bakalit = MalzemeBul("Assets/Materials/Ariza_Lamba_Govde.mat", new Color(0.10f, 0.08f, 0.06f));
+        // Duy: duvara oturan kısa silindir (ekseni +z'ye, duvardan dışarı).
+        GameObject duy = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        duy.name = "Duy";
+        Object.DestroyImmediate(duy.GetComponent<Collider>());
+        duy.transform.SetParent(kok.transform, false);
+        duy.transform.localPosition = new Vector3(0f, 0f, 0.03f);
+        duy.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+        duy.transform.localScale = new Vector3(0.09f, 0.03f, 0.09f);
+        Boya(duy, bakalit);
+        // Ampul: duyun ucunda küçük bir küre; malzemesini ArizaliLamba yanık/sönük arasında değiştirir.
+        GameObject cam = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        cam.name = "Cam";
+        Object.DestroyImmediate(cam.GetComponent<Collider>());
+        cam.transform.SetParent(kok.transform, false);
+        cam.transform.localPosition = new Vector3(0f, -0.02f, 0.10f);
+        cam.transform.localScale = Vector3.one * 0.075f;
+        MeshRenderer camR = cam.GetComponent<MeshRenderer>();
+        camR.sharedMaterial = CamSonukMalzeme();
+        camR.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        // Işık: gölgesiz nokta ışığı (bir nokta ışığının gölgesi altı harita ister; #11 kuralı).
+        GameObject isikNesne = new GameObject("Isik");
+        isikNesne.transform.SetParent(kok.transform, false);
+        isikNesne.transform.localPosition = new Vector3(0f, -0.05f, 0.25f);
+        Light isik = isikNesne.AddComponent<Light>();
+        isik.type = LightType.Point;
+        isik.range = 5.5f;
+        isik.intensity = 2.2f;
+        isik.color = AkkorRengi;
+        isik.shadows = LightShadows.None;
+        isik.enabled = false;
+        ArizaliLamba al = kok.AddComponent<ArizaliLamba>();
+        var seri = new SerializedObject(al);
+        seri.FindProperty("isik").objectReferenceValue = isik;
+        seri.FindProperty("cam").objectReferenceValue = camR;
+        seri.FindProperty("camYanik").objectReferenceValue = CamMalzeme();
+        seri.FindProperty("camSonuk").objectReferenceValue = CamSonukMalzeme();
+        // Sahanlıklar farklı tohum alsın: A ile B aynı anda aynı şeyi yapmasın (ad üzerinden basit bir sayı).
+        seri.FindProperty("tohum").intValue = a.parent != null ? a.parent.name.Length * 17 : 0;
+        seri.ApplyModifiedPropertiesWithoutUndo();
+    }
+
     static GameObject PanoKur(Transform a, float yuz)
     {
         GameObject pano = new GameObject("Pano");

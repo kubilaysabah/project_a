@@ -62,7 +62,7 @@ public static partial class GrayboxKurucu
         v.kapiNumarasi = "";
         v.girisKapali = false;
         v.sahanlikKarti = null;
-        v.elektrikYok = false;
+        v.elektrikYok = true;   // #111: buzdolabının iç ışığı da yanmaz, düğmeler bir şey yakmaz
         v.ikinciDaire = 0;
         v.kacisVar = false;
 
@@ -125,8 +125,9 @@ public static partial class GrayboxKurucu
         v.parcalar = new List<KatParcasi>();
         v.sesler = new List<KatSesi>();
         v.anons = new KatAnonsu { Yol = "Sus_Radyo_Masa_K8", Gecikme = 18f, Dosya = "radyo_kat8" };   // #106
-        // Yönetim'in bürosu (salon) ve hol aydınlık; öbür odalar kafa lambasıyla.
-        v.yananOdalar = new List<string> { "Salon", "Hol" };
+        // #111 (Şahan, 2026-10-06): bütün bina karanlıkken yalnızca bu katın lambalarının yanması tutarsızdı.
+        // Yönetim'in bürosunda da elektrik yok; her oda kafa lambasıyla. (Eskiden salon ve hol yanıyordu.)
+        v.yananOdalar = new List<string>();
         v.esyaYazilari = new List<EsyaYazisi>();
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;

@@ -708,9 +708,7 @@ MonoBehaviour:
     Dosya: radyo_kat8
     Ses: 0.7
   parcalar: []
-  yananOdalar:
-  - Salon
-  - Hol
+  yananOdalar: []
   ikinciDaire: 0
   ikinciKaplamaKati: 0
   esyaYazilari: []
@@ -719,7 +717,7 @@ MonoBehaviour:
   sahanlikKarti: {fileID: 0}
   tiklatmaSesi: {fileID: 0}
   yanlisKapiSesleri: []
-  elektrikYok: 0
+  elektrikYok: 1
   kacisVar: 0
   kacisSablonu: {fileID: 0}
   kacisGecikme: 3
