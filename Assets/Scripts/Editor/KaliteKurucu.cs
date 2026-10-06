@@ -32,7 +32,7 @@ public static class KaliteKurucu
         {
             // FindProperty: dosyadaki bir alanı adıyla bulur (Inspector'ın gördüğü alanlar).
             orta.FindProperty("m_MainLightShadowmapResolution").intValue = 1024;
-            orta.FindProperty("m_AdditionalLightsShadowmapResolution").intValue = 1024;
+            orta.FindProperty("m_AdditionalLightsShadowmapResolution").intValue = 2048;   // #112: 1024'e 5-6 lamba sığmıyordu
             orta.FindProperty("m_ShadowCascadeCount").intValue = 2;
             orta.FindProperty("m_SoftShadowQuality").intValue = 1;          // 1 = düşük yumuşatma
             orta.ApplyModifiedPropertiesWithoutUndo();

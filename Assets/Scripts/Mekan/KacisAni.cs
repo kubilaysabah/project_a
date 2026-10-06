@@ -38,7 +38,8 @@ public class KacisAni : MonoBehaviour
     /// <summary>Kovalamaca şu an sürüyor mu (silüet oyuncunun peşinde)? Saklanma yeri bakar (#103).</summary>
     public bool Suruyor { get { return durum == Durum.Basladi; } }
     private readonly List<Vector3> izler = new List<Vector3>();
-    private float izSayaci, adimSayaci, baslangicZamani;
+    private float izSayaci, adimSayaci, gecenSure;   // gecenSure: kaçış başladığından beri ETKİN geçen süre (#112)
+    private BirinciSahisKontrolcu kontrol;
     private int hedefIz;
     private GameObject golge;
     private Transform oyuncu;
@@ -63,6 +64,7 @@ public class KacisAni : MonoBehaviour
         baslangicSesi = ilkSes;
         haberciSesi = haberci;
         BirinciSahisKontrolcu k = FindAnyObjectByType<BirinciSahisKontrolcu>();
+        kontrol = k;
         oyuncu = k != null ? k.transform : null;
         // Kat kapısı açılınca kaçış biter. Olay (event): kapı açıldığında haber veren liste.
         if (KapidanKacis) foreach (KatKapisi kapi in FindObjectsByType<KatKapisi>()) kapi.AcilisBasladi += KapiAcildi;
@@ -90,6 +92,18 @@ public class KacisAni : MonoBehaviour
             return;
         }
 
+        // #112: not, şifre, inceleme ya da fotoğraf ekranı açıkken (kontrolcü kapalı) ve menüde kovalamaca DONAR:
+        // siluet yürümez, süre işlemez. Eskiden oyuncu ekran açıkken yakalanıyordu. Kontrolcü yalnızca kaçış
+        // bittikten sonraki karartmada da kapalıdır; o zaman durum Bitti olduğundan buraya gelinmez.
+        if (Time.timeScale <= 0f || (kontrol != null && !kontrol.enabled)) return;
+        gecenSure += Time.deltaTime;
+
+        // #112: not, şifre, inceleme ya da fotoğraf ekranı açıkken (kontrolcü kapalı) ve menüde kovalamaca DONAR:
+        // siluet yürümez, süre işlemez. Eskiden oyuncu ekran açıkken yakalanıyordu. Kontrolcü yalnızca kaçış
+        // bittikten sonraki karartmada da kapalıdır; o zaman durum Bitti olduğundan buraya gelinmez.
+        if (Time.timeScale <= 0f || (kontrol != null && !kontrol.enabled)) return;
+        gecenSure += Time.deltaTime;
+
         // İz kaydı: oyuncunun yürüdüğü yol.
         izSayaci += Time.deltaTime;
         if (izSayaci >= IzAraligi) { izSayaci = 0f; izler.Add(oyuncu.position); }
@@ -97,7 +111,7 @@ public class KacisAni : MonoBehaviour
         // Bekleme bitince siluet anahtarın alındığı yerde (ilk iz) belirir ve izleri takip eder.
         if (golge == null)
         {
-            if (Time.time - baslangicZamani < gecikme) return;
+            if (gecenSure < gecikme) return;
             if (HazirGolge != null) { golge = HazirGolge; golge.SetActive(true); }   // oturan Gölge kalkar, olduğu yerden
             else { golge = Instantiate(sablon, izler[0], Quaternion.identity); golge.name = "Kacis_Golgesi"; }
             // Siluetin çevresindeki uğultu #74'te kalktı; gelişini üst kattan adımlar haber verir.
@@ -110,7 +124,7 @@ public class KacisAni : MonoBehaviour
     private void Baslat()
     {
         durum = Durum.Basladi;
-        baslangicZamani = Time.time;
+        gecenSure = 0f;
         izler.Clear();
         izler.Add(oyuncu.position);
         KafaLambasi lamba = FindAnyObjectByType<KafaLambasi>();

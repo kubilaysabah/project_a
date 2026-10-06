@@ -299,7 +299,7 @@ public class Varlik : MonoBehaviour
         Debug.Log($"[VARLIK] {kat}. kat: AV başladı ({Vector3.Distance(yer, oyuncu.position):0.0} m arkadan).");
 
         float hiz = GerilimKurali.AvHizi * kural.KatCarpani;
-        float adimSayaci = 0f, gormemeSayaci = 0f, baslangic = Time.time;
+        float adimSayaci = 0f, gormemeSayaci = 0f, avGecen = 0f;   // avGecen: yalnızca ETKİN karelerde işler (#112)
         int hedefIz = bas + 1;
         IcKapi[] kapilar = FindObjectsByType<IcKapi>();   // bir kez; her kare aramak pahalı
         while (golge != null)
@@ -307,7 +307,8 @@ public class Varlik : MonoBehaviour
             // Kat kapısı açıldı: kaçtı. Menü/not açıkken Gölge bekler (zaman da durur).
             if (yonetici.KatKapisiAcikMi(kat)) { Debug.Log("[VARLIK] av: kat kapısı açıldı, kaçtı."); break; }
             if (!Etkin()) { yield return null; continue; }
-            if (Time.time - baslangic > GerilimKurali.AvSuresi) { Debug.Log("[VARLIK] av: süre doldu, Gölge vazgeçti."); break; }
+            avGecen += Time.deltaTime;
+            if (avGecen > GerilimKurali.AvSuresi) { Debug.Log("[VARLIK] av: süre doldu, Gölge vazgeçti."); break; }
 
             // İzi sür; iz bitince doğrudan oyuncuya.
             float kalan = hiz * Time.deltaTime;

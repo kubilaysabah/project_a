@@ -793,7 +793,10 @@ public class DuraklatmaMenusu : MonoBehaviour
         // İlk düğme: başlık ekranında "Başla", Esc menüsünde "Devam".
         Rect r = new Rect(x, y, en, boy);
         Vurgula(AnaDevam, r);
-        if (GUI.Button(r, baslikta ? Dil.Getir("menu.basla") : Dil.Getir("menu.devam"), dugmeStili))
+        // #112: kayıt varsa başlıktaki düğme hangi kattan devam edileceğini söyler ("Devam (5. kat)").
+        string ilkDugme = !baslikta ? Dil.Getir("menu.devam")
+                        : Kayit.Var ? string.Format(Dil.Getir("menu.devam_kat"), Kayit.Kat) : Dil.Getir("menu.basla");
+        if (GUI.Button(r, ilkDugme, dugmeStili))
         {
             if (baslikta) Basla(); else DevamIste();
         }

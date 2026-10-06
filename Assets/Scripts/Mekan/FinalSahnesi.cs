@@ -199,6 +199,16 @@ public class FinalSahnesi : MonoBehaviour
         yield return Karart(0f, 1f);
         yield return new WaitForSeconds(1f);
 
+        // #112: oyun bitti, kat kaydı silinir; başlıktaki "Başla" yeniden açılıştan başlatır (eskiden kayıt 8. katta
+        // kalıyor, oyunu bitiren oyuncu "Başla" deyince 8. katın başına düşüyordu). En yüksek kat (Katlar sayfası),
+        // fotoğraflar ve notlar kalır: Kayit.Sil onlara dokunmaz.
+        Kayit.Sil();
+        Debug.Log("[FINAL] Kat kaydı silindi: bir sonraki 'Başla' açılıştan başlar.");
+        // #112: oyun bitti, kat kaydı silinir; başlıktaki "Başla" yeniden açılıştan başlatır (eskiden kayıt 8. katta
+        // kalıyor, oyunu bitiren oyuncu "Başla" deyince 8. katın başına düşüyordu). En yüksek kat (Katlar sayfası),
+        // fotoğraflar ve notlar kalır: Kayit.Sil onlara dokunmaz.
+        Kayit.Sil();
+        Debug.Log("[FINAL] Kat kaydı silindi: bir sonraki 'Başla' açılıştan başlar.");
         // Oyun baştan: sahne yeniden yüklenir, her şey (ışık, katlar, kartlar) ilk hâline döner.
         SceneManager.LoadScene(gameObject.scene.name);
     }

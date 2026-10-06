@@ -60,6 +60,7 @@ menu.goruntu	Görüntü	Display
 # Başlık ekranı (#32). Oyunun adı #1'de belli olunca yalnızca bu satır değişir.
 menu.oyun_adi	HUZUR APARTMANI	HUZUR APARTMANI
 menu.basla	Başla	Start
+menu.devam_kat	Devam ({0}. kat)	Continue (floor {0})
 menu.surum	Sürüm {0}	Version {0}
 # Dilin kendi adı, her zaman o dilin kendisiyle yazılır.
 dil.ad	Türkçe	English
