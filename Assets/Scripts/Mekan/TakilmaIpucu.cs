@@ -140,9 +140,11 @@ public class TakilmaIpucu : MonoBehaviour
         if (yonetici.AcilisModunda || yonetici.TurBitti) return false; // açılış (zemin kat) ya da final
         if (yonetici.BulunulanKat != kat) return false;                // oyuncu aşağı inmiş, başka kattaki dairede
         if (yonetici.KatKapisiAcikMi(kat)) return false;               // kat bitti: kapı açık
-        // Gerilim yüksekken ya da av sürerken ipucu yok: o anda korku konuşur, bina yardım etmez.
+        // Av sürerken ipucu yok: o anda korku konuşur, bina yardım etmez. (#112: eskiden 2. kademede de
+        // duruyordu; 7-8. katta lamba hep açık olduğundan gerilim 2. kademede kalıyor ve bütün oyunda tek
+        // ipucu çalıyordu. Artık yalnızca av durdurur.)
         Varlik v = Varlik.Ornek;
-        if (v != null && (v.AvSuruyor || v.Kademe >= 2)) return false;
+        if (v != null && v.AvSuruyor) return false;
         // Senaryolu anlar sürerken ipucu saati durur (6. katın saklanma anı, 7. katın kaçışı): oyuncu o an
         // kaçmakla ya da saklanmakla meşgul; o sırada bir gıcırtı kafa karıştırır.
         foreach (SaklanmaAni s in FindObjectsByType<SaklanmaAni>()) if (s.Suruyor) return false;

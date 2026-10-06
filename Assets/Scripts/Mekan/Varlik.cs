@@ -202,6 +202,8 @@ public class Varlik : MonoBehaviour
                 if (haberci != null) AudioSource.PlayClipAtPoint(haberci, oyuncu.position + Vector3.up * 3f, 0.8f);
                 break;
             case GerilimTepkisi.Golge:
+                // #112: 2. katta ilk kez buraya gelince öğretici karşılaşma (bir kez, kayıtta "ilkav").
+                if (OgreticiGerekli()) { StartCoroutine(OgreticiKarsilasma()); break; }
                 // Önce üst kattan adımlar, sesin ortasında Gölge (#74 kuralı). Yer yoksa en azından kapı.
                 GezenGolge gezen = GetComponent<GezenGolge>();
                 if (gezen == null || !gezen.HaberciyleBelir()) KapiTiklat();
@@ -221,6 +223,39 @@ public class Varlik : MonoBehaviour
                 StartCoroutine(Av());
                 break;
         }
+    }
+
+    // ---------- ÖĞRETİCİ KARŞILAŞMA (#112) ----------
+    // Şahan'ın build günlüğü: 12 avın 9'u yakalanmayla bitti; oyuncu "karanlık = güvenlik" kuralını hiç
+    // öğrenmiyordu. 2. katta (ilk av katı) gerilim ilk kez 2. kademeye çıkınca normal Gölge tepkisi
+    // yerine güvenli bir sahne oynar: kapı tıklatılır, 1,4 sn sonra kafa lambası KENDİLİĞİNDEN söner
+    // (oyuncu açamaz), karanlıkta Gölge belirir ve geçip gider, lamba geri gelir. Sonra gerilim
+    // sıfırlanır ve av soğuması başlar: oyuncu nefes alır. Kayıtta "ilkav" kilidi olarak tutulur
+    // (katın öbür kilitleri gibi; kat baştan alınırsa yeniden oynar).
+    private const string OgretiKimligi = "ilkav";
+    private const float OgretiKaranlik = 7f;
+    private bool ogretiSuruyor;
+
+    private bool OgreticiGerekli()
+    {
+        return kat == 2 && !ogretiSuruyor && lamba != null && lamba.IsikYaniyor && !Kayit.KilitCozukMu(2, OgretiKimligi);
+    }
+
+    private IEnumerator OgreticiKarsilasma()
+    {
+        ogretiSuruyor = true;
+        Debug.Log("[VARLIK] 2. kat: öğretici karşılaşma (kapı, lamba söner, Gölge geçer).");
+        GolgeImzasi.Cal(oyuncu.position + oyuncu.forward * 3f + Vector3.up * 1.2f);
+        KapiTiklat();
+        yield return new WaitForSeconds(1.4f);
+        lamba.Sondur(OgretiKaranlik);
+        yield return new WaitForSeconds(1.2f);
+        GezenGolge gezen = GetComponent<GezenGolge>();
+        if (gezen != null) gezen.Belir();
+        yield return new WaitForSeconds(OgretiKaranlik - 1.2f);
+        kural.AvBitti();                       // gerilim 0 + av soğuması: ders bitti, nefes
+        Kayit.KilitCozuldu(2, OgretiKimligi);
+        ogretiSuruyor = false;
     }
 
     // Oyuncuya en yakın KAPALI oda kapısı tıklatılır: kapının arkasında biri var gibi.

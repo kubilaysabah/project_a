@@ -21,6 +21,13 @@
 // KAT ÇARPANI: alt katlar yavaş ısınır, üst katlar hızlı; 1. katta av yoktur (öğretici kat; en çok
 // 2. kademe). 6. ve 7. katın kendi senaryolu anları (#58) sürerken sahne tarafı kuralı durdurur.
 //
+// #112 (Şahan'ın 2 Ekim build günlüğü): kademe eşiğin tam üstünde dalgalanınca giriş tepkisi her
+// geçişte yeniden ateşleniyordu (5. katta 303 titreme, 7. katta 244 Gölge/kapı tıklatma art arda).
+// Üç ek kural: (1) PAY: kademe ancak eşiğin 0,05 ALTINA inince düşer (termostat gibi: 0,30'da ısıtır,
+// 0,25'te keser); (2) iki GİRİŞ tepkisi arasında en az 20 sn geçer, yoksa giriş sessiz olur (tekrar
+// tepkisi zaten 25-40 sn sonra gelir); (3) av bitince 270 sn AV SOĞUMASI: gerilim yükselse de av
+// başlamaz (Şahan 12 avın 9'unda yakalanmıştı; 8. katta 5 av). 8. katın çarpanı da 1,3 → 1,0.
+//
 // Burada Unity'ye ait tek satır yok: kural Unity açılmadan test edilir (GolgeZamanlayici gibi).
 // Tepkileri sahnede gösteren bileşen Varlik'tır; burası yalnızca "şimdi ne olsun?" sorusunu
 // cevaplar.
@@ -68,6 +75,14 @@ public class GerilimKurali
     /// <summary>Gölge'nin av hızı (m/sn; oyuncu 1,8 yürür, 0,8 çömelir). Kat çarpanıyla çarpılır.</summary>
     public const float AvHizi = 2.0f;
 
+    // ---------- #112 ----------
+    /// <summary>Kademe, eşiğin bu kadar altına inmeden düşmez (termostat payı).</summary>
+    public const float KademePayi = 0.05f;
+    /// <summary>İki giriş tepkisi arasında en az bu kadar süre; yoksa giriş sessiz olur.</summary>
+    public const float GirisAraEnAz = 20f;
+    /// <summary>Av bitince bu kadar süre yeni av başlamaz (gerilim en çok 2. kademede kalır).</summary>
+    public const float AvSogumasi = 270f;
+
     private readonly System.Random rastgele;
     private float deger;          // 0-1 gerilim
     private int kademe;           // 0-3
@@ -75,6 +90,8 @@ public class GerilimKurali
     private float katCarpani = 1f;
     private bool avVar = true;
     private bool avSuruyor;
+    private float sonTepkidenBeri = 999f;   // son gösterilen tepkiden beri geçen süre (#112)
+    private float avSogumaKalan;            // av soğumasından kalan süre; 0 = av serbest (#112)
 
     public GerilimKurali(int tohum)
     {
@@ -90,6 +107,8 @@ public class GerilimKurali
     public bool AvSuruyor { get { return avSuruyor; } }
     /// <summary>Bu katta ısınma çarpanı.</summary>
     public float KatCarpani { get { return katCarpani; } }
+    /// <summary>Av soğumasından kalan süre (saniye; 0 = av serbest). Test göstergesi ve testler için.</summary>
+    public float AvSogumaKalan { get { return avSogumaKalan; } }
 
     /// <summary>
     /// Katın ısınma çarpanı: alt katlar yavaş, üst katlar hızlı. 1. kat öğretici: en yavaş.
@@ -106,14 +125,18 @@ public class GerilimKurali
             case 5: return 1.1f;
             case 6: return 1.0f;    // kendi saklanma anı var (#58); kural o sırada durur
             case 7: return 1.1f;    // kendi kaçış anı var (#58)
-            default: return kat >= 8 ? 1.3f : 1.0f;
+            default: return 1.0f;   // 8. kat 1,3 idi; #112: 9 kilitli katta 5 av çıkıyordu, 1,0'a indi
         }
     }
 
     /// <summary>Bu katta av var mı? 1. katta yok: oyuncu önce binayı tanısın.</summary>
     public static bool KattaAvVar(int kat) { return kat >= 2; }
 
-    /// <summary>Yeni kata varıldı: gerilim sıfırlanır, katın çarpanı ve av izni kurulur.</summary>
+    /// <summary>
+    /// Yeni kata varıldı: gerilim sıfırlanır, katın çarpanı ve av izni kurulur. Av soğuması SİLİNMEZ:
+    /// varlık dinleniyorsa kat değişince de dinlenir (yoksa yakalanıp kat başına dönen oyuncu hemen
+    /// yeni bir ava girerdi).
+    /// </summary>
     public void KatAyarla(int kat)
     {
         katCarpani = KatinCarpani(kat);
@@ -141,6 +164,8 @@ public class GerilimKurali
         if (gecen <= 0f || avSuruyor) return GerilimTepkisi.Yok;
 
         deger = Sinirla(deger + Hiz(dairede, lambaAcik, egik, hareketli) * gecen);
+        sonTepkidenBeri += gecen;
+        if (avSogumaKalan > 0f) avSogumaKalan -= gecen;
 
         int yeni = KademeHesapla(deger);
         if (yeni > kademe)
@@ -149,10 +174,15 @@ public class GerilimKurali
             // tepkisinin hemen ardından bir tekrar gelmesin.
             kademe = yeni;
             tepkiSayaci = YeniAra();
-            if (kademe == 3) { avSuruyor = true; return GerilimTepkisi.Av; }
+            if (kademe == 3) { avSuruyor = true; sonTepkidenBeri = 0f; return GerilimTepkisi.Av; }
+            // #112: son tepkinin üstünden 20 sn geçmediyse giriş sessizdir (kademe yine de yükselir;
+            // tekrar tepkisi 25-40 sn sonra zaten gelir). Eşikte dalgalanmanın tepki yağmuru bitti.
+            if (sonTepkidenBeri < GirisAraEnAz) return GerilimTepkisi.Yok;
+            sonTepkidenBeri = 0f;
             return kademe == 1 ? GerilimTepkisi.Titreme : GerilimTepkisi.Golge;
         }
-        if (yeni < kademe) kademe = yeni;   // soğudu: sessizce iner, tepki yok
+        // Soğudu: kademe ancak kendi eşiğinin PAY kadar altına inince düşer (#112), sessizce, tepki yok.
+        while (kademe > 0 && deger < Esik(kademe) - KademePayi) kademe--;
 
         // 1. ve 2. kademede kalındıkça arada bir tekrar tepkisi.
         if (kademe >= 1)
@@ -161,19 +191,30 @@ public class GerilimKurali
             if (tepkiSayaci <= 0f)
             {
                 tepkiSayaci = YeniAra();
+                sonTepkidenBeri = 0f;
                 return TekrarTepkisi(kademe);
             }
         }
         return GerilimTepkisi.Yok;
     }
 
-    /// <summary>Av bitti (kaçtı, saklandı ya da yakalandı): gerilim sıfırdan başlar.</summary>
+    /// <summary>
+    /// Av bitti (kaçtı, saklandı ya da yakalandı): gerilim sıfırdan başlar ve av soğuması başlar (#112):
+    /// 270 sn boyunca gerilim yükselse de yeni av yok, bina en çok 2. kademede kalır.
+    /// </summary>
     public void AvBitti()
     {
         avSuruyor = false;
         deger = 0f;
         kademe = 0;
         tepkiSayaci = YeniAra();
+        avSogumaKalan = AvSogumasi;
+    }
+
+    // Kademenin kendi eşiği (pay hesabı için).
+    private static float Esik(int k)
+    {
+        return k >= 3 ? AvEsigi : (k == 2 ? GolgeEsigi : TitremeEsigi);
     }
 
     // Isınma ya da soğuma hızı (saniyede; eksi = soğuma).
@@ -190,7 +231,7 @@ public class GerilimKurali
 
     private int KademeHesapla(float d)
     {
-        if (d >= AvEsigi && avVar) return 3;
+        if (d >= AvEsigi && avVar && avSogumaKalan <= 0f) return 3;   // soğumada av yok (#112)
         if (d >= GolgeEsigi) return 2;
         if (d >= TitremeEsigi) return 1;
         return 0;

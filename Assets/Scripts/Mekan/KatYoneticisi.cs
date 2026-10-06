@@ -964,6 +964,9 @@ public class KatYoneticisi : MonoBehaviour
 
         kapi.gameObject.SetActive(false);
         catiAcildi = true;   // final: Gezen Gölge artık çıkmaz (#71)
+        // #112: kapının altındaki gece ışığı sızıntısı kapıyla birlikte gider.
+        Transform sizinti = catiBolumu.transform.Find("Cati_Isik_Sizintisi");
+        if (sizinti != null) sizinti.gameObject.SetActive(false);
 
         // Kapı açılınca sabahın sesi içeri dolar (#25): uzak şehir, kuşlar, rüzgâr.
         // Ses kaynağı çatı bölümünde kapalı bekliyor; açmak çalmak demek.

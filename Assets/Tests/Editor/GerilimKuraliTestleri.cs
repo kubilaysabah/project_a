@@ -93,11 +93,11 @@ public class GerilimKuraliTestleri
     public void Gurultu_bir_anda_yukseltir_ve_kat_carpaniyla_olcur()
     {
         var alt = new GerilimKurali(1); alt.KatAyarla(2);   // 0,8
-        var ust = new GerilimKurali(1); ust.KatAyarla(8);   // 1,3
+        var ust = new GerilimKurali(1); ust.KatAyarla(5);   // 1,1 (8. kat #112 ile 1,0 oldu)
         alt.Gurultu(0.25f);
         ust.Gurultu(0.25f);
         Assert.AreEqual(0.20f, alt.Deger, 1e-4f);
-        Assert.AreEqual(0.325f, ust.Deger, 1e-4f);
+        Assert.AreEqual(0.275f, ust.Deger, 1e-4f);
         ust.Gurultu(5f);
         Assert.AreEqual(1f, ust.Deger, "1'i aşmaz");
     }
@@ -149,6 +149,76 @@ public class GerilimKuraliTestleri
     }
 
     [Test]
+    public void Esikte_dalgalanmak_giris_tepkisini_tekrarlatmaz()
+    {
+        // #112: 0,30'un hemen altına inip yeniden çıkmak her seferinde Titreme döndürüyordu.
+        var k = new GerilimKurali(1);
+        k.KatAyarla(5);
+        k.Gurultu(0.31f);
+        Assert.AreEqual(GerilimTepkisi.Titreme, k.Ilerlet(0.1f, true, true, false, false), "ilk giriş");
+        // 5. katta 0,31 × 1,1 = 0,341. Sessiz saklanma 0,02/sn soğutur: 3 sn'de 0,281 → eşiğin altında
+        // ama payın (0,25) üstünde.
+        int tepki = 0;
+        for (int i = 0; i < 30; i++) if (k.Ilerlet(0.1f, true, false, true, false) != GerilimTepkisi.Yok) tepki++;
+        Assert.Greater(k.Deger, GerilimKurali.TitremeEsigi - GerilimKurali.KademePayi);
+        Assert.Less(k.Deger, GerilimKurali.TitremeEsigi);
+        Assert.AreEqual(1, k.Kademe, "payın içinde kademe düşmez");
+        // Yeniden 0,30'un üstüne çıkar: kademe zaten 1, giriş tepkisi YOK.
+        k.Gurultu(0.02f);
+        for (int i = 0; i < 20; i++) if (k.Ilerlet(0.1f, true, true, false, false) != GerilimTepkisi.Yok) tepki++;
+        Assert.AreEqual(0, tepki, "dalgalanma tepki üretmez");
+        // Payın altına inince (0,25) kademe düşer; sonra yükselince giriş tepkisi yine gelir (20 sn geçti).
+        k.Gurultu(0f);
+        for (int i = 0; i < 400; i++) k.Ilerlet(0.1f, true, false, true, false);   // sessiz soğuma
+        Assert.AreEqual(0, k.Kademe);
+        k.Gurultu(0.35f);
+        Assert.AreEqual(GerilimTepkisi.Titreme, k.Ilerlet(0.1f, true, true, false, false));
+    }
+
+    [Test]
+    public void Iki_giris_tepkisi_arasinda_en_az_20_saniye()
+    {
+        var k = new GerilimKurali(1);
+        k.KatAyarla(5);
+        k.Gurultu(0.35f);
+        Assert.AreEqual(GerilimTepkisi.Titreme, k.Ilerlet(0.1f, true, true, false, false));
+        // Hemen ardından 2. kademeye sıçra: kademe yükselir ama giriş tepkisi sessizdir.
+        k.Gurultu(0.30f);
+        Assert.AreEqual(GerilimTepkisi.Yok, k.Ilerlet(0.1f, true, true, false, false));
+        Assert.AreEqual(2, k.Kademe);
+        // 20 sn sonra soğuyup yeniden 2. kademeye girince giriş tepkisi (Golge) gelir.
+        for (int i = 0; i < 400; i++) k.Ilerlet(0.1f, true, false, true, false);   // sıfıra iner
+        Assert.AreEqual(0, k.Kademe);
+        k.Gurultu(0.65f);
+        Assert.AreEqual(GerilimTepkisi.Golge, k.Ilerlet(0.1f, true, true, false, false));
+    }
+
+    [Test]
+    public void Av_bitince_270_saniye_yeni_av_yok()
+    {
+        var k = new GerilimKurali(2);
+        k.KatAyarla(5);
+        Oynat(k, 300f, true, true, false, true);
+        Assert.IsTrue(k.AvSuruyor);
+        k.AvBitti();
+        Assert.AreEqual(GerilimKurali.AvSogumasi, k.AvSogumaKalan, 1e-3f);
+        // Soğuma sürerken gerilim tavana vursa da av başlamaz, kademe 2'de kalır.
+        k.Gurultu(1f);
+        Oynat(k, 200f, true, true, false, true);
+        Assert.IsFalse(k.AvSuruyor);
+        Assert.AreEqual(2, k.Kademe);
+        // Kat değişse de soğuma silinmez.
+        k.KatAyarla(6);
+        Assert.Greater(k.AvSogumaKalan, 0f);
+        // Soğuma bitince av yine gelir.
+        Oynat(k, 80f, false, true, false, false);          // sahanlıkta bekle: soğuma 270'i aşar
+        Assert.LessOrEqual(k.AvSogumaKalan, 0f);
+        k.Gurultu(1f);
+        Oynat(k, 1f, true, true, false, true);
+        Assert.IsTrue(k.AvSuruyor);
+    }
+
+    [Test]
     public void Kademede_kalinca_25_40_saniyede_bir_tekrar_tepkisi()
     {
         var k = new GerilimKurali(3);
@@ -191,8 +261,11 @@ public class GerilimKuraliTestleri
     public void Kat_carpani_yukari_dogru_artar()
     {
         Assert.Less(GerilimKurali.KatinCarpani(1), GerilimKurali.KatinCarpani(2));
-        Assert.Less(GerilimKurali.KatinCarpani(4), GerilimKurali.KatinCarpani(8));
+        Assert.Less(GerilimKurali.KatinCarpani(4), GerilimKurali.KatinCarpani(5));
         Assert.AreEqual(1.0f, GerilimKurali.KatinCarpani(4));
+        // #112: 8. kat 1,3 iken 9 kilitli katta 5 av çıkıyordu; artık 1,0 ve 5. kattan hızlı değil.
+        Assert.AreEqual(1.0f, GerilimKurali.KatinCarpani(8));
+        Assert.LessOrEqual(GerilimKurali.KatinCarpani(8), GerilimKurali.KatinCarpani(5));
     }
 
     [Test]

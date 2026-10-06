@@ -1329,6 +1329,25 @@ public static partial class GrayboxKurucu
         // Yeni ilerlemede (#68) kapı çatı anahtarıyla açılır: CatiKapisi "KİLİTLİ / AÇ" der.
         Kutu("CatiKapisi", t, new Vector3(kapiX, KapiYukC / 2f, onZ),
              new Vector3(KapiGenC, KapiYukC, DuvarKalin * 0.6f)).AddComponent<CatiKapisi>();
+        // #112: kafa lambası dokuzuncu katta çiviye asılınca çatıya çıkan merdiven simsiyahtı. Kapının
+        // altından soğuk bir gece ışığı (ay / sokak lambası) sızar: ince bir çizgi + gölgesiz nokta ışığı.
+        // Kapı açılınca KatYoneticisi.CatiKapisiniAc bunu da kapatır (kapı kutusunun çocuğu yapılmadı:
+        // kutunun ölçeği çocuğu da ezerdi).
+        GameObject sizinti = new GameObject("Cati_Isik_Sizintisi");
+        sizinti.transform.SetParent(t, false);
+        GameObject cizgiC = Kutu("Cizgi", sizinti.transform, new Vector3(kapiX, 0.006f, onZ + DuvarKalin * 0.3f + 0.012f),
+                                 new Vector3(KapiGenC - 0.10f, 0.012f, 0.02f));
+        Object.DestroyImmediate(cizgiC.GetComponent<Collider>());
+        cizgiC.GetComponent<MeshRenderer>().sharedMaterial = CatiIsikMalzeme();
+        GameObject lekeC = new GameObject("Leke");
+        lekeC.transform.SetParent(sizinti.transform, false);
+        lekeC.transform.localPosition = new Vector3(kapiX, 0.30f, onZ + 0.45f);
+        Light lc = lekeC.AddComponent<Light>();
+        lc.type = LightType.Point;
+        lc.color = new Color(0.70f, 0.80f, 1.0f);
+        lc.intensity = 1.6f;
+        lc.range = 5.0f;
+        lc.shadows = LightShadows.None;
 
         // KORKULUKLAR (parapet): çatının kenarları.
         Kutu("Parapet_Sol", t, new Vector3(-disX + DuvarKalin / 2f, Parapet / 2f, -SahanlikDerin / 2f),
@@ -2302,6 +2321,22 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(m, Yol);
         }
         m.SetColor("_BaseColor", AkkorRengi * 1.5f);
+        EditorUtility.SetDirty(m);
+        AssetDatabase.SaveAssets();
+        return m;
+    }
+
+    // Çatı kapısının altından sızan soğuk gece ışığı (#112): mavimsi, hafif parlak.
+    static Material CatiIsikMalzeme()
+    {
+        const string Yol = "Assets/Materials/Cati_Isik.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            AssetDatabase.CreateAsset(m, Yol);
+        }
+        m.SetColor("_BaseColor", new Color(0.70f, 0.80f, 1.0f) * 1.3f);
         EditorUtility.SetDirty(m);
         AssetDatabase.SaveAssets();
         return m;
