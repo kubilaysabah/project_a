@@ -146,6 +146,7 @@ public class KatYoneticisi : MonoBehaviour
     [SerializeField] private GameObject anahtarParcasiSablonu;              // kırık anahtar parçası (#65)
     [SerializeField] private GameObject tabakSablonu;                       // sofraya konacak tabak (#66)
     [SerializeField] private GameObject asmaKilitSablonu, mentesePlakasiSablonu, camKirikSablonu, notSablonu;
+    [SerializeField] private Material katIsikKaynagiMalzemesi;   // #116: kat imzası ışıklarının parlayan kaynağı
     private ZincirUygulayici zincirUygulayici;
 
     // Her katın kaplama malzemeleri: [(kat - 1) * 4 + yüzey]. DokuKurucu üretir ve buraya bağlar.
@@ -254,6 +255,7 @@ public class KatYoneticisi : MonoBehaviour
         zincirUygulayici.MentesePlakasiSablonu = mentesePlakasiSablonu;
         zincirUygulayici.CamKirikSablonu = camKirikSablonu;
         zincirUygulayici.NotSablonu = notSablonu;
+        zincirUygulayici.IsikKaynagiMalzemesi = katIsikKaynagiMalzemesi;
         zincirUygulayici.YaziOrnegi = aNumaralar != null && aNumaralar.Length > 0 ? aNumaralar[0] : null;
         AyakkabilariBul(sahanlikA, out aRaflar, out aDaginik);
         AyakkabilariBul(sahanlikB, out bRaflar, out bDaginik);

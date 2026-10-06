@@ -38,6 +38,26 @@ public class KatNotu : KatYerlesimi
     public string Metin;          // metin tablosundaki anahtar ("not.kat1_tahliye")
 }
 
+// Kat imzası ışığı (#116): bina karanlık (#111), ama her katın dairesine girince o katı tanıtan zayıf,
+// ELEKTRİKSİZ bir ışık var (mum, gaz lambası, ocağın alevi, el feneri, pili bitmemiş oyuncak, pencereden
+// sokak lambası). Yeri KatYerlesimi kuralıyla: Yol bir süsün adıysa ("Sus_Samdan_K6") X/Y/Z onun içinde
+// yerel konum, Donus dönüş; Yol boşsa plan noktası (u, y, v) ve plandaki yön (OnU, OnV).
+[System.Serializable]
+public class KatIsigi : KatYerlesimi
+{
+    public bool Spot;                            // false: nokta ışığı (her yöne); true: koni (fener, sokak lambası)
+    public Color Renk = new Color(1f, 0.70f, 0.40f);
+    public Color Renk2 = new Color(0.25f, 0.40f, 1f);   // yalnızca Yanip: ikinci renk
+    public float Siddet = 0.6f;
+    public float Menzil = 3f;
+    public float Aci = 60f;                      // spot: koninin açısı (derece)
+    public float Egim;                           // spot: aşağı eğim (derece, + = aşağı)
+    public bool Golge;                           // spot: gölge düşürür mü (nokta ışığı asla: altı gölge haritası, #11)
+    public KatIsikTitremesi Titreme;
+    public Vector3 AlevBoyu;                     // parlayan kaynağın (alev, fener camı) boyu; sıfır: kaynak yok
+    public float KaynakParlakligi = 4f;          // kaynağın HDR parlaklığı (renk bununla çarpılır)
+}
+
 [System.Serializable]
 public class KatSusu : KatYerlesimi
 {
@@ -140,6 +160,7 @@ public class KatZinciriVarligi : ScriptableObject
     public List<KatNotu> notlar = new List<KatNotu>();
     public List<KatSusu> suslar = new List<KatSusu>();
     public List<KatSesi> sesler = new List<KatSesi>();
+    public List<KatIsigi> isiklar = new List<KatIsigi>();   // #116: katın elektriksiz imza ışıkları
     public KatAnonsu anons = new KatAnonsu();   // #106: katın tek haber cümlesi (Yol boşsa yok)
     public List<KatParcasi> parcalar = new List<KatParcasi>();
     // Bu katta tavan lambası yanabilen odalar (#64): dairede elektrik varken yanarlar. Boş: hiçbiri.

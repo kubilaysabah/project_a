@@ -31,6 +31,7 @@ using UnityEngine;
 
 public static partial class GrayboxKurucu
 {
+    const float Sofra6Ust = 0.757f;   // #116: 1974 sofrasının üst yüzü (ışınla ölçüldü)
     // #114: B'nin banyo anahtarının B antresindeki yeri (plan u, v). A'nın antresi boş: SaklamaYeriAra orada
     // hiçbir yer bulmadı. Burası giriş kapısının arkası, dar açı: ayakta 11 / eğilmiş 15 noktadan görünür, s276.
     const float B6AntreU = 0.12f, B6AntreV = -0.48f;
@@ -49,7 +50,7 @@ public static partial class GrayboxKurucu
         foreach (string ad in new[] { "Sapka_Askisi_K6", "Telefon_Masasi_K6", "Yolluk_K6", "Takvim_1994_K6", "Avize_K6", "Perde_K6",
                                       "Pikap_K6", "Eski_TV_K6", "Tel_Dolap_K6", "Ocak_K6", "Mutfak_Masasi_K6", "Bos_Raf_K6", "Karyola_K6",
                                       "Manken_K6", "Endustriyel_Makine_K6", "Kumas_Toplari_K6", "Terzi_Masasi_K6", "Elbise_Askisi_K6",
-                                      "Raf_K6", "Camasir_Sepeti_K6", "Havlu_K6", "Boy_Aynasi_K6", "Perde_Terzi_K6", "Puf_K6" })
+                                      "Raf_K6", "Camasir_Sepeti_K6", "Havlu_K6", "Boy_Aynasi_K6", "Perde_Terzi_K6", "Puf_K6", "Samdan_K6" })
             ParcaSablonuKur(ad, ad);
         AcilirSablonKur("Ceyiz_Sandigi_K6");
         AcilirSablonKur("Dikis_Kutusu_K6");
@@ -136,6 +137,8 @@ public static partial class GrayboxKurucu
         const string B = KilitZinciri.IkinciOnek;
         v.suslar = new List<KatSusu>
         {
+            // Kat imzası (#116): sofranın ortasında pirinç şamdan (masa SofraKur: u 2,8, v 6,3).
+            D("Samdan_K6", 2.80f, Sofra6Ust, 6.30f, 0f, 1f),
             Kart(-0.35f, 0.40f, 0f, "bina.isim_riza"),
             Kart(0.35f, 0.40f, 0f, "bina.isim_hasan"),
             Kart(-0.35f, -0.40f, 180f, "bina.isim_cemal"),
@@ -215,6 +218,12 @@ public static partial class GrayboxKurucu
         v.kacisSablonu = golge;
         v.saklanmaSesi = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
         v.parcalar = new List<KatParcasi>();
+        // Kat imzası ışığı (#116): 1974'te kurulmuş sofranın ortasındaki şamdanda mum hâlâ yanıyor.
+        v.isiklar = new List<KatIsigi>
+        {
+            new KatIsigi { Yol = "Sus_Samdan_K6", X = 0f, Y = 0.318f, Z = 0f, Renk = new Color(1f, 0.64f, 0.30f), Siddet = 0.6f,
+                           Menzil = 2.4f, Titreme = KatIsikTitremesi.Mum, AlevBoyu = new Vector3(0.012f, 0.030f, 0.012f), KaynakParlakligi = 5f },
+        };
         v.sesler = new List<KatSesi>();
         v.anons = new KatAnonsu { Yol = "Sus_Eski_TV_K6", Gecikme = 28f, Dosya = "radyo_kat6" };   // #106: 1974 dairesinin eski televizyonu (A dairesi)
         v.yananOdalar = new List<string>();

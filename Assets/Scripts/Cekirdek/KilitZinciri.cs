@@ -79,6 +79,9 @@ public class ZincirEsyasi
     public string Yer;          // durduğu yerin kimliği
     public float X, Y, Z;       // yerin içinde, yerin kendi eksenlerinde konumu (metre)
     public float Donus;         // y ekseninde dönüşü (derece)
+    // #116: üstünde fosforlu bir anahtarlık var; kafa lambası kapalıyken (ve dairede elektrik yokken) karanlıkta
+    // yeşil parlar (4. katın imzası: ışık ve karanlık). Kural bunu bilmez; yalnızca uygulayıcı kullanır.
+    public bool KaranliktaParlar;
 }
 
 [System.Serializable]

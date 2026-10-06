@@ -76,6 +76,7 @@ MonoBehaviour:
       Y: 0.752
       Z: -0.078
       Donus: 90
+      KaranliktaParlar: 0
     - Kimlik: odaA_anahtari
       Tur: 2
       Yer: kavanoz
@@ -83,6 +84,7 @@ MonoBehaviour:
       Y: 0.012
       Z: 0
       Donus: 30
+      KaranliktaParlar: 0
     - Kimlik: kat_anahtari
       Tur: 1
       Yer: komodin
@@ -90,6 +92,7 @@ MonoBehaviour:
       Y: 0.375
       Z: 0
       Donus: 15
+      KaranliktaParlar: 0
     Kilitler:
     - Kimlik: kavanoz
       Tur: 5
@@ -740,6 +743,26 @@ MonoBehaviour:
     Metin: 
     Ad: 
   sesler: []
+  isiklar:
+  - Yol: 
+    X: 1.4
+    Y: 2.4
+    Z: 8.75
+    Donus: 0
+    OnU: 0
+    OnV: -1
+    Yatik: 0
+    Spot: 1
+    Renk: {r: 1, g: 0.52, b: 0.18, a: 1}
+    Renk2: {r: 0.25, g: 0.4, b: 1, a: 1}
+    Siddet: 5
+    Menzil: 8
+    Aci: 62
+    Egim: 38
+    Golge: 0
+    Titreme: 0
+    AlevBoyu: {x: 0, y: 0, z: 0}
+    KaynakParlakligi: 4
   anons:
     Yol: Sus_Radyo_Kutu_K1
     Gecikme: 30

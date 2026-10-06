@@ -70,6 +70,7 @@ MonoBehaviour:
       Y: 0.004
       Z: 0
       Donus: 25
+      KaranliktaParlar: 0
     - Kimlik: kat_anahtari
       Tur: 1
       Yer: teneke
@@ -77,6 +78,7 @@ MonoBehaviour:
       Y: 0.008
       Z: 0
       Donus: 15
+      KaranliktaParlar: 0
     Kilitler:
     - Kimlik: odaA
       Tur: 0
@@ -789,6 +791,26 @@ MonoBehaviour:
     Ses: 0.8
     Kapatilabilir: 1
     SusturanKilit: 
+  isiklar:
+  - Yol: Sus_Ocak_Emaye
+    X: -0.15
+    Y: 0.862
+    Z: 0.1
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Spot: 0
+    Renk: {r: 0.35, g: 0.55, b: 1, a: 1}
+    Renk2: {r: 0.25, g: 0.4, b: 1, a: 1}
+    Siddet: 0.7
+    Menzil: 2.2
+    Aci: 60
+    Egim: 0
+    Golge: 0
+    Titreme: 2
+    AlevBoyu: {x: 0.06, y: 0.012, z: 0.06}
+    KaynakParlakligi: 3
   anons:
     Yol: 
     Gecikme: 25

@@ -11,8 +11,9 @@
 //   Salon  : (kilitsiz) Oda B duvarında fosforlu boyayla 4816: yalnızca kafa lambası kapalıyken görünür.
 //   Oda B  : (şifreli asma kilit 4816) Hasan'ın alet kutusunda sigorta.
 //   Antre  : sigorta kutusu (dairenin kalıcı parçası): sigorta takılınca elektrik gelir, lambalar yanar.
-//   Mutfak : (kilitsiz) elektrik gelince buzdolabının kapısı açılır: içinde Hasan'ın notu ve katın anahtarı.
-//   Hol boş; banyo, kiler ve Oda A kapalı.
+//   Hol    : yerde, güney duvarının dibinde mutfağın anahtarı; fosforlu anahtarlığı lamba kapalıyken parlar (#116, B8).
+//   Mutfak : (anahtar) elektrik gelince buzdolabının kapısı açılır: içinde Hasan'ın notu ve katın anahtarı.
+//   Banyo, kiler ve Oda A kapalı.
 
 using System.Collections.Generic;
 using UnityEditor;
@@ -20,6 +21,10 @@ using UnityEngine;
 
 public static partial class GrayboxKurucu
 {
+    // #116: mutfak anahtarının holdeki yeri ve yanan mumun alevi (Mumlar_K4'ün içinde, ölçüldü).
+    const float Hol4U = 7.60f, Hol4V = 3.10f;   // hol boş, gizli köşesi yok (SaklamaYeriAra); kolilerin dibinde eğik kartonun
+                                                // arkasında kalıyordu (ne lambayla ne karanlıkta görünüyordu); güney duvarının dibi
+    const float Mum4X = 0f, Mum4Ust = 0.150f, Mum4Z = 0f;   // en uzun mumun fitili 0,134 (ışınla ölçüldü)
     // Buzdolabının iç ışığının yeri (Blender kat4_esyalar.py'nin iç lamba noktası, Unity eksenlerinde).
     static readonly Vector3 Buzdolabi4Isik = new Vector3(-0.19f, 1.24f, -0.05f);
     // Buzdolabının orta rafının üstü ve alet kutusunun iç tabanı (kat4_esyalar.py raporu).
@@ -60,10 +65,14 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "duvar", PlandaNokta = true, Oda = "Salon", U = 4.995f, Y = 1.60f, V = 7.2f, OnU = -1f, OnV = 0f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "kutu", Yol = "Alet_Kutusu_Hasan", Oda = "Oda_B", KilitYolu = "Alet_Kutusu_Hasan/Kapak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "buzdolabi", Yol = "Buzdolabi_Hasan", Oda = "Mutfak", KilitYolu = "Buzdolabi_Hasan/Kapi_1" });
+        // #116: mutfağın anahtarı holde, güney duvarının dibinde (yer ölçülerek seçildi); fosforlu anahtarlıklı.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "hol_yer", PlandaNokta = true, Oda = "Hol", U = Hol4U, Y = 0.004f, V = Hol4V, Donus = 35f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "sigorta", Tur = EsyaTuru.Sigorta, Yer = "kutu", Y = AletKutusu4Taban, Donus = 20f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "mutfak_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "hol_yer", KaranliktaParlar = true });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "buzdolabi", X = 0.06f, Y = Buzdolabi4Raf + 0.004f, Z = -0.03f, Donus = 20f });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaB", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_B", Gerekli = "duvar",
                                           Sifre = "4816", IpucuMetni = "4816", IpucuOlcek = 4f, IpucuKaranlikta = true });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "mutfak", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "mutfak_anahtari" });   // #116
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "buzdolabi", Tur = KilitTuru.Sigorta, OdaKapisi = false, Hedef = "buzdolabi", Gerekli = "sigorta" });
         v.zincir = z;
 
@@ -75,6 +84,13 @@ public static partial class GrayboxKurucu
             new KatNotu { Metin = "not.kat4_buzdolabi", Yol = "Buzdolabi_Hasan", X = -0.10f, Y = Buzdolabi4Raf + 0.005f, Z = -0.06f, Donus = -6f },
         };
         v.parcalar = new List<KatParcasi>();
+        // Kat imzası ışığı (#116): Hasan'ın salonda yere dizdiği erimiş mumlardan biri hâlâ yanıyor. Menzil kısa:
+        // Oda B duvarındaki fosforlu şifreyi (u 5,0, v 7,2; mumlardan ~2 m) aydınlatıp söndürmesin.
+        v.isiklar = new List<KatIsigi>
+        {
+            new KatIsigi { Yol = "Sus_Mumlar_K4", X = Mum4X, Y = Mum4Ust, Z = Mum4Z, Renk = new Color(1f, 0.62f, 0.30f), Siddet = 0.9f,
+                           Menzil = 1.8f, Titreme = KatIsikTitremesi.Mum, AlevBoyu = new Vector3(0.012f, 0.028f, 0.012f), KaynakParlakligi = 5f },
+        };
         v.sesler = new List<KatSesi>();
         v.anons = new KatAnonsu { Yol = "Sus_Radyo_Cep_K4", Gecikme = 35f, Dosya = "radyo_kat4" };   // #106: elektriksiz dairede pilli radyo
         // Hasan'ın gardırobunun bir kapağı aralık başlar (#97): %12 açık (~13°). Boş dairede biri az önce içine

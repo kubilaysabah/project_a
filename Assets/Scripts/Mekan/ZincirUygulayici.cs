@@ -34,6 +34,9 @@ public class ZincirUygulayici
     public GameObject MentesePlakasiSablonu;
     /// <summary>İpucu yazıları bu yazının yazı tipini ve malzemesini kullanır (kapı numarası).</summary>
     public TextMesh YaziOrnegi;
+    // Kat imzası ışıklarının parlayan kaynağı (#116): URP Unlit, beyaz; rengini kaynak kendisi verir.
+    // Kurucuda bağlanır ki build'e girsin (Shader.Find build'de güvenilir değil, #26).
+    public Material IsikKaynagiMalzemesi;
 
     /// <summary>
     /// Çift daire (#70): bu katın ikinci açık dairesi; yoksa null. KatYoneticisi Uygula'dan önce
@@ -66,6 +69,7 @@ public class ZincirUygulayici
         // Katın süsleri (mobilya, dekor) zincirden ÖNCE konur (#83): zincirin bir yeri bir süsün
         // çekmecesi olabilir ("Komodin_Kerem/Cekmece_1"); süs henüz yokken o yol bulunamazdı.
         if (varlik != null) SusleriKoy(daire, varlik);
+        if (varlik != null) IsiklariKoy(daire, varlik);   // #116: süslerden sonra (ışık bir süse bağlanabilir)
         if (zincir == null) return;
         DaireElektrigi elektrik = Elektrik(daire);
 
@@ -193,6 +197,7 @@ public class ZincirUygulayici
             nesne.transform.localPosition = new Vector3(e.X, e.Y, e.Z);
             nesne.transform.localRotation = Quaternion.Euler(0f, e.Donus, 0f);
             Esya bilesen = nesne.GetComponent<Esya>();
+            if (e.KaranliktaParlar) ParlayanEtiketEkle(nesne);   // #116: fosforlu anahtarlık
             if (bilesen != null) bilesen.Ayarla(e.Tur, e.Kimlik, e.Tur == EsyaTuru.KatAnahtari || e.Tur == EsyaTuru.Parca || e.Tur == EsyaTuru.AnahtarParcasi || e.Tur == EsyaTuru.Tabak ? kat : 0);
             if (yigindakiTabak) TabakYigini.UsteKoy(nesne);
             // Kırık anahtar parçası: şablonda iki model var; kimliği "_bas" ile bitiyorsa baş görünür.
@@ -405,26 +410,38 @@ public class ZincirUygulayici
     private GameObject Yerlestir(Transform daire, DaireEksenleri eksen, GameObject sablon, KatYerlesimi y, string ad)
     {
         if (sablon == null) { Debug.LogWarning($"[ZINCIR] '{ad}' için şablon yok."); return null; }
-        Transform ebeveyn;
-        Vector3 konum;
-        Quaternion donus;
+        if (!YerHesapla(daire, eksen, y, ad, out Transform ebeveyn, out Vector3 konum, out Quaternion donus)) return null;
+        GameObject g = Object.Instantiate(sablon, ebeveyn, false);
+        g.name = ad;
+        g.transform.localPosition = konum;
+        g.transform.localRotation = donus;
+        konanlar.Add(g);
+        return g;
+    }
+
+    // Yerleşim bilgisinden ebeveyni, yerel konumu ve dönüşü bulur (süsler ve kat ışıkları ortak kullanır).
+    // "out": işlev bu değişkenlere değer yazar ve çağırana geri verir (birden fazla sonuç döndürmenin yolu).
+    private bool YerHesapla(Transform daire, DaireEksenleri eksen, KatYerlesimi y, string ad,
+                            out Transform ebeveyn, out Vector3 konum, out Quaternion donus)
+    {
+        ebeveyn = null; konum = Vector3.zero; donus = Quaternion.identity;
         if (y.Yol == KilitZinciri.IkinciOnek)
         {
             // Yalnızca "B:": ikinci dairenin planında bir nokta (#70).
-            if (IkinciDaire == null) { Debug.LogWarning($"[ZINCIR] '{ad}' ikinci dairede ama katta ikinci daire yok."); return null; }
+            if (IkinciDaire == null) { Debug.LogWarning($"[ZINCIR] '{ad}' ikinci dairede ama katta ikinci daire yok."); return false; }
             eksen = IkinciDaire.GetComponent<DaireEksenleri>();
             daire = IkinciDaire;
         }
         if (!string.IsNullOrEmpty(y.Yol) && y.Yol != KilitZinciri.IkinciOnek)
         {
             ebeveyn = Cozum(daire, y.Yol);
-            if (ebeveyn == null) { Debug.LogWarning($"[ZINCIR] '{ad}' çapası '{y.Yol}' bulunamadı."); return null; }
+            if (ebeveyn == null) { Debug.LogWarning($"[ZINCIR] '{ad}' çapası '{y.Yol}' bulunamadı."); return false; }
             konum = new Vector3(y.X, y.Y, y.Z);
             donus = Quaternion.Euler(0f, y.Donus, 0f);
         }
         else
         {
-            if (eksen == null) { Debug.LogWarning("[ZINCIR] Dairede DaireEksenleri yok; graybox yeniden kurulmalı."); return null; }
+            if (eksen == null) { Debug.LogWarning("[ZINCIR] Dairede DaireEksenleri yok; graybox yeniden kurulmalı."); return false; }
             ebeveyn = daire;
             konum = eksen.Nokta(y.X, y.Y, y.Z);
             Vector3 on = eksen.Yon(y.OnU, y.OnV);
@@ -433,12 +450,81 @@ public class ZincirUygulayici
         }
         // Yatık: dik duran kâğıt masaya konunca ön yüzü yukarı baksın (x ekseninde -90°).
         if (y.Yatik) donus = donus * Quaternion.Euler(-90f, 0f, 0f);
-        GameObject g = Object.Instantiate(sablon, ebeveyn, false);
-        g.name = ad;
-        g.transform.localPosition = konum;
-        g.transform.localRotation = donus;
-        konanlar.Add(g);
-        return g;
+        return true;
+    }
+
+    // ---------- KAT İMZASI IŞIKLARI (#116) ----------
+    // Her ışık bir boş nesne: Light + (varsa) parlayan küçük bir küre + KatIsigiDavranisi. konanlar'a girer,
+    // kat değişince süslerle birlikte silinir. Nokta ışıkları gölge düşürmez (#11: altı gölge haritası);
+    // gölgeli spot düşük kalitede gölgesiz yanar.
+    private void IsiklariKoy(Transform daire, KatZinciriVarligi varlik)
+    {
+        if (varlik.isiklar == null) return;
+        DaireEksenleri eksen = daire.GetComponent<DaireEksenleri>();
+        int sira = 0;
+        foreach (KatIsigi ki in varlik.isiklar)
+        {
+            sira++;
+            string ad = "Kat_Isigi_" + sira;
+            if (!YerHesapla(daire, eksen, ki, ad, out Transform ebeveyn, out Vector3 konum, out Quaternion donus)) continue;
+            GameObject g = new GameObject(ad);
+            g.transform.SetParent(ebeveyn, false);
+            g.transform.localPosition = konum;
+            // Spot aşağı eğilir: x ekseninde artı açı ileri yönü aşağı çevirir.
+            g.transform.localRotation = donus * Quaternion.Euler(ki.Spot ? ki.Egim : 0f, 0f, 0f);
+            Light l = g.AddComponent<Light>();
+            l.type = ki.Spot ? LightType.Spot : LightType.Point;
+            l.color = ki.Renk;
+            l.intensity = ki.Siddet;
+            l.range = ki.Menzil;
+            if (ki.Spot) { l.spotAngle = ki.Aci; l.innerSpotAngle = ki.Aci * 0.55f; }
+            l.shadows = ki.Spot && ki.Golge && Ayarlar.Kalite > 0 ? LightShadows.Soft : LightShadows.None;
+            Renderer kaynak = null;
+            if (ki.AlevBoyu.sqrMagnitude > 0f && IsikKaynagiMalzemesi != null)
+            {
+                // Parlayan kaynak: çarpıştırıcısız küçük bir küre; ışık onun içinden çıkar.
+                GameObject k = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                k.name = "Kaynak";
+                Object.Destroy(k.GetComponent<Collider>());
+                k.transform.SetParent(g.transform, false);
+                k.transform.localScale = ki.AlevBoyu;
+                kaynak = k.GetComponent<MeshRenderer>();
+                kaynak.sharedMaterial = IsikKaynagiMalzemesi;
+                kaynak.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+            g.AddComponent<KatIsigiDavranisi>().Hazirla(l, kaynak, ki.Titreme, ki.Renk, ki.Renk2, ki.KaynakParlakligi, sira);
+            konanlar.Add(g);
+        }
+    }
+
+    // Fosforlu anahtarlık (#116): eşyanın üstünde küçük, yatık bir "●"; KaranliktaParlayan onu yalnızca kafa
+    // lambası kapalıyken ve dairede elektrik yokken gösterir (4. kattaki duvar şifresiyle aynı boya).
+    private void ParlayanEtiketEkle(GameObject esya)
+    {
+        GameObject g = new GameObject("Fosforlu_Anahtarlik");
+        g.transform.SetParent(esya.transform, false);
+        // Yerden 2,2 cm yukarıda: 1 cm'de döşemenin içinde kalıp çizilmiyordu (ölçülerek bulundu).
+        g.transform.localPosition = new Vector3(0.03f, 0.018f, 0f);
+        // Yatık, yüzü YUKARI: TextMesh yerel -z tarafından okunur; x ekseninde +90° o tarafı yukarı çevirir
+        // (Rx(+90): (0,0,-1) → (0,1,0); -90° aşağı çeviriyordu, ölçülerek bulundu).
+        g.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+        TextMesh yazi = g.AddComponent<TextMesh>();
+        // Anahtarlık halkası: "0" (oval halka). Yazılar Yazi_3B malzemesiyle çizilir ve o malzeme yazı tipinin
+        // karakter dokusunu kurulurken bir kez alır: dokuda yalnızca oyunda zaten kullanılan karakterler var (kapı
+        // numaralarının rakamları, tabeladaki harfler). "●" ve "O" hiçbir yerde kullanılmadığı için çizilmedi;
+        // tabelada geçen "A" çizildi (denemeyle bulundu). Rakamlar her zaman dokuda.
+        yazi.text = "0";
+        yazi.anchor = TextAnchor.MiddleCenter;
+        yazi.alignment = TextAlignment.Center;
+        yazi.fontSize = 96;
+        yazi.characterSize = 0.02f;    // halka ~5 cm: karanlıkta birkaç metreden seçilsin (0,008 nişangâhın arkasında kalıyordu)
+        yazi.color = new Color(0.55f, 1f, 0.6f, 1f);
+        if (YaziOrnegi != null)
+        {
+            yazi.font = YaziOrnegi.font;
+            g.GetComponent<MeshRenderer>().sharedMaterial = YaziOrnegi.GetComponent<MeshRenderer>().sharedMaterial;
+        }
+        g.AddComponent<KaranliktaParlayan>();
     }
 
     // Bu eşya, kayıtta çözülmüş görünen bir kilidi açmak için mi kullanıldı?

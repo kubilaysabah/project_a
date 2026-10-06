@@ -177,6 +177,7 @@ public static partial class GrayboxKurucu
         seri.FindProperty("tornavidaSablonu").objectReferenceValue = tornavida;
         seri.FindProperty("asmaKilitSablonu").objectReferenceValue = asmaKilit;
         seri.FindProperty("mentesePlakasiSablonu").objectReferenceValue = plaka;
+        seri.FindProperty("katIsikKaynagiMalzemesi").objectReferenceValue = IsikKaynagiMalzemesi();   // #116
         seri.FindProperty("camKirikSablonu").objectReferenceValue = camKirik;
         seri.FindProperty("notSablonu").objectReferenceValue = notSablonu;
         seri.FindProperty("cizimParcasiSablonu").objectReferenceValue = cizimParcasi;
@@ -357,6 +358,22 @@ public static partial class GrayboxKurucu
 
     // Eşya olmayan bir parça şablonu (asma kilit gibi): yalnızca model ve çarpışma kutusu.
     // Çarpışma kutusu nişanı kolaylaştırır; etkileşim kilidin takılı olduğu kapıdan gelir.
+    // Kat imzası ışıklarının parlayan kaynağı (#116): URP Unlit, beyaz. Rengi ve HDR parlaklığı her kaynağın
+    // MaterialPropertyBlock'undan gelir (KatIsigiDavranisi); tek malzeme bütün katlarda paylaşılır.
+    static Material IsikKaynagiMalzemesi()
+    {
+        const string Yol = "Assets/Materials/Kat_Isik_Kaynagi.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            m.SetColor("_BaseColor", Color.white);
+            AssetDatabase.CreateAsset(m, Yol);
+            AssetDatabase.SaveAssets();
+        }
+        return m;
+    }
+
     static GameObject ParcaSablonuKur(string ad, string dosya)
     {
         GameObject gecici = new GameObject(ad);
@@ -598,6 +615,13 @@ public static partial class GrayboxKurucu
         // Radyo anonsu (#106): oyuncu daireye girdikten 30 sn sonra kolinin üstündeki radyo-teyp açılır.
         v.anons = new KatAnonsu { Yol = "Sus_Radyo_Kutu_K1", Gecikme = 30f, Dosya = "radyo_kat1" };
         v.parcalar = new List<KatParcasi>();
+        // Kat imzası ışığı (#116): salon penceresinden içeri vuran turuncu sokak lambası (sodyum buharlı). Işık
+        // pencerenin dışında (v 8,75), aşağı ve içeri eğik; gölgesiz (pencere camı gölge düşürür, #95).
+        v.isiklar = new List<KatIsigi>
+        {
+            new KatIsigi { X = 1.40f, Y = 2.40f, Z = 8.75f, OnU = 0f, OnV = -1f, Spot = true, Egim = 38f, Aci = 62f,
+                           Renk = new Color(1f, 0.52f, 0.18f), Siddet = 5f, Menzil = 8f, Titreme = KatIsikTitremesi.Sabit },
+        };
 
         // Dairenin kalıcı eşyalarından bu katta görünenler (oda oda seçildikçe eklenir).
         v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Portmanto", "Tezgah", "Buzdolabi", "Komodin" };
@@ -1026,6 +1050,9 @@ public static partial class GrayboxKurucu
     // Kat dekoru yardımcıları (#83): bir şablonu (adıyla) planın (u, y, v) noktasına, ön yüzü (onU, onV)
     // yönüne bakacak şekilde koyar. yol "B:" ise ikinci dairede (#70). DA: adı verilmiş süs; zincir ona bu
     // adla başvurur ("Komodin_Ayla/Cekmece_1").
+    // #116: 2. katın ocağının (Ocak_Emaye) pişirme yüzü 0,85 (ışınla ölçüldü; 1,07'deki tencere). Alev öndeki gözde.
+    const float Ocak2Ust = 0.862f, Ocak2X = -0.15f, Ocak2Z = 0.10f;
+
     static KatSusu D(string sablon, float u, float y, float v, float onU, float onV, string yol = "")
     { return new KatSusu { Sablon = Sablon(sablon), Yol = yol, X = u, Y = y, Z = v, OnU = onU, OnV = onV }; }
     static KatSusu DA(string ad, string sablon, float u, float y, float v, float onU, float onV, string yol = "")
@@ -1228,6 +1255,12 @@ public static partial class GrayboxKurucu
         v.parcalar = new List<KatParcasi>();
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;
+        // Kat imzası ışığı (#116): Nuri Bey'in ocağı kısık yanık unutulmuş, mavi alev (tüplü ocak, 1994).
+        v.isiklar = new List<KatIsigi>
+        {
+            new KatIsigi { Yol = "Sus_Ocak_Emaye", X = Ocak2X, Y = Ocak2Ust, Z = Ocak2Z, Renk = new Color(0.35f, 0.55f, 1f), Siddet = 0.7f,
+                           Menzil = 2.2f, Titreme = KatIsikTitremesi.Alev, AlevBoyu = new Vector3(0.06f, 0.012f, 0.06f), KaynakParlakligi = 3f },
+        };
         // Radyo dairenin kalıcı eşyası (Esyalar/Radyo); zincir ona başvurduğu için görünür.
         v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Tezgah" };
         v.sesler = new List<KatSesi>

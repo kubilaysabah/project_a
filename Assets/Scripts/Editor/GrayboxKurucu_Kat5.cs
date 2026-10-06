@@ -29,7 +29,7 @@ public static partial class GrayboxKurucu
         foreach (string ad in new[] { "Ayakkabilik_K5", "Semsiyelik_K5", "Duvar_Askisi_K5", "Yolluk_K5", "Konsol_K5", "Su_Kovasi_K5",
                                       "Kanepe_K5", "TV_Unitesi_K5", "Hali_K5", "Perde_K5", "Buzdolabi_K5", "Ocak_K5", "Mutfak_Masasi_K5",
                                       "Tabure_K5", "Ekmek_Sepeti_K5", "Camasir_Makinesi_K5", "Havlu_Askisi_K5", "Banyo_Dolabi_K5",
-                                      "Legen_Kova_K5", "Raf_K5", "Is_Lambasi_K5", "Boya_Kovalari_K5", "Komodin_K5", "Sifonyer_K5",
+                                      "Legen_Kova_K5", "Raf_K5", "Is_Lambasi_K5", "Gaz_Lambasi_K5", "Boya_Kovalari_K5", "Komodin_K5", "Sifonyer_K5",
                                       "Perde_OdaA_K5", "Calisma_Masasi_K5", "Kitaplik_K5", "Sandalye_K5", "Perde_OdaB_K5",
                                       // #110: elektrikli su ısıtıcısı ve gotik karyolanın yerine dönemine uygun iki model.
                                       "Caydanlik_K5", "Karyola_K5" })
@@ -92,6 +92,12 @@ public static partial class GrayboxKurucu
             new KatNotu { Metin = "not.kat5_liste", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
         };
         v.parcalar = new List<KatParcasi>();
+        // Kat imzası ışığı (#116): gaz lambasının camı (parlayan yumurta) ve sakin dalgalanan sıcak ışığı.
+        v.isiklar = new List<KatIsigi>
+        {
+            new KatIsigi { Yol = "Sus_Gaz_Lambasi_K5", X = 0f, Y = 0.175f, Z = 0f, Renk = new Color(1f, 0.66f, 0.32f), Siddet = 0.9f,
+                           Menzil = 3.2f, Titreme = KatIsikTitremesi.Alev, AlevBoyu = new Vector3(0.066f, 0.11f, 0.066f), KaynakParlakligi = 2.2f },
+        };
         v.anons = new KatAnonsu { Yol = "Sus_TV_Unitesi_K5", Gecikme = 25f, Dosya = "radyo_kat5" };   // #106: salondaki TV ünitesi
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;
@@ -117,6 +123,8 @@ public static partial class GrayboxKurucu
             // Yolluk holün başında; ortada tavandan damlayan suyu toplayan kova; Oda B ile Oda A kapıları
             // arasında konsol, üstünde saat ve ailenin fotoğrafı.
             D("Yolluk_K5", 3.90f, 0f, 3.80f, 0f, 1f),
+            // Kat imzası (#116): holün başında yerde yanan gaz lambası (elektrik kesik; kim yaktı, belli değil).
+            D("Gaz_Lambasi_K5", 2.20f, 0f, 4.45f, 0f, -1f),
             // Kova holün kuzey kenarında, salon ile Oda B kapılarının arasında: ortadayken koridoru, Oda B'nin
             // önündeyken kapıyı kapatıyordu (yürünebilirlik denetimi).
             // Kovanın adı var (#96): katın anının sesi ondan gelir.

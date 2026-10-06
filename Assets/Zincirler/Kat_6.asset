@@ -208,6 +208,7 @@ MonoBehaviour:
       Y: 0
       Z: 0
       Donus: 0
+      KaranliktaParlar: 0
     - Kimlik: a_mutfak_anahtari
       Tur: 2
       Yer: b_buzdolabi
@@ -215,6 +216,7 @@ MonoBehaviour:
       Y: 0.504
       Z: -0.04
       Donus: 20
+      KaranliktaParlar: 0
     - Kimlik: odaA_anahtari_uc
       Tur: 9
       Yer: b_dikis
@@ -222,6 +224,7 @@ MonoBehaviour:
       Y: 0.016
       Z: 0
       Donus: 60
+      KaranliktaParlar: 0
     - Kimlik: odaA_anahtari_bas
       Tur: 9
       Yer: b_teneke
@@ -229,6 +232,7 @@ MonoBehaviour:
       Y: 0.008
       Z: 0
       Donus: -25
+      KaranliktaParlar: 0
     - Kimlik: tabak_riza
       Tur: 10
       Yer: a_dolap
@@ -236,6 +240,7 @@ MonoBehaviour:
       Y: 0.475
       Z: 0.02
       Donus: 0
+      KaranliktaParlar: 0
     - Kimlik: tabak_cemal
       Tur: 10
       Yer: a_sandik
@@ -243,6 +248,7 @@ MonoBehaviour:
       Y: 0.084
       Z: 0
       Donus: 0
+      KaranliktaParlar: 0
     - Kimlik: tabak_hasan
       Tur: 10
       Yer: b_banyo_yer
@@ -250,6 +256,7 @@ MonoBehaviour:
       Y: 0
       Z: 0
       Donus: 0
+      KaranliktaParlar: 0
     - Kimlik: tabak_kapici
       Tur: 10
       Yer: b_odaA_yer
@@ -257,6 +264,7 @@ MonoBehaviour:
       Y: 0
       Z: 0
       Donus: 0
+      KaranliktaParlar: 0
     - Kimlik: kat_anahtari
       Tur: 1
       Yer: bufe
@@ -264,6 +272,7 @@ MonoBehaviour:
       Y: 0.27
       Z: 0
       Donus: 15
+      KaranliktaParlar: 0
     Kilitler:
     - Kimlik: b_kiler
       Tur: 1
@@ -382,6 +391,17 @@ MonoBehaviour:
     Yatik: 0
     Metin: not.kat6_davet
   suslar:
+  - Yol: 
+    X: 2.8
+    Y: 0.757
+    Z: 6.3
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Sablon: {fileID: 3505011994175549455, guid: deed1ec46384fe249b64ce285738ad34, type: 3}
+    Metin: 
+    Ad: 
   - Yol: Esyalar/Sofra
     X: -0.35
     Y: 0.757
@@ -867,6 +887,26 @@ MonoBehaviour:
     Metin: 
     Ad: 
   sesler: []
+  isiklar:
+  - Yol: Sus_Samdan_K6
+    X: 0
+    Y: 0.318
+    Z: 0
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Spot: 0
+    Renk: {r: 1, g: 0.64, b: 0.3, a: 1}
+    Renk2: {r: 0.25, g: 0.4, b: 1, a: 1}
+    Siddet: 0.6
+    Menzil: 2.4
+    Aci: 60
+    Egim: 0
+    Golge: 0
+    Titreme: 1
+    AlevBoyu: {x: 0.012, y: 0.03, z: 0.012}
+    KaynakParlakligi: 5
   anons:
     Yol: Sus_Eski_TV_K6
     Gecikme: 28

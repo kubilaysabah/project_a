@@ -10,8 +10,10 @@
 // bir odada en fazla bir görev parçası.
 //
 // Kapı sırası ve görev parçaları:
-//   Antre     : yerdeki okul çantasının üstünde 2. parça.
-//   Salon     : kanepenin altında 3. parça (eğilince görülür, #79).
+//   Antre     : yerdeki okul çantasının üstünde SALONUN anahtarı (#116, B8: 3. kat iki kilitliydi; 4. kattan 5. kata
+//               kilit sayısı birden sıçrıyordu).
+//   Banyo     : (kilitsiz, #116'dan önce kapalıydı) yerde 2. parça.
+//   Salon     : (anahtar) kanepenin altında 3. parça (eğilince görülür, #79).
 //   Mutfak    : tezgâhın üst çekmecesinde Oda B'nin (Kerem'in odası) anahtarı.
 //   Oda B     : (anahtar) oyuncak sandığında 4. parça -> resim tamam.
 //   Oda A     : (şifreli asma kilit 0309) komodinin çekmecesinde katın anahtarı.
@@ -26,6 +28,7 @@ using UnityEngine;
 public static partial class GrayboxKurucu
 {
     // #115: 1. çizim parçasının holdeki yeri (plan u, v): Kerem'in resimlerinin (u 3,8, kuzey duvarı) altı.
+    const float Banyo3U = 3.02f, Banyo3V = 0.32f;   // #116: 2. parçanın banyodaki yeri: dar açı, ayakta 4 / eğilmiş 19 nokta, s74
     const float Hol3U = 3.55f, Hol3V = 4.57f;   // duvarın dibi; hol uzun bir koridor, gizli köşesi yok (resimlerin altı 417 noktadan görünür; 3. katta zorlaşma kuralı yok)
     // 3. katın Blender modelleri (Art/Blender/scripts/kat3_esyalar.py): şablonları kurulur.
     static void Kat3SablonlariniKur()
@@ -63,7 +66,7 @@ public static partial class GrayboxKurucu
         v.tasarimda = false;
         v.yalnizSecilenEsyalar = true;
         var z = new KilitZinciri();
-        z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_C" });
+        z.KapaliOdalar.AddRange(new[] { "Oda_C" });   // #116: banyo açıldı (2. parça orada)
         // 1. parça holde, çocuk resimlerinin altında yerde (yer KatDenetimi.SaklamaYeriAra ile seçildi, #115).
         z.Yerler.Add(new ZincirYeri { Kimlik = "hol_resim", PlandaNokta = true, Oda = "Hol", U = Hol3U, Y = 0.004f, V = Hol3V, Donus = 15f });
         // Okul çantası antrede yerde (u 1,9, v 1,9); parça onun üst yüzünde.
@@ -78,12 +81,16 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "oyuncak", Yol = "Esyalar/Oyuncak_Kutusu", Oda = "Oda_B" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "komodin", Yol = "Komodin_Ayla/Cekmece_1", Oda = "Oda_A" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p1", Tur = EsyaTuru.Parca, Yer = "hol_resim" });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p2", Tur = EsyaTuru.Parca, Yer = "canta" });
+        // #116: çantanın üstünde salonun anahtarı; 2. parça banyoya taşındı (bir odada tek görev parçası).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "banyo_yer", PlandaNokta = true, Oda = "Banyo", U = Banyo3U, Y = 0.004f, V = Banyo3V, Donus = -30f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "canta", Donus = 25f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p2", Tur = EsyaTuru.Parca, Yer = "banyo_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p3", Tur = EsyaTuru.Parca, Yer = "salon_yeri" });
         // Çekmecenin içi: tezgâhın ekseninde x 0,59, y 0,64, z 0,04 (tezgah.py'deki üst çekmecenin tabanı).
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaB_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "cekmece", X = 0.59f, Y = 0.64f, Z = 0.04f, Donus = 30f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p4", Tur = EsyaTuru.Parca, Yer = "oyuncak", Y = SandikTaban, Donus = -20f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "komodin", Y = 0.005f, Donus = 15f });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "salon", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Salon", Gerekli = "salon_anahtari" });   // #116
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaB", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_B", Gerekli = "odaB_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_A", Sifre = "0309",
                                           Parcalar = new List<string> { "p1", "p2", "p3", "p4" } });
@@ -92,6 +99,13 @@ public static partial class GrayboxKurucu
         // PARÇALAR: dokular Art/Cizim/scripts/cizim_uret.py'den. Her parçanın dokudaki bölgesi
         // dosyanın saydam olmayan piksellerinden hesaplanır: resim yeniden üretilince de doğru kalır.
         v.parcalar = new List<KatParcasi>();
+        // Kat imzası ışığı (#116): holdeki dağılmış oyuncakların arasında pili bitmemiş polis arabası, kırmızı-mavi.
+        v.isiklar = new List<KatIsigi>
+        {
+            new KatIsigi { Yol = "Sus_Dagilmis_Oyuncaklar_K3", X = 0f, Y = 0.06f, Z = 0f, Renk = new Color(1f, 0.12f, 0.10f),
+                           Renk2 = new Color(0.15f, 0.30f, 1f), Siddet = 0.6f, Menzil = 2.0f, Titreme = KatIsikTitremesi.Yanip,
+                           AlevBoyu = new Vector3(0.016f, 0.010f, 0.016f), KaynakParlakligi = 3f },
+        };
         for (int i = 1; i <= 4; i++)
         {
             string dokuYolu = $"Assets/Textures/Cizim/Cizim_Kat3_P{i}.png";
@@ -103,7 +117,7 @@ public static partial class GrayboxKurucu
         v.anons = new KatAnonsu { Yol = "Sus_Tuplu_TV_K3", Gecikme = 22f, Dosya = "radyo_kat3" };   // #106: salondaki tüplü TV
         v.acikParcalar = new List<AcikParca>();
         v.buzdolabiFisiCekili = false;
-        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Tezgah" };
+        v.gorunenEsyalar = new List<string> { "Sigorta_Kutusu", "Tezgah", "Lavabo", "Klozet" };   // #116: banyo açık
 
         // Annenin notu hikâye notudur (şifreyi söylemez): koridorda, Oda B'nin kapısının solunda.
         v.notlar = new List<KatNotu>

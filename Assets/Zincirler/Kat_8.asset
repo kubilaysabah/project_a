@@ -127,6 +127,7 @@ MonoBehaviour:
       Y: 0
       Z: 0
       Donus: 0
+      KaranliktaParlar: 0
     - Kimlik: mutfak_anahtari
       Tur: 2
       Yer: evrak
@@ -134,6 +135,7 @@ MonoBehaviour:
       Y: 0.004
       Z: 0
       Donus: 20
+      KaranliktaParlar: 0
     - Kimlik: salon_anahtari
       Tur: 2
       Yer: mutfak_dip
@@ -141,6 +143,7 @@ MonoBehaviour:
       Y: 0
       Z: 0
       Donus: 0
+      KaranliktaParlar: 0
     - Kimlik: dosya_anahtari
       Tur: 2
       Yer: anahtar_dolabi
@@ -148,6 +151,7 @@ MonoBehaviour:
       Y: -0.156
       Z: 0.047
       Donus: -15
+      KaranliktaParlar: 0
     - Kimlik: asansor_sigortasi
       Tur: 3
       Yer: dosya_ust
@@ -155,6 +159,7 @@ MonoBehaviour:
       Y: 1
       Z: 0.02
       Donus: 80
+      KaranliktaParlar: 0
     Kilitler:
     - Kimlik: kiler
       Tur: 0
@@ -668,6 +673,7 @@ MonoBehaviour:
     Metin: 
     Ad: 
   sesler: []
+  isiklar: []
   anons:
     Yol: Sus_Radyo_Masa_K8
     Gecikme: 18

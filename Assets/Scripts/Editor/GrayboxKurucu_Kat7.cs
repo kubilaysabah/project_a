@@ -44,7 +44,7 @@ public static partial class GrayboxKurucu
         foreach (string ad in new[] { "Is_Botlari_K7", "Tulum_Askisi_K7", "Supurge_K7", "Sivas_Kilimi_K7", "Kanepe_Yatak_K7",
                                       "Kucuk_Sehpa_K7", "TV_Taburesi_K7", "Perde_K7", "Tup_Ocak_K7", "Mutfak_Masasi_K7", "Sandalye_K7",
                                       "Bulasik_Yigini_K7", "Tiras_Takimi_K7", "Havlu_K7", "Kova_K7", "Raf_K7", "Merdiven_K7",
-                                      "Tek_Kisilik_Yatak_K7", "Komodin_K7", "Koliler_K7", "Bavullar_K7", "Arastirma_Duvari_K7" })
+                                      "Tek_Kisilik_Yatak_K7", "Komodin_K7", "Koliler_K7", "Bavullar_K7", "Arastirma_Duvari_K7", "El_Feneri_K7" })
             ParcaSablonuKur(ad, ad);
         AcilirSablonKur("Hol_Konsolu_K7");
         AcilirSablonKur("Bufe_Cemal_K7");
@@ -141,6 +141,13 @@ public static partial class GrayboxKurucu
             new KatNotu { Metin = "not.kat7_son", X = 5.45f, Y = 1.40f, Z = 8.098f, OnU = 0f, OnV = -1f },
         };
         v.parcalar = new List<KatParcasi>();
+        // Kat imzası ışığı (#116): el fenerinin camından çıkan dar, gölgeli koni (cam: fenerin içinde (0, 0,026, 0,117)).
+        v.isiklar = new List<KatIsigi>
+        {
+            new KatIsigi { Yol = "Sus_El_Feneri_K7", X = 0f, Y = 0.026f, Z = 0.12f, Spot = true, Egim = 1f, Aci = 34f, Golge = true,
+                           Renk = new Color(1f, 0.93f, 0.78f), Siddet = 22f, Menzil = 10f, Titreme = KatIsikTitremesi.Sabit,
+                           AlevBoyu = new Vector3(0.042f, 0.042f, 0.004f), KaynakParlakligi = 4f },
+        };
         v.sesler = new List<KatSesi>();
         v.anons = new KatAnonsu { Yol = "Sus_TV_Taburesi_K7", Gecikme = 20f, Dosya = "radyo_kat7" };   // #106: taburedeki portatif TV
         v.yananOdalar = new List<string>();
@@ -159,6 +166,8 @@ public static partial class GrayboxKurucu
             // ---------- HOL ---------- (u 0-10,5, v 2,95-4,65): salon ile Oda B kapıları arasında konsol.
             // (#114: konsolun üstündeki fotoğraf Oda A'ya, kolilerin üstüne taşındı; şifrenin kaynağı oldu.)
             DA("Hol_Konsolu_Cemal", "Hol_Konsolu_K7", 3.40f, 0f, 4.65f - 0.16f, 0f, -1f),
+            // Kat imzası (#116): Cemal'in el feneri holde yerde, yanık bırakılmış; ışığı koridor boyunca dip duvara vurur.
+            D("El_Feneri_K7", 6.20f, 0f, 3.35f, 1f, 0f),
             D("Petek", 10.50f, 0f, 3.80f, -1f, 0f),
 
             // ---------- SALON ---------- (u 0-5,0, v 4,75-8,1; kapının önü boş)

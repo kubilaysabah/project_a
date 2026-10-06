@@ -112,6 +112,7 @@ MonoBehaviour:
       Y: 0.012
       Z: 0
       Donus: 30
+      KaranliktaParlar: 0
     - Kimlik: sigorta
       Tur: 3
       Yer: komodin
@@ -119,6 +120,7 @@ MonoBehaviour:
       Y: 0.375
       Z: 0
       Donus: 10
+      KaranliktaParlar: 0
     - Kimlik: tornavida
       Tur: 4
       Yer: ayakkabilik
@@ -126,6 +128,7 @@ MonoBehaviour:
       Y: 1.025
       Z: 0
       Donus: 80
+      KaranliktaParlar: 0
     - Kimlik: odaB_anahtari
       Tur: 2
       Yer: buzdolabi
@@ -133,6 +136,7 @@ MonoBehaviour:
       Y: 0.47
       Z: 0
       Donus: 20
+      KaranliktaParlar: 0
     - Kimlik: kat_anahtari
       Tur: 1
       Yer: oyuncak
@@ -140,6 +144,7 @@ MonoBehaviour:
       Y: 0.02
       Z: 0
       Donus: 20
+      KaranliktaParlar: 0
     Kilitler:
     - Kimlik: kavanoz
       Tur: 5
@@ -256,6 +261,7 @@ MonoBehaviour:
   notlar: []
   suslar: []
   sesler: []
+  isiklar: []
   anons:
     Yol: 
     Gecikme: 25
