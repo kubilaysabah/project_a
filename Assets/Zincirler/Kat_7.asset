@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
   aciklama: "7. kat, daire 1, Cemal'in dairesi (g\xF6zlem). Sahanl\u0131kta d\xF6rt
     '13' kap\u0131s\u0131, ger\xE7e\u011Fi farklar\u0131yla bulunur; yanl\u0131\u015F
-    kap\u0131 bir olay tetikler. Elektriksiz daire, yedi kilit: banyo (mente\u015Fe;
-    n\xFCfus c\xFCzdan\u0131), salon (1107; b\xFCfede kiler anahtar\u0131), kiler
-    (kol), mutfak (\xE7ekmecede anahtar\u0131n ucu; ba\u015F\u0131 holdeki konsolda),
-    Oda A (k\u0131r\u0131k anahtar; fosforlu 0913), Oda B (0913), sand\u0131k (tornavidayla
-    kan\u0131rt) -> kat\u0131n anahtar\u0131, ka\xE7\u0131\u015F. Oda oda d\xF6\u015Fendi
-    (#83)."
+    kap\u0131 bir olay tetikler. Elektriksiz daire, alt\u0131 kilit: banyo kilitsiz
+    (n\xFCfus c\xFCzdan\u0131), salon (1107; b\xFCfede kiler anahtar\u0131), kiler
+    (mutfak anahtar\u0131), mutfak (anahtar\u0131n ucu; ba\u015F\u0131 holdeki konsolda),
+    Oda A (k\u0131r\u0131k anahtar; foto\u011Fraf\u0131n arkas\u0131nda 0913), Oda
+    B (0913), sand\u0131k (tornavidayla kan\u0131rt) -> kat\u0131n anahtar\u0131,
+    ka\xE7\u0131\u015F. Oda oda d\xF6\u015Fendi (#83), #114 seyreltildi."
   tasarimda: 0
   yalnizSecilenEsyalar: 1
   gorunenEsyalar:
@@ -65,15 +65,15 @@ MonoBehaviour:
       Donus: 0
       OnU: 0
       OnV: 0
-    - Kimlik: kiler_kolu
-      Yol: Esyalar/Duvar_Kolu/Kol
+    - Kimlik: kiler_yer
+      Yol: 
       Oda: Oda_C
       KilitYolu: 
-      PlandaNokta: 0
-      U: 0
-      Y: 0
-      V: 0
-      Donus: 0
+      PlandaNokta: 1
+      U: 4.72
+      Y: 0.004
+      V: 0.52
+      Donus: 30
       OnU: 0
       OnV: 0
     - Kimlik: mutfak_kose
@@ -98,16 +98,16 @@ MonoBehaviour:
       Donus: 0
       OnU: 0
       OnV: 0
-    - Kimlik: odaA_duvar
+    - Kimlik: odaA_foto
       Yol: 
       Oda: Oda_A
       KilitYolu: 
       PlandaNokta: 1
-      U: 10.495
-      Y: 1.6
-      V: 6.4
+      U: 10.28
+      Y: 0.982
+      V: 5.33
       Donus: 0
-      OnU: -1
+      OnU: 0
       OnV: 0
     - Kimlik: sandik
       Yol: Sandik_Cemal
@@ -135,6 +135,13 @@ MonoBehaviour:
       Y: 0.103
       Z: 0.004
       Donus: 20
+    - Kimlik: mutfak_anahtari
+      Tur: 2
+      Yer: kiler_yer
+      X: 0
+      Y: 0
+      Z: 0
+      Donus: 0
     - Kimlik: odaA_anahtari_bas
       Tur: 9
       Yer: hol_konsol
@@ -157,22 +164,6 @@ MonoBehaviour:
       Z: 0
       Donus: 20
     Kilitler:
-    - Kimlik: banyo
-      Tur: 4
-      OdaKapisi: 1
-      Hedef: Banyo
-      Gerekli: tornavida
-      Sifre: 
-      IpucuMetni: 
-      IpucuX: 0
-      IpucuY: 0
-      IpucuZ: 0
-      IpucuOlcek: 1
-      Parcalar: []
-      IpucuKaranlikta: 0
-      IpucuYazma: 0
-      Gerekenler: []
-      Yuvalar: []
     - Kimlik: salon
       Tur: 1
       OdaKapisi: 1
@@ -206,10 +197,10 @@ MonoBehaviour:
       Gerekenler: []
       Yuvalar: []
     - Kimlik: mutfak
-      Tur: 2
+      Tur: 0
       OdaKapisi: 1
       Hedef: Mutfak
-      Gerekli: kiler_kolu
+      Gerekli: mutfak_anahtari
       Sifre: 
       IpucuMetni: 
       IpucuX: 0
@@ -243,16 +234,16 @@ MonoBehaviour:
       Tur: 1
       OdaKapisi: 1
       Hedef: Oda_B
-      Gerekli: odaA_duvar
+      Gerekli: odaA_foto
       Sifre: 0913
-      IpucuMetni: 0913
+      IpucuMetni: 
       IpucuX: 0
       IpucuY: 0
       IpucuZ: 0
-      IpucuOlcek: 4
+      IpucuOlcek: 1
       Parcalar: []
-      IpucuKaranlikta: 1
-      IpucuYazma: 0
+      IpucuKaranlikta: 0
+      IpucuYazma: 1
       Gerekenler: []
       Yuvalar: []
     - Kimlik: sandik
@@ -345,17 +336,6 @@ MonoBehaviour:
     Sablon: {fileID: 3835498936763024752, guid: 423dcae84e2b4284b851dc5d284b635a, type: 3}
     Metin: 
     Ad: Hol_Konsolu_Cemal
-  - Yol: 
-    X: 3.62
-    Y: 0.8
-    Z: 4.52
-    Donus: 0
-    OnU: 0
-    OnV: -1
-    Yatik: 0
-    Sablon: {fileID: 5234316692392655128, guid: a3bd2326066d8f34f96cc9a4e76d48d9, type: 3}
-    Metin: kat7
-    Ad: 
   - Yol: 
     X: 10.5
     Y: 0
@@ -586,6 +566,17 @@ MonoBehaviour:
     Yatik: 0
     Sablon: {fileID: 6802362828148242965, guid: 890bb42edb779f446909e2831fc2242e, type: 3}
     Metin: 
+    Ad: 
+  - Yol: 
+    X: 10.28
+    Y: 0.982
+    Z: 5.33
+    Donus: 0
+    OnU: -1
+    OnV: 0
+    Yatik: 0
+    Sablon: {fileID: 5234316692392655128, guid: a3bd2326066d8f34f96cc9a4e76d48d9, type: 3}
+    Metin: kat7
     Ad: 
   - Yol: 
     X: 7.7

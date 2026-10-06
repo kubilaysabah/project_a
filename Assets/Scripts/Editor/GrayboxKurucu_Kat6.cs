@@ -16,11 +16,12 @@
 //   A Mutfak  : (anahtar, B'nin buzdolabında) tezgâh dolabında Rıza Efendi'nin tabağı.
 //   A Oda A   : (kırık anahtar) çeyiz sandığında Cemal'in tabağı.
 //   A Salon   : sofra ve büfe (yerleştirme) -> katın anahtarı.
-//   B Antre   : yerde tornavida (çantada zaten varsa konmaz).
+//   B Antre   : giriş kapısının arkasındaki köşede banyo anahtarı (#114: banyo menteşeyle açılıyordu; tornavida
+//               1. kattan beri çantada olduğu için 5-8. katlarda dört banyo tek tıkla açılıyordu).
 //   B Salon   : terzi masasındaki dikiş kutusunda A'nın yatak odası anahtarının ucu.
 //   B Mutfak  : buzdolabında A'nın mutfak anahtarı.
 //   B Kiler   : (şifre 1974) raftaki düğme tenekesinde A'nın yatak odası anahtarının başı.
-//   B Banyo   : (menteşe, tornavida) yerde Hasan'ın tabağı.
+//   B Banyo   : (anahtar, antrede) yerde Hasan'ın tabağı.
 //   B Oda A   : (A'nın kilerindeki kol) yerde Yeni Kapıcı'nın tabağı.
 //   A banyo, A Oda B ve B Oda B kapalı.
 
@@ -30,6 +31,9 @@ using UnityEngine;
 
 public static partial class GrayboxKurucu
 {
+    // #114: B'nin banyo anahtarının B antresindeki yeri (plan u, v). A'nın antresi boş: SaklamaYeriAra orada
+    // hiçbir yer bulmadı. Burası giriş kapısının arkası, dar açı: ayakta 11 / eğilmiş 15 noktadan görünür, s276.
+    const float B6AntreU = 0.12f, B6AntreV = -0.48f;
     // kat6_esyalar.py raporundan: sandığın, dikiş kutusunun ve düğme tenekesinin iç tabanı; buzdolabının rafı;
     // terzi masasının üstü; takvimdeki boş yazı alanının merkezi (Unity eksenlerinde).
     const float Sandik6Taban = 0.084f;
@@ -81,7 +85,8 @@ public static partial class GrayboxKurucu
             z.Yerler.Add(new ZincirYeri { Kimlik = "yer_" + i, Yol = "Esyalar/Sofra/Yer_" + i, Oda = "Salon" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "bufe", Yol = "Esyalar/Bufe", Oda = "Salon", KilitYolu = "Esyalar/Bufe/Kapi_1" });
         // YERLER: ikinci daire (4)
-        z.Yerler.Add(new ZincirYeri { Kimlik = "b_antre_yer", PlandaNokta = true, Oda = "B:Antre", U = 1.60f, Y = 0.004f, V = 1.20f, Donus = 60f });
+        // #114: B'nin banyo anahtarı B'nin antresinde, giriş kapısının arkasındaki köşede (yer KatDenetimi ile seçildi).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "b_antre_yer", PlandaNokta = true, Oda = "B:Antre", U = B6AntreU, Y = 0.004f, V = B6AntreV, Donus = 40f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_dikis", Yol = "B:Dikis_Kutusu_Sabri", Oda = "B:Salon", KilitYolu = "B:Dikis_Kutusu_Sabri/Kapak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_buzdolabi", Yol = "B:Buzdolabi_Sabri", Oda = "B:Mutfak", KilitYolu = "B:Buzdolabi_Sabri/Kapi_1" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_teneke", Yol = "B:Dugme_Tenekesi_Sabri", Oda = "B:Oda_C", KilitYolu = "B:Dugme_Tenekesi_Sabri/Kapak" });
@@ -93,7 +98,7 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_odaA_yer", PlandaNokta = true, Oda = "B:Oda_A", U = 10.22f, Y = 0.004f, V = 6.47f, Donus = 35f });
 
         // EŞYALAR
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "b_antre_yer" });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "b_banyo_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "b_antre_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "a_mutfak_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "b_buzdolabi", X = 0.05f, Y = Buzdolabi6Raf, Z = -0.04f, Donus = 20f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "b_dikis", Y = DikisKutusu6Taban, Donus = 60f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_bas", Tur = EsyaTuru.AnahtarParcasi, Yer = "b_teneke", Y = Teneke6Taban, Donus = -25f });
@@ -110,7 +115,7 @@ public static partial class GrayboxKurucu
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "a_mutfak", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "a_mutfak_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "a_odaA", Tur = KilitTuru.KirikAnahtar, OdaKapisi = true, Hedef = "Oda_A",
                                           Gerekenler = new List<string> { "odaA_anahtari_bas", "odaA_anahtari_uc" } });
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "b_banyo", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "B:Banyo", Gerekli = "tornavida" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "b_banyo", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "B:Banyo", Gerekli = "b_banyo_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "b_odaA", Tur = KilitTuru.Kol, OdaKapisi = true, Hedef = "B:Oda_A", Gerekli = "a_kol" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "bufe", Tur = KilitTuru.Yerlestirme, OdaKapisi = false, Hedef = "bufe",
                                           Gerekenler = new List<string> { "tabak_riza", "tabak_hasan", "tabak_cemal", "tabak_kapici" },

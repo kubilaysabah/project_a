@@ -406,7 +406,10 @@ public class Etkilesimci : MonoBehaviour
     // ---------- SİMGELER (#104) ----------
     // Her simge 16 × 16'lık bir desen: '#' dolu, '.' boş. Desen metin olarak burada durur; bir dosyaya
     // gerek yok (build'e girmesi dert olmaz) ve bir simgeyi değiştirmek metni düzeltmekten ibaret.
-    // Sıra NisanSimgesi'ndeki sırayla AYNI olmalı: El, Goz, Ac, Kapat, Kilitli, Anahtar, Kol, Saklan.
+    // Sıra NisanSimgesi'ndeki sırayla AYNI olmalı: El, Goz, Ac, Kapat, Kilitli, Anahtar, Kol, Saklan,
+    // Sifre, Agir, Alet (son üçü #114).
+    // (#114: önceden şifreli kilit, ağır gardırop ve aletle sökülecek kapı hepsi "Kilitli" asma kilidini
+    // gösteriyordu; oyuncu 5. katın gardırobunun neden kıpırdamadığını anlayamıyordu.)
     private static readonly string[][] SimgeDesenleri =
     {
         new[] {   // EL: işaret parmağı kalkık bir el
@@ -551,6 +554,62 @@ public class Etkilesimci : MonoBehaviour
             "..#....#....#...",
             "..###########...",
             "..#.........#...",
+            "................",
+        },
+        new[] {   // ŞİFRE: asma kilit, gövdesinde çevirme diski (halka + ortada topuz). İlk çizim (üç çark ızgarası)
+                  // küçükken takvime benziyordu.
+            "................",
+            ".....######.....",
+            "....##....##....",
+            "....#......#....",
+            "....#......#....",
+            "..############..",
+            "..#####..#####..",
+            "..###......###..",
+            "..##...##...##..",
+            "..##..####..##..",
+            "..##..####..##..",
+            "..##...##...##..",
+            "..###......###..",
+            "..#####..#####..",
+            "...##########...",
+            "................",
+        },
+        new[] {   // AĞIR: halteri andıran ağırlık (yerinden oynamıyor, ekipman gerek)
+            "................",
+            "................",
+            "......####......",
+            ".....#....#.....",
+            ".....#....#.....",
+            "......####......",
+            "....########....",
+            "...##########...",
+            "..############..",
+            "..############..",
+            ".##############.",
+            ".##############.",
+            ".##############.",
+            ".##############.",
+            "................",
+            "................",
+        },
+        new[] {   // ALET: dik duran tornavida, altta kalın sap, üstte ince uç. Eğik çizimler küçük boyda
+                  // "giriş yasak" işaretine benziyordu (kırmızı daire + çapraz çizgi).
+            "................",
+            ".......##.......",
+            ".......##.......",
+            ".......##.......",
+            ".......##.......",
+            ".......##.......",
+            "......####......",
+            ".....######.....",
+            ".....######.....",
+            ".....##..##.....",
+            ".....######.....",
+            ".....##..##.....",
+            ".....######.....",
+            "......####......",
+            "................",
             "................",
         },
     };

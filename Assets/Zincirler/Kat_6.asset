@@ -139,10 +139,10 @@ MonoBehaviour:
       Oda: B:Antre
       KilitYolu: 
       PlandaNokta: 1
-      U: 1.6
+      U: 0.12
       Y: 0.004
-      V: 1.2
-      Donus: 60
+      V: -0.48
+      Donus: 40
       OnU: 0
       OnV: 0
     - Kimlik: b_dikis
@@ -201,8 +201,8 @@ MonoBehaviour:
       OnU: 0
       OnV: 0
     Esyalar:
-    - Kimlik: tornavida
-      Tur: 4
+    - Kimlik: b_banyo_anahtari
+      Tur: 2
       Yer: b_antre_yer
       X: 0
       Y: 0
@@ -316,10 +316,10 @@ MonoBehaviour:
       - odaA_anahtari_uc
       Yuvalar: []
     - Kimlik: b_banyo
-      Tur: 4
+      Tur: 0
       OdaKapisi: 1
       Hedef: B:Banyo
-      Gerekli: tornavida
+      Gerekli: b_banyo_anahtari
       Sifre: 
       IpucuMetni: 
       IpucuX: 0

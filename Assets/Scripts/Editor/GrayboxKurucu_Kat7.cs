@@ -10,14 +10,15 @@
 // Kurallar: katlarda aynı model yok; ipucu notu yok (kol ve şifre notları kaldırıldı); bir odada en fazla
 // bir görev parçası.
 //
-// Kapı sırası ve görev parçaları (yedi kilit):
-//   Antre  : yerde tornavida (çantada zaten varsa konmaz).
-//   Banyo  : (menteşe, tornavida) lavabonun üstünde duvarda Cemal'in nüfus cüzdanı: doğum günü 11.07.
+// Kapı sırası ve görev parçaları (altı kilit; #114: banyonun menteşesi, kilerin kolu ve fosforlu şifre kalktı,
+// üçü de 4-5. katlarda zaten vardı):
+//   Antre  : yerde tornavida (çantada zaten varsa konmaz; sandığı kanırtmak için).
+//   Banyo  : (kilitsiz) lavabonun üstünde duvarda Cemal'in nüfus cüzdanı: doğum günü 11.07.
 //   Salon  : (şifre 1107) büfenin alt dolabında kilerin anahtarı.
-//   Kiler  : (anahtar) duvardaki kol -> mutfağın sürgüsü.
-//   Mutfak : (kol) tezgâhın üst çekmecesinde Oda A anahtarının ucu.
+//   Kiler  : (anahtar) yerde, köşede mutfağın anahtarı.
+//   Mutfak : (anahtar) dip köşede Oda A anahtarının ucu.
 //   Hol    : (kilitsiz) konsolun çekmecesinde Oda A anahtarının başı.
-//   Oda A  : (kırık anahtar) dip duvarda fosforlu boyayla 0913: yalnızca kafa lambası kapalıyken görünür.
+//   Oda A  : (kırık anahtar) kolilerin üstünde Cemal'in fotoğrafı; arkasındaki stüdyo damgasında sipariş no 0913.
 //   Oda B  : (şifre 0913) Cemal'in sandığı tornavidayla kanırtılır: içinde katın anahtarı -> kaçış anı.
 
 using System.Collections.Generic;
@@ -26,6 +27,9 @@ using UnityEngine;
 
 public static partial class GrayboxKurucu
 {
+    // #114: mutfak anahtarının kilerdeki yeri ve fotoğrafın koli yığınının üstündeki yüksekliği (plan u, v; metre).
+    const float Kiler7U = 4.72f, Kiler7V = 0.52f;   // rafın dibi: yalnız eğilince görünür (0/33, s155)
+    const float Koli7FotoY = 0.982f;   // koli yığınının üstü (ölçüldü)
     // kat7_esyalar.py raporundan: büfenin alt dolabının tabanı ve birinci kapağın bölmesinin merkezi,
     // sandığın iç tabanı (Unity eksenlerinde).
     const float Bufe7Taban = 0.103f;
@@ -57,9 +61,9 @@ public static partial class GrayboxKurucu
             AssetDatabase.CreateAsset(v, yol);
         }
         v.aciklama = "7. kat, daire 1, Cemal'in dairesi (gözlem). Sahanlıkta dört '13' kapısı, gerçeği farklarıyla bulunur; yanlış kapı " +
-                     "bir olay tetikler. Elektriksiz daire, yedi kilit: banyo (menteşe; nüfus cüzdanı), salon (1107; büfede kiler anahtarı), " +
-                     "kiler (kol), mutfak (çekmecede anahtarın ucu; başı holdeki konsolda), Oda A (kırık anahtar; fosforlu 0913), Oda B " +
-                     "(0913), sandık (tornavidayla kanırt) -> katın anahtarı, kaçış. Oda oda döşendi (#83).";
+                     "bir olay tetikler. Elektriksiz daire, altı kilit: banyo kilitsiz (nüfus cüzdanı), salon (1107; büfede kiler anahtarı), " +
+                     "kiler (mutfak anahtarı), mutfak (anahtarın ucu; başı holdeki konsolda), Oda A (kırık anahtar; fotoğrafın arkasında " +
+                     "0913), Oda B (0913), sandık (tornavidayla kanırt) -> katın anahtarı, kaçış. Oda oda döşendi (#83), #114 seyreltildi.";
         v.tasarimda = false;
         v.yalnizSecilenEsyalar = true;
         v.kapiNumarasi = "13";
@@ -87,7 +91,8 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 2.0f, Y = 0.004f, V = -0.4f, Donus = 70f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "b_kimlik", Yol = "Esyalar/Lavabo", Oda = "Banyo" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "salon_bufe", Yol = "Bufe_Cemal", Oda = "Salon", KilitYolu = "Bufe_Cemal/Kapi_1" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_kolu", Yol = "Esyalar/Duvar_Kolu/Kol", Oda = "Oda_C" });
+        // #114: kilerde kol yok (kol 5, 6 ve 8. katlarda var); yerde, köşede mutfağın anahtarı.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "kiler_yer", PlandaNokta = true, Oda = "Oda_C", U = Kiler7U, Y = 0.004f, V = Kiler7V, Donus = 30f });
         // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
         // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
         // Anahtar ucu mutfağın dip köşesinde, tezgâhın dibinde (0/13). Eskiden tezgâhın üst çekmecesindeydi:
@@ -96,24 +101,26 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "hol_konsol", Yol = "Hol_Konsolu_Cemal/Cekmece_1", Oda = "Hol" });
         // Yatak odasının dip duvarı: dış duvar odanın dışına örülür, iç yüzü u = 10,5. Yazı yüzün yarım
         // santim önünde (5 cm öndeyken havada duruyordu: eksikler testi), göz hizasının üstünde, odaya (-u) bakar.
-        z.Yerler.Add(new ZincirYeri { Kimlik = "odaA_duvar", PlandaNokta = true, Oda = "Oda_A", U = 10.495f, Y = 1.60f, V = 6.4f, OnU = -1f, OnV = 0f });
+        // #114: Oda B'nin şifresi artık fosforlu duvarda değil (4. katın imzası), kolilerin üstündeki fotoğrafın
+        // arkasında (stüdyo damgası, "Sipariş No: 0913"). Yer kuralı için fotoğrafın durduğu nokta.
+        z.Yerler.Add(new ZincirYeri { Kimlik = "odaA_foto", PlandaNokta = true, Oda = "Oda_A", U = 10.28f, Y = Koli7FotoY, V = 5.33f });
         z.Yerler.Add(new ZincirYeri { Kimlik = "sandik", Yol = "Sandik_Cemal", Oda = "Oda_B", KilitYolu = "Sandik_Cemal/Kapak" });
 
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "antre_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kiler_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "salon_bufe", X = Bufe7KapiX, Y = Bufe7Taban, Z = 0.004f, Donus = 20f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "mutfak_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "kiler_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_bas", Tur = EsyaTuru.AnahtarParcasi, Yer = "hol_konsol", Y = 0.004f, Donus = -40f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "odaA_anahtari_uc", Tur = EsyaTuru.AnahtarParcasi, Yer = "mutfak_kose" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kat_anahtari", Tur = EsyaTuru.KatAnahtari, Yer = "sandik", Y = Sandik7Taban, Donus = 20f });
 
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "banyo", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "Banyo", Gerekli = "tornavida" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "salon", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Salon", Gerekli = "b_kimlik",
                                           Sifre = "1107", IpucuYazma = true });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "kiler", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_C", Gerekli = "kiler_anahtari" });
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "mutfak", Tur = KilitTuru.Kol, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "kiler_kolu" });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "mutfak", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "mutfak_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.KirikAnahtar, OdaKapisi = true, Hedef = "Oda_A",
                                           Gerekenler = new List<string> { "odaA_anahtari_bas", "odaA_anahtari_uc" } });
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaB", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_B", Gerekli = "odaA_duvar",
-                                          Sifre = "0913", IpucuMetni = "0913", IpucuOlcek = 4f, IpucuKaranlikta = true });
+        z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaB", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_B", Gerekli = "odaA_foto",
+                                          Sifre = "0913", IpucuYazma = true });
         // Sandık tornavidayla kanırtılır (levye 5. katta kaldı; tornavida kapıcının çantasında).
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "sandik", Tur = KilitTuru.Ekipman, OdaKapisi = false, Hedef = "sandik",
                                           Gerekenler = new List<string> { "tornavida" }, IpucuMetni = "ipucu.kanirt" });
@@ -144,10 +151,9 @@ public static partial class GrayboxKurucu
             D("Tulum_Askisi_K7", 2.60f, 1.08f, 1.20f, -1f, 0f),
             D("Supurge_K7", 2.30f, 0f, -0.80f, 0f, 1f),
 
-            // ---------- HOL ---------- (u 0-10,5, v 2,95-4,65): salon ile Oda B kapıları arasında konsol,
-            // üstünde Cemal'in fotoğrafı (arkasında biri duruyor).
+            // ---------- HOL ---------- (u 0-10,5, v 2,95-4,65): salon ile Oda B kapıları arasında konsol.
+            // (#114: konsolun üstündeki fotoğraf Oda A'ya, kolilerin üstüne taşındı; şifrenin kaynağı oldu.)
             DA("Hol_Konsolu_Cemal", "Hol_Konsolu_K7", 3.40f, 0f, 4.65f - 0.16f, 0f, -1f),
-            Foto("kat7", false, 3.62f, 0.80f, 4.52f, 0f, -1f),
             D("Petek", 10.50f, 0f, 3.80f, -1f, 0f),
 
             // ---------- SALON ---------- (u 0-5,0, v 4,75-8,1; kapının önü boş)
@@ -177,11 +183,12 @@ public static partial class GrayboxKurucu
             D("Raf_K7", 4.60f + 0.21f, 0f, 0.30f, 1f, 0f),
             D("Merdiven_K7", 5.60f, 0f, -0.80f, 0f, 1f),
 
-            // ---------- ODA A ---------- (u 7,7-10,5, v 4,75-8,1; kapının önü boş; dip duvarın u 10,0-10,5,
-            // v 5,8-7,0 bölümü fosforlu şifre için boş kalır)
+            // ---------- ODA A ---------- (u 7,7-10,5, v 4,75-8,1; kapının önü boş)
             D("Tek_Kisilik_Yatak_K7", 7.70f + 0.51f, 0f, 8.10f - 0.98f, 0f, -1f),
             D("Komodin_K7", 8.95f, 0f, 8.10f - 0.19f, 0f, -1f),
             D("Koliler_K7", 10.28f, 0f, 5.33f, -1f, 0f),
+            // #114: Cemal'in fotoğrafı toplanmış kolilerin üstünde, odaya (-u) bakar; arkasında şifre (stüdyo damgası).
+            Foto("kat7", false, 10.28f, Koli7FotoY, 5.33f, -1f, 0f),
             // Cemal'in gardırobu (#97): Oda B duvarına (u = 7,7) sırtını dayamış, odaya (+u) bakar; eşyalarını
             // kolilere toplamış, gardırop boş; içinde saklanılabilir. v 5,15-5,95: yatağa (v 6,14'ten) değmez;
             // kapakları açılınca u 8,62'ye kadar gelir, açık oda kapısının kanadı (u 8,7) serbest kalır.

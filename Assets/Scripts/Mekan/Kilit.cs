@@ -76,13 +76,16 @@ public class Kilit : MonoBehaviour
     {
         get
         {
+            // #114: eksik olanın TÜRÜ simgeden okunur: şifre (çark), ekipman (ağırlık), alet (tornavida).
+            // Anahtar, kol ve sigorta eksikse asma kilit kalır (anahtar deliği / sürgü kapalı).
             switch (Veri.Tur)
             {
                 case KilitTuru.Anahtar: return Cep.KimligiTasiyor(Veri.Gerekli) ? NisanSimgesi.Anahtar : NisanSimgesi.Kilitli;
                 case KilitTuru.KirikAnahtar: return ParcalarTamam() ? NisanSimgesi.Anahtar : NisanSimgesi.Kilitli;
                 case KilitTuru.Tornavida:
-                case KilitTuru.Kirma: return Aletler.Var(Veri.Gerekli) ? NisanSimgesi.El : NisanSimgesi.Kilitli;
-                case KilitTuru.Ekipman: return EkipmanTamam() ? NisanSimgesi.El : NisanSimgesi.Kilitli;
+                case KilitTuru.Kirma: return Aletler.Var(Veri.Gerekli) ? NisanSimgesi.El : NisanSimgesi.Alet;
+                case KilitTuru.Ekipman: return EkipmanTamam() ? NisanSimgesi.El : NisanSimgesi.Agir;
+                case KilitTuru.Sifre: return NisanSimgesi.Sifre;
                 default: return NisanSimgesi.Kilitli;
             }
         }
@@ -134,8 +137,28 @@ public class Kilit : MonoBehaviour
             ekran.Ac(this, oyuncu);
             return true;
         }
+        // Ekipman eksik (#114): ağır eşya (gardırop, sandık kapağı) yerinde bir an sarsılır: oyuncu itti ama
+        // kıpırdatamadı. Ses parçanın kendi "kilitli" sesi (aşağıdaki false ile).
+        if (Veri.Tur == KilitTuru.Ekipman && !sarsiliyor) StartCoroutine(Sars());
         // Açacak şey yok: kapı ya da parça kendi "kilitli" sesini çalsın.
         return false;
+    }
+
+    // Kısa bir sarsıntı: dik eksen etrafında ±0,8° iki kez gidip gelir, sonra tam eski hâline döner.
+    private bool sarsiliyor;
+    private System.Collections.IEnumerator Sars()
+    {
+        sarsiliyor = true;
+        Quaternion ilk = transform.localRotation;
+        for (float t = 0f; t < 0.32f; t += Time.deltaTime)
+        {
+            // Sin: -1 ile 1 arası gidip gelen eğri; (1 - t/0.32) sarsıntıyı sona doğru söndürür.
+            float aci = 0.8f * Mathf.Sin(t * 40f) * (1f - t / 0.32f);
+            transform.localRotation = ilk * Quaternion.Euler(0f, aci, 0f);
+            yield return null;
+        }
+        transform.localRotation = ilk;
+        sarsiliyor = false;
     }
 
     /// <summary>Kilidi çözer. acilsin: kapı hemen açılsın mı (anahtarla açınca evet; uzaktaki

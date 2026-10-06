@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f919113cce41d8f4f9d8eeed99e0e510, type: 3}
   m_Name: Kat_8
   m_EditorClassIdentifier: Assembly-CSharp::KatZinciriVarligi
-  aciklama: "8. kat, daire 4, Y\xF6netim b\xFCrosu (asans\xF6r). Sekiz kilit: banyo
-    (mente\u015Fe; kiler anahtar\u0131), kiler (kol), Oda B (evrak dolab\u0131nda
-    mutfak anahtar\u0131), mutfak (salon anahtar\u0131), Oda A (\u015Fifre 1974,
-    holdeki isk\xE2n ruhsat\u0131; anahtar dolab\u0131nda dosya dolab\u0131n\u0131n
-    anahtar\u0131), salon (dosya dolab\u0131nda asans\xF6r\xFCn sigortas\u0131),
-    asans\xF6r (sigorta panoya, \xE7a\u011F\u0131r, g\xF6sterge 9 der) -> kabinde
-    \xE7at\u0131 anahtar\u0131. Oda oda d\xF6\u015Fendi (#83)."
+  aciklama: "8. kat, daire 4, Y\xF6netim b\xFCrosu (asans\xF6r). Yedi kilit: banyo
+    kilitsiz (kiler anahtar\u0131), kiler (kol), Oda B (evrak dolab\u0131nda mutfak
+    anahtar\u0131), mutfak (salon anahtar\u0131), Oda A (\u015Fifre 2386, holdeki
+    isk\xE2n ruhsat\u0131; anahtar dolab\u0131nda dosya dolab\u0131n\u0131n anahtar\u0131),
+    salon (dosya dolab\u0131nda asans\xF6r\xFCn sigortas\u0131), asans\xF6r (sigorta
+    panoya, \xE7a\u011F\u0131r, g\xF6sterge 9 der) -> kabinde \xE7at\u0131 anahtar\u0131.
+    Oda oda d\xF6\u015Fendi (#83)."
   tasarimda: 0
   yalnizSecilenEsyalar: 1
   gorunenEsyalar:
@@ -31,17 +31,6 @@ MonoBehaviour:
   zincir:
     KapaliOdalar: []
     Yerler:
-    - Kimlik: antre_yer
-      Yol: 
-      Oda: Antre
-      KilitYolu: 
-      PlandaNokta: 1
-      U: 2
-      Y: 0.004
-      V: -0.4
-      Donus: 70
-      OnU: 0
-      OnV: 0
     - Kimlik: banyo_yer
       Yol: 
       Oda: Banyo
@@ -131,13 +120,6 @@ MonoBehaviour:
       OnU: 0
       OnV: 0
     Esyalar:
-    - Kimlik: tornavida
-      Tur: 4
-      Yer: antre_yer
-      X: 0
-      Y: 0
-      Z: 0
-      Donus: 0
     - Kimlik: kiler_anahtari
       Tur: 2
       Yer: banyo_yer
@@ -174,22 +156,6 @@ MonoBehaviour:
       Z: 0.02
       Donus: 80
     Kilitler:
-    - Kimlik: banyo
-      Tur: 4
-      OdaKapisi: 1
-      Hedef: Banyo
-      Gerekli: tornavida
-      Sifre: 
-      IpucuMetni: 
-      IpucuX: 0
-      IpucuY: 0
-      IpucuZ: 0
-      IpucuOlcek: 1
-      Parcalar: []
-      IpucuKaranlikta: 0
-      IpucuYazma: 0
-      Gerekenler: []
-      Yuvalar: []
     - Kimlik: kiler
       Tur: 0
       OdaKapisi: 1
@@ -259,7 +225,7 @@ MonoBehaviour:
       OdaKapisi: 1
       Hedef: Oda_A
       Gerekli: hol_ruhsat
-      Sifre: 1974
+      Sifre: 2386
       IpucuMetni: 
       IpucuX: 0
       IpucuY: 0

@@ -27,6 +27,10 @@ public enum NisanSimgesi
     Anahtar,   // eldeki anahtarla / tamamlanan parçalarla açılacak
     Kol,       // çekilecek kol, çevrilecek çark
     Saklan,    // dolaba saklan
+    // #113'ten sonra (#114) SONA eklendi: sıra Etkilesimci.SimgeDesenleri ile aynı olmalı.
+    Sifre,     // şifreli asma kilit: yakın bakışta çark çevrilecek
+    Agir,      // yerinden oynamıyor: gereken ekipman (levye, kaydırıcı...) eksik
+    Alet,      // bir aletle açılacak (menteşe sökmek, kırmak) ama alet henüz yok
 }
 
 public interface IEtkilesimli

@@ -512,6 +512,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **TR**
 
+> FOTO SAADET
+> Sipariş No: 0913
+>
 > Ağustos 1994.
 >
 > Her fotoğrafta biraz daha yakın.
@@ -521,6 +524,9 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **EN**
 
+> SAADET PHOTO
+> Order No: 0913
+>
 > August 1994.
 >
 > He is a little closer in every photo.
@@ -566,6 +572,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > İSKÂN RUHSATI
 >
+> Ruhsat No: 2386
 > Huzur Apartmanı
 > Zemin + 8 kat, 32 daire
 > Yapım yılı: 1974
@@ -576,6 +583,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 > OCCUPANCY PERMIT
 >
+> Permit No: 2386
 > Huzur Apartment Building
 > Ground + 8 floors, 32 flats
 > Year built: 1974

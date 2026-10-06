@@ -8,13 +8,12 @@
 // kaldırıldı); bir odada en fazla bir görev parçası.
 //
 // Kapı sırası ve görev parçaları:
-//   Antre  : yerde tornavida (çantada zaten varsa konmaz).
-//   Banyo  : (menteşe, tornavida) yerde kilerin anahtarı.
+//   Banyo  : (kilitsiz; #114: menteşe kalktı, tornavida bu katta gerekmez) yerde kilerin anahtarı.
 //   Kiler  : (anahtar) duvardaki kol -> toplantı odasının sürgüsü.
 //   Oda B  : (kol) evrak dolabının üst çekmecesinde mutfağın anahtarı.
 //   Mutfak : (anahtar) yerde, dip köşede salonun anahtarı (#102: tezgâhın üst çekmecesindeydi).
-//   Hol    : (kilitsiz) duvarda iskân ruhsatı: "yapım yılı 1974".
-//   Oda A  : (şifre 1974, arşiv) duvardaki anahtar dolabında dosya dolabının anahtarı.
+//   Hol    : (kilitsiz) duvarda iskân ruhsatı: ruhsat no 2386 (yapım yılı 1974 de yazar).
+//   Oda A  : (şifre 2386, arşiv; #114: 1974 6. katın şifresiydi) duvardaki anahtar dolabında dosya dolabının anahtarı.
 //   Salon  : (anahtar) dosya dolabının üst çekmecesi (anahtar): asansörün sigortası ve Cemal'in notu.
 //   Sahanlık: sigorta asansör panosuna takılır, asansör çağrılır, gösterge 9 der; kabin BOŞ gelir.
 //   Kabine binen oyuncuyu asansör dokuzuncu kata çıkarır; ÇATI ANAHTARI oradaki sofradadır (#108, DokuzuncuKat).
@@ -53,8 +52,8 @@ public static partial class GrayboxKurucu
             v = ScriptableObject.CreateInstance<KatZinciriVarligi>();
             AssetDatabase.CreateAsset(v, yol);
         }
-        v.aciklama = "8. kat, daire 4, Yönetim bürosu (asansör). Sekiz kilit: banyo (menteşe; kiler anahtarı), kiler (kol), Oda B " +
-                     "(evrak dolabında mutfak anahtarı), mutfak (salon anahtarı), Oda A (şifre 1974, holdeki iskân ruhsatı; anahtar " +
+        v.aciklama = "8. kat, daire 4, Yönetim bürosu (asansör). Yedi kilit: banyo kilitsiz (kiler anahtarı), kiler (kol), Oda B " +
+                     "(evrak dolabında mutfak anahtarı), mutfak (salon anahtarı), Oda A (şifre 2386, holdeki iskân ruhsatı; anahtar " +
                      "dolabında dosya dolabının anahtarı), salon (dosya dolabında asansörün sigortası), asansör (sigorta panoya, çağır, " +
                      "gösterge 9 der) -> kabinde çatı anahtarı. Oda oda döşendi (#83).";
         v.tasarimda = false;
@@ -67,7 +66,6 @@ public static partial class GrayboxKurucu
         v.kacisVar = false;
 
         var z = new KilitZinciri();
-        z.Yerler.Add(new ZincirYeri { Kimlik = "antre_yer", PlandaNokta = true, Oda = "Antre", U = 2.0f, Y = 0.004f, V = -0.4f, Donus = 70f });
         // Banyonun kapıya göre sağ köşesi: menteşesi sökülen kapının devrildiği şeridin (v 0,9-2,9) dışında.
         // #102 (kat kat zorlaşma): yer, KatDenetimi.SaklamaYeriAra'nın ölçtüğü adaylardan seçildi; parantezde
         // ayakta/eğilmiş görüldüğü nokta sayısı (20 cm ızgara, 5 m). Eski yer açıktaydı.
@@ -87,7 +85,6 @@ public static partial class GrayboxKurucu
         // Asansörün kabini sahanlıkta (dairenin dışında): kapılar açılana kadar gizli.
         z.Yerler.Add(new ZincirYeri { Kimlik = "kabin", Yol = "Sahanlik:Asansor/Kabin", Oda = KilitZinciri.SahanlikOdasi });
 
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "tornavida", Tur = EsyaTuru.Tornavida, Yer = "antre_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "kiler_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "banyo_yer" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "mutfak_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "evrak", Y = 0.004f, Donus = 20f });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "salon_anahtari", Tur = EsyaTuru.OdaAnahtari, Yer = "mutfak_dip" });
@@ -99,13 +96,12 @@ public static partial class GrayboxKurucu
         // dokuzuncu kata çıkar, anahtar oradaki sofrada durur (DokuzuncuKat). Kural, anahtarsız zinciri
         // asansör kilidi çözülünce "bitti" sayar (KilitZinciri.Cozumle).
 
-        z.Kilitler.Add(new ZincirKilidi { Kimlik = "banyo", Tur = KilitTuru.Tornavida, OdaKapisi = true, Hedef = "Banyo", Gerekli = "tornavida" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "kiler", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Oda_C", Gerekli = "kiler_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaB", Tur = KilitTuru.Kol, OdaKapisi = true, Hedef = "Oda_B", Gerekli = "kiler_kolu" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "mutfak", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Mutfak", Gerekli = "mutfak_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "salon", Tur = KilitTuru.Anahtar, OdaKapisi = true, Hedef = "Salon", Gerekli = "salon_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "odaA", Tur = KilitTuru.Sifre, OdaKapisi = true, Hedef = "Oda_A", Gerekli = "hol_ruhsat",
-                                          Sifre = "1974", IpucuYazma = true });
+                                          Sifre = "2386", IpucuYazma = true });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "dosya", Tur = KilitTuru.Anahtar, OdaKapisi = false, Hedef = "dosya_ust", Gerekli = "dosya_anahtari" });
         z.Kilitler.Add(new ZincirKilidi { Kimlik = "asansor", Tur = KilitTuru.Asansor, OdaKapisi = false, Hedef = "kabin", Gerekli = "asansor_sigortasi" });
         v.zincir = z;
