@@ -282,6 +282,15 @@ MonoBehaviour:
     OnV: 1
     Yatik: 0
     Metin: not.kat7_kimlik
+  - Yol: Esyalar/Lavabo
+    X: 0.34
+    Y: 1.12
+    Z: 0.004
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat7_kart
   - Yol: 
     X: 5.45
     Y: 1.4

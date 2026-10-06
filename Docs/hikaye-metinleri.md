@@ -490,6 +490,26 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > Volume: 41   Family No: 112   Entry No: 3
 
+### `not.kat7_kart`
+
+**TR**
+
+> Oğlum Cemal,
+>
+> 11 Temmuz'da yanında olamadım, kusura bakma.
+> Otuz üç yaşına girdin; artık evlen, o binadan da çık.
+>
+> Anan Hatice
+
+**EN**
+
+> My son Cemal,
+>
+> Forgive me for not being with you on the 11th of July.
+> You turned thirty-three; get married now, and get out of that building.
+>
+> Your mother, Hatice
+
 ### `not.kat7_son`
 
 **TR**

@@ -13,7 +13,9 @@
 // Kapı sırası ve görev parçaları (altı kilit; #114: banyonun menteşesi, kilerin kolu ve fosforlu şifre kalktı,
 // üçü de 4-5. katlarda zaten vardı):
 //   Antre  : yerde tornavida (çantada zaten varsa konmaz; sandığı kanırtmak için).
-//   Banyo  : (kilitsiz) lavabonun üstünde duvarda Cemal'in nüfus cüzdanı: doğum günü 11.07.
+//   Banyo  : (kilitsiz) lavabonun üstünde duvarda Cemal'in nüfus cüzdanı: doğum günü 11.07. Yanında annesinin
+//            doğum günü kartı ("11 Temmuz'da yanında olamadım"): tarih iki yerde görülünce gün-ay denenir
+//            (#115; cüzdanda altı sayı vardı, oyuncu önce 1961'i deniyordu). Kart hikâye; "şifre bu" demez.
 //   Salon  : (şifre 1107) büfenin alt dolabında kilerin anahtarı.
 //   Kiler  : (anahtar) yerde, köşede mutfağın anahtarı.
 //   Mutfak : (anahtar) dip köşede Oda A anahtarının ucu.
@@ -29,6 +31,7 @@ public static partial class GrayboxKurucu
 {
     // #114: mutfak anahtarının kilerdeki yeri ve fotoğrafın koli yığınının üstündeki yüksekliği (plan u, v; metre).
     const float Kiler7U = 4.72f, Kiler7V = 0.52f;   // rafın dibi: yalnız eğilince görünür (0/33, s155)
+    const float Kart7X = 0.34f;   // doğum günü kartının lavabo eksenindeki yan kayması (#115)
     const float Koli7FotoY = 0.982f;   // koli yığınının üstü (ölçüldü)
     // kat7_esyalar.py raporundan: büfenin alt dolabının tabanı ve birinci kapağın bölmesinin merkezi,
     // sandığın iç tabanı (Unity eksenlerinde).
@@ -132,6 +135,8 @@ public static partial class GrayboxKurucu
             new KatNotu { Metin = "not.kat7_cemal", Yol = "Sahanlik:Ilan", X = 0.45f, Y = 0f, Z = 0.004f },
             // Nüfus cüzdanı banyoda, lavabonun üstünde duvarda (şifrenin kaynağı; lavabonun pivotu duvarın dibinde).
             new KatNotu { Metin = "not.kat7_kimlik", Yol = "Esyalar/Lavabo", X = 0f, Y = 1.25f, Z = 0.004f },
+            // Annesinin doğum günü kartı cüzdanın yanında, biraz aşağıda (#115).
+            new KatNotu { Metin = "not.kat7_kart", Yol = "Esyalar/Lavabo", X = Kart7X, Y = 1.12f, Z = 0.004f },
             // Cemal'in son notu Oda B'nin arka duvarında (v = 8,1), odaya (-v) bakar.
             new KatNotu { Metin = "not.kat7_son", X = 5.45f, Y = 1.40f, Z = 8.098f, OnU = 0f, OnV = -1f },
         };

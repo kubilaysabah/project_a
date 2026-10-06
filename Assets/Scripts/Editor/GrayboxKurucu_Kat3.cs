@@ -10,13 +10,14 @@
 // bir odada en fazla bir görev parçası.
 //
 // Kapı sırası ve görev parçaları:
-//   Sahanlık  : dairenin kapısının önündeki ayakkabılıkta 1. parça.
 //   Antre     : yerdeki okul çantasının üstünde 2. parça.
 //   Salon     : kanepenin altında 3. parça (eğilince görülür, #79).
 //   Mutfak    : tezgâhın üst çekmecesinde Oda B'nin (Kerem'in odası) anahtarı.
 //   Oda B     : (anahtar) oyuncak sandığında 4. parça -> resim tamam.
 //   Oda A     : (şifreli asma kilit 0309) komodinin çekmecesinde katın anahtarı.
-//   Hol hikâye odası (çocuk resimleri, annenin notu); banyo ve kiler kapalı.
+//   Hol       : Kerem'in duvardaki resimlerinin altında, yerde 1. parça (#115: sahanlıktaki ayakkabılıktaydı; oyunda
+//               dairenin dışına konmuş tek görev eşyasıydı ve oyuncu iki kattır sahanlığı süs diye öğrenmişti).
+//               Annenin notu da burada; banyo ve kiler kapalı.
 
 using System.Collections.Generic;
 using UnityEditor;
@@ -24,6 +25,8 @@ using UnityEngine;
 
 public static partial class GrayboxKurucu
 {
+    // #115: 1. çizim parçasının holdeki yeri (plan u, v): Kerem'in resimlerinin (u 3,8, kuzey duvarı) altı.
+    const float Hol3U = 3.55f, Hol3V = 4.57f;   // duvarın dibi; hol uzun bir koridor, gizli köşesi yok (resimlerin altı 417 noktadan görünür; 3. katta zorlaşma kuralı yok)
     // 3. katın Blender modelleri (Art/Blender/scripts/kat3_esyalar.py): şablonları kurulur.
     static void Kat3SablonlariniKur()
     {
@@ -61,7 +64,8 @@ public static partial class GrayboxKurucu
         v.yalnizSecilenEsyalar = true;
         var z = new KilitZinciri();
         z.KapaliOdalar.AddRange(new[] { "Banyo", "Oda_C" });
-        z.Yerler.Add(new ZincirYeri { Kimlik = "ayakkabilik", Yol = "Sahanlik:Kapi_{n}/Ayakkabilik", Oda = KilitZinciri.SahanlikOdasi });
+        // 1. parça holde, çocuk resimlerinin altında yerde (yer KatDenetimi.SaklamaYeriAra ile seçildi, #115).
+        z.Yerler.Add(new ZincirYeri { Kimlik = "hol_resim", PlandaNokta = true, Oda = "Hol", U = Hol3U, Y = 0.004f, V = Hol3V, Donus = 15f });
         // Okul çantası antrede yerde (u 1,9, v 1,9); parça onun üst yüzünde.
         z.Yerler.Add(new ZincirYeri { Kimlik = "canta", PlandaNokta = true, Oda = "Antre", U = 1.975f, Y = CantaUstu3, V = 1.90f, Donus = -20f });
         // Kanepe (Kanepe_K3) Oda B duvarının önünde, altı açık. Parça kanepenin altında, duvara yakın:
@@ -73,7 +77,7 @@ public static partial class GrayboxKurucu
         z.Yerler.Add(new ZincirYeri { Kimlik = "cekmece", Yol = "Esyalar/Tezgah/Cekmece_1", Oda = "Mutfak" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "oyuncak", Yol = "Esyalar/Oyuncak_Kutusu", Oda = "Oda_B" });
         z.Yerler.Add(new ZincirYeri { Kimlik = "komodin", Yol = "Komodin_Ayla/Cekmece_1", Oda = "Oda_A" });
-        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p1", Tur = EsyaTuru.Parca, Yer = "ayakkabilik", Y = 1.025f, Donus = -15f });
+        z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p1", Tur = EsyaTuru.Parca, Yer = "hol_resim" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p2", Tur = EsyaTuru.Parca, Yer = "canta" });
         z.Esyalar.Add(new ZincirEsyasi { Kimlik = "p3", Tur = EsyaTuru.Parca, Yer = "salon_yeri" });
         // Çekmecenin içi: tezgâhın ekseninde x 0,59, y 0,64, z 0,04 (tezgah.py'deki üst çekmecenin tabanı).

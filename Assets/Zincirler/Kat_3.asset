@@ -31,15 +31,15 @@ MonoBehaviour:
     - Banyo
     - Oda_C
     Yerler:
-    - Kimlik: ayakkabilik
-      Yol: Sahanlik:Kapi_{n}/Ayakkabilik
-      Oda: Sahanlik
+    - Kimlik: hol_resim
+      Yol: 
+      Oda: Hol
       KilitYolu: 
-      PlandaNokta: 0
-      U: 0
-      Y: 0
-      V: 0
-      Donus: 0
+      PlandaNokta: 1
+      U: 3.55
+      Y: 0.004
+      V: 4.57
+      Donus: 15
       OnU: 0
       OnV: 0
     - Kimlik: canta
@@ -100,11 +100,11 @@ MonoBehaviour:
     Esyalar:
     - Kimlik: p1
       Tur: 6
-      Yer: ayakkabilik
+      Yer: hol_resim
       X: 0
-      Y: 1.025
+      Y: 0
       Z: 0
-      Donus: -15
+      Donus: 0
     - Kimlik: p2
       Tur: 6
       Yer: canta
