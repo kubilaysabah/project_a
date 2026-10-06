@@ -12,7 +12,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > Cemal Bey ayrıldı; eşyalarını odada bıraktı, kafa lambası çivide asılı. Al, geceleri lambasız çıkma; ampullerin çoğu yanmıyor.
 >
-> Katların arasına güvenlik için demir kapılar taktırdık. Her katın anahtarı o katta bir yerdedir. Önce o katın işlerini bitir, anahtarı bul, sonra yukarı çık.
+> Katların arasına güvenlik için demir kapılar taktırdık. Her katın anahtarı o katta bir yerdedir. Anahtarı bulmadan yukarı çıkamazsın.
 >
 > Kiracılar rahatsız edilmesin. Kapılar açılmazsa ısrar etme.
 >
@@ -26,7 +26,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > Cemal has left; his things are still in the room, his headlamp hangs on the nail. Take it, and don't go up at night without it — most of the bulbs are out.
 >
-> We have had iron doors fitted between the floors, for safety. Each floor's key is somewhere on that floor. Finish the floor's chores first, find the key, then go up.
+> We have had iron doors fitted between the floors, for safety. Each floor's key is somewhere on that floor. You can't go up without it.
 >
 > Do not disturb the tenants. If a door won't open, don't insist.
 >

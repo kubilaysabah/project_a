@@ -53,9 +53,14 @@ public class DuraklatmaMenusu : MonoBehaviour
     // Menünün üç sayfası var: ana sayfa, ayarlar (#27) ve görüntü (#30). Anomali defteri (#45)
     // eski kuralla birlikte kaldırıldı (#59).
     private const int SayfaAna = 0, SayfaAyarlar = 1, SayfaGoruntu = 2, SayfaFoto = 3;   // Fotoğraflar sayfası: #69
-    // Kontroller sayfası (#80): Ayarlar'ın altında, oyundaki bütün tuşların listesi. Şahan'ın kararı
-    // (2026-09-28): oyun içinde tuş ipucu çıkmaz; oyuncu tuşları oyunlarda alışık olduğu yerde bulur.
+    // Kontroller sayfası (#80): oyundaki bütün tuşların listesi. Şahan'ın kararı (2026-09-28): oyun içinde
+    // tuş ipucu çıkmaz; oyuncu tuşları oyunlarda alışık olduğu yerde bulur. #113 (2026-10-06): sayfa Ayarlar'ın
+    // altından ANA menüye taşındı (Esc → Kontroller) ve yeni oyunda bir kez giriş kartı olarak gösterilir
+    // (girisKarti). Satır adları yaygın oyun terimleriyle yazıldı (Etkileşim, Fener, Görev listesi...).
     private const int SayfaKontrol = 4;
+    // Giriş kartı açık mı (#113): Kontroller sayfası yeni oyunun başında "Devam" düğmesiyle gösterilir.
+    // Geri tuşu Ayarlar'a değil oyuna döner; Esc / B / Enter / A kartı kapatır.
+    private bool girisKarti;
     // Katlar sayfası (#85): ulaşılan katlar listelenir, birine basınca oyun o katın başından sürer.
     private const int SayfaKatlar = 5;
     private int sayfa = SayfaAna;
@@ -64,7 +69,8 @@ public class DuraklatmaMenusu : MonoBehaviour
     // Öğelerin sırası (yukarıdan aşağı). Numara, gezginin "Secili" değeriyle eşleşir.
     // (Katı Sıfırla düğmesi #83'te kalktı, Şahan'ın kararı: kat artık her oturumun başında kendiliğinden
     // baştan başlıyor; bkz. Kayit.KatBasinaDon.)
-    private const int AnaDevam = 0, AnaKatlar = 1, AnaAyarlar = 2, AnaGoruntu = 3, AnaFoto = 4, AnaDil = 5, AnaCik = 6, AnaOgeSayisi = 7;
+    private const int AnaDevam = 0, AnaKatlar = 1, AnaAyarlar = 2, AnaGoruntu = 3, AnaKontroller = 4, AnaFoto = 5,
+                      AnaDil = 6, AnaCik = 7, AnaOgeSayisi = 8;   // #113: Kontroller ana menüde
     // Katlar sayfası: 1..8. kat, sonra Geri.
     private const int KatOgeSayisi = KatSayaci.CatiKati + 1;
 
@@ -75,7 +81,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     private int katOnay;                  // sorusu gösterilen kat (0 = yok)
     private static bool dogrudanBasla;    // sahne menüden kat seçilerek yüklendi: başlık ekranı gösterilmesin
     private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3, AyarSallanma = 4,
-                      AyarKontroller = 5, AyarVarsayilan = 6, AyarGeri = 7, AyarOgeSayisi = 8;
+                      AyarVarsayilan = 5, AyarGeri = 6, AyarOgeSayisi = 7;   // #113: Kontroller ana menüye taşındı
 
     // Kontroller sayfasının satırları. Her satırın metni "eylem|klavye ve fare|oyun kolu": üç sütun
     // tek anahtarda durur, dil değişince üçü birlikte değişir. Tuşların kendisi de çevrilir
@@ -235,7 +241,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (baslat && !baslikta) { DevamIste(); return; }
         if (esc || geri)                                // Esc / B: bir geri git
         {
-            if (sayfa == SayfaKontrol) SayfaAc(SayfaAyarlar);   // Kontroller Ayarlar'ın altında: bir geri = Ayarlar
+            if (girisKarti) DevamIste();                // giriş kartı (#113): geri = oyuna dön
             else if (sayfa != SayfaAna) SayfaAc(SayfaAna);
             else if (!baslikta) DevamIste();            // başlık ekranının ana sayfasında geri yok
             return;
@@ -364,13 +370,15 @@ public class DuraklatmaMenusu : MonoBehaviour
     private void Basla()
     {
         if (geciste) return;
-        StartCoroutine(BaslaGecisi());
+        // Yeni oyun mu (#113)? Kayıt yoksa oyun açılıştan (kapıcı odası) başlar; ekran açılınca bir kez Kontroller
+        // kartı gösterilir. Kayıttan devam eden oyuncu tuşları zaten biliyor; ona gösterilmez.
+        StartCoroutine(BaslaGecisi(!Kayit.Var));
     }
 
     // Ekran kararır → başlık kamerası kalkar, oyuncu kapıcı odasında uyanır → ekran açılır.
     // Coroutine: "yield return" satırında durur, sonraki karede kaldığı yerden devam eder
     // (FinalSahnesi'ndeki gibi). Süreler gerçek zamanla (unscaled) ölçülüyor.
-    private System.Collections.IEnumerator BaslaGecisi()
+    private System.Collections.IEnumerator BaslaGecisi(bool yeniOyun)
     {
         geciste = true;
 
@@ -404,7 +412,23 @@ public class DuraklatmaMenusu : MonoBehaviour
         }
         karartma = 0f;
         geciste = false;
+        if (yeniOyun) GirisKartiniAc();
     }
+
+    // Giriş kartı (#113): Esc menüsü gibi açılır (oyun saati durur, oyuncu donar), ama doğrudan Kontroller
+    // sayfasında ve "Devam" düğmesiyle. Kapanınca her şey Devam() ile eski hâline döner.
+    private void GirisKartiniAc()
+    {
+        Ac();
+        girisKarti = true;
+        SayfaAc(SayfaKontrol);
+    }
+
+    /// <summary>Test için: giriş kartı açık mı?</summary>
+    public bool GirisKartiAcik { get { return acik && girisKarti; } }
+
+    /// <summary>Giriş kartını "Devam"a basılmış gibi kapatır (oyun botu kullanır, #113).</summary>
+    public void GirisKartiniKapat() { if (GirisKartiAcik) DevamIste(); }
 
     // Static değer Play'ler arasında kalmasın (Dil.cs'teki gibi).
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -437,6 +461,7 @@ public class DuraklatmaMenusu : MonoBehaviour
                 case AnaKatlar: SayfaAc(SayfaKatlar); break;
                 case AnaAyarlar: SayfaAc(SayfaAyarlar); break;
                 case AnaGoruntu: SayfaAc(SayfaGoruntu); break;
+                case AnaKontroller: SayfaAc(SayfaKontrol); break;
                 case AnaFoto: SayfaAc(SayfaFoto); break;
                 case AnaDil: Dil.Sonraki(); break;
                 case AnaCik: OyundanCik(); break;
@@ -455,8 +480,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         // Fotoğraflar: onay tuşu fotoğrafı çevirir (tek düğme "Geri"yi fare ya da Esc / B çalıştırır).
         if (sayfa == SayfaFoto) { fotoArka = !fotoArka; return; }
 
-        // Kontroller: tek öğe "Geri"; onay tuşu Ayarlar'a döner.
-        if (sayfa == SayfaKontrol) { SayfaAc(SayfaAyarlar); return; }
+        // Kontroller: tek öğe; menüde "Geri" (ana menüye), giriş kartında "Devam" (oyuna).
+        if (sayfa == SayfaKontrol) { if (girisKarti) DevamIste(); else SayfaAc(SayfaAna); return; }
 
         if (sayfa == SayfaAyarlar)
         {
@@ -464,7 +489,6 @@ public class DuraklatmaMenusu : MonoBehaviour
             {
                 case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
                 case AyarSallanma: Ayarlar.Sallanma = !Ayarlar.Sallanma; break;
-                case AyarKontroller: SayfaAc(SayfaKontrol); break;
                 case AyarVarsayilan: Ayarlar.VarsayilanaDon(); break;
                 case AyarGeri: SayfaAc(SayfaAna); break;
                 // Kaydırıcılarda onay tuşunun işi yok; sol/sağ ile değiştirilir.
@@ -539,9 +563,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         // Bir sayfaya girince ilk öğe seçili. Ana sayfaya dönünce geldiği sayfanın düğmesi
         // seçili kalsın (oyuncu nereden geldiğini görür, tekrar girmek isterse tek tuş yeter).
         if (yeni == SayfaAna) gezgin.Sec(onceki == SayfaGoruntu ? AnaGoruntu : onceki == SayfaFoto ? AnaFoto
-                                         : onceki == SayfaKatlar ? AnaKatlar : AnaAyarlar);
+                                         : onceki == SayfaKatlar ? AnaKatlar : onceki == SayfaKontrol ? AnaKontroller : AnaAyarlar);
         else if (yeni == SayfaKatlar) gezgin.Sec(Kayit.Kat - 1);   // kaldığı kat seçili açılır
-        else if (yeni == SayfaAyarlar && onceki == SayfaKontrol) gezgin.Sec(AyarKontroller);   // geldiği düğme seçili
         else gezgin.Sec(0);
 
         if (yeni == SayfaGoruntu) CozunurlukListesiniKur();
@@ -667,6 +690,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     private void Devam()
     {
         acik = false;
+        girisKarti = false;
 
         Time.timeScale = eskiZamanOlcegi;
         AudioListener.pause = eskiSesDuraklamasi;
@@ -780,12 +804,12 @@ public class DuraklatmaMenusu : MonoBehaviour
             // sol altta sürüm. Application.version: Project Settings → Player → Version (0.1.0).
             GUI.Label(new Rect(0, ArayuzOlcegi.Yukseklik * 0.16f, ArayuzOlcegi.Genislik, 100f), Dil.Getir("menu.oyun_adi"), oyunAdiStili);
             GUI.Label(new Rect(16, ArayuzOlcegi.Yukseklik - 36f, 400f, 28f), string.Format(Dil.Getir("menu.surum"), Application.version), surumStili);
-            y = ArayuzOlcegi.Yukseklik * 0.38f;
+            y = ArayuzOlcegi.Yukseklik * 0.35f;   // #113: bir düğme daha; liste biraz yukarı
         }
         else
         {
-            // Yedi düğme (#69'da Fotoğraflar, #85'te Katlar eklendi).
-            y = ArayuzOlcegi.Yukseklik / 2f - 296f;
+            // Sekiz düğme (#69'da Fotoğraflar, #85'te Katlar, #113'te Kontroller eklendi).
+            y = ArayuzOlcegi.Yukseklik / 2f - 332f;
             GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.baslik"), baslikStili);
             y += 60f + 2f * ara;
         }
@@ -815,6 +839,12 @@ public class DuraklatmaMenusu : MonoBehaviour
         r = new Rect(x, y, en, boy);
         Vurgula(AnaGoruntu, r);
         if (GUI.Button(r, Dil.Getir("menu.goruntu"), dugmeStili)) SayfaAc(SayfaGoruntu);
+        y += boy + ara;
+
+        // Kontroller (#113): Steam oyuncusunun aradığı yerde, Esc menüsünün ana sayfasında.
+        r = new Rect(x, y, en, boy);
+        Vurgula(AnaKontroller, r);
+        if (GUI.Button(r, Dil.Getir("menu.kontroller"), dugmeStili)) SayfaAc(SayfaKontrol);
         y += boy + ara;
 
         r = new Rect(x, y, en, boy);
@@ -889,7 +919,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     {
         float en = 480f, ara = 14f;
         float x = (ArayuzOlcegi.Genislik - en) / 2f;
-        float y = ArayuzOlcegi.Yukseklik / 2f - 290f;   // #80: Kontroller, #92: kafa sallanması düğmesi eklendi; sayfa yukarı
+        float y = ArayuzOlcegi.Yukseklik / 2f - 262f;   // #92: kafa sallanması eklendi; #113: Kontroller ana menüye taşındı
 
         GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.ayarlar"), baslikStili);
         y += 60f + 2f * ara;
@@ -947,11 +977,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (GUI.Button(r, sallanmaYazisi, dugmeStili)) Ayarlar.Sallanma = !Ayarlar.Sallanma;
         y += 44f + ara;
 
-        // Kontroller (#80): tuş listesinin sayfası.
-        r = new Rect(x, y, en, 44f);
-        Vurgula(AyarKontroller, r);
-        if (GUI.Button(r, Dil.Getir("menu.kontroller"), dugmeStili)) SayfaAc(SayfaKontrol);
-        y += 44f + 2f * ara;
+        y += ara;   // düğmelerle alttaki Varsayılan / Geri satırı arasında biraz boşluk
 
         float dugmeEn = (en - ara) / 2f, boy = 52f;
         r = new Rect(x, y, dugmeEn, boy);
@@ -1000,9 +1026,19 @@ public class DuraklatmaMenusu : MonoBehaviour
             y += satir;
         }
 
+        // Giriş kartında (#113) altta tek satır: bu liste her zaman Esc menüsünde. Düğme oyuna döner.
+        if (girisKarti)
+        {
+            var ortali = new GUIStyle(soluk) { alignment = TextAnchor.MiddleCenter };
+            GUI.Label(new Rect(0, y + 14f, ArayuzOlcegi.Genislik, 30f), Dil.Getir("menu.kontrol_giris_alt"), ortali);
+            y += 30f;
+        }
         Rect r = new Rect((ArayuzOlcegi.Genislik - 240f) / 2f, y + 30f, 240f, 50f);
         Vurgula(0, r);
-        if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAyarlar);
+        if (GUI.Button(r, Dil.Getir(girisKarti ? "menu.devam" : "menu.geri"), dugmeStili))
+        {
+            if (girisKarti) DevamIste(); else SayfaAc(SayfaAna);
+        }
     }
 
     // ---------- GÖRÜNTÜ SAYFASI (#30) ----------

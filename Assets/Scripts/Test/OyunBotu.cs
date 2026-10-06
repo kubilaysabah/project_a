@@ -107,6 +107,15 @@ public class OyunBotu : MonoBehaviour
         kontrol = FindAnyObjectByType<BirinciSahisKontrolcu>();
         govde = kontrol.GetComponent<CharacterController>();
         yonetici = FindAnyObjectByType<KatYoneticisi>();
+        // Yeni oyunun giriş kartı (#113) oyun saatini durdurur; açıksa (ya da kararma bitince açılırsa) bot onu
+        // kapatır, oyuncunun "Devam"a basması gibi. Gerçek zamanla beklenir: saat dururken WaitForSeconds bitmez.
+        DuraklatmaMenusu menu = FindAnyObjectByType<DuraklatmaMenusu>();
+        for (float t = 0f; t < 3f && menu != null; t += Time.unscaledDeltaTime)
+        {
+            if (menu.GirisKartiAcik) { menu.GirisKartiniKapat(); break; }
+            yield return null;
+        }
+        yield return new WaitForSecondsRealtime(0.2f);
         yield return new WaitForSeconds(1f);
         if (inisKatSayisi >= 0) { yield return InisKipi(); yield break; }
 

@@ -25,7 +25,7 @@ public class CopToplayici : MonoBehaviour
     // eklenir; sahnede ayrıca kurmak gerekmez.
     private void Awake()
     {
-        if (GetComponent<PosetGostergesi>() == null) gameObject.AddComponent<PosetGostergesi>();
+        // #113: poşetler toplanmıyor; sağ alttaki poşet sayacı (PosetGostergesi) artık eklenmez.
     }
 
     /// <summary>Bir poşet daha toplandı. CopPoseti çağırır.</summary>

@@ -23,7 +23,8 @@ public class DaginikAyakkabi : MonoBehaviour, IEtkilesimli
     private static AudioClip tik;       // çift rafa otururken hafif tahta sesi (adım sesi, kısık)
 
     public string Ipucu { get { return Dil.Getir("ipucu.rafa_koy"); } }
-    public bool EtkilesimeAcik { get { return !rafaKondu && gameObject.activeSelf; } }
+    // #113: kapı önündeki dağınık ayakkabılar da süs; rafa koymanın hiçbir sonucu yoktu (bkz. CopPoseti).
+    public bool EtkilesimeAcik { get { return false; } }
 
     public void Etkilesim(GameObject oyuncu)
     {

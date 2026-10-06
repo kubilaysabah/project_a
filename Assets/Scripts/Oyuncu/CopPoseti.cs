@@ -26,7 +26,10 @@ public class CopPoseti : MonoBehaviour, IEtkilesimli
     public string Ipucu { get { return Dil.Getir("ipucu.topla"); } }
 
     /// <summary>Alınmış poşet artık etkileşime açık değildir.</summary>
-    public bool EtkilesimeAcik { get { return !alindi && gameObject.activeSelf; } }
+    // #113 (Şahan, 2026-10-06): poşet toplamanın #59'dan beri hiçbir sonucu yoktu ama oyuncu toplamaya
+    // uğraşıyordu. Poşetler sahanlıkta SÜS olarak kalır (kat planı yine çizer, yerleri yine hatırlanır);
+    // nişangâh onları göstermez, E onlara bir şey yapmaz. Geri açmak için yalnızca bu satır değişir.
+    public bool EtkilesimeAcik { get { return false; } }
 
     /// <summary>Oyuncu tuşa bastığında çağrılır.</summary>
     public void Etkilesim(GameObject oyuncu)
