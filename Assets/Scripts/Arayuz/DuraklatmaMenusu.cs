@@ -933,9 +933,9 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         // Sayılar dile göre yazılır: Türkçede "1,50", İngilizcede "1.50".
         // CultureInfo: bir dilin sayı, tarih yazım kuralları.
-        System.Globalization.CultureInfo kultur = Dil.Etkin == DilKodu.TR
-            ? new System.Globalization.CultureInfo("tr-TR")
-            : System.Globalization.CultureInfo.InvariantCulture;
+        System.Globalization.CultureInfo kultur = DilSecimi.KulturAdi(Dil.Etkin) == ""
+            ? System.Globalization.CultureInfo.InvariantCulture
+            : new System.Globalization.CultureInfo(DilSecimi.KulturAdi(Dil.Etkin));   // #123: sekiz dil
 
         // Fare hassasiyeti: 0,05'lik adımlarla (1,00 / 1,05 / 1,10...).
         Vurgula(AyarHassasiyet, new Rect(x, y, en, 52f));
@@ -1078,9 +1078,9 @@ public class DuraklatmaMenusu : MonoBehaviour
         GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.goruntu"), baslikStili);
         y += 60f + 2f * ara;
 
-        System.Globalization.CultureInfo kultur = Dil.Etkin == DilKodu.TR
-            ? new System.Globalization.CultureInfo("tr-TR")
-            : System.Globalization.CultureInfo.InvariantCulture;
+        System.Globalization.CultureInfo kultur = DilSecimi.KulturAdi(Dil.Etkin) == ""
+            ? System.Globalization.CultureInfo.InvariantCulture
+            : new System.Globalization.CultureInfo(DilSecimi.KulturAdi(Dil.Etkin));   // #123: sekiz dil
 
         // Çözünürlük: "1920 × 1080".
         string cozunurluk = cozunurlukGenislik.Length > 0

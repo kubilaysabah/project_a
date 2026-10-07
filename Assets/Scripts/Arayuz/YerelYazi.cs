@@ -47,9 +47,20 @@ public class YerelYazi : MonoBehaviour
         Dil.Degisti -= Yenile;
     }
 
+    private Font ilkYaziTipi;          // sahnedeki yazı tipi (Liberation Sans) ve malzemesi: CJK'den dönünce geri
+    private Material ilkMalzeme;
+
     private void Yenile()
     {
         if (string.IsNullOrEmpty(anahtar)) return;
-        GetComponent<TextMesh>().text = Dil.Getir(anahtar);
+        TextMesh tm = GetComponent<TextMesh>();
+        MeshRenderer mr = GetComponent<MeshRenderer>();
+        if (ilkYaziTipi == null) { ilkYaziTipi = tm.font; if (mr != null) ilkMalzeme = mr.sharedMaterial; }
+        // #123: Çince/Japonca harfleri gömülü yazı tipinde yok; yazı tipiyle birlikte harf dokusunu taşıyan
+        // malzeme de değişir (Yazi3B gölgelendiricisi dokuyu malzemeden okur). Öbür dillerde eski ikili.
+        bool cjk = YaziTipi.CjkMi(Dil.Etkin) && YaziTipi.Cjk != null && YaziTipi.CjkMalzeme != null;
+        tm.font = cjk ? YaziTipi.Cjk : ilkYaziTipi;
+        if (mr != null && ilkMalzeme != null) mr.sharedMaterial = cjk ? YaziTipi.CjkMalzeme : ilkMalzeme;
+        tm.text = Dil.Getir(anahtar);
     }
 }

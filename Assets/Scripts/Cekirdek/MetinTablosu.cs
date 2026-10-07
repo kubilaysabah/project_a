@@ -29,11 +29,18 @@
 using System.Collections.Generic;
 
 // Oyunun desteklediği diller. enum: sabit, isimli seçenekler listesi (EtkiTuru gibi).
-// Sıra önemli: tablodaki sütun sırasıyla aynı (0 = Türkçe, 1 = İngilizce).
+// Sıra önemli: tablodaki sütun sırasıyla aynı (0 = Türkçe, 1 = İngilizce, ...). Yeni dil SONA eklenir
+// (ayar dosyası dili sayı olarak saklar). #123: DE ES PT(BR) RU ZH(basitleştirilmiş) JA.
 public enum DilKodu
 {
     TR = 0,
-    EN = 1
+    EN = 1,
+    DE = 2,
+    ES = 3,
+    PT = 4,
+    RU = 5,
+    ZH = 6,
+    JA = 7
 }
 
 public class MetinTablosu
@@ -56,7 +63,7 @@ public class MetinTablosu
     public IReadOnlyList<string> Hatalar { get { return hatalar; } }
 
     // Dil sayısı: enum'daki seçenek sayısı. Yeni dil eklenirse burası ve tablo değişir.
-    public const int DilSayisi = 2;
+    public const int DilSayisi = 8;
 
     // ---------- OKUMA ----------
     /// <summary>TSV içeriğinden bir tablo kurar.</summary>
@@ -83,10 +90,11 @@ public class MetinTablosu
 
             string[] sutunlar = satir.Split('\t');
 
-            // anahtar + her dil için bir sütun olmalı.
-            if (sutunlar.Length != 1 + DilSayisi)
+            // anahtar + en az Türkçe ve İngilizce; en çok her dil için bir sütun (#123: eksik dil sütunu
+            // hata değil, o dil boş sayılır ve İngilizceye düşer; böylece eski üç sütunlu satırlar da okunur).
+            if (sutunlar.Length < 3 || sutunlar.Length > 1 + DilSayisi)
             {
-                tablo.hatalar.Add($"{satirNo}. satır: {1 + DilSayisi} sütun olmalıydı, {sutunlar.Length} var.");
+                tablo.hatalar.Add($"{satirNo}. satır: en az 3, en çok {1 + DilSayisi} sütun olmalıydı, {sutunlar.Length} var.");
                 continue;
             }
 
@@ -101,10 +109,11 @@ public class MetinTablosu
             string[] metinler = new string[DilSayisi];
             for (int d = 0; d < DilSayisi; d++)
             {
-                // "\n" yazısını (ters bölü + n) gerçek satır sonuna çevir.
-                metinler[d] = sutunlar[1 + d].Replace("\\n", "\n");
+                // "\n" yazısını (ters bölü + n) gerçek satır sonuna çevir. Satırda olmayan dil: boş (#123).
+                metinler[d] = 1 + d < sutunlar.Length ? sutunlar[1 + d].Replace("\\n", "\n") : "";
 
-                if (metinler[d].Trim().Length == 0)
+                // Türkçe ve İngilizce zorunlu; öbür diller boşsa İngilizce görünür (Getir).
+                if (d <= (int)DilKodu.EN && metinler[d].Trim().Length == 0)
                     tablo.hatalar.Add($"{satirNo}. satır: '{anahtar}' için {(DilKodu)d} metni boş.");
             }
 
@@ -116,9 +125,9 @@ public class MetinTablosu
 
     // ---------- ARAMA ----------
     /// <summary>
-    /// Anahtarın seçili dildeki metni. O dil boşsa Türkçesi verilir (hiç yazı
-    /// görünmemesindense Türkçe görünmesi iyidir). Anahtar tabloda hiç yoksa
-    /// "#anahtar#" döner: ekranda göze batsın ki eksik hemen fark edilsin.
+    /// Anahtarın seçili dildeki metni. O dil boşsa önce İngilizcesi, o da boşsa Türkçesi verilir
+    /// (#123: bir Alman oyuncuya Türkçe not yerine İngilizce not; hiç yazı görünmemesindense yine iyidir).
+    /// Anahtar tabloda hiç yoksa "#anahtar#" döner: ekranda göze batsın ki eksik hemen fark edilsin.
     /// </summary>
     public string Getir(string anahtar, DilKodu dil)
     {
@@ -127,6 +136,7 @@ public class MetinTablosu
             return "#" + anahtar + "#";
 
         string metin = metinler[(int)dil];
+        if (metin.Trim().Length == 0) metin = metinler[(int)DilKodu.EN];
         if (metin.Trim().Length == 0) metin = metinler[(int)DilKodu.TR];
         return metin;
     }
@@ -149,6 +159,32 @@ public static class DilSecimi
 {
     public static DilKodu SistemDilinden(string sistemDiliAdi)
     {
-        return sistemDiliAdi == "Turkish" ? DilKodu.TR : DilKodu.EN;
+        switch (sistemDiliAdi)
+        {
+            case "Turkish": return DilKodu.TR;
+            case "German": return DilKodu.DE;
+            case "Spanish": return DilKodu.ES;
+            case "Portuguese": return DilKodu.PT;
+            case "Russian": return DilKodu.RU;
+            case "Chinese": case "ChineseSimplified": case "ChineseTraditional": return DilKodu.ZH;   // tek Çince tablo (basitleştirilmiş)
+            case "Japanese": return DilKodu.JA;
+            default: return DilKodu.EN;
+        }
+    }
+
+    /// <summary>Dilin sayı/tarih kültürü ("tr-TR" gibi); İngilizce için boş = InvariantCulture.</summary>
+    public static string KulturAdi(DilKodu dil)
+    {
+        switch (dil)
+        {
+            case DilKodu.TR: return "tr-TR";
+            case DilKodu.DE: return "de-DE";
+            case DilKodu.ES: return "es-ES";
+            case DilKodu.PT: return "pt-BR";
+            case DilKodu.RU: return "ru-RU";
+            case DilKodu.ZH: return "zh-CN";
+            case DilKodu.JA: return "ja-JP";
+            default: return "";
+        }
     }
 }

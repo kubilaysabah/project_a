@@ -2294,8 +2294,26 @@ public static partial class GrayboxKurucu
     // arayüzü için yapılmış ve derinliğe bakmıyor: yazı duvarların içinden görünüyordu
     // (bir üst kattaki asansör notu tavandan, kapı numaraları ceza karanlığında).
     // Assets/Shaders/Yazi3B.shader aynı işi derinliğe saygı göstererek yapıyor.
+    // CJK dünya yazısı malzemesi (#123): aynı gölgelendirici, Noto Sans CJK'nin harf dokusu. Resources'ta
+    // durur ki YerelYazi oyun sırasında adıyla yükleyebilsin (yazı tipi de orada).
+    static void CjkYaziMalzemesiKur()
+    {
+        Font noto = AssetDatabase.LoadAssetAtPath<Font>("Assets/Resources/Fonts/NotoSansCJKsc-Regular.otf");
+        if (noto == null) { Debug.LogWarning("[GRAYBOX] Resources/Fonts/NotoSansCJKsc-Regular.otf yok; CJK malzemesi kurulmadı."); return; }
+        const string Yol = "Assets/Resources/Fonts/Yazi_3B_CJK.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (m == null)
+        {
+            m = new Material(Shader.Find("Huzur/Yazi3B"));
+            AssetDatabase.CreateAsset(m, Yol);
+        }
+        m.mainTexture = noto.material.mainTexture;
+        EditorUtility.SetDirty(m);
+    }
+
     static Material YaziMalzeme(Font yaziTipi)
     {
+        CjkYaziMalzemesiKur();
         const string Yol = "Assets/Materials/Yazi_3B.mat";
         Material m = AssetDatabase.LoadAssetAtPath<Material>(Yol);
         if (m == null)

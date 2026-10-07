@@ -111,7 +111,13 @@ public class MetinTablosuTestleri
     {
         Assert.AreEqual(DilKodu.TR, DilSecimi.SistemDilinden("Turkish"));
         Assert.AreEqual(DilKodu.EN, DilSecimi.SistemDilinden("English"));
-        Assert.AreEqual(DilKodu.EN, DilSecimi.SistemDilinden("German"));
+        Assert.AreEqual(DilKodu.DE, DilSecimi.SistemDilinden("German"));
+        Assert.AreEqual(DilKodu.PT, DilSecimi.SistemDilinden("Portuguese"));
+        Assert.AreEqual(DilKodu.ZH, DilSecimi.SistemDilinden("ChineseSimplified"));
+        Assert.AreEqual(DilKodu.JA, DilSecimi.SistemDilinden("Japanese"));
+        Assert.AreEqual(DilKodu.EN, DilSecimi.SistemDilinden("Swahili"), "bilinmeyen dil İngilizceye düşer");
+        Assert.AreEqual("pt-BR", DilSecimi.KulturAdi(DilKodu.PT));
+        Assert.AreEqual("", DilSecimi.KulturAdi(DilKodu.EN));
         Assert.AreEqual(DilKodu.EN, DilSecimi.SistemDilinden("Unknown"));
     }
 }

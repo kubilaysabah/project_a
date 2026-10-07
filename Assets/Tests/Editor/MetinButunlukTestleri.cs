@@ -99,8 +99,44 @@ public class MetinButunlukTestleri
         foreach (string a in tablo.Anahtarlar)
         {
             string tr = string.Join(",", yerTutucu.Matches(tablo.Getir(a, DilKodu.TR)).Cast<Match>().Select(m => m.Value).OrderBy(x => x));
-            string en = string.Join(",", yerTutucu.Matches(tablo.Getir(a, DilKodu.EN)).Cast<Match>().Select(m => m.Value).OrderBy(x => x));
-            Assert.AreEqual(tr, en, $"'{a}' anahtarının yer tutucuları iki dilde farklı.");
+            // #123: sekiz dilin hepsi Türkçeyle aynı yer tutucuları taşımalı.
+            for (int d = 1; d < MetinTablosu.DilSayisi; d++)
+            {
+                string diger = string.Join(",", yerTutucu.Matches(tablo.Getir(a, (DilKodu)d)).Cast<Match>().Select(m => m.Value).OrderBy(x => x));
+                Assert.AreEqual(tr, diger, $"'{a}' anahtarının yer tutucuları {(DilKodu)d} dilinde farklı.");
+            }
+        }
+    }
+
+    [Test]
+    public void Her_satir_sekiz_dilde_dolu()
+    {
+        // #123: tablo sekiz dile çıktı; yarım çevrilmiş bir satır sessizce İngilizceye düşer (Getir), oyuncu
+        // fark etmez, biz de etmeyiz. Bu test dosyayı ham okur: her veri satırı 1 + DilSayisi sütun ve hiçbir hücre boş.
+        string yol = Path.Combine(Application.dataPath, "Resources", "Metinler.txt");
+        string[] satirlar = File.ReadAllText(yol).Split('\n');
+        var eksik = new List<string>();
+        for (int i = 0; i < satirlar.Length; i++)
+        {
+            string s = satirlar[i].TrimEnd('\r');
+            if (s.Trim().Length == 0 || s.StartsWith("#")) continue;
+            string[] p = s.Split('\t');
+            if (p.Length != 1 + MetinTablosu.DilSayisi) { eksik.Add($"{i + 1}. satır ({p[0]}): {p.Length} sütun"); continue; }
+            for (int d = 1; d < p.Length; d++) if (p[d].Trim().Length == 0) eksik.Add($"{i + 1}. satır ({p[0]}): {(DilKodu)(d - 1)} boş");
+        }
+        Assert.IsEmpty(eksik, string.Join("\n", eksik));
+    }
+
+    [Test]
+    public void Kontrol_satirlari_her_dilde_uc_parca()
+    {
+        // Kontroller sayfası "eylem|klavye|oyun kolu" üçlüsünü '|' ile böler; bir dilde '|' eksikse sütun kayar.
+        MetinTablosu tablo = TabloyuOku();
+        foreach (string a in tablo.Anahtarlar)
+        {
+            if (!a.StartsWith("menu.kontrol_") || tablo.Getir(a, DilKodu.TR).IndexOf('|') < 0) continue;
+            for (int d = 0; d < MetinTablosu.DilSayisi; d++)
+                Assert.AreEqual(3, tablo.Getir(a, (DilKodu)d).Split('|').Length, $"'{a}' {(DilKodu)d}: üç parça olmalı.");
         }
     }
 }

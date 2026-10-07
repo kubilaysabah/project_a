@@ -16,6 +16,7 @@ sayfasında herkese görünür, o yüzden açık ve kısa yazılır.
 |---|---|---|---|
 | Dairelerdeki aile fotoğrafları (9 görsel) | Stable Diffusion XL 1.0 (ComfyUI, Şahan'ın makinesinde, çevrimdışı) | Üretildi, sonra Blender betiğiyle eskitildi ve bozuldu; gerçek kişi yok | `Art/Fotograflar/LISANSLAR.md` |
 | Oyun metinleri (notlar, telefon, radyo, menü; TR/EN) | Claude (Anthropic) ile birlikte yazıldı | Şahan karar verdi ve onayladı; Claude taslakları yazdı | `Docs/hikaye-metinleri.md` |
+| Çeviriler (DE, ES, PT-BR, RU, ZH, JA — #123) | Claude ile çevrildi | Türkçe/İngilizce asıl metinlerden; insan düzeltmesi yok (jenerikte "Çeviriler: Claude ile" satırı var) | `Assets/Resources/Metinler.txt` |
 | Kod ve Blender prop betikleri | Claude ile birlikte yazıldı | Şahan'ın tasarım kararlarıyla, Claude tarafından yazılıp Şahan'ın Editöründe doğrulandı | `CLAUDE.md` |
 | Sesler | **Yapay zekâ yok**: gürültüden sentez (Python betikleri) ve CC0/CC BY kayıtlar; sesler hiç sentezlenmedi (Şahan okur) | | `Docs/ses-katalogu.md`, `Art/Ses/kayitlar/LISANSLAR.md` |
 | Dokular | **Yapay zekâ yok**: Poly Haven / ambientCG CC0 + betikle üretilen kir/leke haritaları | | `Art/Dokular/LISANSLAR.md` |
@@ -28,7 +29,9 @@ sayfasında herkese görünür, o yüzden açık ve kısa yazılır.
 > The nine family photographs seen in the apartments were generated with Stable Diffusion XL running
 > locally and then aged and distorted by our own scripts; they depict no real person. The game's text
 > (notes, phone calls, radio lines, menus) and source code were written with the assistance of Claude,
-> an AI coding assistant, under the developer's direction and review. No AI-generated voices, music or
+> an AI coding assistant, under the developer's direction and review. The German, Spanish, Portuguese,
+> Russian, Chinese and Japanese translations were produced with Claude from the Turkish and English
+> originals. No AI-generated voices, music or
 > sound effects are used; voices are recorded by the developer. The game does not generate any content
 > while running.
 
@@ -37,7 +40,8 @@ sayfasında herkese görünür, o yüzden açık ve kısa yazılır.
 > Dairelerde görülen dokuz aile fotoğrafı, yerel olarak çalıştırılan Stable Diffusion XL ile üretildi,
 > sonra kendi betiklerimizle eskitildi ve bozuldu; hiçbir gerçek kişiyi göstermez. Oyunun metinleri
 > (notlar, telefon konuşmaları, radyo cümleleri, menüler) ve kaynak kodu, geliştiricinin yönetiminde ve
-> denetiminde, yapay zekâ kodlama yardımcısı Claude ile yazıldı. Yapay zekâ ile üretilmiş ses, müzik ya
+> denetiminde, yapay zekâ kodlama yardımcısı Claude ile yazıldı. Almanca, İspanyolca, Portekizce, Rusça,
+> Çince ve Japonca çeviriler Türkçe ve İngilizce asıllardan Claude ile yapıldı. Yapay zekâ ile üretilmiş ses, müzik ya
 > da ses efekti yoktur; sesler geliştirici tarafından kaydedilir. Oyun çalışırken hiçbir içerik üretmez.
 
 ## Jenerik

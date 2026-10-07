@@ -27,6 +27,8 @@ public static class ArayuzOlcegi
     /// <summary>GUI matrisini ölçeğe ayarlar. Her OnGUI'nin başında çağrılır.</summary>
     public static void Uygula()
     {
+        // #123: Çince/Japonca seçiliyken OnGUI yazı tipi Noto Sans CJK; stiller yazı tipini skin'den alır.
+        GUI.skin.font = YaziTipi.Guncel;
         float o = Olcek;
         // Matrix4x4.Scale: yalnızca büyütme/küçültme içeren bir matris (x ve y aynı oranda).
         GUI.matrix = Matrix4x4.Scale(new Vector3(o, o, 1f));
