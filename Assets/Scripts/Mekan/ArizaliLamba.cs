@@ -27,6 +27,8 @@ public class ArizaliLamba : MonoBehaviour
     [SerializeField] private int tohum;             // iki lamba aynı anda aynı şeyi yapmasın
 
     private const float VizilSesi = 0.10f;          // vızıltının en yüksek sesi
+    /// <summary>Başlık ekranı açıkken her sahanlığın arızalı lambası yanar (#128); DuraklatmaMenusu yazar.</summary>
+    public static bool BaslikZorla;
     private float temelSiddet;                      // ışığın tam yanıkken gücü (sahnedeki değer)
     private AudioSource vizilti;
     private KatYoneticisi yonetici;
@@ -59,7 +61,8 @@ public class ArizaliLamba : MonoBehaviour
     {
         if (yonetici == null) yonetici = FindAnyObjectByType<KatYoneticisi>();
         // Bu sahanlık şu an 8. katı mı gösteriyor? (Dokuzuncu kat sormaz, hep yanar.)
-        bool aktif = herZaman || (yonetici != null && yonetici.SahanlikKati(transform) == KatSayaci.CatiKati);
+        // BaslikZorla (#128): başlık ekranı A sahanlığındaki asansöre bakar; lamba orada da titrer.
+        bool aktif = herZaman || BaslikZorla || (yonetici != null && yonetici.SahanlikKati(transform) == KatSayaci.CatiKati);
         float p = aktif ? ArizaliLambaKurali.Parlaklik(Time.time, tohum) : 0f;
         if (isik != null)
         {

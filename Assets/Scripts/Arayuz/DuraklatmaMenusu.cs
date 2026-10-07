@@ -151,9 +151,17 @@ public class DuraklatmaMenusu : MonoBehaviour
     // Kamera neredeyse dik yukarı bakar; katlar kat kat dönerek karanlığa yükselir.
     // Birkaç açı denenip seçildi. Dış cephe bilerek kullanılmadı: bina dışarıdan 9
     // katlı görünür ve finaldeki sürprizi (#16) başlık ekranında bozardı.
+    // #128: başlık ekranı artık merdiven boşluğu yerine A sahanlığındaki ARIZALI asansöre bakar: titreyen
+    // arızalı lamba (ArizaliLamba.BaslikZorla), "ARIZALI" notu, karanlık sahanlık — oyunun anahtar görüntüsü.
+    // Kamera asansör kapısının önünde, alçakta, yavaşça salınır. Eski değerler (merdiven boşluğu) yedek:
+    // asansör bulunamazsa onlara düşer.
     private static readonly Vector3 BaslikKameraKonumu = new Vector3(0f, 0.3f, 1.08f);
     private const float BaslikKameraEgimi = -85f;      // derece; eksi = yukarı
     private const float BaslikKameraDonusHizi = 2.5f;  // derece/saniye; sarmal gibi yavaş döner
+    private const float BaslikSalinimDerece = 1.6f;    // asansör görüşünde yatay salınım genliği
+    private const float BaslikSalinimHizi = 0.22f;     // salınım frekansı (Hz)
+    private Vector3 baslikAsansorKonumu, baslikAsansorBakisi;   // asansör görüşü (varsa)
+    private bool baslikAsansorVar;
 
     private void Start()
     {
@@ -351,18 +359,51 @@ public class DuraklatmaMenusu : MonoBehaviour
         Light bi = baslikIsigi.AddComponent<Light>();
         bi.type = LightType.Point;
         bi.range = 7f;
-        bi.intensity = 1.2f;
+        bi.intensity = 0.5f;   // #128: arızalı lamba asıl ışık; bu yalnızca zemini okutan dolgu
         bi.color = new Color(1f, 0.88f, 0.70f);
         bi.shadows = LightShadows.None;
+        BaslikAsansorunuBul();
+        ArizaliLamba.BaslikZorla = true;
         BaslikKamerasiniDondur();
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
+    // Asansör görüşü (#128): A sahanlığının asansörü bulunur; kamera kapının 3,4 m önünde, 0,9 m yanda,
+    // 1,15 m yükseklikte durur ve kapının ortasının biraz altına bakar.
+    private void BaslikAsansorunuBul()
+    {
+        baslikAsansorVar = false;
+        // Asansör kökü sahanlığın orta hattında durur (kapı duvarda değil, #14'teki ses kuralı gibi); kapının
+        // yeri kasasının (Kasa) sınır kutusundan alınır.
+        GameObject asansor = GameObject.Find("Sahanlik_A/Asansor");
+        if (asansor == null) return;
+        Transform kasa = asansor.transform.Find("Kasa");
+        Renderer kasaCizici = kasa != null ? kasa.GetComponentInChildren<Renderer>() : null;
+        if (kasaCizici == null) return;
+        Vector3 kapiTaban = kasaCizici.bounds.center; kapiTaban.y = asansor.transform.position.y;
+        Vector3 ice = asansor.transform.position - kapiTaban; ice.y = 0f;   // kapıdan sahanlığın ortasına
+        if (ice.sqrMagnitude < 0.01f) ice = Vector3.forward;
+        ice.Normalize();
+        Vector3 yan = Vector3.Cross(Vector3.up, ice);
+        // Menü düğmeleri ekranın ortasında: kamera sağa alınıp bakış kapının sağına kaydırılır ki asansör
+        // sol üçte birde dursun, düğmeler onun üstüne binmesin.
+        baslikAsansorKonumu = kapiTaban + ice * 3.6f + yan * 1.3f + Vector3.up * 1.15f;
+        baslikAsansorBakisi = kapiTaban + Vector3.up * 1.3f + yan * 1.6f;
+        baslikAsansorVar = true;
+    }
+
     private void BaslikKamerasiniDondur()
     {
         if (baslikKamerasi == null) return;
+        if (baslikAsansorVar)
+        {
+            float sal = Mathf.Sin(Time.unscaledTime * BaslikSalinimHizi * 2f * Mathf.PI) * BaslikSalinimDerece;
+            Quaternion bakis = Quaternion.LookRotation(baslikAsansorBakisi - baslikAsansorKonumu) * Quaternion.Euler(0f, sal, 0f);
+            baslikKamerasi.transform.SetPositionAndRotation(baslikAsansorKonumu, bakis);
+            return;
+        }
         baslikDonusu += BaslikKameraDonusHizi * Time.unscaledDeltaTime;
         // Euler(eğim, dönüş, 0): önce dik eksen etrafında dön, sonra yukarı bak.
         // Kamera yukarı bakarken dik eksen etrafında dönmek görüntüyü ortası etrafında
@@ -394,6 +435,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         karartma = 1f;
 
         // Ekran simsiyahken geçişi yap: oyuncu hiçbir ara kareyi görmez.
+        ArizaliLamba.BaslikZorla = false;   // #128: arızalı lamba yine yalnızca 8. katta
         if (baslikKamerasi != null) Destroy(baslikKamerasi.gameObject);
         if (oyuncuKamerasi != null) oyuncuKamerasi.enabled = true;
         if (oyuncuKulagi != null) oyuncuKulagi.enabled = true;

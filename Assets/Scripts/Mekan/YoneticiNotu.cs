@@ -129,9 +129,9 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
         GUI.color = new Color(0f, 0f, 0f, 0.55f);
         GUI.DrawTexture(new Rect(0, 0, ArayuzOlcegi.Genislik, ArayuzOlcegi.Yukseklik), Texture2D.whiteTexture);
 
-        // Kâğıt: sararmış beyaz.
-        GUI.color = new Color(0.86f, 0.82f, 0.70f, 1f);
-        GUI.DrawTexture(kagit, Texture2D.whiteTexture);
+        // Kâğıt: sararmış, lifli doku (#128); doku yoksa düz bej.
+        GUI.color = KagitDokusu.Renk;
+        GUI.DrawTexture(kagit, KagitDokusu.Al() ?? Texture2D.whiteTexture);
         GUI.color = Color.white;
 
         if (yaziStili == null)

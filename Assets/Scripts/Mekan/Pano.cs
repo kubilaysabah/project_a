@@ -140,8 +140,8 @@ public class Pano : MonoBehaviour, IEtkilesimli
 
         // Sağ: seçili notun kâğıdı.
         Rect kagit = new Rect(W / 2f - 80f, H / 2f - 270f, 620f, 520f);
-        GUI.color = new Color(0.86f, 0.82f, 0.70f, 1f);
-        GUI.DrawTexture(kagit, Texture2D.whiteTexture);
+        GUI.color = KagitDokusu.Renk;                                       // #128: kâğıt dokusu
+        GUI.DrawTexture(kagit, KagitDokusu.Al() ?? Texture2D.whiteTexture);
         GUI.color = Color.white;
         GUI.Label(new Rect(kagit.x + 32f, kagit.y + 28f, kagit.width - 64f, kagit.height - 56f), Dil.Getir(liste[secili]), yaziStili);
 
