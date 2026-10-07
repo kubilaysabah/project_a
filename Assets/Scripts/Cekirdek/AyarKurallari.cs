@@ -23,6 +23,9 @@ public static class AyarKurallari
     public const float SesEnAz = 0f;
     public const float SesEnCok = 1f;
     public const float SesVarsayilan = 1f;
+    // #118: müzik ve konuşma kanalları (genel seviyeyle çarpılır; efektler yalnızca genel kanalda).
+    public const float MuzikEnAz = 0f, MuzikEnCok = 1f, MuzikVarsayilan = 1f;
+    public const float KonusmaEnAz = 0f, KonusmaEnCok = 1f, KonusmaVarsayilan = 1f;
 
     // ---------- GÖRÜŞ AÇISI (FOV) ----------
     // Kameranın dikey görüş açısı, derece. 60 dar ve sinematik (oyunun ayarlandığı
@@ -103,6 +106,16 @@ public static class AyarKurallari
     public static float Ses(float deger)
     {
         return Sinirla(deger, SesEnAz, SesEnCok, SesVarsayilan);
+    }
+
+    public static float Muzik(float deger)
+    {
+        return Sinirla(deger, MuzikEnAz, MuzikEnCok, MuzikVarsayilan);
+    }
+
+    public static float Konusma(float deger)
+    {
+        return Sinirla(deger, KonusmaEnAz, KonusmaEnCok, KonusmaVarsayilan);
     }
 
     public static float Gorus(float deger)

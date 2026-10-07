@@ -17,6 +17,18 @@ public class AyarKurallariTestleri
     }
 
     [Test]
+    public void Muzik_ve_konusma_kanallari_sinirlanir()
+    {
+        // #118: iki kanal da 0-1 arasında, varsayılan 1 (hiçbir şey kısılmamış); bozuk değer varsayılana döner.
+        Assert.AreEqual(1f, AyarKurallari.MuzikVarsayilan);
+        Assert.AreEqual(1f, AyarKurallari.KonusmaVarsayilan);
+        Assert.AreEqual(0f, AyarKurallari.Muzik(-3f));
+        Assert.AreEqual(1f, AyarKurallari.Konusma(7f));
+        Assert.AreEqual(0.35f, AyarKurallari.Muzik(0.35f), 1e-6f);
+        Assert.AreEqual(AyarKurallari.KonusmaVarsayilan, AyarKurallari.Konusma(float.NaN));
+    }
+
+    [Test]
     public void Oyunun_ayarlandigi_hal_varsayilan()
     {
         // Oyun 1× hassasiyet, tam ses, 60° görüş açısıyla ayarlandı; ilk açılış bu olmalı.

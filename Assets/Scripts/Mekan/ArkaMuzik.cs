@@ -106,6 +106,7 @@ public class ArkaMuzik : MonoBehaviour
         bool kabarik = simdi >= kabarmaBaslangici && simdi < kabarmaBitisi;
         // Olay kabarması dalganın üstüne biner; kabarma yokken dalga ve oyuncunun yeri belirler.
         float hedef = kabarik ? KabarmaSeviyesi : taban * dalga.Carpan(Time.time) * MuzikDalgasi.KonumCarpani(Merdivende());
+        hedef *= Ayarlar.Muzik;   // #118: müzik kanalı (0 = sessiz); genel seviye AudioListener.volume'da
         // MoveTowards: değeri hedefe doğru en fazla verilen adım kadar yaklaştırır.
         // Yükselirken hızlı, inerken yavaş: korku ani gelir, yavaş geçer.
         float hiz = hedef > kaynak.volume ? YukselmeHizi : InmeHizi;

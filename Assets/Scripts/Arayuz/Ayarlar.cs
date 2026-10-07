@@ -20,6 +20,8 @@ public static class Ayarlar
     // PlayerPrefs'teki kayıt adları. "ayar_dil" Dil.cs'te.
     private const string HassasiyetAdi = "ayar_hassasiyet";
     private const string SesAdi = "ayar_ses";
+    private const string MuzikAdi = "ayar_muzik";       // #118: müzik kanalı
+    private const string KonusmaAdi = "ayar_konusma";   // #118: konuşma kanalı (telefon, radyo)
     private const string TersAdi = "ayar_ters";
     private const string SallanmaAdi = "ayar_sallanma";   // kafa sallanması (#92)
     private const string GorusAdi = "ayar_gorus";
@@ -31,6 +33,7 @@ public static class Ayarlar
     private const string YukseklikAdi = "ayar_cozunurluk_y";
 
     private static float hassasiyet, ses, gorus, parlaklik;
+    private static float muzik = AyarKurallari.MuzikVarsayilan, konusma = AyarKurallari.KonusmaVarsayilan;
     private static bool ters, tamEkran, vsync;
     private static bool sallanma = AyarKurallari.SallanmaVarsayilan;
     private static int kalite, genislik, yukseklik;
@@ -54,6 +57,20 @@ public static class Ayarlar
     {
         get { Hazirla(); return ses; }
         set { Hazirla(); ses = AyarKurallari.Ses(value); AudioListener.volume = ses; Kaydet(); }
+    }
+
+    /// <summary>Müzik kanalı (0–1), genel seviyeyle çarpılır; ArkaMuzik okur (#118).</summary>
+    public static float Muzik
+    {
+        get { Hazirla(); return muzik; }
+        set { Hazirla(); muzik = AyarKurallari.Muzik(value); Kaydet(); }
+    }
+
+    /// <summary>Konuşma kanalı (0–1): telefon ve radyo seslendirmeleri (#118).</summary>
+    public static float Konusma
+    {
+        get { Hazirla(); return konusma; }
+        set { Hazirla(); konusma = AyarKurallari.Konusma(value); Kaydet(); }
     }
 
     /// <summary>Fare yukarı itilince aşağı bakılsın mı.</summary>
@@ -141,6 +158,8 @@ public static class Ayarlar
         Hazirla();
         hassasiyet = AyarKurallari.HassasiyetVarsayilan;
         ses = AyarKurallari.SesVarsayilan;
+        muzik = AyarKurallari.MuzikVarsayilan;
+        konusma = AyarKurallari.KonusmaVarsayilan;
         ters = AyarKurallari.TersVarsayilan;
         sallanma = AyarKurallari.SallanmaVarsayilan;
         gorus = AyarKurallari.GorusVarsayilan;
@@ -153,6 +172,8 @@ public static class Ayarlar
     {
         PlayerPrefs.SetFloat(HassasiyetAdi, hassasiyet);
         PlayerPrefs.SetFloat(SesAdi, ses);
+        PlayerPrefs.SetFloat(MuzikAdi, muzik);
+        PlayerPrefs.SetFloat(KonusmaAdi, konusma);
         PlayerPrefs.SetInt(TersAdi, ters ? 1 : 0);   // bool doğrudan saklanamıyor; 1/0 olarak
         PlayerPrefs.SetInt(SallanmaAdi, sallanma ? 1 : 0);
         PlayerPrefs.SetFloat(GorusAdi, gorus);
@@ -179,6 +200,8 @@ public static class Ayarlar
         // kuraldan geçer: kayıt bozuksa ya da sınırlar değiştiyse düzeltilir.
         hassasiyet = AyarKurallari.Hassasiyet(PlayerPrefs.GetFloat(HassasiyetAdi, AyarKurallari.HassasiyetVarsayilan));
         ses = AyarKurallari.Ses(PlayerPrefs.GetFloat(SesAdi, AyarKurallari.SesVarsayilan));
+        muzik = AyarKurallari.Muzik(PlayerPrefs.GetFloat(MuzikAdi, AyarKurallari.MuzikVarsayilan));
+        konusma = AyarKurallari.Konusma(PlayerPrefs.GetFloat(KonusmaAdi, AyarKurallari.KonusmaVarsayilan));
         ters = PlayerPrefs.GetInt(TersAdi, AyarKurallari.TersVarsayilan ? 1 : 0) == 1;
         sallanma = PlayerPrefs.GetInt(SallanmaAdi, AyarKurallari.SallanmaVarsayilan ? 1 : 0) == 1;
         gorus = AyarKurallari.Gorus(PlayerPrefs.GetFloat(GorusAdi, AyarKurallari.GorusVarsayilan));

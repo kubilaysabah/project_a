@@ -80,8 +80,8 @@ public class DuraklatmaMenusu : MonoBehaviour
     // Yeniden yüklenen sahnede başlık ekranı atlanır (dogrudanBasla), oyun kararmadan açılarak başlar.
     private int katOnay;                  // sorusu gösterilen kat (0 = yok)
     private static bool dogrudanBasla;    // sahne menüden kat seçilerek yüklendi: başlık ekranı gösterilmesin
-    private const int AyarHassasiyet = 0, AyarSes = 1, AyarGorus = 2, AyarTers = 3, AyarSallanma = 4,
-                      AyarVarsayilan = 5, AyarGeri = 6, AyarOgeSayisi = 7;   // #113: Kontroller ana menüye taşındı
+    private const int AyarHassasiyet = 0, AyarSes = 1, AyarMuzik = 2, AyarKonusma = 3, AyarGorus = 4, AyarTers = 5,
+                      AyarSallanma = 6, AyarVarsayilan = 7, AyarGeri = 8, AyarOgeSayisi = 9;   // #118: Müzik, Konuşma
 
     // Kontroller sayfasının satırları. Her satırın metni "eylem|klavye ve fare|oyun kolu": üç sütun
     // tek anahtarda durur, dil değişince üçü birlikte değişir. Tuşların kendisi de çevrilir
@@ -545,6 +545,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         {
             case AyarHassasiyet: Ayarlar.Hassasiyet = Mathf.Round((Ayarlar.Hassasiyet + 0.05f * yon) * 20f) / 20f; break;
             case AyarSes: Ayarlar.Ses = Mathf.Round((Ayarlar.Ses + 0.05f * yon) * 20f) / 20f; OrnekSesCal(); break;
+            case AyarMuzik: Ayarlar.Muzik = Mathf.Round((Ayarlar.Muzik + 0.05f * yon) * 20f) / 20f; break;
+            case AyarKonusma: Ayarlar.Konusma = Mathf.Round((Ayarlar.Konusma + 0.05f * yon) * 20f) / 20f; break;
             case AyarGorus: Ayarlar.Gorus = Mathf.Round(Ayarlar.Gorus + yon); break;
             case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
             case AyarSallanma: Ayarlar.Sallanma = !Ayarlar.Sallanma; break;
@@ -919,7 +921,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     {
         float en = 480f, ara = 14f;
         float x = (ArayuzOlcegi.Genislik - en) / 2f;
-        float y = ArayuzOlcegi.Yukseklik / 2f - 262f;   // #92: kafa sallanması eklendi; #113: Kontroller ana menüye taşındı
+        float y = ArayuzOlcegi.Yukseklik / 2f - 330f;   // #118: Müzik ve Konuşma kaydırıcıları eklendi; sayfa yukarı
 
         GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 60f), Dil.Getir("menu.ayarlar"), baslikStili);
         y += 60f + 2f * ara;
@@ -950,6 +952,24 @@ public class DuraklatmaMenusu : MonoBehaviour
             Ayarlar.Ses = yeniS;
             OrnekSesCal();
         }
+        y += 20f + ara;
+
+        // Müzik ve konuşma kanalları (#118): genel seviyeyle çarpılır. Efektler ayrı değil: yüzlerce tek seferlik
+        // ses tek bir kanaldan geçiyor; "Genel"i kısmak efektleri kısmak demek.
+        Vurgula(AyarMuzik, new Rect(x, y, en, 52f));
+        float mz = Ayarlar.Muzik;
+        GUI.Label(new Rect(x, y, en, 30f), string.Format(Dil.Getir("ayar.muzik"), Mathf.RoundToInt(mz * 100f)), yaziStili);
+        y += 32f;
+        float yeniMz = Mathf.Round(GUI.HorizontalSlider(new Rect(x, y, en, 20f), mz, AyarKurallari.MuzikEnAz, AyarKurallari.MuzikEnCok) * 20f) / 20f;
+        if (!Mathf.Approximately(yeniMz, mz)) Ayarlar.Muzik = yeniMz;
+        y += 20f + ara;
+
+        Vurgula(AyarKonusma, new Rect(x, y, en, 52f));
+        float kn = Ayarlar.Konusma;
+        GUI.Label(new Rect(x, y, en, 30f), string.Format(Dil.Getir("ayar.konusma"), Mathf.RoundToInt(kn * 100f)), yaziStili);
+        y += 32f;
+        float yeniKn = Mathf.Round(GUI.HorizontalSlider(new Rect(x, y, en, 20f), kn, AyarKurallari.KonusmaEnAz, AyarKurallari.KonusmaEnCok) * 20f) / 20f;
+        if (!Mathf.Approximately(yeniKn, kn)) Ayarlar.Konusma = yeniKn;
         y += 20f + ara;
 
         // Görüş açısı: 1 derecelik adımlar.

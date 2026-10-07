@@ -23,6 +23,13 @@ public class RadyoAnonsu : MonoBehaviour
 {
     private const float ParazitGiris = 0.8f, ParazitCikis = 0.6f;
     private const float ParazitSes = 0.35f;   // seslendirmeye göre parazitin gücü
+    private const float AltyaziMenzili = 9f;  // oyuncu cihaza bu kadar yakınsa cümle alt yazı olur (#118)
+    // Cümlelerin metin anahtarları (#118): "anons." + dosya adı. Liste düz yazılmıştır ki metin bütünlük
+    // testi anahtarları kodda bulsun (2. katın cümlesi oyunda çalmaz ama tabloda durur).
+    private static readonly string[] AltyaziAnahtarlari = {
+        "anons.radyo_kat1", "anons.radyo_kat2", "anons.radyo_kat3", "anons.radyo_kat4",
+        "anons.radyo_kat5", "anons.radyo_kat6", "anons.radyo_kat7", "anons.radyo_kat8",
+    };
 
     private float gecikme, ses;
     private string dosya;
@@ -90,20 +97,24 @@ public class RadyoAnonsu : MonoBehaviour
                 yield return null;
             }
         }
+        // Alt yazı (#118): cümle ekranın altında, kayıt olsa da olmasa da (oyuncu duyabilecek kadar yakınsa).
+        string altyaziAnahtari = System.Array.IndexOf(AltyaziAnahtarlari, "anons." + dosya) >= 0 ? "anons." + dosya : null;
+        bool yakin = oyuncu != null && Vector3.Distance(oyuncu.position, transform.position) <= AltyaziMenzili;
+        if (altyaziAnahtari != null && yakin) Altyazi.Goster(Dil.Getir(altyaziAnahtari), konusma != null ? konusma.length : 0f);
         // 2. Seslendirme: parazitin üstüne, aynı kaynaktan değil ikinci bir kaynaktan (ikisi birlikte duyulur).
         if (konusma != null)
         {
             AudioSource sesKaynagi = gameObject.AddComponent<AudioSource>();
             sesKaynagi.playOnAwake = false; sesKaynagi.spatialBlend = 1f; sesKaynagi.minDistance = 1.2f; sesKaynagi.maxDistance = 14f;
             sesKaynagi.rolloffMode = AudioRolloffMode.Logarithmic;
-            sesKaynagi.clip = konusma; sesKaynagi.volume = ses; sesKaynagi.Play();
+            sesKaynagi.clip = konusma; sesKaynagi.volume = ses * Ayarlar.Konusma; sesKaynagi.Play();   // #118: konuşma kanalı
             if (kaynak.isPlaying) kaynak.volume = ses * ParazitSes * 0.4f;   // konuşurken parazit geri çekilir
             yield return new WaitForSeconds(konusma.length);
             Destroy(sesKaynagi);
             if (kaynak.isPlaying) kaynak.volume = ses * ParazitSes;
             yield return new WaitForSeconds(0.4f);
         }
-        else if (parazit != null) yield return new WaitForSeconds(1.6f);   // seslendirme yoksa parazit biraz daha sürer
+        else if (parazit != null) yield return new WaitForSeconds(altyaziAnahtari != null && yakin ? 5f : 1.6f);   // kayıt yoksa alt yazı okunacak kadar parazit
         // 3. Parazit söner, düğme tıkı.
         if (parazit != null)
         {

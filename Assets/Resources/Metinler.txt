@@ -48,7 +48,7 @@ not.kat8_plan	9. KAT PLANI\n\nDaireler: 33 - 34 - 35 - 36\n\nRuhsatta yok.\nMerd
 not.kapat	{0}: kapat	{0}: close
 
 # ---- Jenerik: ilk satır başlık, boş satırlar aralık ----
-jenerik	HUZUR APARTMANI\n\nTasarım ve Geliştirme\nŞahan Boz\n\nBirlikte\nKubilay\n\nMüzik\nDeath is Looming: Scott Elliott (OpenGameArt, CC BY 4.0)\n\nSes\nLavabo damlası: Funkelfang (Freesound, CC BY 4.0)\n\n\nOynadığın için teşekkürler.	HUZUR APARTMANI\n\nDesign & Development\nŞahan Boz\n\nWith\nKubilay\n\nMusic\nDeath is Looming: Scott Elliott (OpenGameArt, CC BY 4.0)\n\nSound\nDripping sink: Funkelfang (Freesound, CC BY 4.0)\n\n\nThank you for playing.
+jenerik	HUZUR APARTMANI\n\nTasarım ve Geliştirme\nŞahan Boz\n\nBirlikte\nKubilay\n\nMüzik\nDeath is Looming: Scott Elliott (OpenGameArt, CC BY 4.0)\n\nSes\nLavabo damlası: Funkelfang (Freesound, CC BY 4.0)\n\nFotoğraflar\nAile fotoğrafları Stable Diffusion XL ile üretildi (gerçek kişi yok)\n\n\nOynadığın için teşekkürler.	HUZUR APARTMANI\n\nDesign & Development\nŞahan Boz\n\nWith\nKubilay\n\nMusic\nDeath is Looming: Scott Elliott (OpenGameArt, CC BY 4.0)\n\nSound\nDripping sink: Funkelfang (Freesound, CC BY 4.0)\n\nPhotographs\nFamily photos generated with Stable Diffusion XL (no real people)\n\n\nThank you for playing.
 
 # ---- Duraklatma menüsü (Esc) ----
 menu.baslik	DURAKLATILDI	PAUSED
@@ -178,3 +178,13 @@ menu.kat	{0}. Kat	Floor {0}
 menu.kat_kayitli	{0}. Kat  (kaldığın yer)	Floor {0}  (you are here)
 menu.kat_kilitli	{0}. Kat  (kilitli)	Floor {0}  (locked)
 menu.kat_onay	{0}. kattan başlansın mı? Tekrar bas	Start from floor {0}? Press again
+ayar.muzik	Müzik: %{0}	Music: {0}%
+ayar.konusma	Konuşma: %{0}	Voice: {0}%
+anons.radyo_kat1	Saatlerimiz gece on ikiyi gösteriyor. Belediye Fen İşleri, 1974'teki arşiv yangınında kaybolan yapı ruhsatlarının yenilenmesi için son başvuru tarihini uzattı. Ayrıntılar sabah bülteninde.	It is now midnight. The Municipal Works Department has extended the deadline to replace the building permits lost in the archive fire of 1974. Details in the morning bulletin.
+anons.radyo_kat2	Gece Kuşağı'na bir dinleyici notu: "Bizim apartmanda geceleri üst kattan ayak sesi geliyor, ama üst kat yok." Şakacı dinleyicimize iyi geceler.	A listener's note for the night programme: "In our building you hear footsteps from the floor above at night, but there is no floor above." Good night to our joker.
+anons.radyo_kat3	Şehir haberleri: Eski Fen İşleri binasındaki tadilatta, 1974 tarihli bir projede bir katın sonradan silindiği görüldü. Yetkililer "kayıt hatası" dedi.	City news: during repairs at the old Works Department, a 1974 project was found to have one floor erased after the fact. Officials called it a clerical error.
+anons.radyo_kat4	Dinleyicimiz soruyor: "Elektrikler kesilince komşunun penceresi nasıl yanıyor?" Elektrik İdaresi, yirmi yıldır tespit edilemeyen kaçak hatlar olduğunu kabul etti.	A listener asks: "How does the neighbour's window stay lit during a power cut?" The electricity board has admitted there are illegal lines it has failed to trace for twenty years.
+anons.radyo_kat5	Kayıp ilanı: Çarşamba gecesinden beri haber alınamayan bir apartman görevlisi için ailesi yardım istiyor. Son görüldüğünde iş önlüğü ve el feneriyle merdivenlere çıkmış.	Missing person: the family of a building caretaker unheard of since Wednesday night asks for help. He was last seen going up the stairs in his work apron, carrying a torch.
+anons.radyo_kat6	Arşivden: 1974 Ekim'inde bu mahallede teslim edilen bir apartmanın açılışına yüklenici gelmedi. Gazete "dokuzuncu kattan inmedi" yazmış, düzeltmeyi ertesi gün basmıştı.	From the archive: in October 1974 the contractor failed to attend the opening of a building delivered in this district. The paper wrote "he never came down from the ninth floor" and printed a correction the next day.
+anons.radyo_kat7	Gece yarısı bülteni: İtfaiye, bir apartmanın çatısından gelen ışık ihbarına gitti; çatıda kimse yoktu. İhbarı yapan, "her gece aynı pencere" dedi.	Midnight bulletin: the fire brigade answered a report of a light on an apartment building's roof; no one was there. The caller said, "the same window every night."
+anons.radyo_kat8	Son dakika: Belediye, iskân ruhsatı olmayan katlar için af yasasının bu gece yarısı yürürlüğe girdiğini duyurdu. Yirmi yıldır "olmayan" katlar artık kayıtlara geçecek.	Breaking: the municipality announced that the amnesty for floors without an occupancy permit takes effect at midnight tonight. Floors that "did not exist" for twenty years will now enter the records.

@@ -59,7 +59,7 @@ public class Telefon : MonoBehaviour, IEtkilesimli
             konusmaKaynagi.bypassListenerEffects = true;   // odanın yankısı hattan gelen sese işlemez
         }
         konusmaKaynagi.clip = klip;
-        konusmaKaynagi.volume = 0.85f;
+        konusmaKaynagi.volume = 0.85f * Ayarlar.Konusma;   // #118: konuşma kanalı
         konusmaKaynagi.PlayDelayed(0.7f);   // ahize kulağa gidene kadar
     }
 
