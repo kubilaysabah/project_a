@@ -68,7 +68,13 @@ public static class Tuslar
     /// <summary>Son kullanılan cihaza göre tuşun ekrandaki adı ("E" ya da "A"); ipuçları bunu yazar.</summary>
     public static string Ad(TusEylemi e) { return GirisCihazi.Kol ? KolAdi(e) : KlavyeAdi(e); }
 
-    public static string KlavyeAdi(TusEylemi e) { return KlavyeAdi(Kural.Klavye(e)); }
+    public static string KlavyeAdi(TusEylemi e)
+    {
+        // Klavye düzenine göre gerçek harf (AZERTY'de "A" tuşu "Q" yazar); yoksa enum adından.
+        KeyControl k = KlavyeKontrolu(e);
+        if (k != null && !string.IsNullOrEmpty(k.displayName) && k.displayName.Length <= 3) return k.displayName.ToUpperInvariant();
+        return KlavyeAdi(Kural.Klavye(e));
+    }
     public static string KolAdi(TusEylemi e) { return KolAdi(Kural.Kol(e)); }
 
     /// <summary>Key enum adından okunur ad: "LeftCtrl" → "Ctrl", "Digit1" → "1", "Numpad5" → "Num 5".</summary>
@@ -170,11 +176,22 @@ public static class Tuslar
             {
                 if (!Gamepad.current[d].wasPressedThisFrame) continue;
                 if (d == GamepadButton.East) { iptal = true; return true; }
-                sonuc = Ata(e, d.ToString(), true, out catisan);
+                sonuc = Ata(e, KanonikKolAdi(d), true, out catisan);
                 return true;
             }
         }
         return false;
+    }
+
+    // GamepadButton'da South/A/Cross aynı sayıdır; d.ToString() hangisini vereceğini söylemez ("A" verdi,
+    // kuraldaki "South" ile eşleşmedi, çatışma denetimi atlandı). Kayıtta hep kanonik ad durur.
+    public static string KanonikKolAdi(GamepadButton d)
+    {
+        if (d == GamepadButton.South) return "South";
+        if (d == GamepadButton.East) return "East";
+        if (d == GamepadButton.West) return "West";
+        if (d == GamepadButton.North) return "North";
+        return d.ToString();
     }
 
     // ---------- ETKİLEŞİM EYLEMİ (Player/Interact) ----------

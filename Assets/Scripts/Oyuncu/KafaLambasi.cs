@@ -323,7 +323,7 @@ public class KafaLambasi : MonoBehaviour
         if (tik != null) kaynak.PlayOneShot(tik, 0.3f);
         // Bitiş anı uzatılabilir (ikinci Sondur): sabit bir bekleme yerine saate bakılır.
         while (Time.time < sonmeBitis) yield return null;
-        acik = once;
+        acik = once && !SaklanmaYeri.Saklaniyor;   // dolaptayken geri yanmaz (saklanma lambayı söndürmüştü)
         Uygula(acik);
         if (acik && tik != null) kaynak.PlayOneShot(tik, 0.3f);
         titreme = null;

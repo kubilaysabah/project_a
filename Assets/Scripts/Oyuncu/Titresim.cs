@@ -19,7 +19,7 @@ public class Titresim : MonoBehaviour
 {
     private static Titresim ornek;
     private float dusuk, yuksek, bitis = -1f;
-    private bool suruyor;
+    private bool suruyor, menudeDeOlur;
 
     /// <summary>Son isteğin motor güçleri ve bitiş anı (test göstergesi ve testler için).</summary>
     public static float SonDusuk { get { return ornek != null ? ornek.dusuk : 0f; } }
@@ -30,7 +30,10 @@ public class Titresim : MonoBehaviour
     /// Kolu titretir: dusuk/yuksek 0-1 (sol ağır motor, sağ ince motor), sure saniye. Ayar kapalıysa ya da kol
     /// yoksa sessizce geçer. Sürmekte olan daha güçlü bir titreşimi bastırmaz.
     /// </summary>
-    public static void Vur(float dusukGuc, float yuksekGuc, float sure)
+    public static void Vur(float dusukGuc, float yuksekGuc, float sure) { Vur(dusukGuc, yuksekGuc, sure, false); }
+
+    /// <summary>menudeDeOlur: zaman durmuşken de sürer (Ayarlar'daki deneme darbesi; oyun olayları için false).</summary>
+    public static void Vur(float dusukGuc, float yuksekGuc, float sure, bool menudeDeOlur)
     {
         if (!Ayarlar.Titresim || sure <= 0f) return;
         if (ornek == null)
@@ -43,6 +46,7 @@ public class Titresim : MonoBehaviour
         ornek.dusuk = Mathf.Clamp01(dusukGuc);
         ornek.yuksek = Mathf.Clamp01(yuksekGuc);
         ornek.bitis = Time.unscaledTime + sure;
+        ornek.menudeDeOlur = menudeDeOlur;
         ornek.suruyor = true;
         ornek.Uygula();
     }
@@ -67,7 +71,7 @@ public class Titresim : MonoBehaviour
     {
         if (!suruyor) return;
         // Menüde (zaman durur) ve ayar kapatılınca motorlar durur; titreşim orada biter.
-        if (Time.timeScale <= 0f || !Ayarlar.Titresim || Time.unscaledTime >= bitis) { suruyor = false; Sifirla(); return; }
+        if ((Time.timeScale <= 0f && !menudeDeOlur) || !Ayarlar.Titresim || Time.unscaledTime >= bitis) { suruyor = false; Sifirla(); return; }
         Uygula();
     }
 
@@ -88,6 +92,9 @@ public class Titresim : MonoBehaviour
     }
 
     private void OnDisable() { Sifirla(); }
+    // Pencere odağı gidince (alt-tab) Update durur; motorlar son hızda kalmasın.
+    private void OnApplicationFocus(bool odak) { if (!odak) { suruyor = false; Sifirla(); } }
+    private void OnApplicationPause(bool duraklama) { if (duraklama) { suruyor = false; Sifirla(); } }
     private void OnDestroy() { Sifirla(); if (ornek == this) ornek = null; }
     private void OnApplicationQuit() { Sifirla(); }
 }

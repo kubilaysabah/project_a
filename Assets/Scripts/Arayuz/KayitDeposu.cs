@@ -36,6 +36,7 @@ public class KayitDeposu
     private readonly bool yuvali;             // dosya adı test yuvasına göre değişir mi
     private Dictionary<string, string> sozluk;
     private string yuklenenYol;               // sözlüğün hangi dosyadan okunduğu (yuva değişince yeniden okunur)
+    private bool okunamadi;                   // dosya vardı ama okunamadı: üstüne yazma (kayıt korunsun)
 
     private KayitDeposu(string dosyaAdi, bool yuvaliMi) { ad = dosyaAdi; yuvali = yuvaliMi; }
 
@@ -55,8 +56,14 @@ public class KayitDeposu
             yuklenenYol = yol;
             if (File.Exists(yol))
             {
-                try { sozluk = KayitDosyasiKurali.Oku(File.ReadAllText(yol)); }
-                catch (System.Exception e) { Debug.LogWarning($"[KAYIT] {yol} okunamadı: {e.Message}; boş sayılıyor."); sozluk = new Dictionary<string, string>(); }
+                try { sozluk = KayitDosyasiKurali.Oku(File.ReadAllText(yol)); okunamadi = false; }
+                catch (System.Exception e)
+                {
+                    // Dosya var ama okunamıyor (antivirüs/bulut kilidi, izin): BOŞ bir sözlükle devam edilir ama bu
+                    // oturumda dosyaya YAZILMAZ; yoksa bir sonraki Save gerçek kaydı boş kayıtla ezerdi.
+                    Debug.LogWarning($"[KAYIT] {yol} okunamadı: {e.Message}; bu oturumda kayıt yazılmayacak.");
+                    sozluk = new Dictionary<string, string>(); okunamadi = true;
+                }
             }
             else
             {
@@ -82,6 +89,7 @@ public class KayitDeposu
     {
         string yol = Yol;
         var s = Sozluk;   // yuva değiştiyse önce doğru dosya okunsun
+        if (okunamadi) return;
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(yol));
@@ -97,7 +105,7 @@ public class KayitDeposu
     {
         string yol = Yol;
         try { if (File.Exists(yol)) File.Delete(yol); } catch (System.Exception e) { Debug.LogWarning($"[KAYIT] {yol} silinemedi: {e.Message}"); }
-        sozluk = null; yuklenenYol = null;
+        sozluk = null; yuklenenYol = null; okunamadi = false;
     }
 
     // ---------- PlayerPrefs'ten taşıma (bir kez, dosya yokken) ----------

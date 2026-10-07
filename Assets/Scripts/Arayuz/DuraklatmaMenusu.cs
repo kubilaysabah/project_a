@@ -502,7 +502,7 @@ public class DuraklatmaMenusu : MonoBehaviour
             {
                 case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
                 case AyarSallanma: Ayarlar.Sallanma = !Ayarlar.Sallanma; break;
-                case AyarTitresim: Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f); break;   // açınca küçük bir deneme (#124)
+                case AyarTitresim: Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f, true); break;   // açınca küçük bir deneme (#124)
                 case AyarVarsayilan: Ayarlar.VarsayilanaDon(); break;
                 case AyarGeri: SayfaAc(SayfaAna); break;
                 // Kaydırıcılarda onay tuşunun işi yok; sol/sağ ile değiştirilir.
@@ -569,7 +569,7 @@ public class DuraklatmaMenusu : MonoBehaviour
             case AyarGorus: Ayarlar.Gorus = Mathf.Round(Ayarlar.Gorus + yon); break;
             case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
             case AyarSallanma: Ayarlar.Sallanma = !Ayarlar.Sallanma; break;
-            case AyarTitresim: Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f); break;
+            case AyarTitresim: Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f, true); break;
         }
     }
 
@@ -1022,7 +1022,7 @@ public class DuraklatmaMenusu : MonoBehaviour
         r = new Rect(x, y, en, 44f);
         Vurgula(AyarTitresim, r);
         string titresimYazisi = string.Format(Dil.Getir("ayar.titresim"), Ayarlar.Titresim ? Dil.Getir("ayar.acik") : Dil.Getir("ayar.kapali"));
-        if (GUI.Button(r, titresimYazisi, dugmeStili)) { Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f); }
+        if (GUI.Button(r, titresimYazisi, dugmeStili)) { Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f, true); }
         y += 44f + ara;
 
         y += ara;   // düğmelerle alttaki Varsayılan / Geri satırı arasında biraz boşluk
