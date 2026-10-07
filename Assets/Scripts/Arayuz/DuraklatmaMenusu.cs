@@ -88,7 +88,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     // ("basılı tut" / "hold"). Anahtarlar düz yazılır ki metin bütünlük testi onları kodda bulsun.
     private static readonly string[] KontrolSatirlari = {
         "menu.kontrol_yuru", "menu.kontrol_bak", "menu.kontrol_etkilesim", "menu.kontrol_surukle", "menu.kontrol_incele", "menu.kontrol_lamba",
-        "menu.kontrol_liste", "menu.kontrol_egil", "menu.kontrol_saklan", "menu.kontrol_menu", "menu.kontrol_geri",
+        "menu.kontrol_liste", "menu.kontrol_egil", "menu.kontrol_kos", "menu.kontrol_saklan", "menu.kontrol_menu", "menu.kontrol_geri",
     };
     private const int GorCozunurluk = 0, GorEkran = 1, GorVSync = 2, GorKalite = 3,
                       GorParlaklik = 4, GorVarsayilan = 5, GorGeri = 6, GorOgeSayisi = 7;
@@ -1088,12 +1088,12 @@ public class DuraklatmaMenusu : MonoBehaviour
     // Satır → eylem (null: sabit satır). Sürükle ve Saklan satırları etkileşim tuşunu GÖSTERİR, atama Etkileşim satırından.
     private static readonly TusEylemi?[] KontrolEylemleri = {
         null, null, TusEylemi.Etkilesim, TusEylemi.Etkilesim, TusEylemi.Incele, TusEylemi.Fener,
-        TusEylemi.GorevListesi, TusEylemi.Egil, TusEylemi.Etkilesim, null, null,
+        TusEylemi.GorevListesi, TusEylemi.Egil, TusEylemi.Kos, TusEylemi.Etkilesim, null, null,
     };
-    // Gezgin sırası: Etkileşim 0, İncele 1, Fener 2, Görev listesi 3, Eğil 4; Varsayılan 5; Geri 6.
-    private static readonly int[] KontrolGezginSirasi = { -1, -1, 0, -1, 1, 2, 3, 4, -1, -1, -1 };
-    private static readonly TusEylemi[] GezginEylemleri = { TusEylemi.Etkilesim, TusEylemi.Incele, TusEylemi.Fener, TusEylemi.GorevListesi, TusEylemi.Egil };
-    private const int KontrolVarsayilan = 5, KontrolGeri = 6, KontrolOgeSayisi = 7;
+    // Gezgin sırası: Etkileşim 0, İncele 1, Fener 2, Görev listesi 3, Eğil 4, Koş 5 (#129); Varsayılan 6; Geri 7.
+    private static readonly int[] KontrolGezginSirasi = { -1, -1, 0, -1, 1, 2, 3, 4, 5, -1, -1, -1 };
+    private static readonly TusEylemi[] GezginEylemleri = { TusEylemi.Etkilesim, TusEylemi.Incele, TusEylemi.Fener, TusEylemi.GorevListesi, TusEylemi.Egil, TusEylemi.Kos };
+    private const int KontrolVarsayilan = 6, KontrolGeri = 7, KontrolOgeSayisi = 8;
     private int dinlenen = -1;                 // dinlenen gezgin sırası (0-4); -1 = dinlemiyor
     private string kontrolMesaji;              // ret mesajı ("bu tuş kullanımda"), kısa süre görünür
     private float kontrolMesajBitis;
@@ -1120,7 +1120,8 @@ public class DuraklatmaMenusu : MonoBehaviour
     private static string EylemAdi(TusEylemi e)
     {
         string anahtar = e == TusEylemi.Etkilesim ? "menu.kontrol_etkilesim" : e == TusEylemi.Incele ? "menu.kontrol_incele"
-                       : e == TusEylemi.Fener ? "menu.kontrol_lamba" : e == TusEylemi.GorevListesi ? "menu.kontrol_liste" : "menu.kontrol_egil";
+                       : e == TusEylemi.Fener ? "menu.kontrol_lamba" : e == TusEylemi.GorevListesi ? "menu.kontrol_liste"
+                       : e == TusEylemi.Kos ? "menu.kontrol_kos" : "menu.kontrol_egil";
         return Dil.Getir(anahtar).Split('|')[0];
     }
 

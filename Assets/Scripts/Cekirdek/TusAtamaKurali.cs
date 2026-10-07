@@ -17,7 +17,8 @@ public enum TusEylemi
     Incele = 1,        // eşyayı gözün önüne getir (#88)
     Fener = 2,         // kafa lambası (#76, #119)
     GorevListesi = 3,  // T listesi (#75)
-    Egil = 4           // çömel (#79)
+    Egil = 4,          // çömel (#79)
+    Kos = 5            // koş, basılı tut (#129)
 }
 
 public enum AtamaSonucu
@@ -30,11 +31,11 @@ public enum AtamaSonucu
 
 public class TusAtamaKurali
 {
-    public const int EylemSayisi = 5;
+    public const int EylemSayisi = 6;
 
     // Varsayılanlar: eylem sırasıyla (TusEylemi'nin sayı değeri dizinin sırası).
-    private static readonly string[] VarsayilanKlavye = { "E", "R", "F", "T", "LeftCtrl" };
-    private static readonly string[] VarsayilanKol = { "South", "West", "LeftShoulder", "Select", "RightStick" };
+    private static readonly string[] VarsayilanKlavye = { "E", "R", "F", "T", "LeftCtrl", "LeftShift" };
+    private static readonly string[] VarsayilanKol = { "South", "West", "LeftShoulder", "Select", "RightStick", "LeftStick" };
 
     // Atanamayan tuşlar: menü ve hareket bunları sabit kullanır.
     private static readonly string[] YasakKlavye = { "Escape", "W", "A", "S", "D", "UpArrow", "DownArrow", "LeftArrow", "RightArrow", "Enter", "Space", "None" };

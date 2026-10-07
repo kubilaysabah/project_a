@@ -1279,6 +1279,10 @@ public class KatYoneticisi : MonoBehaviour
         if (govde != null) govde.enabled = true;
         Physics.SyncTransforms();
 
+        // Kat başına alınan oyuncunun nefesi dolar (#129): yakalanma sonrası tükenmiş nefesle başlamasın.
+        BirinciSahisKontrolcu nefesli = oyuncu.GetComponent<BirinciSahisKontrolcu>();
+        if (nefesli != null) nefesli.NefesiDoldur();
+
         // Takipçi, oyuncu yere yeniden oturduğunda baştan kurulacak.
         // Ölçüm noktası da burası: karartma sırasında kat edilen yol sayılmaz.
         // NaN ("sayı değil") hiçbir sayıya eşit değildir; böylece bir sonraki

@@ -47,6 +47,9 @@ public static class Tuslar
     public static bool KlavyeBasildi(TusEylemi e) { KeyControl k = KlavyeKontrolu(e); return k != null && k.wasPressedThisFrame; }
     public static bool KlavyeBasili(TusEylemi e) { KeyControl k = KlavyeKontrolu(e); return k != null && k.isPressed; }
     public static bool KolBasildi(TusEylemi e) { ButtonControl b = KolKontrolu(e); return b != null && b.wasPressedThisFrame; }
+    public static bool KolBasili(TusEylemi e) { ButtonControl b = KolKontrolu(e); return b != null && b.isPressed; }
+    /// <summary>Basılı tutulan eylem (koşma): klavye ya da kol.</summary>
+    public static bool Basili(TusEylemi e) { return KlavyeBasili(e) || KolBasili(e); }
 
     private static KeyControl KlavyeKontrolu(TusEylemi e)
     {

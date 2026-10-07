@@ -52,6 +52,15 @@ public class BirinciSahisKontrolcu : MonoBehaviour
     [Tooltip("Eğilmiş yürüme hızı (metre/saniye).")]
     [SerializeField] private float egikHiz = 0.8f;
 
+    // Koşma (#129): Shift / sol çubuğa basılı tutulurken KosmaKurali.KosmaHizi; nefes biter, dolar.
+    private readonly KosmaKurali kosma = new KosmaKurali();
+    /// <summary>Bu karede koşuluyor mu (Varlik: koşmak gürültüdür; AyakSesi: adımlar sıklaşır).</summary>
+    public bool Kosuyor { get { return kosma.Kosuyor; } }
+    /// <summary>Nefes 0-1 (test göstergesi).</summary>
+    public float Nefes { get { return kosma.Nefes; } }
+    /// <summary>Nefesi doldurur (kat başı).</summary>
+    public void NefesiDoldur() { kosma.Doldur(); }
+
     [Tooltip("Eğilip kalkmanın hızı: büyüdükçe göz yeni yüksekliğine daha çabuk varır.")]
     [SerializeField] private float egilmeGecisi = 8f;
 
@@ -259,8 +268,13 @@ public class BirinciSahisKontrolcu : MonoBehaviour
             dikeyHiz += yercekimi * Time.deltaTime;
         }
 
-        // Yatay hareket ile dikey düşmeyi tek bir harekette birleştir. Eğikken daha yavaş.
-        Vector3 hareket = yon * (egik ? egikHiz : yurumeHizi);
+        // Koşma (#129): tuş basılı, oyuncu GERÇEKTEN yürüyor (girişi var ve geçen kare yerinden oynadı:
+        // duvara yaslanıp Shift'e basan oyuncu nefes harcamaz), eğik değil ve nefes var → koşma hızı. Kural nefesi sayar.
+        Vector3 yatayHiz = new Vector3(kontrolcu.velocity.x, 0f, kontrolcu.velocity.z);
+        bool yuruyor = giris.sqrMagnitude > 0.01f && yatayHiz.sqrMagnitude > 0.09f;
+        bool kosuyor = kosma.Ilerlet(Time.deltaTime, Tuslar.Basili(TusEylemi.Kos), yuruyor, egik);
+        // Yatay hareket ile dikey düşmeyi tek bir harekette birleştir. Eğikken daha yavaş, koşarken hızlı.
+        Vector3 hareket = yon * (egik ? egikHiz : (kosuyor ? KosmaKurali.KosmaHizi : yurumeHizi));
         hareket.y = dikeyHiz;
 
         // Move: çarpışmaları hesaba katarak taşır. Duvardan geçmeyi engeller,

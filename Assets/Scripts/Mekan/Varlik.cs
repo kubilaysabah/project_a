@@ -114,6 +114,8 @@ public class Varlik : MonoBehaviour
     }
 
     /// <summary>Gürültü oldu: gerilim bu kadar yükselir (0,02 çekmece, 0,25 kavanoz, 0,3 yanlış kapı).</summary>
+    public const float KosmaGurultusu = 0.03f;   // koşarken saniyede eklenen gerilim (#129)
+
     public static void Gurultu(float miktar)
     {
         if (Ornek == null || Kapali || Ornek.kural == null) return;
@@ -143,6 +145,8 @@ public class Varlik : MonoBehaviour
         bool hareketli = !saklaniyor && govde != null && new Vector3(govde.velocity.x, 0f, govde.velocity.z).magnitude > 0.1f;
         bool lambaAcik = !saklaniyor && lamba != null && lamba.IsikYaniyor;
         bool egik = saklaniyor || (kontrol != null && kontrol.Egik);
+        // Koşmak gürültüdür (#129): dairede koşan oyuncu saniyede KosmaGurultusu kadar ısıtır (4,5 sn ≈ +0,13).
+        if (dairede && kontrol != null && kontrol.Kosuyor) kural.Gurultu(KosmaGurultusu * Time.deltaTime);
         GerilimTepkisi tepki = kural.Ilerlet(Time.deltaTime, saklaniyor || dairede, lambaAcik, egik, hareketli);
         if (tepki != GerilimTepkisi.Yok) Goster(tepki);
     }

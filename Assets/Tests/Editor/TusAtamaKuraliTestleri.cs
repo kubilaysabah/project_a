@@ -14,6 +14,8 @@ public class TusAtamaKuraliTestleri
         Assert.AreEqual("F", k.Klavye(TusEylemi.Fener));
         Assert.AreEqual("T", k.Klavye(TusEylemi.GorevListesi));
         Assert.AreEqual("LeftCtrl", k.Klavye(TusEylemi.Egil));
+        Assert.AreEqual("LeftShift", k.Klavye(TusEylemi.Kos));
+        Assert.AreEqual("LeftStick", k.Kol(TusEylemi.Kos));
         Assert.AreEqual("South", k.Kol(TusEylemi.Etkilesim));
         Assert.AreEqual("LeftShoulder", k.Kol(TusEylemi.Fener));
         Assert.IsTrue(k.VarsayilanMi);
@@ -57,13 +59,14 @@ public class TusAtamaKuraliTestleri
         var k = new TusAtamaKurali();
         TusEylemi c;
         k.Ata(TusEylemi.Incele, "Q", false, out c);
-        k.Ata(TusEylemi.Egil, "LeftShift", false, out c);
+        Assert.AreEqual(AtamaSonucu.Catisma, k.Ata(TusEylemi.Egil, "LeftShift", false, out c), "Shift koşmanın (#129)");
+        k.Ata(TusEylemi.Egil, "LeftAlt", false, out c);
         k.Ata(TusEylemi.GorevListesi, "North", true, out c);
         string metin = k.Metin();
-        Assert.AreEqual("k:E,Q,F,T,LeftShift;g:South,West,LeftShoulder,North,RightStick", metin);
+        Assert.AreEqual("k:E,Q,F,T,LeftAlt,LeftShift;g:South,West,LeftShoulder,North,RightStick,LeftStick", metin);
         var geri = TusAtamaKurali.Oku(metin);
         Assert.AreEqual("Q", geri.Klavye(TusEylemi.Incele));
-        Assert.AreEqual("LeftShift", geri.Klavye(TusEylemi.Egil));
+        Assert.AreEqual("LeftAlt", geri.Klavye(TusEylemi.Egil));
         Assert.AreEqual("North", geri.Kol(TusEylemi.GorevListesi));
         Assert.AreEqual("E", geri.Klavye(TusEylemi.Etkilesim));
     }
@@ -73,8 +76,8 @@ public class TusAtamaKuraliTestleri
     {
         Assert.IsTrue(TusAtamaKurali.Oku("").VarsayilanMi);
         Assert.IsTrue(TusAtamaKurali.Oku("saçma").VarsayilanMi);
-        Assert.IsTrue(TusAtamaKurali.Oku("k:E,E,F,T,LeftCtrl").VarsayilanMi, "iki eylemde aynı tuş: varsayılan");
-        Assert.IsTrue(TusAtamaKurali.Oku("k:Escape,R,F,T,LeftCtrl").VarsayilanMi, "yasak tuş: varsayılan");
+        Assert.IsTrue(TusAtamaKurali.Oku("k:E,E,F,T,LeftCtrl,LeftShift").VarsayilanMi, "iki eylemde aynı tuş: varsayılan");
+        Assert.IsTrue(TusAtamaKurali.Oku("k:Escape,R,F,T,LeftCtrl,LeftShift").VarsayilanMi, "yasak tuş: varsayılan");
         var eksik = TusAtamaKurali.Oku("k:E,Q");
         Assert.AreEqual("Q", eksik.Klavye(TusEylemi.Incele));
         Assert.AreEqual("F", eksik.Klavye(TusEylemi.Fener), "yazılmayan eylem varsayılanda kalır");
