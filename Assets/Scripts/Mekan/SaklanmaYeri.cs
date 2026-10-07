@@ -433,7 +433,7 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
             }
             GUI.color = Color.white;
             GUI.Label(new Rect(0f, Y - 70f, G, 30f),
-                      string.Format(Dil.Getir("ipucu.saklanma_tuslar"), GirisCihazi.Kol ? "A" : "E"), ipucuStili);
+                      string.Format(Dil.Getir("ipucu.saklanma_tuslar"), Tuslar.Ad(TusEylemi.Etkilesim)), ipucuStili);   // #125
         }
 
         if (cizKarartma)

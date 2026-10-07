@@ -278,11 +278,10 @@ public class BirinciSahisKontrolcu : MonoBehaviour
     // gömmeden, oradan çıkana kadar eğik kalır.
     private void Egil()
     {
-        // Oyun kolu: sağ çubuğa basmak (R3) aç-kapa.
-        if (Gamepad.current != null && Gamepad.current.rightStickButton.wasPressedThisFrame)
+        // Oyun kolu: düğme (varsayılan sağ çubuğa basmak, R3) aç-kapa; klavye: tuş basılı tutulur (#125: atanabilir).
+        if (Tuslar.KolBasildi(TusEylemi.Egil))
             koldanEgik = !koldanEgik;
-        bool klavye = Keyboard.current != null &&
-                      (Keyboard.current.leftCtrlKey.isPressed || Keyboard.current.rightCtrlKey.isPressed);
+        bool klavye = Tuslar.KlavyeBasili(TusEylemi.Egil);
         bool istek = klavye || koldanEgik;
 
         if (istek && !egik) BoyuAyarla(egikBoy, true);

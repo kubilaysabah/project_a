@@ -103,7 +103,7 @@ public class FotografEkrani : MonoBehaviour
         }
         bool kol = GirisCihazi.Kol;
         GUI.Label(new Rect(0, y, ArayuzOlcegi.Genislik, 30f),
-                  string.Format(Dil.Getir("foto.tuslar"), kol ? "A" : "E", kol ? "B" : "Esc"), ipucuStili);
+                  string.Format(Dil.Getir("foto.tuslar"), kol ? Tuslar.KolAdi(TusEylemi.Etkilesim) : Tuslar.KlavyeAdi(TusEylemi.Etkilesim), kol ? "B" : "Esc"), ipucuStili);
     }
 
     /// <summary>

@@ -148,6 +148,6 @@ public class Pano : MonoBehaviour, IEtkilesimli
         var ipucu = new GUIStyle(GUI.skin.label) { fontSize = 16, alignment = TextAnchor.MiddleCenter };
         ipucu.normal.textColor = new Color(0.8f, 0.78f, 0.72f);
         bool kolda = GirisCihazi.Kol;
-        GUI.Label(new Rect(0, H / 2f + 280f, W, 30f), string.Format(Dil.Getir("pano.tuslar"), kolda ? "A / B" : "E / Esc"), ipucu);
+        GUI.Label(new Rect(0, H / 2f + 280f, W, 30f), string.Format(Dil.Getir("pano.tuslar"), string.Format(Dil.Getir(kolda ? "tus.kapat_kol" : "tus.kapat_klavye"), kolda ? Tuslar.KolAdi(TusEylemi.Etkilesim) : Tuslar.KlavyeAdi(TusEylemi.Etkilesim))), ipucu);   // #125
     }
 }

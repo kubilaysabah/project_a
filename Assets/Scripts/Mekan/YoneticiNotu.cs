@@ -145,7 +145,7 @@ public class YoneticiNotu : MonoBehaviour, IEtkilesimli
         var ipucu = new GUIStyle(GUI.skin.label) { fontSize = 14, alignment = TextAnchor.LowerRight };
         ipucu.normal.textColor = new Color(0.3f, 0.27f, 0.22f);
         // "E / Esc: kapat" ya da oyun kolu kullanılıyorsa "A / B: kapat" (#29).
-        string tuslar = GirisCihazi.Kol ? Dil.Getir("tus.kapat_kol") : Dil.Getir("tus.kapat_klavye");
+        string tuslar = string.Format(Dil.Getir(GirisCihazi.Kol ? "tus.kapat_kol" : "tus.kapat_klavye"), Tuslar.Ad(TusEylemi.Etkilesim));   // #125: atanan tuş
         GUI.Label(new Rect(kagit.x, kagit.y, kagit.width - 20, kagit.height - 12), string.Format(Dil.Getir("not.kapat"), tuslar), ipucu);
     }
 }

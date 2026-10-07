@@ -228,9 +228,8 @@ public class KafaLambasi : MonoBehaviour
         if (!takili) return;   // lamba henüz çivide: kafada yanacak bir şey yok
 
         // #119 (Şahan): fener F'ye döndü (#76'da L idi); inceleme R'ye taşındı. Oyun kolunda LB.
-        bool f = Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
-        bool omuz = Gamepad.current != null && Gamepad.current.leftShoulder.wasPressedThisFrame;
-        if (f || omuz) Degistir();
+        // #125: tuş atanabilir (Tuslar); varsayılan yine F / LB.
+        if (Tuslar.Basildi(TusEylemi.Fener)) Degistir();
     }
 
     /// <summary>

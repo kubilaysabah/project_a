@@ -236,6 +236,10 @@ public class DuraklatmaMenusu : MonoBehaviour
 
         if (devamIstendi) return;                       // kapanmak üzere; başka girdi okuma
 
+        // Tuş atama dinlemesi (#125): basılan ilk tuş eyleme gider; Esc / B vazgeçer. Bu sırada menünün
+        // kendi tuşları (geri, gezinme, onay) işlemez; yoksa Esc hem vazgeçer hem sayfayı kapatırdı.
+        if (TusDinleniyor) { TusDinle(); return; }
+
         // Start her sayfadan menüyü kapatır. Başlık ekranında kapatılacak bir menü yok
         // (arkada devam edilecek bir oyun yok), o yüzden orada bir şey yapmaz.
         if (baslat && !baslikta) { DevamIste(); return; }
@@ -480,8 +484,17 @@ public class DuraklatmaMenusu : MonoBehaviour
         // Fotoğraflar: onay tuşu fotoğrafı çevirir (tek düğme "Geri"yi fare ya da Esc / B çalıştırır).
         if (sayfa == SayfaFoto) { fotoArka = !fotoArka; return; }
 
-        // Kontroller: tek öğe; menüde "Geri" (ana menüye), giriş kartında "Devam" (oyuna).
-        if (sayfa == SayfaKontrol) { if (girisKarti) DevamIste(); else SayfaAc(SayfaAna); return; }
+        // Kontroller (#125): atanabilir satırda onay dinlemeyi başlatır; Varsayılan ve Geri düğmeleri; giriş
+        // kartında tek öğe "Devam" (oyuna).
+        if (sayfa == SayfaKontrol)
+        {
+            if (girisKarti) { DevamIste(); return; }
+            int secili = gezgin.Secili;
+            if (secili < GezginEylemleri.Length) DinlemeyeBasla(secili);
+            else if (secili == KontrolVarsayilan) Tuslar.VarsayilanaDon();
+            else SayfaAc(SayfaAna);
+            return;
+        }
 
         if (sayfa == SayfaAyarlar)
         {
@@ -566,7 +579,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         sayfa = yeni;
         gezgin.OgeSayisiniAyarla(yeni == SayfaAyarlar ? AyarOgeSayisi : yeni == SayfaGoruntu ? GorOgeSayisi
                                  : yeni == SayfaKatlar ? KatOgeSayisi
-                                 : yeni == SayfaFoto || yeni == SayfaKontrol ? 1 : AnaOgeSayisi);
+                                 : yeni == SayfaFoto ? 1 : yeni == SayfaKontrol ? (girisKarti ? 1 : KontrolOgeSayisi) : AnaOgeSayisi);   // #125
+        dinlenen = -1;
         katOnay = 0;
 
         // Bir sayfaya girince ilk öğe seçili. Ana sayfaya dönünce geldiği sayfanın düğmesi
@@ -1023,9 +1037,51 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (GUI.Button(r, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAna);
     }
 
-    // ---------- KONTROLLER SAYFASI (#80) ----------
+    // ---------- KONTROLLER SAYFASI (#80, #125 tuş atama) ----------
     // Üç sütunlu bir tablo: eylem, klavye ve fare, oyun kolu. Oyuncunun o an kullandığı cihazın
     // sütunu parlak, öbürü soluk yazılır (GirisCihazi.Kol, #29): göz önce kendi tuşunu bulur.
+    // #125: beş satır atanabilir (TusEylemi). Satırı seçip onaylayınca (ya da hücresine tıklayınca) sayfa yeni
+    // tuşu bekler; basılan tuş hangi cihazdansa o sütun değişir. Esc / B vazgeçer. Çatışan ya da sabit tuş
+    // reddedilir ve altta bir an mesaj çıkar. Giriş kartında (#113) sayfa yalnızca gösterir, atama yapılmaz.
+    // Satır → eylem (null: sabit satır). Sürükle ve Saklan satırları etkileşim tuşunu GÖSTERİR, atama Etkileşim satırından.
+    private static readonly TusEylemi?[] KontrolEylemleri = {
+        null, null, TusEylemi.Etkilesim, TusEylemi.Etkilesim, TusEylemi.Incele, TusEylemi.Fener,
+        TusEylemi.GorevListesi, TusEylemi.Egil, TusEylemi.Etkilesim, null, null,
+    };
+    // Gezgin sırası: Etkileşim 0, İncele 1, Fener 2, Görev listesi 3, Eğil 4; Varsayılan 5; Geri 6.
+    private static readonly int[] KontrolGezginSirasi = { -1, -1, 0, -1, 1, 2, 3, 4, -1, -1, -1 };
+    private static readonly TusEylemi[] GezginEylemleri = { TusEylemi.Etkilesim, TusEylemi.Incele, TusEylemi.Fener, TusEylemi.GorevListesi, TusEylemi.Egil };
+    private const int KontrolVarsayilan = 5, KontrolGeri = 6, KontrolOgeSayisi = 7;
+    private int dinlenen = -1;                 // dinlenen gezgin sırası (0-4); -1 = dinlemiyor
+    private string kontrolMesaji;              // ret mesajı ("bu tuş kullanımda"), kısa süre görünür
+    private float kontrolMesajBitis;
+
+    /// <summary>Kontroller sayfası yeni tuş bekliyor mu (Update öbür tuşları o sırada işlemez).</summary>
+    private bool TusDinleniyor { get { return sayfa == SayfaKontrol && !girisKarti && dinlenen >= 0; } }
+
+    private void DinlemeyeBasla(int gezginSirasi) { dinlenen = gezginSirasi; kontrolMesaji = null; }
+
+    // Her kare (menü açık, dinlerken): basılan ilk tuş atanır; çatışma ve yasakta mesaj.
+    private void TusDinle()
+    {
+        AtamaSonucu sonuc; TusEylemi catisan; bool iptal;
+        if (!Tuslar.Dinle(GezginEylemleri[dinlenen], out sonuc, out catisan, out iptal)) return;
+        dinlenen = -1;
+        if (iptal) return;
+        if (sonuc == AtamaSonucu.Catisma) KontrolMesaji(string.Format(Dil.Getir("menu.kontrol_catisma"), EylemAdi(catisan)));
+        else if (sonuc == AtamaSonucu.Yasak) KontrolMesaji(Dil.Getir("menu.kontrol_yasak"));
+    }
+
+    private void KontrolMesaji(string m) { kontrolMesaji = m; kontrolMesajBitis = Time.unscaledTime + 2.2f; }
+
+    // Eylemin satır adı ("İncele"): çatışma mesajı için.
+    private static string EylemAdi(TusEylemi e)
+    {
+        string anahtar = e == TusEylemi.Etkilesim ? "menu.kontrol_etkilesim" : e == TusEylemi.Incele ? "menu.kontrol_incele"
+                       : e == TusEylemi.Fener ? "menu.kontrol_lamba" : e == TusEylemi.GorevListesi ? "menu.kontrol_liste" : "menu.kontrol_egil";
+        return Dil.Getir(anahtar).Split('|')[0];
+    }
+
     private void KontrolleriCiz()
     {
         float en = 900f, satir = 44f;
@@ -1040,6 +1096,8 @@ public class DuraklatmaMenusu : MonoBehaviour
         var soluk = new GUIStyle(yaziStili);
         soluk.normal.textColor = new Color(0.62f, 0.60f, 0.56f);
         var baslik = new GUIStyle(yaziStili) { fontStyle = FontStyle.Bold };
+        var bekleyen = new GUIStyle(yaziStili);
+        bekleyen.normal.textColor = new Color(0.95f, 0.72f, 0.35f);
         bool kol = GirisCihazi.Kol;
 
         // Sütun başlıkları ve altında ince bir çizgi.
@@ -1050,32 +1108,53 @@ public class DuraklatmaMenusu : MonoBehaviour
         GUI.DrawTexture(new Rect(x, y - 6f, en, 1f), Texture2D.whiteTexture);
         GUI.color = Color.white;
 
-        foreach (string anahtar in KontrolSatirlari)
+        for (int i = 0; i < KontrolSatirlari.Length; i++)
         {
-            // "eylem|klavye|kol": üç parça. Eksik parça olursa (tablo hatası) boş yazılır, çökmez.
-            string[] p = Dil.Getir(anahtar).Split('|');
+            // "eylem|klavye|kol": üç parça. {0} klavye tuşunun, {1} kol düğmesinin adı (#125). Eksik parça
+            // olursa (tablo hatası) boş yazılır, çökmez.
+            string metin = Dil.Getir(KontrolSatirlari[i]);
+            TusEylemi? eylem = KontrolEylemleri[i];
+            if (eylem.HasValue) metin = string.Format(metin, Tuslar.KlavyeAdi(eylem.Value), Tuslar.KolAdi(eylem.Value));
+            string[] p = metin.Split('|');
+            int g = KontrolGezginSirasi[i];
+            Rect satirAlani = new Rect(x, y, en, satir);
+            bool atanabilir = g >= 0 && !girisKarti;
+            if (atanabilir) Vurgula(g, new Rect(x + s1, y + 2f, en - s1, satir - 4f));
+            bool dinleniyor = atanabilir && dinlenen == g;
             GUI.Label(new Rect(x, y, s1, satir), p[0], parlak);
-            GUI.Label(new Rect(x + s1, y, s2, satir), p.Length > 1 ? p[1] : "", kol ? soluk : parlak);
-            GUI.Label(new Rect(x + s1 + s2, y, s3, satir), p.Length > 2 ? p[2] : "", kol ? parlak : soluk);
+            GUI.Label(new Rect(x + s1, y, s2, satir), dinleniyor ? Dil.Getir("menu.kontrol_dinliyor") : (p.Length > 1 ? p[1] : ""), dinleniyor ? bekleyen : (kol ? soluk : parlak));
+            GUI.Label(new Rect(x + s1 + s2, y, s3, satir), dinleniyor ? Dil.Getir("menu.kontrol_dinliyor") : (p.Length > 2 ? p[2] : ""), dinleniyor ? bekleyen : (kol ? parlak : soluk));
+            // Fareyle: satırın tuş hücrelerine tıklamak dinlemeyi başlatır (görünmez düğme).
+            if (atanabilir && dinlenen < 0 && GUI.Button(new Rect(x + s1, y, en - s1, satir), GUIContent.none, GUIStyle.none)) { gezgin.Sec(g); DinlemeyeBasla(g); }
             y += satir;
         }
 
-        // Giriş kartında (#113) altta tek satır: bu liste her zaman Esc menüsünde. Düğme oyuna döner.
         if (girisKarti)
         {
+            // Giriş kartında (#113) altta: bu liste her zaman Esc menüsünde; ışık uyarısı (#124). Düğme oyuna döner.
             var ortali = new GUIStyle(soluk) { alignment = TextAnchor.MiddleCenter };
             GUI.Label(new Rect(0, y + 14f, ArayuzOlcegi.Genislik, 30f), Dil.Getir("menu.kontrol_giris_alt"), ortali);
-            // Işık uyarısı (#124): şimşek, titreyen lambalar ve yanıp sönen ışıklar var; ışığa duyarlı oyuncu
-            // oyuna girmeden bilsin. Yalnızca giriş kartında (yeni oyun), Kontroller sayfasında değil.
             GUI.Label(new Rect(0, y + 40f, ArayuzOlcegi.Genislik, 30f), Dil.Getir("menu.isik_uyari"), ortali);
             y += 56f;
+            Rect r = new Rect((ArayuzOlcegi.Genislik - 240f) / 2f, y + 30f, 240f, 50f);
+            Vurgula(0, r);
+            if (GUI.Button(r, Dil.Getir("menu.devam"), dugmeStili)) DevamIste();
+            return;
         }
-        Rect r = new Rect((ArayuzOlcegi.Genislik - 240f) / 2f, y + 30f, 240f, 50f);
-        Vurgula(0, r);
-        if (GUI.Button(r, Dil.Getir(girisKarti ? "menu.devam" : "menu.geri"), dugmeStili))
-        {
-            if (girisKarti) DevamIste(); else SayfaAc(SayfaAna);
-        }
+
+        // Menüde: ipucu satırı (ya da ret mesajı), altında "Varsayılana dön" ve "Geri".
+        var ipucuStili = new GUIStyle(soluk) { alignment = TextAnchor.MiddleCenter };
+        bool mesajVar = kontrolMesaji != null && Time.unscaledTime < kontrolMesajBitis;
+        if (mesajVar) ipucuStili.normal.textColor = new Color(0.95f, 0.55f, 0.35f);
+        GUI.Label(new Rect(0, y + 14f, ArayuzOlcegi.Genislik, 30f), mesajVar ? kontrolMesaji : Dil.Getir("menu.kontrol_atama_ipucu"), ipucuStili);
+        y += 30f;
+        float dugmeEn = 240f, ara = 16f;
+        Rect v = new Rect((ArayuzOlcegi.Genislik - 2f * dugmeEn - ara) / 2f, y + 30f, dugmeEn, 50f);
+        Vurgula(KontrolVarsayilan, v);
+        if (GUI.Button(v, Dil.Getir("ayar.varsayilan"), dugmeStili)) { dinlenen = -1; Tuslar.VarsayilanaDon(); }
+        Rect gr = new Rect(v.xMax + ara, v.y, dugmeEn, 50f);
+        Vurgula(KontrolGeri, gr);
+        if (GUI.Button(gr, Dil.Getir("menu.geri"), dugmeStili)) SayfaAc(SayfaAna);
     }
 
     // ---------- GÖRÜNTÜ SAYFASI (#30) ----------

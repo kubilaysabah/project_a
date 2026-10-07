@@ -83,8 +83,7 @@ public class EsyaListesi : MonoBehaviour
 
     private void Update()
     {
-        bool basildi = (Keyboard.current != null && Keyboard.current.tKey.wasPressedThisFrame)
-                    || (Gamepad.current != null && Gamepad.current.selectButton.wasPressedThisFrame);
+        bool basildi = Tuslar.Basildi(TusEylemi.GorevListesi);   // #125: atanabilir (varsayılan T / Select)
         if (basildi && Gosterilebilir()) acik = !acik;
     }
 
