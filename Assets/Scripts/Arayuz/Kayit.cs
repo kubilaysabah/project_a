@@ -209,6 +209,8 @@ public static class Kayit
         {
             PlayerPrefs.DeleteKey(KatAnahtari);           // kayıt yok: oyun açılıştan başlar
             Aletler.Bosalt();
+            PlayerPrefs.DeleteKey(NotAnahtari);           // #119: Sil() gibi; notlar kalsaydı telefon çalmazdı (#117)
+            notlar = null;
         }
         else
         {

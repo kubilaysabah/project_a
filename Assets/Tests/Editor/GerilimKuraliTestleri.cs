@@ -301,6 +301,21 @@ public class GerilimKuraliTestleri
     }
 
     [Test]
+    public void Aktarilan_soguma_avi_erteler()
+    {
+        // #119: sahne yeniden yüklenince yeni kurala eski soğuma aktarılır; süresi dolana kadar av yok.
+        var k = new GerilimKurali(3); k.KatAyarla(5);
+        k.AvSogumasiAyarla(100f);
+        Assert.AreEqual(100f, k.AvSogumaKalan, 0.001f);
+        for (int i = 0; i < 900; i++) k.Ilerlet(0.1f, true, true, false, true);   // 90 sn, gerilim tavana vurur
+        Assert.IsFalse(k.AvSuruyor, "soğuma bitmeden av başladı");
+        for (int i = 0; i < 1500; i++) if (k.Ilerlet(0.1f, true, true, false, true) == GerilimTepkisi.Av) break;
+        Assert.IsTrue(k.AvSuruyor, "soğuma bitince av gelmedi");
+        k.AvSogumasiAyarla(-5f);
+        Assert.AreEqual(0f, k.AvSogumaKalan, 0.001f, "eksi değer 0 sayılır");
+    }
+
+    [Test]
     public void Ayni_tohum_ayni_tepkileri_verir()
     {
         var a = new GerilimKurali(9); a.KatAyarla(5);

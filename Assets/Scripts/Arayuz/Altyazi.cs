@@ -7,7 +7,8 @@
 // alt yazı eskisinin yerini alır. Süre oyun saatiyle akar: menüde durur, menüyle birlikte kaybolmaz.
 //
 // ÇİZİM: OnGUI, ArayuzOlcegi kuralıyla (#34: sanal 1080 yüksekliğinde ekran). Koyu şerit üstünde açık yazı;
-// başlık ekranında ve final sahnesinde çizilmez. GUI.depth -150: menünün (-200) altında, oyun yazılarının üstünde.
+// başlık ekranında ve final sahnesinde çizilmez. GUI.depth +10 (#119): IMGUI'de küçük derinlik öne gelir;
+// +10 ile alt yazı notların, şifre ekranının (0), finalin (-100) ve menünün (-200) ALTINDA kalır.
 
 using UnityEngine;
 
@@ -32,6 +33,12 @@ public class Altyazi : MonoBehaviour
         ornek.kalan = sure > 0f ? sure : Mathf.Max(4f, yazi.Length / 14f);
     }
 
+    /// <summary>Bu metin görünüyorsa kaldırır (#119: radyo kat değişince susar, cümlesi de gider).</summary>
+    public static void Gizle(string yazi)
+    {
+        if (ornek != null && ornek.metin == yazi) ornek.kalan = 0f;
+    }
+
     /// <summary>Şu an bir alt yazı görünüyor mu (test için).</summary>
     public static bool Gorunuyor { get { return ornek != null && ornek.kalan > 0f; } }
     /// <summary>Görünen metin (test için).</summary>
@@ -44,8 +51,8 @@ public class Altyazi : MonoBehaviour
 
     private void OnGUI()
     {
-        if (kalan <= 0f || DuraklatmaMenusu.BaslikEkraninda) return;
-        GUI.depth = -150;
+        if (kalan <= 0f || DuraklatmaMenusu.BaslikEkraninda || FinalSahnesi.Suruyor) return;
+        GUI.depth = 10;
         ArayuzOlcegi.Uygula();
         if (stil == null)
         {

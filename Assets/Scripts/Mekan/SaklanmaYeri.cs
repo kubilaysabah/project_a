@@ -221,7 +221,7 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
         if (govde != null) govde.enabled = true;
         if (kontrolcu != null) kontrolcu.enabled = true;
         if (etkilesimci != null) etkilesimci.enabled = true;
-        // Lamba girerken yanıyorduysa yine yanar; sönüktüyse sönük kalır. (Gizliyken L'ye basılmışsa da
+        // Lamba girerken yanıyorduysa yine yanar; sönüktüyse sönük kalır. (Gizliyken F'ye basılmışsa da
         // girdiği hâle döner.)
         if (lamba != null && lamba.Takili && lamba.Acik != lambaAcikti) lamba.Degistir();
 

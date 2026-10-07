@@ -85,12 +85,22 @@ public class Varlik : MonoBehaviour
     /// <summary>Av sürerken sahnedeki Gölge (yoksa null). SaklanmaYeri: Gölge yakındayken dolaba girilmez.</summary>
     public Transform AvGolgesi { get { return golge != null ? golge.transform : null; } }
 
+    // #119: sahne yeniden yüklenince (Katlar sayfası, final) bu nesne yok olup yeniden kurulur ve kural
+    // sıfırdan başlar; av soğuması (#112) kaybolurdu. Kalan soğuma static'te taşınır: static alan sahne
+    // yüklemesini atlatır (#103 kuralı burada bilerek kullanılıyor; oyun kapanınca zaten gider).
+    private static float sogumaAktarimi;
+
     private void Awake() { Ornek = this; }
-    private void OnDestroy() { if (Ornek == this) Ornek = null; }
+    private void OnDestroy()
+    {
+        if (kural != null) sogumaAktarimi = kural.AvSogumaKalan;
+        if (Ornek == this) Ornek = null;
+    }
 
     private void Start()
     {
         kural = new GerilimKurali(System.Environment.TickCount);
+        if (sogumaAktarimi > 0f) { kural.AvSogumasiAyarla(sogumaAktarimi); sogumaAktarimi = 0f; }
         yonetici = GetComponent<KatYoneticisi>();
         kontrol = FindAnyObjectByType<BirinciSahisKontrolcu>();
         if (kontrol != null)
@@ -114,10 +124,11 @@ public class Varlik : MonoBehaviour
     {
         if (kural == null || yonetici == null || oyuncu == null) return;
 
-        // Yeni kat: kural baştan kurulur, iz silinir.
-        if (yonetici.MevcutKat != kat)
+        // Yeni kat: kural baştan kurulur, iz silinir. BulunulanKat, MevcutKat değil (#103 kuralı, #119):
+        // oyuncu 2. kattan 1'e inerse 1. katın kuralları (çarpan 0,6, av yok) geçerli olmalı.
+        if (yonetici.BulunulanKat != kat)
         {
-            kat = yonetici.MevcutKat;
+            kat = yonetici.BulunulanKat;
             kural.KatAyarla(kat);
             AvIptal();
             izler.Clear(); izZamanlari.Clear();

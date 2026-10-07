@@ -8,7 +8,7 @@
 // Bu bir kapı anıdır, bulmaca değil: holde etkileşilebilen tek şey bu çividir.
 //
 // NASIL
-// Etkileşim: oyuncunun lambası kafasından iner (KafaLambasi.Birak: ışık söner, L tuşu bir şey yapmaz),
+// Etkileşim: oyuncunun lambası kafasından iner (KafaLambasi.Birak: ışık söner, F tuşu bir şey yapmaz),
 // çivideki lamba modeli yanar hâlde görünür (kapıcı odasındaki Cividen_Lamba'nın aynısı: GrayboxKurucu
 // kurar, "asiliLamba" alanına bağlar) ve Asildi olayı DokuzuncuKat'a haber verir; o da salon kapısını
 // açar. Asılan lamba geri ALINAMAZ: bina onu tutar (final: pencerede yanan ışık bu lambadır).

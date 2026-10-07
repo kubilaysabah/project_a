@@ -16,11 +16,15 @@ public class KatIsigiDavranisi : MonoBehaviour
     private Color renk, renk2;
     private float temelSiddet, kaynakParlakligi;
     private int tohum;
+    private bool golgeli;                    // kat dosyası gölge istedi mi (kalite izin verirse uygulanır, #119)
     private MaterialPropertyBlock blok;
 
-    public void Hazirla(Light l, Renderer kaynakRenderer, KatIsikTitremesi titreme, Color r1, Color r2, float kaynakParlak, int sira)
+    public void Hazirla(Light l, Renderer kaynakRenderer, KatIsikTitremesi titreme, Color r1, Color r2, float kaynakParlak, int sira, bool golge = false)
     {
         isik = l;
+        golgeli = golge;
+        GolgeyiUygula();
+        Ayarlar.Degisti += GolgeyiUygula;   // kalite Düşük → Orta/Yüksek olunca gölge de gelsin (#119)
         kaynak = kaynakRenderer;
         tur = titreme;
         renk = r1;
@@ -30,6 +34,15 @@ public class KatIsigiDavranisi : MonoBehaviour
         tohum = sira;
         blok = new MaterialPropertyBlock();
         Uygula();
+    }
+
+    private void OnDestroy() { Ayarlar.Degisti -= GolgeyiUygula; }
+
+    // Gölge yalnızca spot ışıkta ve Düşük kalite dışında (Düşük'ün URP varlığı ek ışık gölgesini zaten kapatır).
+    private void GolgeyiUygula()
+    {
+        if (isik == null) return;
+        isik.shadows = golgeli && isik.type == LightType.Spot && Ayarlar.Kalite > 0 ? LightShadows.Soft : LightShadows.None;
     }
 
     private void Update() { Uygula(); }

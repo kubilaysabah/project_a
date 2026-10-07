@@ -162,8 +162,8 @@ menu.kontrol_yuru	Hareket|W A S D  (ya da yön tuşları)|Sol çubuk	Move|W A S 
 menu.kontrol_bak	Bakış|Fare|Sağ çubuk	Look|Mouse|Right stick
 menu.kontrol_etkilesim	Etkileşim (al, aç, oku)|E|A	Interact (take, open, read)|E|A
 menu.kontrol_surukle	Kapı / çekmece sürükle|E (basılı tut) + fare|A (basılı tut) + sağ çubuk	Drag doors / drawers|E (hold) + mouse|A (hold) + right stick
-menu.kontrol_incele	İncele|F|X	Inspect|F|X
-menu.kontrol_lamba	Fener (kafa lambası)|L|LB	Flashlight (headlamp)|L|LB
+menu.kontrol_incele	İncele|R|X	Inspect|R|X
+menu.kontrol_lamba	Fener (kafa lambası)|F|LB	Flashlight (headlamp)|F|LB
 menu.kontrol_liste	Görev listesi|T|Select	Objectives|T|Select
 menu.kontrol_egil	Eğil|Ctrl  (basılı tut)|Sağ çubuğa bas (RS)	Crouch|Ctrl  (hold)|Press right stick (RS)
 menu.kontrol_saklan	Saklan / çık|E  (çık: E ya da Esc)|A  (çık: A ya da B)	Hide / leave|E  (leave: E or Esc)|A  (leave: A or B)

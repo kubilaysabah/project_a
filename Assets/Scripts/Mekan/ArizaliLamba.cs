@@ -46,6 +46,11 @@ public class ArizaliLamba : MonoBehaviour
             vizilti.spatialBlend = 1f;
             vizilti.minDistance = 0.8f;
             vizilti.maxDistance = 7f;
+            // #119: Doğrusal düşüş: 7 m'de gerçekten sıfır (logaritmik eğri uzakta ~%1'de takılı kalıyordu;
+            // dokuzuncu katın lambası hep yanık, vınlaması bütün oyuna sızıyordu). Pes: aynı klip kafa lambasının
+            // gerilim uyarısında da çalıyor (#105); balast vınlaması daha kalın olsun ki ikisi karışmasın.
+            vizilti.rolloffMode = AudioRolloffMode.Linear;
+            vizilti.pitch = 0.6f;
             vizilti.volume = 0f;
         }
     }

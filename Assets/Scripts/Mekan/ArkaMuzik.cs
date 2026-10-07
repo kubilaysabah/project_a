@@ -31,6 +31,7 @@ public class ArkaMuzik : MonoBehaviour
     private float taban;                // normal (kabarmamış) seviye; sahnede ayarlanan değer
     private float kabarmaBaslangici = -1f, kabarmaBitisi = -1f;
     private bool susturuluyor;
+    private float kanal = 1f;           // son uygulanan müzik kanalı (Ayarlar.Muzik); değişince ses anında ölçeklenir (#119)
 
     // Sürekli dalgalanma (#49): seviye kendi kendine dakikalar süren kabarma ve sönmelerle değişir
     // (MuzikDalgasi, saf C#); merdivende biraz yüksek, sahanlıkta ve dairede biraz alçak.
@@ -106,7 +107,15 @@ public class ArkaMuzik : MonoBehaviour
         bool kabarik = simdi >= kabarmaBaslangici && simdi < kabarmaBitisi;
         // Olay kabarması dalganın üstüne biner; kabarma yokken dalga ve oyuncunun yeri belirler.
         float hedef = kabarik ? KabarmaSeviyesi : taban * dalga.Carpan(Time.time) * MuzikDalgasi.KonumCarpani(Merdivende());
-        hedef *= Ayarlar.Muzik;   // #118: müzik kanalı (0 = sessiz); genel seviye AudioListener.volume'da
+        // #118: müzik kanalı (0 = sessiz); genel seviye AudioListener.volume'da. #119: kanal değişince ses
+        // ANINDA ölçeklenir (eskiden yeni hedefe 0,055/sn ile 3-8 saniyede iniyordu, kaydırıcı gecikmeli
+        // sanılıyordu). Kanalın eski değeri bölünüp yenisi çarpılır; böylece dalga/kabarma akışı bozulmaz.
+        if (!Mathf.Approximately(kanal, Ayarlar.Muzik))
+        {
+            kaynak.volume = kanal > 0f ? kaynak.volume / kanal * Ayarlar.Muzik : hedef * Ayarlar.Muzik;
+            kanal = Ayarlar.Muzik;
+        }
+        hedef *= Ayarlar.Muzik;
         // MoveTowards: değeri hedefe doğru en fazla verilen adım kadar yaklaştırır.
         // Yükselirken hızlı, inerken yavaş: korku ani gelir, yavaş geçer.
         float hiz = hedef > kaynak.volume ? YukselmeHizi : InmeHizi;

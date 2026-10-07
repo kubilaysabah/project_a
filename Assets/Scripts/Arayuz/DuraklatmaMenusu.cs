@@ -512,6 +512,11 @@ public class DuraklatmaMenusu : MonoBehaviour
     // düğmelerinde de durumu değiştirir; sol/sağ oyuncuya orada da doğal gelir.
     private void Kaydir(int yon)
     {
+        // #119: Kontroller sayfasında (giriş kartı dahil) ve Katlar sayfasında sol/sağın işi yok. Eskiden
+        // bu iki sayfa aşağıdaki Ayarlar switch'ine düşüyordu: yeni oyuncu giriş kartında A-D'ye basınca
+        // fare hassasiyeti kayıp KAYDEDİLİYORDU, Katlar sayfasında seçili satıra göre ses/FOV değişiyordu.
+        if (sayfa == SayfaKontrol || sayfa == SayfaKatlar) return;
+
         if (sayfa == SayfaAna)
         {
             if (gezgin.Secili == AnaDil) Dil.Sonraki();

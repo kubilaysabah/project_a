@@ -98,7 +98,7 @@ public class Etkilesimci : MonoBehaviour
         if (etkilesimEylemi == null) return;
 
         // İnceleme (#88): F (kolda X) bir eşyayı gözün önüne getirir.
-        bool incele = (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        bool incele = (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)   // #119: F fenerin oldu
                    || (Gamepad.current != null && Gamepad.current.buttonWest.wasPressedThisFrame);
         if (incele && !IncelemeEkrani.Acik && Hedef is Esya esya && esya.EtkilesimeAcik)
         {

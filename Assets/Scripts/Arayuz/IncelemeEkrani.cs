@@ -141,7 +141,7 @@ public class IncelemeEkrani : MonoBehaviour
         }
 
         bool al = etkilesimEylemi != null && etkilesimEylemi.WasPressedThisFrame();
-        bool kapat = (Keyboard.current != null && (Keyboard.current.escapeKey.wasPressedThisFrame || Keyboard.current.fKey.wasPressedThisFrame))
+        bool kapat = (Keyboard.current != null && (Keyboard.current.escapeKey.wasPressedThisFrame || Keyboard.current.rKey.wasPressedThisFrame))   // #119: R
                   || (Gamepad.current != null && (Gamepad.current.buttonEast.wasPressedThisFrame || Gamepad.current.buttonWest.wasPressedThisFrame));
         if (al) { alinacak = true; Kapat(); }
         else if (kapat) Kapat();
@@ -188,6 +188,6 @@ public class IncelemeEkrani : MonoBehaviour
         GUIStyle ipucu = new GUIStyle(GUI.skin.label) { fontSize = 18, alignment = TextAnchor.MiddleCenter };
         ipucu.normal.textColor = new Color(0.8f, 0.78f, 0.72f);
         GUI.Label(new Rect(0, y + 42f, ArayuzOlcegi.Genislik, 30f),
-                  string.Format(Dil.Getir("inceleme.tuslar"), kol ? "A" : "E", kol ? "X" : "F"), ipucu);
+                  string.Format(Dil.Getir("inceleme.tuslar"), kol ? "A" : "E", kol ? "X" : "R"), ipucu);   // #119: R
     }
 }

@@ -478,8 +478,7 @@ public class ZincirUygulayici
             l.intensity = ki.Siddet;
             l.range = ki.Menzil;
             if (ki.Spot) { l.spotAngle = ki.Aci; l.innerSpotAngle = ki.Aci * 0.55f; }
-            l.shadows = ki.Spot && ki.Golge && Ayarlar.Kalite > 0 ? LightShadows.Soft : LightShadows.None;
-            Renderer kaynak = null;
+            Renderer kaynak = null;   // gölgeyi KatIsigiDavranisi kurar ve kalite değişince yeniler (#119)
             if (ki.AlevBoyu.sqrMagnitude > 0f && IsikKaynagiMalzemesi != null)
             {
                 // Parlayan kaynak: çarpıştırıcısız küçük bir küre; ışık onun içinden çıkar.
@@ -492,7 +491,7 @@ public class ZincirUygulayici
                 kaynak.sharedMaterial = IsikKaynagiMalzemesi;
                 kaynak.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             }
-            g.AddComponent<KatIsigiDavranisi>().Hazirla(l, kaynak, ki.Titreme, ki.Renk, ki.Renk2, ki.KaynakParlakligi, sira);
+            g.AddComponent<KatIsigiDavranisi>().Hazirla(l, kaynak, ki.Titreme, ki.Renk, ki.Renk2, ki.KaynakParlakligi, sira, ki.Golge);
             konanlar.Add(g);
         }
     }

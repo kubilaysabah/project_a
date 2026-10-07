@@ -38,7 +38,9 @@ public class RadyoAnonsu : MonoBehaviour
     private float iceridekiSure;
     private bool oynadi;
     private AudioSource kaynak;
+    private AudioSource sesKaynagi;   // seslendirme (yayın sırasında; Sifirla da siler, #119)
     private Coroutine akis;
+    private string gosterilenAltyazi;  // bu cihazın açtığı alt yazı (Sifirla kapatır)
 
     /// <summary>Kat dosyasından kurulur. dosya: Konusmalar klasöründeki seslendirme (boş olabilir).</summary>
     public void Hazirla(float gecikmeSn, string dosyaAdi, float sesDuzeyi, DaireEksenleri eksenler)
@@ -63,6 +65,9 @@ public class RadyoAnonsu : MonoBehaviour
     {
         if (akis != null) StopCoroutine(akis);
         if (kaynak != null) DestroyImmediate(kaynak);
+        if (sesKaynagi != null) DestroyImmediate(sesKaynagi);           // #119: konuşma kat değişince susar
+        if (gosterilenAltyazi != null) Altyazi.Gizle(gosterilenAltyazi);  // ... ve alt yazısı kalkar
+        gosterilenAltyazi = null;
     }
 
     private void Update()
@@ -97,24 +102,38 @@ public class RadyoAnonsu : MonoBehaviour
                 yield return null;
             }
         }
-        // Alt yazı (#118): cümle ekranın altında, kayıt olsa da olmasa da (oyuncu duyabilecek kadar yakınsa).
+        // Alt yazı (#118): cümle ekranın altında, kayıt olsa da olmasa da. Menzil (9 m) cümle boyunca her
+        // kare bakılır (#119): oyuncu uzak odadan yayının ortasında gelirse cümleyi kalan süreyle yine görür.
+        // Eskiden tek sefer, yayının 0,8. saniyesinde bakılıyordu; uzaktaki oyuncu cümleyi hiç görmüyordu.
         string altyaziAnahtari = System.Array.IndexOf(AltyaziAnahtarlari, "anons." + dosya) >= 0 ? "anons." + dosya : null;
-        bool yakin = oyuncu != null && Vector3.Distance(oyuncu.position, transform.position) <= AltyaziMenzili;
-        if (altyaziAnahtari != null && yakin) Altyazi.Goster(Dil.Getir(altyaziAnahtari), konusma != null ? konusma.length : 0f);
+        float sure = konusma != null ? konusma.length : (altyaziAnahtari != null ? 5f : 1.6f);   // kayıt yoksa okunacak kadar parazit
         // 2. Seslendirme: parazitin üstüne, aynı kaynaktan değil ikinci bir kaynaktan (ikisi birlikte duyulur).
         if (konusma != null)
         {
-            AudioSource sesKaynagi = gameObject.AddComponent<AudioSource>();
+            sesKaynagi = gameObject.AddComponent<AudioSource>();
             sesKaynagi.playOnAwake = false; sesKaynagi.spatialBlend = 1f; sesKaynagi.minDistance = 1.2f; sesKaynagi.maxDistance = 14f;
             sesKaynagi.rolloffMode = AudioRolloffMode.Logarithmic;
             sesKaynagi.clip = konusma; sesKaynagi.volume = ses * Ayarlar.Konusma; sesKaynagi.Play();   // #118: konuşma kanalı
             if (kaynak.isPlaying) kaynak.volume = ses * ParazitSes * 0.4f;   // konuşurken parazit geri çekilir
-            yield return new WaitForSeconds(konusma.length);
-            Destroy(sesKaynagi);
+        }
+        float bitis = Time.time + sure;
+        while (Time.time < bitis)
+        {
+            if (gosterilenAltyazi == null && altyaziAnahtari != null && oyuncu != null
+                && Vector3.Distance(oyuncu.position, transform.position) <= AltyaziMenzili)
+            {
+                gosterilenAltyazi = Dil.Getir(altyaziAnahtari);
+                Altyazi.Goster(gosterilenAltyazi, Mathf.Max(4f, bitis - Time.time));
+            }
+            if (sesKaynagi != null) sesKaynagi.volume = ses * Ayarlar.Konusma;   // kaydırıcı yayın sırasında da işler (#119)
+            yield return null;
+        }
+        if (sesKaynagi != null)
+        {
+            Destroy(sesKaynagi); sesKaynagi = null;
             if (kaynak.isPlaying) kaynak.volume = ses * ParazitSes;
             yield return new WaitForSeconds(0.4f);
         }
-        else if (parazit != null) yield return new WaitForSeconds(altyaziAnahtari != null && yakin ? 5f : 1.6f);   // kayıt yoksa alt yazı okunacak kadar parazit
         // 3. Parazit söner, düğme tıkı.
         if (parazit != null)
         {

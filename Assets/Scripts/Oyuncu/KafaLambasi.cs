@@ -10,7 +10,7 @@
 //   - Kameranın çocuğu olan bir SPOT ışık: kamera nereye bakarsa huzme oraya. Oyuncu yalnızca
 //     huzmedekini görür; korku, bakışa bağlanır (bir şey huzmenin kenarında durabilir).
 //   - L ya da kolun sol omzu (L1) lambayı açıp kapatır; eski bir anahtar tıkı duyulur.
-//     (#76, Şahan: ilk hâli F'ydi; "lamba" demek olan L'ye taşındı.)
+//     (#76, Şahan: ilk hâli F'ydi; "lamba" demek olan L'ye taşındı. #119, Şahan: yeniden F; inceleme R oldu.)
 //     Karanlıkta durup dinlemek ve saklanmak (#58 kaçış anları) için gerekli.
 //   - Pil YOK (Şahan'ın kararı): sayaç eklenince korku yerine muhasebe olur. Lamba yalnızca
 //     senaryolu anlarda titrer ya da bir anlığına söner; bunun için Titret() ve Sondur() var,
@@ -53,6 +53,7 @@ public class KafaLambasi : MonoBehaviour
     private bool acik = true;
     private bool takili = true;   // lamba oyuncunun kafasında mı (açılışta çividen alınana kadar değil)
     private Coroutine titreme;
+    private float sonmeBitis = -1f;   // senaryolu sönmenin bittiği an (Time.time); geçmişse sönme yok (#119)
 
     /// <summary>Lamba oyuncunun kafasında mı? Açılışta çividen alınana kadar false (#56).</summary>
     public bool Takili { get { return takili; } }
@@ -199,9 +200,10 @@ public class KafaLambasi : MonoBehaviour
         if (DuraklatmaMenusu.BaslikEkraninda || Time.timeScale == 0f) return;
         if (!takili) return;   // lamba henüz çivide: kafada yanacak bir şey yok
 
-        bool l = Keyboard.current != null && Keyboard.current.lKey.wasPressedThisFrame;
+        // #119 (Şahan): fener F'ye döndü (#76'da L idi); inceleme R'ye taşındı. Oyun kolunda LB.
+        bool f = Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
         bool omuz = Gamepad.current != null && Gamepad.current.leftShoulder.wasPressedThisFrame;
-        if (l || omuz) Degistir();
+        if (f || omuz) Degistir();
     }
 
     /// <summary>
@@ -230,6 +232,14 @@ public class KafaLambasi : MonoBehaviour
     public void Degistir()
     {
         if (!takili) return;
+        // #119: senaryolu sönme sürerken düğme işe yaramaz: tık duyulur, ışık gelmez (lamba "ölü"), sönme
+        // bitince lamba eski durumuna döner. Eskiden bu basış sönmeyi kesip lambayı yakıyordu; 2. kat dersi
+        // (#112) "oyuncu açamaz"a dayanır.
+        if (Time.time < sonmeBitis)
+        {
+            if (tik != null) kaynak.PlayOneShot(tik, 0.35f);
+            return;
+        }
         acik = !acik;
         if (titreme != null) { StopCoroutine(titreme); titreme = null; }
         Uygula(acik);
@@ -242,7 +252,7 @@ public class KafaLambasi : MonoBehaviour
     /// </summary>
     public void Titret(float sure)
     {
-        if (!acik) return;
+        if (!acik || Time.time < sonmeBitis) return;   // sönükken titreyecek ışık yok
         if (titreme != null) StopCoroutine(titreme);
         titreme = StartCoroutine(TitremeAkisi(sure));
     }
@@ -251,8 +261,18 @@ public class KafaLambasi : MonoBehaviour
     public void Sondur(float sure)
     {
         if (!takili) return;   // kafada lamba yokken söndürülecek bir şey de yok
+        // #119: iki sönme üst üste gelirse (4. katta parlayan kodun 1,8 sn'si + gerilim sönmesi) ikincisi
+        // birincinin yerine geçmez, yalnızca bitişi uzatır. Eskiden ikinci çağrı "önceki durum"u zaten
+        // sönük okuyup lambayı kalıcı sönük bırakıyordu.
+        float yeniBitis = Time.time + sure;
+        if (Time.time < sonmeBitis)
+        {
+            if (yeniBitis > sonmeBitis) sonmeBitis = yeniBitis;
+            return;
+        }
         if (titreme != null) StopCoroutine(titreme);
-        titreme = StartCoroutine(SonmeAkisi(sure));
+        sonmeBitis = yeniBitis;
+        titreme = StartCoroutine(SonmeAkisi());
     }
 
     private IEnumerator TitremeAkisi(float sure)
@@ -269,13 +289,14 @@ public class KafaLambasi : MonoBehaviour
         titreme = null;
     }
 
-    private IEnumerator SonmeAkisi(float sure)
+    private IEnumerator SonmeAkisi()
     {
         bool once = acik;
         acik = false;
         Uygula(false);
         if (tik != null) kaynak.PlayOneShot(tik, 0.3f);
-        yield return new WaitForSeconds(sure);
+        // Bitiş anı uzatılabilir (ikinci Sondur): sabit bir bekleme yerine saate bakılır.
+        while (Time.time < sonmeBitis) yield return null;
         acik = once;
         Uygula(acik);
         if (acik && tik != null) kaynak.PlayOneShot(tik, 0.3f);

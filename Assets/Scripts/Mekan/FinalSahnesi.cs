@@ -61,6 +61,8 @@ public class FinalSahnesi : MonoBehaviour
 
     private Transform oyuncu;
     private bool basladi;
+    /// <summary>Final (şafak, dış cephe, jenerik) sürüyor mu? Alt yazı gibi oyun içi yazılar bunu okur (#119).</summary>
+    public static bool Suruyor { get; private set; }
     private float karartma;            // 0 = açık, 1 = simsiyah (OnGUI çizer)
     private float jenerikKonum = -1f;  // -1 = jenerik yok; 0..1 arası akış
 
@@ -73,6 +75,7 @@ public class FinalSahnesi : MonoBehaviour
 
     private void Awake()
     {
+        Suruyor = false;   // static: sahne yeniden yüklenince sıfırlanmalı (#103 kuralı)
         Transform k = transform.Find("Final_Kamera");
         if (k != null) finalKamera = k.GetComponent<Camera>();
     }
@@ -80,6 +83,7 @@ public class FinalSahnesi : MonoBehaviour
     // ---------- 1. ÇATI KAPISI AÇILDI ----------
     public void CatiAcildi(Transform oyuncuTransform)
     {
+        Suruyor = true;
         oyuncu = oyuncuTransform;
         StartCoroutine(Safak());
 
@@ -205,13 +209,8 @@ public class FinalSahnesi : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         // #112: oyun bitti, kat kaydı silinir; başlıktaki "Başla" yeniden açılıştan başlatır (eskiden kayıt 8. katta
-        // kalıyor, oyunu bitiren oyuncu "Başla" deyince 8. katın başına düşüyordu). En yüksek kat (Katlar sayfası),
-        // fotoğraflar ve notlar kalır: Kayit.Sil onlara dokunmaz.
-        Kayit.Sil();
-        Debug.Log("[FINAL] Kat kaydı silindi: bir sonraki 'Başla' açılıştan başlar.");
-        // #112: oyun bitti, kat kaydı silinir; başlıktaki "Başla" yeniden açılıştan başlatır (eskiden kayıt 8. katta
-        // kalıyor, oyunu bitiren oyuncu "Başla" deyince 8. katın başına düşüyordu). En yüksek kat (Katlar sayfası),
-        // fotoğraflar ve notlar kalır: Kayit.Sil onlara dokunmaz.
+        // kalıyor, oyunu bitiren oyuncu "Başla" deyince 8. katın başına düşüyordu). En yüksek kat (Katlar sayfası)
+        // ve fotoğraflar kalır; okunan notlar #117'den beri silinir (ikinci oynayışta telefon yine çalsın).
         Kayit.Sil();
         Debug.Log("[FINAL] Kat kaydı silindi: bir sonraki 'Başla' açılıştan başlar.");
         // Oyun baştan: sahne yeniden yüklenir, her şey (ışık, katlar, kartlar) ilk hâline döner.

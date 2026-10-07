@@ -111,6 +111,15 @@ public class GerilimKurali
     public float AvSogumaKalan { get { return avSogumaKalan; } }
 
     /// <summary>
+    /// Soğumayı dışarıdan kurar (#119): sahne yeniden yüklenince (Katlar sayfası, bitiş) kural baştan
+    /// kurulur; Varlik eski kuralın kalan soğumasını yeni kurala aktarır ki av hemen geri gelmesin.
+    /// </summary>
+    public void AvSogumasiAyarla(float kalan)
+    {
+        avSogumaKalan = kalan > 0f ? kalan : 0f;
+    }
+
+    /// <summary>
     /// Katın ısınma çarpanı: alt katlar yavaş, üst katlar hızlı. 1. kat öğretici: en yavaş.
     /// (Kat dosyasında ayrı bir alan yok; tablo burada ki testlenebilsin ve tek yerde dursun.)
     /// </summary>

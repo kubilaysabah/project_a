@@ -574,8 +574,11 @@ public static partial class GrayboxKurucu
         seri.FindProperty("cam").objectReferenceValue = camR;
         seri.FindProperty("camYanik").objectReferenceValue = CamMalzeme();
         seri.FindProperty("camSonuk").objectReferenceValue = CamSonukMalzeme();
-        // Sahanlıklar farklı tohum alsın: A ile B aynı anda aynı şeyi yapmasın (ad üzerinden basit bir sayı).
-        seri.FindProperty("tohum").intValue = a.parent != null ? a.parent.name.Length * 17 : 0;
+        // Sahanlıklar farklı tohum alsın: A ile B aynı anda aynı şeyi yapmasın. Adın harfleri toplanır (#119:
+        // eskiden ad UZUNLUĞU alınıyordu; "Sahanlik_A", "_B" ve "_9" hepsi 10 harf, üçü de aynı tohumu alıyordu).
+        int tohum = 0;
+        if (a.parent != null) foreach (char c in a.parent.name) tohum = tohum * 31 + c;
+        seri.FindProperty("tohum").intValue = tohum & 0xFFFF;
         seri.ApplyModifiedPropertiesWithoutUndo();
     }
 

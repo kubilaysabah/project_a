@@ -65,6 +65,8 @@ public class Telefon : MonoBehaviour, IEtkilesimli
 
     private void Update()
     {
+        // #119: konuşma kanalı kaydırıcısı çalan konuşmaya da işler (eskiden yalnızca başlarken okunuyordu).
+        if (konusmaKaynagi != null && konusmaKaynagi.isPlaying) konusmaKaynagi.volume = 0.85f * Ayarlar.Konusma;
         // Konuşma ekranı kapanınca ahize yerine iner.
         if (ahize != null && ahize.localPosition != ahizeYeri && (konusmaEkrani == null || konusmaEkrani.EtkilesimeAcik))
         {
