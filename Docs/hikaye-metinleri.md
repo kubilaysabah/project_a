@@ -180,6 +180,28 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > The Management
 
+### `not.kat1_pano`
+
+**TR**
+
+> DUYURU — Daire 2
+>
+> Daire 31 Ağustos 1994 itibarıyla tahliye edilmiştir.
+> Kalan eşyalar ve kat kapısının anahtarı kapıcı tarafından toplanacaktır.
+> Daire bu gece boşaltılmış olacaktır.
+>
+> — Yönetim
+
+**EN**
+
+> NOTICE — Flat 2
+>
+> The flat was vacated as of 31 August 1994.
+> The remaining belongings and the floor-door key are to be collected by the janitor.
+> The flat will be cleared tonight.
+>
+> — The Management
+
 ### `foto.kat1`
 
 **TR**
@@ -221,6 +243,28 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Dear residents,
 > Mr Nuri, owner of flat 7, has been taken to hospital.
 > No one is to enter the flat until he returns.
+>
+> — The Management
+
+### `not.kat2_pano`
+
+**TR**
+
+> DUYURU — Daire 7
+>
+> Gece yarısı radyo sesi şikâyetleri yönetime ulaşmıştır.
+> Nuri Bey hastanededir; dairede kimse olmamalıdır.
+> Kapıcı daireye bakıp sesi kesecektir.
+>
+> — Yönetim
+
+**EN**
+
+> NOTICE — Flat 7
+>
+> Complaints about a radio playing at midnight have reached the management.
+> Mr Nuri is in hospital; nobody should be in the flat.
+> The janitor will look in and silence it.
 >
 > — The Management
 
@@ -267,6 +311,28 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > This morning he drew that man, and he won't show the drawing to anyone. When I asked where he put it, he laughed.
 >
 > — Ayla
+
+### `not.kat3_pano`
+
+**TR**
+
+> DUYURU — Daire 9
+>
+> Daire 9 sakinleri dün gece apar topar taşınmıştır.
+> Kapı açık bırakılmıştır.
+> Kapıcı daireyi dolaşıp kat kapısını kilitleyecektir.
+>
+> — Yönetim
+
+**EN**
+
+> NOTICE — Flat 9
+>
+> The residents of flat 9 moved out in a hurry last night.
+> The door was left open.
+> The janitor will go through the flat and lock the floor door.
+>
+> — The Management
 
 ### `foto.kat3`
 
@@ -324,6 +390,28 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > — Hasan
 
+### `not.kat4_pano`
+
+**TR**
+
+> DUYURU — Daire 16
+>
+> Aydın ailesi yazlıktadır; daire boş olmalıdır.
+> Eski kapıcı Hasan'ın bu dairede kaldığı bildirilmiştir.
+> Elektrik borçtan kesiktir. Yeni kapıcı daireyi kontrol edecektir.
+>
+> — Yönetim
+
+**EN**
+
+> NOTICE — Flat 16
+>
+> The Aydın family is at their summer house; the flat should be empty.
+> We have been told that Hasan, the former janitor, has been staying in it.
+> The electricity is cut for unpaid bills. The new janitor will check the flat.
+>
+> — The Management
+
 ### `foto.kat4`
 
 **TR**
@@ -366,6 +454,28 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 >
 > — The Management
 
+### `not.kat5_pano`
+
+**TR**
+
+> DUYURU — Daire 18
+>
+> Alt kata su sızmaktadır. Karaca ailesi yazlıkta, anahtar kapıcıdadır.
+> Tesisat işi kapıcı Cemal'e verilmişti; yarım bırakılmıştır.
+> İşi yeni kapıcı bitirecektir.
+>
+> — Yönetim
+
+**EN**
+
+> NOTICE — Flat 18
+>
+> Water is leaking into the flat below. The Karaca family is away; the janitor holds the key.
+> The plumbing job was given to Cemal, the janitor; it was left half done.
+> The new janitor will finish it.
+>
+> — The Management
+
 ### `foto.kat5`
 
 **TR**
@@ -405,6 +515,28 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > All three will be there: Rıza Efendi, Hasan, Cemal.
 > Your seat is ready too.
 > When our guest arrives, don't stand in the open.
+>
+> — The Management
+
+### `not.kat6_pano`
+
+**TR**
+
+> DUYURU — Daire 23 ve 24
+>
+> Daire 23'ün kirası 1974'ten beri ödenmemektedir; kapıyı açan yoktur.
+> Daire 24'teki terzi dükkânı ruhsatsız çalışmaktadır.
+> İki daire de bu gece kapıcı tarafından kontrol edilecektir.
+>
+> — Yönetim
+
+**EN**
+
+> NOTICE — Flats 23 and 24
+>
+> The rent for flat 23 has not been paid since 1974; nobody answers the door.
+> The tailor's workshop in flat 24 operates without a licence.
+> Both flats will be checked by the janitor tonight.
 >
 > — The Management
 
@@ -683,6 +815,28 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Not on the permit.
 > The stairs don't go up.
 > The lift does.
+
+### `not.kat8_pano`
+
+**TR**
+
+> DUYURU — Daire 32 (Yönetim)
+>
+> Çatıya çıkmak yasaktır; çatı anahtarı yönetim ofisindedir.
+> Asansör arızalıdır, çağırmayınız.
+> Ofise kapıcı Cemal'den sonra giren olmamıştır.
+>
+> — Yönetim
+
+**EN**
+
+> NOTICE — Flat 32 (Management)
+>
+> Access to the roof is forbidden; the roof key is kept in the management office.
+> The lift is out of order; do not call it.
+> Nobody has entered the office since Cemal, the janitor.
+>
+> — The Management
 
 ### `foto.kat8`
 

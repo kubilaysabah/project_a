@@ -113,6 +113,15 @@ MonoBehaviour:
       Gerekenler: []
       Yuvalar: []
   notlar:
+  - Yol: Sahanlik:Ilan
+    X: -0.03
+    Y: 0.005
+    Z: 0.026
+    Donus: 0
+    OnU: 0
+    OnV: 1
+    Yatik: 0
+    Metin: not.kat2_pano
   - Yol: Esyalar/Sigorta_Kutusu
     X: 0.3
     Y: -0.1

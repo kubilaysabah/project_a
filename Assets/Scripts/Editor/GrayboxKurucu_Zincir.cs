@@ -552,6 +552,10 @@ public static partial class GrayboxKurucu
     }
 
     // Okunabilir not kâğıdı şablonu: model, nişan için büyükçe çarpışma kutusu, YoneticiNotu.
+    // İlan panosundaki duyurunun yeri (#57): panonun pivotu arka yüzün ortasında, mantar 1,5 cm, raptiyeler
+    // 2,4 cm'ye kadar çıkıyor; kâğıt raptiyelerin önünde (z 2,6 cm), modelin kendi A4'ünün üstünde (x -3 cm).
+    const float PanoNotX = -0.03f, PanoNotY = 0.005f, PanoNotZ = 0.026f;
+
     static GameObject NotSablonuKur()
     {
         GameObject gecici = new GameObject("Not_Kagidi");
@@ -639,6 +643,8 @@ public static partial class GrayboxKurucu
         // durur; o köşe boş bırakılır. Kapıdan hole giden çapraz yol ortada, 1,8 m genişliğinde boş.
         v.notlar = new List<KatNotu>
         {
+            // İlan panosundaki Yönetim duyurusu (#57): daireye NEDEN girildiğini anlatır; nerede ne aranacağını asla söylemez.
+            new KatNotu { Metin = "not.kat1_pano", Yol = "Sahanlik:Ilan", X = PanoNotX, Y = PanoNotY, Z = PanoNotZ },
             // Tahliye yazısı: sigorta kutusunun yanında duvarda (Yönetim kapıcıya bıraktırmış).
             new KatNotu { Metin = "not.kat1_tahliye", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
         };
@@ -1281,6 +1287,8 @@ public static partial class GrayboxKurucu
         // u 0-0,8, v 0,26-0,48 boyunca durur (1. kattaki dairenin aynası). Kapıdan hole giden yol ortada boş.
         v.notlar = new List<KatNotu>
         {
+            // İlan panosundaki Yönetim duyurusu (#57): daireye NEDEN girildiğini anlatır; nerede ne aranacağını asla söylemez.
+            new KatNotu { Metin = "not.kat2_pano", Yol = "Sahanlik:Ilan", X = PanoNotX, Y = PanoNotY, Z = PanoNotZ },
             // Yönetim'in notu: sigorta kutusunun yanında (hikâye: Nuri Bey hastaneye kaldırıldı).
             new KatNotu { Metin = "not.kat2_hastane", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
         };

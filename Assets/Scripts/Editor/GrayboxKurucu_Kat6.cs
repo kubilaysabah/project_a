@@ -210,6 +210,8 @@ public static partial class GrayboxKurucu
         };
         v.notlar = new List<KatNotu>
         {
+            // İlan panosundaki Yönetim duyurusu (#57): daireye NEDEN girildiğini anlatır; nerede ne aranacağını asla söylemez.
+            new KatNotu { Metin = "not.kat6_pano", Yol = "Sahanlik:Ilan", X = PanoNotX, Y = PanoNotY, Z = PanoNotZ },
             // A'nın antresinde Yönetim'in davet notu (hikâye; misafir gelince ortada durma).
             new KatNotu { Metin = "not.kat6_davet", Yol = "Esyalar/Sigorta_Kutusu", X = 0.30f, Y = -0.10f, Z = 0.002f },
         };

@@ -108,6 +108,8 @@ public static partial class GrayboxKurucu
 
         v.notlar = new List<KatNotu>
         {
+            // İlan panosundaki Yönetim duyurusu (#57): daireye NEDEN girildiğini anlatır; nerede ne aranacağını asla söylemez.
+            new KatNotu { Metin = "not.kat8_pano", Yol = "Sahanlik:Ilan", X = PanoNotX, Y = PanoNotY, Z = PanoNotZ },
             // Yönetim'in notu antrede, sigorta kutusunun yanında (hikâye: çatı anahtarı asansörde).
             new KatNotu { Metin = "not.kat8_yonetim", Yol = "Esyalar/Sigorta_Kutusu", X = 0.42f, Y = 0f, Z = 0.004f },
             // İskân ruhsatı holün kuzey duvarında (v = 4,65), holün içine (-v) bakar.

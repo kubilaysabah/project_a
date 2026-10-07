@@ -122,6 +122,8 @@ public static partial class GrayboxKurucu
         // Annenin notu hikâye notudur (şifreyi söylemez): koridorda, Oda B'nin kapısının solunda.
         v.notlar = new List<KatNotu>
         {
+            // İlan panosundaki Yönetim duyurusu (#57): daireye NEDEN girildiğini anlatır; nerede ne aranacağını asla söylemez.
+            new KatNotu { Metin = "not.kat3_pano", Yol = "Sahanlik:Ilan", X = PanoNotX, Y = PanoNotY, Z = PanoNotZ },
             new KatNotu { Metin = "not.kat3_anne", X = 5.45f, Y = 1.40f, Z = 4.648f, OnU = 0f, OnV = -1f },
         };
 
