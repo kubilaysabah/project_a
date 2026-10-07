@@ -353,6 +353,9 @@ public static partial class GrayboxKurucu
         // Katın anahtarı (#52): yalnızca gerçek sahanlıklarda (A ve B).
         if (tam) KatAnahtariKur(t);
 
+        // Yağlı boya bandı, bordür ve süpürgelik (#107): her sahanlıkta aynı (döngü kuralı).
+        SahanlikGiydir(t);
+
         return kok;
     }
 
@@ -1099,6 +1102,8 @@ public static partial class GrayboxKurucu
             Kutu($"Basamak_{i + 1:00}", cikis.transform,
                  new Vector3(CikisKoluX, ust - dilim / 2f, z),
                  new Vector3(KolGen, dilim, BasamakDerinlik));
+            // Basamak burnu çıtası (#107): çıkış kolunda basamağın burnu z'nin küçük tarafında (oyuncu +z'ye tırmanır).
+            BasamakCitasiKur(cikis.transform, i + 1, CikisKoluX, ust, i * BasamakDerinlik + CitaDerin / 2f);
         }
 
         GameObject varis = new GameObject("Kol_Varis");
@@ -1110,6 +1115,8 @@ public static partial class GrayboxKurucu
             Kutu($"Basamak_{j + 1:00}", varis.transform,
                  new Vector3(VarisKoluX, ust - dilim / 2f, z),
                  new Vector3(KolGen, dilim, BasamakDerinlik));
+            // Varış kolunda burun z'nin büyük tarafında (oyuncu -z'ye tırmanır).
+            BasamakCitasiKur(varis.transform, j + 1, VarisKoluX, ust, KolUzunluk - j * BasamakDerinlik - CitaDerin / 2f);
         }
 
         // ARA SAHANLIK: iki kolu birleştiren dönüş sahanlığı.
@@ -1203,6 +1210,20 @@ public static partial class GrayboxKurucu
         GameObject gece = Kutu("Disari", p, new Vector3(0f, (Alt + Ust) / 2f, CekirdekDerin + DuvarKalin + 1.0f),
              new Vector3(SahanlikGen + 2f * DuvarKalin, Ust - Alt, 0.1f));
         gece.GetComponent<MeshRenderer>().sharedMaterial = GeceMalzeme();
+    }
+
+    // ---------- BASAMAK ÇITASI (#107) ----------
+    // 90'ların mozaik basamağında burna pirinç ya da alüminyum bir çıta vidalanır: kaymayı önler, kenarı
+    // korur. İnce bir kutu; basamağın üstünden 3 mm taşar (CharacterController'ın 35 cm'lik basamak payı
+    // bunu fark etmez), çarpışmasız. Adı "Basamak_Citasi_NN": DokuKurucu eskimiş pirinç verir.
+    const float CitaDerin = 0.025f, CitaYuk = 0.006f;
+
+    static void BasamakCitasiKur(Transform kol, int sira, float x, float ust, float z)
+    {
+        GameObject c = Kutu($"Basamak_Citasi_{sira:00}", kol,
+                            new Vector3(x, ust + CitaYuk / 2f - 0.003f, z),
+                            new Vector3(KolGen - 0.02f, CitaYuk, CitaDerin));
+        Object.DestroyImmediate(c.GetComponent<Collider>());
     }
 
     // ---------- KORKULUKLAR ----------

@@ -67,7 +67,14 @@ public static class DokuKurucu
     static readonly Tur Cati    = new Tur("Doku_Cati", "worn_concrete_floor", 2.0f, 0.08f, Color.white);
     // Dokusuz, düz renkli küçük parçalar.
     static readonly Tur Demir   = new Tur("Doku_Demir", null, 1f, 0.3f, new Color(0.10f, 0.10f, 0.09f));    // korkuluk dikmeleri: koyu boyalı demir
-    static readonly Tur Tirabzan = new Tur("Doku_Tirabzan", null, 1f, 0.35f, new Color(0.22f, 0.12f, 0.07f)); // tirabzan: koyu ahşap
+    // #107: tırabzan artık dokulu (sapele kaplama koyu cevize çekilir, verniği aşınmış); UV kendi ekseninde (eğik çubuk).
+    static readonly Tur Tirabzan = new Tur("Doku_Tirabzan", "sapele_veneer", 0.6f, 0.45f, new Color(0.28f, 0.17f, 0.10f));   // ilk deneme 0,40/0,25/0,15 fenerde kızıl patlıyordu
+    // #107: sahanlık duvarının alt 1,2 m'si ve basamakların yan yüzleri: 20 yıllık, kirlenmiş koyu yeşil yağlı boya;
+    // bordür aynı boyanın koyusu. Dokusuz düz renk; kir katmanını KirKurucu ekler.
+    static readonly Tur YagliBoya = new Tur("Doku_YagliBoya", null, 1f, 0.30f, new Color(0.29f, 0.34f, 0.29f));   // 0,42 parlaklık rıhtlarda fener yansıması yapıyordu
+    static readonly Tur Bordur    = new Tur("Doku_Bordur", null, 1f, 0.30f, new Color(0.12f, 0.15f, 0.13f));
+    // Basamak çıtası: eskimiş pirinç, kapı kolundan (Madeni) daha koyu ve mat; fenerde sarı boya gibi parlamasın.
+    static readonly Tur Cita      = new Tur("Doku_Cita", null, 1f, 0.45f, new Color(0.34f, 0.27f, 0.14f));
     static readonly Tur Boya    = new Tur("Doku_Boya", null, 1f, 0.3f, new Color(0.78f, 0.76f, 0.70f));     // pencere, plaka, zil: kirli beyaz yağlı boya
     static readonly Tur Madeni  = new Tur("Doku_Madeni", null, 1f, 0.55f, new Color(0.52f, 0.40f, 0.20f));  // kapı kolu, kapı gözü: eskimiş pirinç (#81)
     static readonly Tur Naylon  = new Tur("Doku_Naylon", null, 1f, 0.6f, new Color(0.04f, 0.04f, 0.045f)); // çöp poşeti: siyah naylon
@@ -193,8 +200,11 @@ public static class DokuKurucu
         if (ad == "Daire_Tavan") return Tek(Tavan);
         if (ad == "Ic_Kanat") return Tek(IcBoya, yerel: true);
         if (ad == "Ic_Kasa") return Tek(IcBoya);
-        if (ad == "Zemin" || ad == "Ara_Sahanlik") return Yuzeyler(Zemin, Tavan, Tavan);
-        if (ad == "Basamak") return Yuzeyler(Zemin, Tavan, Zemin);
+        // #107: mozaik yalnızca ÜSTTE. Basamağın rıhtı (dik yüzü) ve kirişin yanı sıva üstü yağlı boya;
+        // sahanlık döşemesinin ve ara sahanlığın gözden görünen kenarı da öyle. Alt yüz tavan sıvası.
+        if (ad == "Zemin" || ad == "Ara_Sahanlik") return Yuzeyler(Zemin, Tavan, YagliBoya);
+        if (ad == "Basamak") return Yuzeyler(Zemin, Tavan, YagliBoya);
+        if (ad == "Basamak_Citasi") return Tek(Cita, yerel: true);     // #107: basamak burnundaki pirinç çıta
         if (ad == "Tavan" || ad == "Oda_Tavan") return Tek(Tavan);
         if (ad == "Cati_Zemin") return Yuzeyler(Cati, Tavan, Cati);
         if (ad.StartsWith("Parapet")) return Tek(Cati);
@@ -203,7 +213,7 @@ public static class DokuKurucu
         if (ad == "Kasa_Cita") return Tek(Kapi, yerel: true);   // #81: kapının çıtaları kanatla döner, doku kaymasın
         if (ad.StartsWith("Kasa")) return Tek(Kapi);
         if (ad.StartsWith("Dikme")) return Tek(Demir);
-        if (ad.StartsWith("Tirabzan")) return Tek(Tirabzan);
+        if (ad.StartsWith("Tirabzan")) return Tek(Tirabzan, yerel: true);   // eğik çubuk: damar çubuk boyunca aksın
         if (ad.StartsWith("Cerceve") || ad == "Denizlik" || ad == "Kayit" || ad == "Numaralik" || ad == "Zil") return Tek(Boya);
         if (ad == "Kol" || ad == "Kapi_Gozu") return Tek(Madeni);
         if (ad == "Poset") return Tek(Naylon, yerel: true);
@@ -327,6 +337,15 @@ public static class DokuKurucu
     // ---------- MALZEMELER ----------
     // Her tür için Assets/Materials altında bir malzeme dosyası: yoksa üretilir, varsa
     // ayarları yenilenir (dosya silinmez; sahnedeki bağlantılar kopmasın).
+    // #107: kurucunun bir türün malzemesini adıyla istemesi için (sahanlık bandı). Dokula aynı dosyayı
+    // aynı ayarlarla yeniler; iki kaynak olmaz.
+    public static Material Malzeme(string ad)
+    {
+        Tur[] turler = { Duvar, Zemin, Tavan, Kapi, Cati, Demir, Tirabzan, Boya, Madeni, Naylon, Kumas, YagliBoya, Bordur, Cita };
+        foreach (Tur t in turler) if (t.ad == ad) return MalzemeAl(t, new Dictionary<string, Material>());
+        throw new System.ArgumentException("DokuKurucu: bilinmeyen tür " + ad);
+    }
+
     static Material MalzemeAl(Tur tur, Dictionary<string, Material> onbellek)
     {
         if (onbellek.TryGetValue(tur.ad, out Material m)) return m;
@@ -356,6 +375,8 @@ public static class DokuKurucu
         }
         // UV'ler zaten metre/döşeme boyu; malzemedeki tekrar 1 kalır.
         m.SetTextureScale("_BaseMap", Vector2.one);
+        // #107: düz renkli yağlı boya bandı tertemiz dururdu; #78'in kir katmanı (leke + toz) üstüne biner.
+        if (tur.ad == "Doku_YagliBoya") KirKurucu.KirEkle(m, 0.6f);
         EditorUtility.SetDirty(m);
         onbellek[tur.ad] = m;
         return m;

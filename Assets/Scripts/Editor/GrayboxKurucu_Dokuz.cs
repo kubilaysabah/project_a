@@ -325,7 +325,6 @@ public static partial class GrayboxKurucu
     // Dokula() her kutuya adına göre 1994'ün dokusunu verir (lekeli sıva, kirli mozaik, çizik kaplama). Bu kat
     // 1974'te yenidir: aynı adların taze karşılıkları takılır. Kural ad eşlemesidir, kutu listesi değil: ileride
     // sahanlığa eklenen her parça kendiliğinden tazelenir. Daire_9 dışarıda kalır (kaplamasını KatYoneticisi takar).
-    const float LambriYuk = 1.15f;   // yağlı boya bandının üst sınırı (70'lerin apartman sahanlığı)
 
     public static void DokuzuncuKatiTazele()
     {
@@ -343,8 +342,13 @@ public static partial class GrayboxKurucu
             { "Doku_Kapi",    TazeMalzeme("Taze_Kapi",    "sapele_veneer",       new Color(0.66f, 0.46f, 0.32f), 0.62f) },
             { "Doku_Boya",    TazeMalzeme("Taze_Boya",    null,                  new Color(0.74f, 0.74f, 0.70f), 0.55f) },   // #126: 0,94 fenerde patlıyordu
             { "Doku_Madeni",  TazeMalzeme("Taze_Madeni",  null,                  new Color(0.86f, 0.68f, 0.30f), 0.80f, metal: 0.7f) },
+            { "Doku_Cita",    TazeMalzeme("Taze_Madeni",  null,                  new Color(0.86f, 0.68f, 0.30f), 0.80f, metal: 0.7f) },   // #107: yeni pirinç çıta
             { "Doku_Demir",   TazeMalzeme("Taze_Demir",   null,                  new Color(0.10f, 0.13f, 0.11f), 0.60f) },
-            { "Doku_Tirabzan", TazeMalzeme("Taze_Tirabzan", null,                new Color(0.30f, 0.16f, 0.08f), 0.65f) },
+            { "Doku_Tirabzan", TazeMalzeme("Taze_Tirabzan", "sapele_veneer",     new Color(0.60f, 0.38f, 0.22f), 0.70f) },
+            // #107: 1994'ün kirli yağlı boya bandı, bordürü ve süpürgeliği 1974'te yeni: çağla yeşili, parlak.
+            { "Doku_YagliBoya", TazeMalzeme("Taze_YagliBoya", null,              new Color(0.56f, 0.70f, 0.58f), 0.72f) },
+            { "Doku_Bordur",   TazeMalzeme("Taze_Bordur",   null,                new Color(0.26f, 0.38f, 0.30f), 0.72f) },
+            { "Supurgelik",    TazeMalzeme("Taze_Supurgelik", null,              new Color(0.32f, 0.22f, 0.12f), 0.60f) },
         };
         int sayi = 0;
         foreach (MeshRenderer r in kok.GetComponentsInChildren<MeshRenderer>(true))
@@ -358,12 +362,8 @@ public static partial class GrayboxKurucu
             }
             if (degisti) { r.sharedMaterials = mats; sayi++; }
         }
-        foreach (string sahanlikAdi in new[] { "Sahanlik_9", "Sahanlik_9_Ust" })
-        {
-            Transform sh = kok.transform.Find(sahanlikAdi);
-            if (sh != null) YagliBoyaBandiKur(sh);
-        }
-        Debug.Log($"[DOKUZ] 1974 tazelemesi: {sayi} parça taze malzeme aldı, yağlı boya bandı kuruldu.");
+        // Yağlı boya bandı artık her sahanlıkta SahanlikKur içinde kurulur (#107); burada yalnızca malzemesi tazelenir.
+        Debug.Log($"[DOKUZ] 1974 tazelemesi: {sayi} parça taze malzeme aldı.");
     }
 
     // Taze malzeme: DokuKurucu'nun yaptığı gibi URP Lit, aynı doku dosyaları (dokuyu DokuKurucu.DokuAl yükler ki
@@ -397,36 +397,4 @@ public static partial class GrayboxKurucu
         return m;
     }
 
-    // 70'lerin apartmanı: duvarın alt 1,15 metresi parlak yağlı boya (çağla yeşili), üstünde koyu bir bordür.
-    // Her "Duvar_*" kutusunun (lentolar hariç) sahanlığa bakan yüzüne 1,2 cm'lik bir band konur; çarpışmasız.
-    static void YagliBoyaBandiKur(Transform sahanlik)
-    {
-        Material boya = TazeMalzeme("Taze_YagliBoya", null, new Color(0.56f, 0.70f, 0.58f), 0.72f);
-        Material bordur = TazeMalzeme("Taze_Bordur", null, new Color(0.26f, 0.38f, 0.30f), 0.72f);
-        foreach (Transform duvar in sahanlik)
-        {
-            if (!duvar.name.StartsWith("Duvar_") || duvar.name.Contains("Lento")) continue;
-            if (duvar.Find("Lambri") != null) continue;   // yeniden çalıştırmada iki kez konmasın
-            // Sahanlığa bakan yön: sol duvar +x, sağ duvar -x, ön duvar +z, arka duvar -z.
-            Vector3 ic = duvar.name.Contains("_Sol") ? Vector3.right : duvar.name.Contains("_Sag") ? Vector3.left
-                       : duvar.name.Contains("_On") ? Vector3.forward : Vector3.back;
-            if (duvar.name.StartsWith("Duvar_Arka")) ic = Vector3.back;
-            bool yanDuvar = Mathf.Abs(ic.x) > 0.5f;
-            Vector3 olcek = duvar.localScale;
-            float uzunluk = yanDuvar ? olcek.z : olcek.x;
-            Vector3 yuz = duvar.localPosition + ic * (DuvarKalin / 2f);   // duvarın iç yüzü
-            GameObject band = Kutu("Lambri", duvar, Vector3.zero, Vector3.one);
-            band.transform.SetParent(sahanlik, false);
-            band.transform.localPosition = new Vector3(yuz.x, LambriYuk / 2f, yuz.z) + ic * 0.006f;
-            band.transform.localScale = yanDuvar ? new Vector3(0.012f, LambriYuk, uzunluk) : new Vector3(uzunluk, LambriYuk, 0.012f);
-            band.transform.SetParent(duvar, true);
-            Boya(band, boya);
-            Object.DestroyImmediate(band.GetComponent<Collider>());
-            GameObject cizgi = Kutu("Bordur", sahanlik, new Vector3(yuz.x, LambriYuk + 0.015f, yuz.z) + ic * 0.008f,
-                                    yanDuvar ? new Vector3(0.016f, 0.03f, uzunluk) : new Vector3(uzunluk, 0.03f, 0.016f));
-            cizgi.transform.SetParent(duvar, true);
-            Boya(cizgi, bordur);
-            Object.DestroyImmediate(cizgi.GetComponent<Collider>());
-        }
-    }
 }
