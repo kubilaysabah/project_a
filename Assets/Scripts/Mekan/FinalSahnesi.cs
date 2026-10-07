@@ -58,6 +58,12 @@ public class FinalSahnesi : MonoBehaviour
     // yatay yüzeylere (yol, arsa) neredeyse hiç vurmuyor, kadrajın altı kararıyordu.
     public static readonly Vector3 SafakGunesDonus = new Vector3(22f, 25f, 0f);
     public const float SafakGunesSiddeti = 1.6f;
+    // İkinci sonun (#121) gece cephesi: ay önden, soğuk ve zayıf; katlar sayılsın ama sabah olmasın.
+    // (Gece post-processing'i 0,2 altını eziyor; değerler v121 ölçümüyle seçildi.) Static: ölçüm eval'i ayarlar.
+    public static Color GeceOrtam = new Color(0.16f, 0.18f, 0.26f);
+    public static Color GeceSis = new Color(0.05f, 0.06f, 0.09f);
+    public static Color GeceAyRengi = new Color(0.62f, 0.70f, 0.92f);
+    public static float GeceAySiddeti = 0.9f;
 
     private Transform oyuncu;
     private bool basladi;
@@ -78,6 +84,47 @@ public class FinalSahnesi : MonoBehaviour
         Suruyor = false;   // static: sahne yeniden yüklenince sıfırlanmalı (#103 kuralı)
         Transform k = transform.Find("Final_Kamera");
         if (k != null) finalKamera = k.GetComponent<Camera>();
+    }
+
+    // ---------- 1b. İKİNCİ SON: KAPICI GİDİYOR (#121) ----------
+    /// <summary>
+    /// Dokuzuncu kattan anahtarsız inen kapıcı (DokuzuncuKat.Terk çağırır). Şafak yok: gece dış cephe, yanık
+    /// pencere, siluet ve asansör sesi yok; jenerik "dördüncü de gitti" satırıyla başlar. Kayıt yine silinir.
+    /// </summary>
+    public void TerkEt(Transform oyuncuTransform)
+    {
+        if (basladi) return;
+        basladi = true;
+        Suruyor = true;
+        oyuncu = oyuncuTransform;
+        ArkaMuzik.Ornek?.Sustur(4f);
+        StartCoroutine(Terk());
+    }
+
+    private IEnumerator Terk()
+    {
+        yield return Karart(0f, 1f);
+        GeceyiKur();
+        yield return DisCepheyeGec();
+        yield return new WaitForSeconds(3f);   // pencere yanık, kimse yok: sessizlik
+        yield return JenerikVeBitis(true);
+    }
+
+    // Gece cephesi: ay şafak güneşinin yerine geçer (önden, alçak), soğuk ve zayıf; sis uzağa.
+    private void GeceyiKur()
+    {
+        Light ay = null;
+        foreach (Light l in FindObjectsByType<Light>()) if (l.type == LightType.Directional) ay = l;
+        RenderSettings.ambientLight = GeceOrtam;
+        RenderSettings.fogColor = GeceSis;
+        RenderSettings.fogStartDistance = 40f;
+        RenderSettings.fogEndDistance = 260f;
+        if (ay != null)
+        {
+            ay.color = GeceAyRengi;
+            ay.intensity = GeceAySiddeti;
+            ay.transform.rotation = Quaternion.Euler(SafakGunesDonus);
+        }
     }
 
     // ---------- 1. ÇATI KAPISI AÇILDI ----------
@@ -155,7 +202,26 @@ public class FinalSahnesi : MonoBehaviour
         yield return new WaitForSeconds(catidaBekleme);
 
         yield return Karart(0f, 1f);
+        yield return DisCepheyeGec();
 
+        // Bina bütünüyle kadrajda: önce asansörün sesi, sonra yanan pencerede biri belirir.
+        yield return new WaitForSeconds(1.2f);
+        if (asansorSesi != null)
+        {
+            // İki boyutlu, kısık: kamera sokakta, ses binanın içinden, uzaktan gelir.
+            AudioSource kulak = finalKamera.GetComponent<AudioSource>();
+            if (kulak != null) kulak.PlayOneShot(asansorSesi, 0.45f);
+        }
+        yield return new WaitForSeconds(0.9f);
+        if (pencereSilueti != null) pencereSilueti.SetActive(true);
+        Debug.Log("[FINAL] Dokuzuncu katın penceresinde biri durdu.");
+        yield return JenerikVeBitis(false);
+    }
+
+    // Her iki sonun ortak parçası: oyuncu ve kat mantığı kapanır, pencere yanar, dış kamera açılır, kararma
+    // açılır, kamera geri çekilip bütün binayı gösterir (#121'de Final()'den ayrıldı).
+    private IEnumerator DisCepheyeGec()
+    {
         // Oyuncuyu durdur, onun kamerasını ve kulağını kapat.
         Camera oyuncuKamera = oyuncu.GetComponentInChildren<Camera>();
         if (oyuncuKamera != null)
@@ -185,23 +251,16 @@ public class FinalSahnesi : MonoBehaviour
             yield return null;
         }
         KamerayiYerlestir(1f);
+    }
 
-        // Bina bütünüyle kadrajda: önce asansörün sesi, sonra yanan pencerede biri belirir.
-        yield return new WaitForSeconds(1.2f);
-        if (asansorSesi != null)
-        {
-            // İki boyutlu, kısık: kamera sokakta, ses binanın içinden, uzaktan gelir.
-            AudioSource kulak = finalKamera.GetComponent<AudioSource>();
-            if (kulak != null) kulak.PlayOneShot(asansorSesi, 0.45f);
-        }
-        yield return new WaitForSeconds(0.9f);
-        if (pencereSilueti != null) pencereSilueti.SetActive(true);
-        Debug.Log("[FINAL] Dokuzuncu katın penceresinde biri durdu.");
+    // Jenerik ve bitiş (iki sonun ortak kuyruğu). terk: ikinci sonun satırları başlığın altına girer.
+    private IEnumerator JenerikVeBitis(bool terk)
+    {
 
         yield return new WaitForSeconds(3f);
 
         // Jenerik: ekranın altından yukarı akar. Split('\n'): metni satır sonlarından böler.
-        jenerik = Dil.Getir("jenerik").Split('\n');
+        jenerik = JenerikSatirlari(terk);
         for (jenerikKonum = 0f; jenerikKonum < 1f; jenerikKonum += Time.deltaTime / jenerikSuresi)
             yield return null;
 
@@ -215,6 +274,21 @@ public class FinalSahnesi : MonoBehaviour
         Debug.Log("[FINAL] Kat kaydı silindi: bir sonraki 'Başla' açılıştan başlar.");
         // Oyun baştan: sahne yeniden yüklenir, her şey (ışık, katlar, kartlar) ilk hâline döner.
         SceneManager.LoadScene(gameObject.scene.name);
+    }
+
+    // Jenerik satırları: başlık, boşluk, (ikinci sonda "jenerik_terk" satırları + boşluk), kalan jenerik.
+    // Jenerik metni tek bir tabloda durur; ikinci son yalnızca kendi iki satırını araya sokar (#121).
+    private string[] JenerikSatirlari(bool terk)
+    {
+        string[] asil = Dil.Getir("jenerik").Split('\n');
+        if (!terk) return asil;
+        var satirlar = new System.Collections.Generic.List<string>();
+        int bas = Mathf.Min(2, asil.Length);            // başlık + boş satır
+        for (int i = 0; i < bas; i++) satirlar.Add(asil[i]);
+        satirlar.AddRange(Dil.Getir("jenerik_terk").Split('\n'));
+        satirlar.Add("");
+        for (int i = bas; i < asil.Length; i++) satirlar.Add(asil[i]);
+        return satirlar.ToArray();
     }
 
     private void KamerayiYerlestir(float s)

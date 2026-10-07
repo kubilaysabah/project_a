@@ -48,6 +48,7 @@ not.kat8_plan	9. KAT PLANI\n\nDaireler: 33 - 34 - 35 - 36\n\nRuhsatta yok.\nMerd
 not.kapat	{0}: kapat	{0}: close
 
 # ---- Jenerik: ilk satır başlık, boş satırlar aralık ----
+jenerik_terk	Dördüncü kapıcı da gitti.\nLamba çivide kaldı; pencere hâlâ yanık.	The fourth janitor left too.\nThe lamp stayed on the nail; the window is still lit.
 jenerik	HUZUR APARTMANI\n\nTasarım ve Geliştirme\nŞahan Boz\n\nBirlikte\nKubilay\n\nMüzik\nDeath is Looming: Scott Elliott (OpenGameArt, CC BY 4.0)\n\nSes\nLavabo damlası: Funkelfang (Freesound, CC BY 4.0)\n\nFotoğraflar\nAile fotoğrafları Stable Diffusion XL ile üretildi (gerçek kişi yok)\n\n\nOynadığın için teşekkürler.	HUZUR APARTMANI\n\nDesign & Development\nŞahan Boz\n\nWith\nKubilay\n\nMusic\nDeath is Looming: Scott Elliott (OpenGameArt, CC BY 4.0)\n\nSound\nDripping sink: Funkelfang (Freesound, CC BY 4.0)\n\nPhotographs\nFamily photos generated with Stable Diffusion XL (no real people)\n\n\nThank you for playing.
 
 # ---- Duraklatma menüsü (Esc) ----

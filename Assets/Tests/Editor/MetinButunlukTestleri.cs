@@ -37,11 +37,11 @@ public class MetinButunlukTestleri
     // Regex (düzenli ifade): bir yazı kalıbını tarif eden küçük bir dil. Buradaki kalıp:
     //   "  → bir tırnak
     //   (ipucu|not|...)\.[a-z0-9_.]+  → öneklerden biri, bir nokta, sonra küçük harfler
-    //   |jenerik  → ya da tek başına "jenerik"
+    //   |jenerik(?:_[a-z]+)?  → ya da "jenerik" / "jenerik_terk" (#121)
     //   "  → kapanan tırnak
     private static HashSet<string> KoddakiAnahtarlar()
     {
-        var kalip = new Regex("\"((?:" + string.Join("|", Onekler) + ")\\.[a-z0-9_.]+|jenerik)\"");
+        var kalip = new Regex("\"((?:" + string.Join("|", Onekler) + ")\\.[a-z0-9_.]+|jenerik(?:_[a-z]+)?)\"");   // jenerik_terk (#121)
         var bulunan = new HashSet<string>();   // HashSet: aynı değeri bir kez tutan küme
 
         string kok = Path.Combine(Application.dataPath, "Scripts");

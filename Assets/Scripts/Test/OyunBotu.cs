@@ -25,6 +25,8 @@ using UnityEngine;
 public class OyunBotu : MonoBehaviour
 {
     public static OyunBotu Ornek { get; private set; }
+    /// <summary>İkinci son (#121): dokuzuncu katta anahtarı almadan kabine binip gider. Baslat'tan önce ayarlanır.</summary>
+    public static bool TerkSonu;
     public readonly List<string> Sorunlar = new List<string>();
     public bool Bitti { get; private set; }
     public string Durum { get; private set; } = "başlıyor";
@@ -155,7 +157,7 @@ public class OyunBotu : MonoBehaviour
             int kat = yonetici.MevcutKat;
             Yaz($"{kat}. kat başlıyor");
             yield return KatiCoz(kat);
-            if (kat >= KatSayaci.CatiKati) { yield return Dokuz(); yield return Cati(); break; }
+            if (kat >= KatSayaci.CatiKati) { yield return Dokuz(); if (!TerkSonu) yield return Cati(); break; }
             yield return SahanligaGec();
             yield return Merdivenden(kat);
             yield return new WaitForSeconds(2f);
@@ -495,6 +497,20 @@ public class OyunBotu : MonoBehaviour
         foreach (IcKapi k in dk.GetComponentsInChildren<IcKapi>(true)) if (k.name == "Kapi_Salon") salon = k;
         if (salon == null) Sorun("dokuzuncu katta salon kapısı bulunamadı");
         else if (!salon.Acik) Sorun("salon kapısı lamba asılınca açılmadı");
+        if (TerkSonu)
+        {
+            // İkinci son (#121): anahtar alınmaz, kabine binilir, bekleme dolunca kapılar kapanır ve final başlar.
+            Yaz("9. kat: anahtarı almadan kabine biniyor (ikinci son)");
+            Transform kabinTerk = dk.transform.Find("Sahanlik_9/Asansor/Kabin");
+            if (kabinTerk == null) { Sorun("dokuzuncu katın kabini yok"); yield break; }
+            Isinla(kabinTerk.TransformPoint(new Vector3(0f, 0f, -MekanOlculeri.SahanlikDerin - MekanOlculeri.DuvarKalin - 0.6f)), kok.y);
+            for (float t = 0; t < 40f && !FinalSahnesi.Suruyor; t += 0.25f) yield return new WaitForSeconds(0.25f);
+            if (!FinalSahnesi.Suruyor) { Sorun("ikinci son başlamadı (FinalSahnesi.Suruyor gelmedi)"); yield break; }
+            if (!DokuzuncuKat.Yasandi) Sorun("ikinci sonda dokuzuncu kat 'yaşandı' işaretlenmedi");
+            if (Cep.Tasiyor(EsyaTuru.KatAnahtari, KatSayaci.CatiKati)) Sorun("ikinci sonda çatı anahtarı cepte");
+            Yaz("ikinci son başladı (gece dış cephe)");
+            yield break;
+        }
         Yaz("9. kat: sofradan çatı anahtarını alıyor");
         Esya anahtar = null;
         foreach (Esya e in dk.GetComponentsInChildren<Esya>(true)) if (e.Tur == EsyaTuru.KatAnahtari) anahtar = e;

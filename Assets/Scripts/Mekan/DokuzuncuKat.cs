@@ -20,6 +20,10 @@
 //   5. Yakalanırsa Yakalandi(): kararma, bölüm kabinin açılışından yeniden (anahtar tabağa, Gölge
 //      sandalyeye, lamba oyuncuya). KAYIT DEĞİŞMEZ: dokuzuncu kat kayda girmez (#84: oyun burada
 //      kapatılırsa 8. katın başından açılır).
+//   6. İKİNCİ SON (#121, Şahan): lamba çiviye asıldıktan sonra oyuncu anahtarı ALMADAN kabine girip
+//      TerkBeklemesi kadar durursa kapılar kapanır, kabin 8'e iner ve FinalSahnesi.TerkEt ile "çekip giden"
+//      son oynar: önceki üç kapıcı gibi dördüncü de gider; lamba çivide, pencere yanık, siluet yok. Lamba
+//      asılmadan kabine girmek hiçbir şey yapmaz (oyuncu daha bir şey görmedi).
 //
 // Dokuzuncu kat sahnede ayrı bir settir (Dokuzuncu_Kat kökü, x = -400; dış cephe gibi) ve GrayboxKurucu
 // kurar: 1974 sahanlığı (33-36 numaralı kapılar, tuğlayla örülü merdiven), Daire_9 ve içindekiler.
@@ -48,6 +52,7 @@ public class DokuzuncuKat : MonoBehaviour
     private const float KacisBeklemesi = 2.5f;   // anahtar alındıktan kaç sn sonra Gölge yürümeye başlar
     private const float KacisHizi = 2.0f;         // oyuncu 1,8 m/sn
     private const float OturmaYuksekligi = 0.47f; // sandalye minderinin üstü
+    private const float TerkBeklemesi = 2.5f;     // ikinci son: anahtarsız kabinde bu kadar durunca kapılar kapanır (#121)
 
     /// <summary>Sahnedeki tek dokuzuncu kat (AsansorPanosu buradan ulaşır).</summary>
     public static DokuzuncuKat Ornek { get; private set; }
@@ -73,6 +78,8 @@ public class DokuzuncuKat : MonoBehaviour
     private Vector3 golgeOturmaYeri;           // Gölge'nin sandalyedeki konumu (yakalanınca geri döner)
     private Quaternion golgeOturmaDonusu;
     private bool yolculukSuruyor, anahtarAlindi, donusBasladi;
+    private bool lambaAsildi;                  // çiviye asıldı mı (ikinci sonun ön şartı, #121)
+    private float kabindeSure;                 // anahtarsız kabinde geçen süre (#121)
     private float karartma;                    // 0-1: yakalanma kararması
 
     // Static alanlar sahne yeniden yüklenince (bitiş, Katlar sayfası) kendiliğinden sıfırlanmaz (#103).
@@ -172,7 +179,7 @@ public class DokuzuncuKat : MonoBehaviour
 
     // ---------- 2. ÇİVİ VE SALON KAPISI ----------
 
-    private void LambaAsildi() { StartCoroutine(SalonuAc()); }
+    private void LambaAsildi() { lambaAsildi = true; StartCoroutine(SalonuAc()); }
 
     private IEnumerator SalonuAc()
     {
@@ -192,6 +199,52 @@ public class DokuzuncuKat : MonoBehaviour
         if (!anahtarAlindi && Cep.Tasiyor(EsyaTuru.KatAnahtari, KatSayaci.CatiKati)) AnahtarAlindi();
         // Kaçış: anahtar elde, oyuncu kabinde → kapılar kapanır, iniş.
         if (anahtarAlindi && !donusBasladi && pano != null && pano.OyuncuKabinde()) StartCoroutine(Donus());
+        // İkinci son (#121): lamba asılı, anahtar alınmamış, oyuncu kabinde bekliyor → çekip gidiyor.
+        // Bekleme var ki kabine bir adım atıp çıkan oyuncu istemeden oyunu bitirmesin.
+        if (lambaAsildi && !anahtarAlindi && !donusBasladi && pano != null)
+        {
+            if (pano.OyuncuKabinde()) { kabindeSure += Time.deltaTime; if (kabindeSure >= TerkBeklemesi) StartCoroutine(Terk()); }
+            else kabindeSure = 0f;
+        }
+    }
+
+    // ---------- 6. İKİNCİ SON: ANAHTARSIZ İNİŞ (#121) ----------
+    // Donus'un sessiz kardeşi: Gölge kalkmaz, kapıya vurulmaz, kovalamaca yok. Kabin 8'e iner; kapılar
+    // açılmadan FinalSahnesi.TerkEt oyunu alır (gece dış cephe, yanık pencere, jenerik). Icinde açık kalır:
+    // gerilim kuralı ve Gölge son boyunca kapalı; sahne yeniden yüklenince static'ler zaten sıfırlanır.
+    private IEnumerator Terk()
+    {
+        donusBasladi = true;
+        if (kontrol != null) kontrol.enabled = false;
+        Debug.Log("[DOKUZ] Oyuncu anahtarsız kabinde: çekip gidiyor (ikinci son).");
+        yield return pano.KapilariOynat(1f, 0f);
+        pano.KalkisSesiCal();
+        pano.Ugultu(true);
+        KameraHareketi.Sars(0.10f, 0.7f);
+        yield return new WaitForSeconds(1.4f);
+        pano.GostergeYaz("");
+        StartCoroutine(KabinLambasiniTitret(pano.Kabin));
+        yield return new WaitForSeconds(0.7f);
+        pano.GostergeYaz("8");
+        yield return new WaitForSeconds(1.3f);
+        if (radyo != null) radyo.Stop();
+        OyuncuyuKabineTasi(pano.Kabin, pano8 != null ? pano8.Kabin : null);
+        pano.KabinAyrildi("8");
+        Yasandi = true;
+        if (pano8 != null)
+        {
+            pano8.KabinGeldiKapali(KatSayaci.CatiKati, "8");
+            pano8.Ugultu(true);
+            yield return new WaitForSeconds(0.8f);
+            pano8.Ugultu(false);
+            pano8.VarisSesiCal();
+            yield return new WaitForSeconds(0.4f);
+            pano8.DingCal();
+        }
+        // Kapılar açılmaz: kapıcı burada iner ve gider; gerisini dış cephe anlatır.
+        FinalSahnesi final = FindAnyObjectByType<FinalSahnesi>();
+        if (final != null) final.TerkEt(oyuncu);
+        else Debug.LogWarning("[DOKUZ] FinalSahnesi yok: ikinci son oynatılamadı.");
     }
 
     private void AnahtarAlindi()
@@ -338,6 +391,8 @@ public class DokuzuncuKat : MonoBehaviour
     {
         anahtarAlindi = false;
         donusBasladi = false;
+        lambaAsildi = false;
+        kabindeSure = 0f;
         if (anahtar != null) Destroy(anahtar);
         if (anahtarSablonu != null && anahtarYeri != null)
         {

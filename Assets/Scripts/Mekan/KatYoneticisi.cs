@@ -45,7 +45,7 @@ public class KatYoneticisi : MonoBehaviour
     /// </summary>
     public bool GolgeSayabilir
     {
-        get { return sayac != null && !acilisModu && !catiAcildi && !DokuzuncuKat.Icinde && !acilanKatlar.Contains(sayac.MevcutKat); }
+        get { return sayac != null && !acilisModu && !catiAcildi && !FinalSahnesi.Suruyor && !DokuzuncuKat.Icinde && !acilanKatlar.Contains(sayac.MevcutKat); }
     }
 
     // Çatı kapısı açıldı mı (final başladı)?

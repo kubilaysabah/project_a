@@ -263,3 +263,9 @@ borcu öder. Kararlar: **zorunlu** (seçim yok; bina çağırır), **bulmacasız
   gösterge bir an boş kalır ve kabin lambası titrer. Boş çivi fenerin ışığında eşyalar gibi parıldar
   (`FenerParlamasi`, eşyasız; sabit 3,5 m), lamba asılınca söner. Gölge'nin kolu dirsekten iki parça
   (`Kol_*/OnKol_*`); otururken ön kol masaya yatar, yürürken dirsekten de salınır.
+- **İkinci son — "çekip giden" (#121, Şahan 2026-10-07).** Lamba çiviye asıldıktan sonra oyuncu anahtarı ALMADAN
+  kabine girip 2,5 sn durursa kapılar kapanır (Gölge kalkmaz, kovalamaca yok), kabin 8'e iner ve kapılar açılmadan
+  `FinalSahnesi.TerkEt` başlar: şafak yok, gece dış cephe (ay önden, soğuk ve zayıf: katlar sayılır), dokuzuncu katın
+  penceresi yanık, siluet ve asansör sesi yok; jenerik "Dördüncü kapıcı da gitti. / Lamba çivide kaldı; pencere hâlâ
+  yanık." satırlarıyla başlar (`jenerik_terk`). Kayıt yine silinir (en yüksek kat ve fotoğraflar kalır). Lamba
+  asılmadan kabine girmek hiçbir şey yapmaz. Steam başarımı ("Dördüncü de gitti") Steam sayfasıyla (#12) gelir.
