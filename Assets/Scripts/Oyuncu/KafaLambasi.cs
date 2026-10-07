@@ -32,7 +32,15 @@ public class KafaLambasi : MonoBehaviour
     // şiddet 6'dan 3,5'e, dış koni 44°'den 64°'ye; iç koni 26°'de kaldı ki kenar geniş bir
     // geçişle yumuşasın.
     public const float Siddet = 3.5f;
-    public const float Menzil = 10f;
+    // #120: menzil 10 → 15 m. URP spot ışığı menzile yaklaşırken yumuşakça sıfıra iner ((1-(d/r)^4)^2):
+    // 10 m menzilde 7 m'deki daire kapısına ışığın yalnızca %58'i ulaşıyordu, ters kareyle birlikte %4; gece
+    // post-processing'i 0,2 altını eziyor, sahanlık kapısı okunmuyordu. 15 m'de 7 m'de %91 kalır.
+    public static float Menzil = 15f;
+    // #120 UZAK TELAFİSİ: huzmenin ortası uzağa vuruyorsa fener güçlenir. Gerçek fener böyle yapmaz ama
+    // göz yapar (uzağa bakınca iris açılır); No70 ve Chilla's Art fenerleri 8-10 m'yi okutur. Yakın duvar
+    // (UzakBaslangic altı) etkilenmez: antre, çekmece, not eskisi gibi. Çarpan 3 m'de 1, 8 m'de 1+UzakKazanc.
+    public static float UzakBaslangic = 3f, UzakTam = 8f, UzakKazanc = 1.6f;
+    private const float UzakGecisHizi = 4f;         // çarpanın saniyede en çok ne kadar değiştiği (0,25 sn'de tam yol)
     public const float DisAci = 64f, IcAci = 26f;   // dış koni ve tam şiddet konisi (yumuşak kenar)
     public static readonly Color Renk = new Color(1f, 0.90f, 0.72f);   // sıcak beyaz, ampullerden biraz beyaz
 
@@ -71,6 +79,9 @@ public class KafaLambasi : MonoBehaviour
     /// <summary>Kaynağın şu an kameranın ne kadar gerisinde olduğu (arkada duvar varsa daha az).</summary>
     public float GeriAlinan { get; private set; }
     /// <summary>Uzaklık telafisi: 3 m'deki parlaklık eskisiyle aynı kalsın diye güç bu kadar artar.</summary>
+    /// <summary>Uzak telafisinin o anki çarpanı (1 = yakın yüzey; #120). FenerSekmesi ve testler okur.</summary>
+    public float UzakCarpani { get; private set; } = 1f;
+
     public float TelafiCarpani
     {
         get { float k = (TelafiMesafesi + GeriAlinan) / TelafiMesafesi; return k * k; }
@@ -148,7 +159,8 @@ public class KafaLambasi : MonoBehaviour
         isik.color = Color.Lerp(Renk, SariRenk, karisim);
         // Güç: karışımla aynı eğride, ama çarpan olarak (kural güç çarpanını gerilimden verir; burada
         // yumuşatılmış karışımdan türetilir ki renk ve güç birlikte hareket etsin).
-        isik.intensity = Siddet * TelafiCarpani * incelemeCarpani * (1f - (1f - LambaGerilimKurali.EnDusukGuc) * karisim);
+        UzakTelafisiniGuncelle();
+        isik.intensity = Siddet * TelafiCarpani * UzakCarpani * incelemeCarpani * (1f - (1f - LambaGerilimKurali.EnDusukGuc) * karisim);
 
         if (vinlama == null || vinlama.clip == null) return;
         // Vınlama yalnızca lamba yanarken: sesi çıkaran lambanın kendisi. Menüde (zaman durur) kısılır.
@@ -157,6 +169,21 @@ public class KafaLambasi : MonoBehaviour
         vinlama.pitch = LambaGerilimKurali.VinlamaPerdesi(GerilimDegeri());
         if (vinlama.volume > 0.001f && !vinlama.isPlaying) vinlama.Play();
         else if (vinlama.volume <= 0.001f && vinlama.isPlaying) vinlama.Stop();
+    }
+
+    // Uzak telafisi (#120): huzmenin ortasındaki ilk engelin uzaklığı (oyuncunun kendi parçaları atlanır;
+    // engel yoksa "uzak" sayılır). Çarpan hedefe yumuşakça gider ki kapı pervazından duvara bakarken titremesin.
+    private void UzakTelafisiniGuncelle()
+    {
+        float uzaklik = UzakTam;
+        Transform kok = transform.root;
+        foreach (RaycastHit h in Physics.RaycastAll(isik.transform.position, isik.transform.forward, Menzil, ~0, QueryTriggerInteraction.Ignore))
+        {
+            if (h.transform.IsChildOf(kok)) continue;
+            uzaklik = Mathf.Min(uzaklik, h.distance - GeriAlinan);
+        }
+        float hedef = 1f + UzakKazanc * Mathf.Clamp01(Mathf.InverseLerp(UzakBaslangic, UzakTam, uzaklik));
+        UzakCarpani = Mathf.MoveTowards(UzakCarpani, hedef, UzakGecisHizi * Time.deltaTime);
     }
 
     // Kaynağı kameranın gerisine alır (#110). Arkaya kısa bir ışın atılır; oyuncunun kendi parçaları (kamera

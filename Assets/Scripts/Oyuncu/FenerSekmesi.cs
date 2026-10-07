@@ -105,7 +105,7 @@ public class FenerSekmesi : MonoBehaviour
         // Fenerin o anki gücü (#103): eşya incelenirken fener %12'ye kısılır; sekme tam güçle hesaplanınca
         // incelenen eşyanın arkasındaki oda fenerden parlak bir dolguyla aydınlanıyordu.
         Light fener = lamba.IsikYonu.GetComponent<Light>();
-        float fenerOrani = fener != null ? Mathf.Clamp01(fener.intensity / (KafaLambasi.Siddet * lamba.TelafiCarpani)) : 1f;
+        float fenerOrani = fener != null ? Mathf.Clamp01(fener.intensity / (KafaLambasi.Siddet * lamba.TelafiCarpani * lamba.UzakCarpani)) : 1f;   // #120
         // Yakın yüzeyde sekme kısılır (#110): 40 cm'de sıfır, 1,6 m'de tam. Yüzü duvara dayamış oyuncunun
         // duvarı fener + sekmeyle bembeyaz yanıyordu; o kadar yakında sekmenin aydınlatacağı bir oda da yok.
         float yakinlik = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.4f, 1.6f, mesafe));
