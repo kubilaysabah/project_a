@@ -20,6 +20,9 @@ public static class SaklanmaKurali
 
     // Göz, ön yüzün (kapakların) bu kadar arkasına konur: kapağın aralığından bakıyormuş gibi.
     public const float OnPayi = 0.15f;
+    // #127: gözün kapak düzleminin ÖNÜNDE durduğu pay. Göz içeride (ön yüzün 15 cm arkasında) durunca kamera
+    // kapalı kapakların iç yüzüne bakıyordu: oda hiç görünmüyor, "aralık" kaplaması siyah gösteriyordu.
+    public const float DisPayi = 0.06f;
     // Göz yüksekliği en çok bu kadar; alçak bir dolapta tavanın 15 cm altı.
     public const float GozTavani = 1.55f;
     public const float TavanPayi = 0.15f;

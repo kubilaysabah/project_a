@@ -135,6 +135,10 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
         // Kafa lambası söner (karanlık dolapta ışık sızdırmak saklanmanın tersi); çıkışta eski hâline döner.
         lambaAcikti = lamba != null && lamba.Takili && lamba.Acik;
         if (lambaAcikti) lamba.Degistir();
+        // #127: göz alışması. Lamba sönünce dolaptan görünen oda simsiyahtı; oyuncu saklandığını bile anlamıyor,
+        // Gölge geçerken fark edilmiyordu. Kameradan dışarı bakan zayıf, soğuk, gölgesiz bir spot: oyuncunun
+        // gözü alışmış gibi odanın siluetleri okunur. Varlik saklanan oyuncuyu zaten görmez; ışık ona görünmez.
+        GorusIsigi(true);
 
         // Kapsül kapanır: dolabın içindeki oyuncuyu duvarlar dışarı itmesin, Gölge'nin ışınları da
         // (QueryTriggerInteraction.Ignore ile atılanlar dahil) ona çarpmasın.
@@ -204,6 +208,28 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
     // ---------- ÇIKIŞ ----------
 
     // sesli: normal çıkışta kapak gıcırdar ve ekran bir an kararır; zorla çıkışta (dolap yok olurken) yok.
+    // Dolap içi görüş ışığı (#127): kameranın çocuğu, bir kez kurulur, saklanırken açık.
+    private static Light gorusIsigi;
+    private void GorusIsigi(bool acik)
+    {
+        if (kamera == null) return;
+        if (gorusIsigi == null)
+        {
+            GameObject g = new GameObject("Gorus_Isigi");
+            g.transform.SetParent(kamera, false);
+            gorusIsigi = g.AddComponent<Light>();
+            gorusIsigi.type = LightType.Spot;
+            gorusIsigi.spotAngle = 80f;
+            gorusIsigi.innerSpotAngle = 40f;
+            gorusIsigi.range = 7f;
+            gorusIsigi.intensity = GorusIsigiSiddeti;
+            gorusIsigi.color = new Color(0.62f, 0.68f, 0.85f);
+            gorusIsigi.shadows = LightShadows.None;
+        }
+        gorusIsigi.enabled = acik;
+    }
+    public const float GorusIsigiSiddeti = 0.35f;
+
     private void Cik(bool sesli)
     {
         Aktif = null;
@@ -224,6 +250,7 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
         // Lamba girerken yanıyorduysa yine yanar; sönüktüyse sönük kalır. (Gizliyken F'ye basılmışsa da
         // girdiği hâle döner.)
         if (lamba != null && lamba.Takili && lamba.Acik != lambaAcikti) lamba.Degistir();
+        GorusIsigi(false);
 
         if (sesli)
         {
@@ -280,13 +307,15 @@ public class SaklanmaYeri : MonoBehaviour, IEtkilesimli
         return !ilk;
     }
 
-    // Göz noktası (dünya): kutunun ortasında, ön yüzün 15 cm arkasında, yerden min(1,55, tepe-0,15).
+    // Göz noktası (dünya): kutunun ortasında, kapak düzleminin 6 cm ÖNÜNDE (#127; eskiden 15 cm arkasında:
+    // kamera kapalı kapakların içine bakıyor, oda görünmüyordu), yerden min(1,55, tepe-0,15). Ekrandaki
+    // aralık kaplaması bakışı "kapak aralığından" gösterir; gövde (kapsül kapalı) içeride sayılır.
     // Modellerin ölçeği 1 kabul edilir (bütün mobilya şablonları öyle).
     private Vector3 IcNokta()
     {
         if (!YerelSinir(transform, out Bounds b)) return transform.position + Vector3.up * 1.5f;
         float goz = SaklanmaKurali.GozYuksekligi(b.size.y);
-        return transform.TransformPoint(new Vector3(b.center.x, b.min.y + goz, b.max.z - SaklanmaKurali.OnPayi));
+        return transform.TransformPoint(new Vector3(b.center.x, b.min.y + goz, b.max.z + SaklanmaKurali.DisPayi));
     }
 
     // Ön nokta (dünya, ayak hizası): dolabın ön yüzünün önünde, oyuncunun kapsülü sığacak kadar ötede.

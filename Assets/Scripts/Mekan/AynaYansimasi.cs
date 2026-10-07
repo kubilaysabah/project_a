@@ -74,7 +74,12 @@ public class AynaYansimasi : MonoBehaviour
     // şey bu katmanı kullanmamalı, yoksa oyuncu onu da göremez.
     public const int AynaKatmani = 30;
 
-    private const float EnUzak = 4f;            // oyuncu bundan uzaktaysa yansıma çizilmez (metre)
+    private const float EnUzak = 4f;            // bu uzaklığa kadar her kare tam yansıma (metre)
+    // #127: 4-12 m arası yansıma yine çizilir ama altı karede bir ve kısık (eski cam uzaktan koyu görünür); 12 m
+    // ötesi koyu cam. Eskiden 4 m dışında ayna kapkara bir dikdörtgendi (3. kat banyosu koridordan).
+    private const float UzakSinir = 12f;
+    private const int UzakAralik = 6;
+    private const float UzakParlaklik = 0.45f;
     private const float YansimaMenzili = 15f;   // yansıma kamerasının ne kadar uzağı çizdiği
     private const float SolmaSuresi = 0.25f;    // yansıma ile koyu cam arasındaki geçiş (saniye)
     private const int DokuYuksekligi = 384;     // çizim dokusunun piksel yüksekliği (genişlik orana göre)
@@ -83,7 +88,7 @@ public class AynaYansimasi : MonoBehaviour
     [SerializeField] private Renderer[] cerceve = new Renderer[0]; // çerçeve ve arkalık: hariç katta gizlenir
     [SerializeField] private int[] haricKatlar = new int[0];       // aynanın gizlendiği katlar (kurucu yazar)
     [SerializeField] private Color aynaRengi = new Color(0.80f, 0.82f, 0.84f);  // eski cam: biraz gri, biraz yeşil
-    [SerializeField] private Color koyuCam = new Color(0.02f, 0.022f, 0.025f);  // yansıma yokken camın rengi
+    [SerializeField] private Color koyuCam = new Color(0.05f, 0.055f, 0.065f);  // yansıma yokken camın rengi (#127: 0,02 siyah okunuyordu)
 
     private Renderer cam;                      // bu nesnenin (camın) çiziciri
     private RenderTexture doku;                // yansıma kamerasının çizdiği resim
@@ -206,14 +211,17 @@ public class AynaYansimasi : MonoBehaviour
         }
         if (haric) { yansimaKamerasi.enabled = false; Ciziliyor = false; return; }
 
-        // 2) Bu karede yansıma gerekli mi? Gerekliyse kamerayı yerleştir ve aç.
+        // 2) Bu karede yansıma gerekli mi? Gerekliyse kamerayı yerleştir ve aç. Uzaktayken (#127) kamera altı
+        // karede bir çalışır; aradaki karelerde doku son çizimi tutar (kapalı kamera dokuyu silmez).
         Ciziliyor = CizilmeliMi();
-        if (Ciziliyor) KamerayiYerlestir();
-        yansimaKamerasi.enabled = Ciziliyor;
+        bool yakin = Ciziliyor && Vector3.Distance(oyuncuKamerasi.transform.position, Merkez) <= EnUzak;
+        bool buKare = Ciziliyor && (yakin || Time.frameCount % UzakAralik == 0);
+        if (buKare) KamerayiYerlestir();
+        yansimaKamerasi.enabled = buKare;
 
         // 3) Cama dokuyu ve rengi ver. Parlaklık hedefe yumuşakça yaklaşır (MoveTowards: her karede
         // en fazla şu kadar adım).
-        float hedef = Ciziliyor ? 1f : 0f;
+        float hedef = !Ciziliyor ? 0f : (yakin ? 1f : UzakParlaklik);   // uzaktan kısık yansıma (#127)
         parlaklik = Mathf.MoveTowards(parlaklik, hedef, Time.unscaledDeltaTime / SolmaSuresi);
         if (cam != null)
         {
@@ -237,7 +245,7 @@ public class AynaYansimasi : MonoBehaviour
         // Oyuncu aynanın önünde mi? (Göz ile cam arasındaki farkın camın normaline izdüşümü.)
         float onunde = Vector3.Dot(goz - Merkez, Normal);
         if (onunde < 0.05f) return false;                                   // arkasında ya da cama yapışık
-        if (Vector3.Distance(goz, Merkez) > EnUzak) return false;
+        if (Vector3.Distance(goz, Merkez) > UzakSinir) return false;   // #127: 12 m'ye kadar (4 m ötesi seyrek ve kısık)
 
         // Ayna oyuncunun görüş piramidinin içinde mi? (Camın kutusu piramidin altı yüzüyle denenir.)
         GeometryUtility.CalculateFrustumPlanes(oyuncuKamerasi, gorusDuzlemleri);
