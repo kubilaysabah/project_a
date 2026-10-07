@@ -91,6 +91,7 @@ public class SahanlikKapisi : MonoBehaviour, IEtkilesimli
         }
         KafaLambasi lamba = FindAnyObjectByType<KafaLambasi>();
         if (lamba != null) lamba.Titret(1.4f);
+        Titresim.Vur(0.3f, 0.6f, 0.35f);   // #124: yanlış kapı: arkadan cevap
         Varlik.Gurultu(0.3f);    // yanlış kapıyı çaldı: bina duydu (#86)
         // Yanlış kapının bedeli (#83): "ardından cevap veriyorlar". Lamba titrerken Gölge oyuncunun önünde
         // belirir ve bir süre peşinden gelir (GezenGolge; zarar vermez, korkutur). Yer bulamazsa belirmez.

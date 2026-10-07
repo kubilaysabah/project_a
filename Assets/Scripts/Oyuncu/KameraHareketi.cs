@@ -135,6 +135,9 @@ public class KameraHareketi : MonoBehaviour
     public static void Sars(float guc, float sure)
     {
         if (ornek == null || sure <= 0f) return;
+        // #124: her kamera sarsıntısı kolda da duyulur (asansör, varış, çarpma): kamera 0,04-0,18 gücünde
+        // sarsılır, kol 0,15-0,65; ağır motor önde (gümbürtü), ince motor arkada.
+        Titresim.Vur(Mathf.Clamp01(guc * 3.6f), Mathf.Clamp01(guc * 1.8f), sure);
         // Yeni sarsıntı, eskisinin ŞU ANKİ gücünden büyükse onun yerini alır.
         if (guc >= ornek.AnlikSarsinti())
         {

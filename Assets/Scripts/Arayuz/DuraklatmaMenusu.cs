@@ -81,7 +81,7 @@ public class DuraklatmaMenusu : MonoBehaviour
     private int katOnay;                  // sorusu gösterilen kat (0 = yok)
     private static bool dogrudanBasla;    // sahne menüden kat seçilerek yüklendi: başlık ekranı gösterilmesin
     private const int AyarHassasiyet = 0, AyarSes = 1, AyarMuzik = 2, AyarKonusma = 3, AyarGorus = 4, AyarTers = 5,
-                      AyarSallanma = 6, AyarVarsayilan = 7, AyarGeri = 8, AyarOgeSayisi = 9;   // #118: Müzik, Konuşma
+                      AyarSallanma = 6, AyarTitresim = 7, AyarVarsayilan = 8, AyarGeri = 9, AyarOgeSayisi = 10;   // #118: Müzik, Konuşma; #124: Titreşim
 
     // Kontroller sayfasının satırları. Her satırın metni "eylem|klavye ve fare|oyun kolu": üç sütun
     // tek anahtarda durur, dil değişince üçü birlikte değişir. Tuşların kendisi de çevrilir
@@ -489,6 +489,7 @@ public class DuraklatmaMenusu : MonoBehaviour
             {
                 case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
                 case AyarSallanma: Ayarlar.Sallanma = !Ayarlar.Sallanma; break;
+                case AyarTitresim: Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f); break;   // açınca küçük bir deneme (#124)
                 case AyarVarsayilan: Ayarlar.VarsayilanaDon(); break;
                 case AyarGeri: SayfaAc(SayfaAna); break;
                 // Kaydırıcılarda onay tuşunun işi yok; sol/sağ ile değiştirilir.
@@ -555,6 +556,7 @@ public class DuraklatmaMenusu : MonoBehaviour
             case AyarGorus: Ayarlar.Gorus = Mathf.Round(Ayarlar.Gorus + yon); break;
             case AyarTers: Ayarlar.Ters = !Ayarlar.Ters; break;
             case AyarSallanma: Ayarlar.Sallanma = !Ayarlar.Sallanma; break;
+            case AyarTitresim: Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f); break;
         }
     }
 
@@ -1002,6 +1004,13 @@ public class DuraklatmaMenusu : MonoBehaviour
         if (GUI.Button(r, sallanmaYazisi, dugmeStili)) Ayarlar.Sallanma = !Ayarlar.Sallanma;
         y += 44f + ara;
 
+        // Oyun kolu titreşimi (#124): açınca kol bir an titrer ki oyuncu çalıştığını elinde duysun.
+        r = new Rect(x, y, en, 44f);
+        Vurgula(AyarTitresim, r);
+        string titresimYazisi = string.Format(Dil.Getir("ayar.titresim"), Ayarlar.Titresim ? Dil.Getir("ayar.acik") : Dil.Getir("ayar.kapali"));
+        if (GUI.Button(r, titresimYazisi, dugmeStili)) { Ayarlar.Titresim = !Ayarlar.Titresim; if (Ayarlar.Titresim) Titresim.Vur(0.5f, 0.5f, 0.3f); }
+        y += 44f + ara;
+
         y += ara;   // düğmelerle alttaki Varsayılan / Geri satırı arasında biraz boşluk
 
         float dugmeEn = (en - ara) / 2f, boy = 52f;
@@ -1056,7 +1065,10 @@ public class DuraklatmaMenusu : MonoBehaviour
         {
             var ortali = new GUIStyle(soluk) { alignment = TextAnchor.MiddleCenter };
             GUI.Label(new Rect(0, y + 14f, ArayuzOlcegi.Genislik, 30f), Dil.Getir("menu.kontrol_giris_alt"), ortali);
-            y += 30f;
+            // Işık uyarısı (#124): şimşek, titreyen lambalar ve yanıp sönen ışıklar var; ışığa duyarlı oyuncu
+            // oyuna girmeden bilsin. Yalnızca giriş kartında (yeni oyun), Kontroller sayfasında değil.
+            GUI.Label(new Rect(0, y + 40f, ArayuzOlcegi.Genislik, 30f), Dil.Getir("menu.isik_uyari"), ortali);
+            y += 56f;
         }
         Rect r = new Rect((ArayuzOlcegi.Genislik - 240f) / 2f, y + 30f, 240f, 50f);
         Vurgula(0, r);

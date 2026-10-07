@@ -342,6 +342,7 @@ public class Simsek : MonoBehaviour
         gokSesi.pitch = Aralik(0.92f, 1.04f);                           // her gürültü biraz farklı
         bogucu.cutoffFrequency = Mathf.Lerp(4000f, 900f, uzaklik);
         gokSesi.Play();
+        Titresim.Vur(Mathf.Lerp(0.6f, 0.25f, uzaklik), 0.15f, Mathf.Lerp(0.9f, 0.5f, uzaklik));   // #124: yakın gürültü sert
         Debug.Log($"[SIMSEK] Gök gürledi ({gecikme:0.0} sn sonra, ses {gokSesi.volume:0.00}, boğma {bogucu.cutoffFrequency:0} Hz).");
     }
 

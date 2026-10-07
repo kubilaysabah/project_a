@@ -24,6 +24,7 @@ public static class Ayarlar
     private const string KonusmaAdi = "ayar_konusma";   // #118: konuşma kanalı (telefon, radyo)
     private const string TersAdi = "ayar_ters";
     private const string SallanmaAdi = "ayar_sallanma";   // kafa sallanması (#92)
+    private const string TitresimAdi = "ayar_titresim";   // oyun kolu titreşimi (#124)
     private const string GorusAdi = "ayar_gorus";
     private const string KaliteAdi = "ayar_kalite";
     private const string ParlaklikAdi = "ayar_parlaklik";
@@ -36,6 +37,7 @@ public static class Ayarlar
     private static float muzik = AyarKurallari.MuzikVarsayilan, konusma = AyarKurallari.KonusmaVarsayilan;
     private static bool ters, tamEkran, vsync;
     private static bool sallanma = AyarKurallari.SallanmaVarsayilan;
+    private static bool titresim = AyarKurallari.TitresimVarsayilan;
     private static int kalite, genislik, yukseklik;
     private static bool hazir;
 
@@ -79,6 +81,13 @@ public static class Ayarlar
     {
         get { Hazirla(); return sallanma; }
         set { Hazirla(); sallanma = value; Kaydet(); }
+    }
+
+    /// <summary>Oyun kolu titreşimi (#124): av, kapı çarpması, gök gürültüsü, yakalanma. Kapalıysa Titresim.Vur hiç titretmez.</summary>
+    public static bool Titresim
+    {
+        get { Hazirla(); return titresim; }
+        set { Hazirla(); titresim = value; Kaydet(); }
     }
 
     public static bool Ters
@@ -162,6 +171,7 @@ public static class Ayarlar
         konusma = AyarKurallari.KonusmaVarsayilan;
         ters = AyarKurallari.TersVarsayilan;
         sallanma = AyarKurallari.SallanmaVarsayilan;
+        titresim = AyarKurallari.TitresimVarsayilan;
         gorus = AyarKurallari.GorusVarsayilan;
         AudioListener.volume = ses;
         Kaydet();
@@ -176,6 +186,7 @@ public static class Ayarlar
         KayitDeposu.Ayar.SetFloat(KonusmaAdi, konusma);
         KayitDeposu.Ayar.SetInt(TersAdi, ters ? 1 : 0);   // bool doğrudan saklanamıyor; 1/0 olarak
         KayitDeposu.Ayar.SetInt(SallanmaAdi, sallanma ? 1 : 0);
+        KayitDeposu.Ayar.SetInt(TitresimAdi, titresim ? 1 : 0);
         KayitDeposu.Ayar.SetFloat(GorusAdi, gorus);
         KayitDeposu.Ayar.SetInt(KaliteAdi, kalite);
         KayitDeposu.Ayar.SetFloat(ParlaklikAdi, parlaklik);
@@ -204,6 +215,7 @@ public static class Ayarlar
         konusma = AyarKurallari.Konusma(KayitDeposu.Ayar.GetFloat(KonusmaAdi, AyarKurallari.KonusmaVarsayilan));
         ters = KayitDeposu.Ayar.GetInt(TersAdi, AyarKurallari.TersVarsayilan ? 1 : 0) == 1;
         sallanma = KayitDeposu.Ayar.GetInt(SallanmaAdi, AyarKurallari.SallanmaVarsayilan ? 1 : 0) == 1;
+        titresim = KayitDeposu.Ayar.GetInt(TitresimAdi, AyarKurallari.TitresimVarsayilan ? 1 : 0) == 1;
         gorus = AyarKurallari.Gorus(KayitDeposu.Ayar.GetFloat(GorusAdi, AyarKurallari.GorusVarsayilan));
         kalite = AyarKurallari.Kalite(KayitDeposu.Ayar.GetInt(KaliteAdi, AyarKurallari.KaliteVarsayilan));
         parlaklik = AyarKurallari.Parlaklik(KayitDeposu.Ayar.GetFloat(ParlaklikAdi, AyarKurallari.ParlaklikVarsayilan));

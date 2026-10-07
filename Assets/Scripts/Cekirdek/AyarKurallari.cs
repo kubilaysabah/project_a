@@ -42,6 +42,7 @@ public static class AyarKurallari
     // Yürürken kameranın hafifçe sallanması. Bazı oyuncuların midesini bulandırır (hareket
     // hassasiyeti); bu yüzden kapatılabilir. Varsayılan açık: oyunun hissinin parçası.
     public const bool SallanmaVarsayilan = true;
+    public const bool TitresimVarsayilan = true;   // oyun kolu titreşimi (#124)
 
     // ---------- GÖRÜNTÜ (#30) ----------
     // Grafik kalitesi: 0 = Düşük, 1 = Orta, 2 = Yüksek. Oyun Yüksek'te ayarlandı.

@@ -189,6 +189,7 @@ public class KacisAni : MonoBehaviour
     private void Yakalandi()
     {
         durum = Durum.Bitti;
+        Titresim.Vur(1f, 0.8f, 0.9f);   // #124
         Debug.Log($"[KACIS] {kat}. kat: yakalandı; kat baştan başlıyor.");
         if (YakalanmaIsleyici != null) { YakalanmaIsleyici(kat); return; }   // dokuzuncu kat kendi başa dönüşünü yapar
         KatYoneticisi y = FindAnyObjectByType<KatYoneticisi>();

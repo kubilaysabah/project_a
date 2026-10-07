@@ -325,11 +325,13 @@ public class AsansorPanosu : MonoBehaviour, IEtkilesimli
     {
         if (varisSesi == null) varisSesi = Resources.Load<AudioClip>("Sesler/Asansor_Varis");
         if (varisSesi != null) AudioSource.PlayClipAtPoint(varisSesi, KuyuNoktasi(), 0.9f);
+        Titresim.Vur(0.35f, 0.12f, 0.5f);   // #124: kabin durdu
     }
     public void KalkisSesiCal()
     {
         if (kalkisSesi == null) kalkisSesi = Resources.Load<AudioClip>("Sesler/Asansor_Kalkis");
         if (kalkisSesi != null) AudioSource.PlayClipAtPoint(kalkisSesi, KuyuNoktasi(), 0.9f);
+        Titresim.Vur(0.25f, 0.08f, 1.2f);   // #124: kabin kalktı, uzun ve hafif
     }
     public void DingCal() { if (dingSesi != null) AudioSource.PlayClipAtPoint(dingSesi, GostergeNoktasi(), 0.9f); }
 

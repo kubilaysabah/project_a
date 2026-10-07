@@ -351,6 +351,7 @@ public class KatAni : MonoBehaviour
         }
         carpanKapi.Ayarla(false);
         kapiCarpiyor = false;
+        Titresim.Vur(0.6f, 0.45f, 0.35f);   // #124: kapı çarpması
         Cal(veri.Klip, mentese.position + Vector3.up * 1.0f, veri.Ses, 1f);
         KafaLambasi lamba = FindAnyObjectByType<KafaLambasi>();
         if (lamba != null) lamba.Titret(0.5f);

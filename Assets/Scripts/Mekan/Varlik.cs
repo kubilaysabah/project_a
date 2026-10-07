@@ -273,6 +273,7 @@ public class Varlik : MonoBehaviour
     private void KapiTiklat()
     {
         if (tiklatma == null) return;
+        Titresim.Vur(0.2f, 0.6f, 0.25f);   // #124: kapıya vuruş, ince motor
         IcKapi secilen = null; float enKisa = float.MaxValue;
         foreach (IcKapi k in FindObjectsByType<IcKapi>())
         {
@@ -307,6 +308,7 @@ public class Varlik : MonoBehaviour
         Vector3 bakis = oyuncu.position - yer; bakis.y = 0f;
         golge = Instantiate(sablon, yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
         golge.name = "Av_Golgesi";
+        Titresim.Vur(0.55f, 0.25f, 0.7f);   // #124: av başladı, kol gümbürder
         Debug.Log($"[VARLIK] {kat}. kat: AV başladı ({Vector3.Distance(yer, oyuncu.position):0.0} m arkadan).");
 
         float hiz = GerilimKurali.AvHizi * kural.KatCarpani;
@@ -464,6 +466,7 @@ public class Varlik : MonoBehaviour
     private void Yakalandi()
     {
         Debug.Log($"[VARLIK] {kat}. kat: avda yakalandı; kat başında uyanılacak (kilitler kalır).");
+        Titresim.Vur(1f, 0.8f, 0.9f);   // #124: yakalanma, en sert titreşim
         AvIptal();
         izler.Clear(); izZamanlari.Clear();
         kural.AvBitti();
