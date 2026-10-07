@@ -7,11 +7,10 @@
 // anahtarlarını siliyordu; Şahan Editor'de kaldığı yerden devam edemiyor, her yeni katı
 // denemek için önceki katları baştan oynamak zorunda kalıyordu.
 //
-// ÇÖZÜM: kayıt anahtarlarının sonuna bir "yuva eki" gelir. Normalde ek boştur: anahtarlar
-// eskisi gibi ("kayit_kat"). Claude test öncesinde Editor ayarlarına (EditorPrefs) bir ek
-// yazar ("_test"); o zaman oyun "kayit_kat_test" gibi ayrı anahtarlara yazar ve okur. Test
-// bitince Claude ekli anahtarları ve eki siler; Şahan'ın kaydı hiç değişmemiş olur.
-// Build'de EditorPrefs yoktur: ek her zaman boştur.
+// ÇÖZÜM: bir "yuva eki". Normalde ek boştur. Claude test öncesinde Editor ayarlarına (EditorPrefs)
+// bir ek yazar ("_test"); #122'den beri ek KAYIT DOSYASININ adına girer (kayit.txt → kayit_test.txt,
+// KayitDeposu.Oyun.Yol), anahtar adları düz kalır. Test bitince Claude test dosyasını ve eki siler;
+// Şahan'ın kayit.txt'si hiç değişmemiş olur. Build'de EditorPrefs yoktur: ek her zaman boştur.
 //
 // Ek açıkken oyun başında Console'a bir uyarı yazılır: unutulursa Şahan fark etsin.
 
@@ -37,6 +36,6 @@ public static class KayitYuvasi
         }
     }
 
-    /// <summary>Bir kayıt anahtarının bu yuvadaki adı ("kayit_kat" -> "kayit_kat_test").</summary>
-    public static string Anahtar(string ad) { return ad + Ek; }
+    /// <summary>Kayıt anahtarının adı. #122'den beri olduğu gibi döner (yuva dosya adında); çağrı yerleri korunsun diye duruyor.</summary>
+    public static string Anahtar(string ad) { return ad; }
 }

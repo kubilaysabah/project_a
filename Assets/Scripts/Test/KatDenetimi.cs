@@ -723,7 +723,7 @@ public static class KatDenetimi
         int yari = sonuc.AcilanKilitler.Count / 2;
         var yazilan = new List<string>();
         for (int i = 0; i < yari; i++) { Kayit.KilitCozuldu(kat, sonuc.AcilanKilitler[i]); yazilan.Add(sonuc.AcilanKilitler[i]); }
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.Save();   // #122: dosya
         return "kayda çözüldü yazılan: " + string.Join(",", yazilan);
     }
 

@@ -17,7 +17,7 @@ using UnityEngine;
 
 public static class Ayarlar
 {
-    // PlayerPrefs'teki kayıt adları. "ayar_dil" Dil.cs'te.
+    // Ayar dosyasındaki (KayitDeposu.Ayar: ayarlar.txt, #122; eskiden PlayerPrefs) adlar. "ayar_dil" Dil.cs'te.
     private const string HassasiyetAdi = "ayar_hassasiyet";
     private const string SesAdi = "ayar_ses";
     private const string MuzikAdi = "ayar_muzik";       // #118: müzik kanalı
@@ -170,23 +170,23 @@ public static class Ayarlar
     // ---------- KAYDET / YÜKLE ----------
     private static void Kaydet()
     {
-        PlayerPrefs.SetFloat(HassasiyetAdi, hassasiyet);
-        PlayerPrefs.SetFloat(SesAdi, ses);
-        PlayerPrefs.SetFloat(MuzikAdi, muzik);
-        PlayerPrefs.SetFloat(KonusmaAdi, konusma);
-        PlayerPrefs.SetInt(TersAdi, ters ? 1 : 0);   // bool doğrudan saklanamıyor; 1/0 olarak
-        PlayerPrefs.SetInt(SallanmaAdi, sallanma ? 1 : 0);
-        PlayerPrefs.SetFloat(GorusAdi, gorus);
-        PlayerPrefs.SetInt(KaliteAdi, kalite);
-        PlayerPrefs.SetFloat(ParlaklikAdi, parlaklik);
-        PlayerPrefs.SetInt(TamEkranAdi, tamEkran ? 1 : 0);
-        PlayerPrefs.SetInt(VSyncAdi, vsync ? 1 : 0);
-        PlayerPrefs.SetInt(GenislikAdi, genislik);
-        PlayerPrefs.SetInt(YukseklikAdi, yukseklik);
+        KayitDeposu.Ayar.SetFloat(HassasiyetAdi, hassasiyet);
+        KayitDeposu.Ayar.SetFloat(SesAdi, ses);
+        KayitDeposu.Ayar.SetFloat(MuzikAdi, muzik);
+        KayitDeposu.Ayar.SetFloat(KonusmaAdi, konusma);
+        KayitDeposu.Ayar.SetInt(TersAdi, ters ? 1 : 0);   // bool doğrudan saklanamıyor; 1/0 olarak
+        KayitDeposu.Ayar.SetInt(SallanmaAdi, sallanma ? 1 : 0);
+        KayitDeposu.Ayar.SetFloat(GorusAdi, gorus);
+        KayitDeposu.Ayar.SetInt(KaliteAdi, kalite);
+        KayitDeposu.Ayar.SetFloat(ParlaklikAdi, parlaklik);
+        KayitDeposu.Ayar.SetInt(TamEkranAdi, tamEkran ? 1 : 0);
+        KayitDeposu.Ayar.SetInt(VSyncAdi, vsync ? 1 : 0);
+        KayitDeposu.Ayar.SetInt(GenislikAdi, genislik);
+        KayitDeposu.Ayar.SetInt(YukseklikAdi, yukseklik);
 
         // Kaydırıcı sürüklenirken her karede diske yazmak gereksiz ama zararsız: Save
         // birkaç küçük değer yazar. Hemen yazmak, oyun çökse de ayarın kalmasını sağlar.
-        PlayerPrefs.Save();
+        KayitDeposu.Ayar.Save();
 
         Degisti?.Invoke();
     }
@@ -198,19 +198,19 @@ public static class Ayarlar
 
         // GetFloat(ad, varsayılan): kayıt yoksa ikinci değeri verir. Okunan değer yine
         // kuraldan geçer: kayıt bozuksa ya da sınırlar değiştiyse düzeltilir.
-        hassasiyet = AyarKurallari.Hassasiyet(PlayerPrefs.GetFloat(HassasiyetAdi, AyarKurallari.HassasiyetVarsayilan));
-        ses = AyarKurallari.Ses(PlayerPrefs.GetFloat(SesAdi, AyarKurallari.SesVarsayilan));
-        muzik = AyarKurallari.Muzik(PlayerPrefs.GetFloat(MuzikAdi, AyarKurallari.MuzikVarsayilan));
-        konusma = AyarKurallari.Konusma(PlayerPrefs.GetFloat(KonusmaAdi, AyarKurallari.KonusmaVarsayilan));
-        ters = PlayerPrefs.GetInt(TersAdi, AyarKurallari.TersVarsayilan ? 1 : 0) == 1;
-        sallanma = PlayerPrefs.GetInt(SallanmaAdi, AyarKurallari.SallanmaVarsayilan ? 1 : 0) == 1;
-        gorus = AyarKurallari.Gorus(PlayerPrefs.GetFloat(GorusAdi, AyarKurallari.GorusVarsayilan));
-        kalite = AyarKurallari.Kalite(PlayerPrefs.GetInt(KaliteAdi, AyarKurallari.KaliteVarsayilan));
-        parlaklik = AyarKurallari.Parlaklik(PlayerPrefs.GetFloat(ParlaklikAdi, AyarKurallari.ParlaklikVarsayilan));
-        tamEkran = PlayerPrefs.GetInt(TamEkranAdi, AyarKurallari.TamEkranVarsayilan ? 1 : 0) == 1;
-        vsync = PlayerPrefs.GetInt(VSyncAdi, AyarKurallari.VSyncVarsayilan ? 1 : 0) == 1;
-        genislik = PlayerPrefs.GetInt(GenislikAdi, 0);
-        yukseklik = PlayerPrefs.GetInt(YukseklikAdi, 0);
+        hassasiyet = AyarKurallari.Hassasiyet(KayitDeposu.Ayar.GetFloat(HassasiyetAdi, AyarKurallari.HassasiyetVarsayilan));
+        ses = AyarKurallari.Ses(KayitDeposu.Ayar.GetFloat(SesAdi, AyarKurallari.SesVarsayilan));
+        muzik = AyarKurallari.Muzik(KayitDeposu.Ayar.GetFloat(MuzikAdi, AyarKurallari.MuzikVarsayilan));
+        konusma = AyarKurallari.Konusma(KayitDeposu.Ayar.GetFloat(KonusmaAdi, AyarKurallari.KonusmaVarsayilan));
+        ters = KayitDeposu.Ayar.GetInt(TersAdi, AyarKurallari.TersVarsayilan ? 1 : 0) == 1;
+        sallanma = KayitDeposu.Ayar.GetInt(SallanmaAdi, AyarKurallari.SallanmaVarsayilan ? 1 : 0) == 1;
+        gorus = AyarKurallari.Gorus(KayitDeposu.Ayar.GetFloat(GorusAdi, AyarKurallari.GorusVarsayilan));
+        kalite = AyarKurallari.Kalite(KayitDeposu.Ayar.GetInt(KaliteAdi, AyarKurallari.KaliteVarsayilan));
+        parlaklik = AyarKurallari.Parlaklik(KayitDeposu.Ayar.GetFloat(ParlaklikAdi, AyarKurallari.ParlaklikVarsayilan));
+        tamEkran = KayitDeposu.Ayar.GetInt(TamEkranAdi, AyarKurallari.TamEkranVarsayilan ? 1 : 0) == 1;
+        vsync = KayitDeposu.Ayar.GetInt(VSyncAdi, AyarKurallari.VSyncVarsayilan ? 1 : 0) == 1;
+        genislik = KayitDeposu.Ayar.GetInt(GenislikAdi, 0);
+        yukseklik = KayitDeposu.Ayar.GetInt(YukseklikAdi, 0);
     }
 
     // ---------- OYUN BAŞINDA ----------

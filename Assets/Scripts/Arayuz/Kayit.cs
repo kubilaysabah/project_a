@@ -5,15 +5,15 @@
 // kapatıp açınca kaldığı kattan devam etmeli. Kayıt noktası: bir kat kapısı açılıp üst kata
 // varılınca. (İleride #54: dairede her kilit çözülünce de.)
 //
-// Şimdilik PlayerPrefs'te tek sayı ("kayit_kat"): oyuncunun ulaştığı en yüksek kat. Yeni
-// oyun 1'dir. Ayarlar ve defter de PlayerPrefs'te; hepsi aynı yerde, yedeklemesi kolay.
+// Kayıt KayitDeposu.Oyun'da (#122: persistentDataPath/kayit.txt, Steam Cloud'a giden dosya; eskiden
+// PlayerPrefs = Windows kayıt defteri, bulut onu eşlemiyordu). Ayarlar ayrı dosyada (KayitDeposu.Ayar).
 
 using UnityEngine;
 
 public static class Kayit
 {
-    // Anahtarların adı yuvaya göre (KayitYuvasi): normalde "kayit_kat", Claude'un testinde
-    // "kayit_kat_test". Sabit (const) değil, her okunuşta hesaplanan birer özellik.
+    // Anahtar adları düz; test yuvası (KayitYuvasi) artık DOSYANIN adını değiştirir (kayit_test.txt, #122).
+    // KayitYuvasi.Anahtar adı olduğu gibi döndürür; çağrılar eski yerinde kaldı.
     private static string KatAnahtari { get { return KayitYuvasi.Anahtar("kayit_kat"); } }
     private static string KilitAnahtari { get { return KayitYuvasi.Anahtar("kayit_kilitler"); } }   // çözülen kilitler (#54)
     private static string ParcaAnahtari { get { return KayitYuvasi.Anahtar("kayit_parcalar"); } }   // bulunan çizim parçaları (#63)
@@ -33,7 +33,7 @@ public static class Kayit
     {
         get
         {
-            if (fotograflar == null) fotograflar = KilitKaydi.Oku(PlayerPrefs.GetString(FotografAnahtari, ""));
+            if (fotograflar == null) fotograflar = KilitKaydi.Oku(KayitDeposu.Oyun.GetString(FotografAnahtari, ""));
             return fotograflar;
         }
     }
@@ -42,8 +42,8 @@ public static class Kayit
     public static void FotografBulundu(string kimlik)
     {
         if (!Fotograflar.Ekle(0, kimlik)) return;
-        PlayerPrefs.SetString(FotografAnahtari, Fotograflar.Metin());
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.SetString(FotografAnahtari, Fotograflar.Metin());
+        KayitDeposu.Oyun.Save();
         Debug.Log($"[KAYIT] '{kimlik}' fotoğrafı koleksiyona eklendi.");
     }
 
@@ -58,7 +58,7 @@ public static class Kayit
     {
         get
         {
-            if (notlar == null) notlar = KilitKaydi.Oku(PlayerPrefs.GetString(NotAnahtari, ""));
+            if (notlar == null) notlar = KilitKaydi.Oku(KayitDeposu.Oyun.GetString(NotAnahtari, ""));
             return notlar;
         }
     }
@@ -66,8 +66,8 @@ public static class Kayit
     public static void NotOkundu(string anahtar)
     {
         if (string.IsNullOrEmpty(anahtar) || !Notlar.Ekle(0, anahtar)) return;
-        PlayerPrefs.SetString(NotAnahtari, Notlar.Metin());
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.SetString(NotAnahtari, Notlar.Metin());
+        KayitDeposu.Oyun.Save();
     }
 
     public static bool NotOkunduMu(string anahtar) { return Notlar.Iceriyor(0, anahtar); }
@@ -90,7 +90,7 @@ public static class Kayit
     {
         get
         {
-            if (kilitler == null) kilitler = KilitKaydi.Oku(PlayerPrefs.GetString(KilitAnahtari, ""));
+            if (kilitler == null) kilitler = KilitKaydi.Oku(KayitDeposu.Oyun.GetString(KilitAnahtari, ""));
             return kilitler;
         }
     }
@@ -99,8 +99,8 @@ public static class Kayit
     public static void KilitCozuldu(int kat, string kimlik)
     {
         if (!Kilitler.Ekle(kat, kimlik)) return;
-        PlayerPrefs.SetString(KilitAnahtari, Kilitler.Metin());
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.SetString(KilitAnahtari, Kilitler.Metin());
+        KayitDeposu.Oyun.Save();
         Debug.Log($"[KAYIT] {kat}. kat: '{kimlik}' kilidi kaydedildi.");
     }
 
@@ -110,7 +110,7 @@ public static class Kayit
     {
         get
         {
-            if (parcalar == null) parcalar = KilitKaydi.Oku(PlayerPrefs.GetString(ParcaAnahtari, ""));
+            if (parcalar == null) parcalar = KilitKaydi.Oku(KayitDeposu.Oyun.GetString(ParcaAnahtari, ""));
             return parcalar;
         }
     }
@@ -119,8 +119,8 @@ public static class Kayit
     public static void ParcaBulundu(int kat, string kimlik)
     {
         if (!Parcalar.Ekle(kat, kimlik)) return;
-        PlayerPrefs.SetString(ParcaAnahtari, Parcalar.Metin());
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.SetString(ParcaAnahtari, Parcalar.Metin());
+        KayitDeposu.Oyun.Save();
         Debug.Log($"[KAYIT] {kat}. kat: '{kimlik}' parçası kaydedildi.");
     }
 
@@ -138,9 +138,9 @@ public static class Kayit
     {
         int kilit = Kilitler.KatiSil(kat);
         int parca = Parcalar.KatiSil(kat);
-        PlayerPrefs.SetString(KilitAnahtari, Kilitler.Metin());
-        PlayerPrefs.SetString(ParcaAnahtari, Parcalar.Metin());
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.SetString(KilitAnahtari, Kilitler.Metin());
+        KayitDeposu.Oyun.SetString(ParcaAnahtari, Parcalar.Metin());
+        KayitDeposu.Oyun.Save();
         Debug.Log($"[KAYIT] {kat}. kat baştan: {kilit} kilit ve {parca} parça silindi.");
     }
 
@@ -155,8 +155,8 @@ public static class Kayit
     /// her kat ayrı; menüdeki Katlar sayfası bunlardan birine döner).</summary>
     public static void KatBasiniKaydet()
     {
-        PlayerPrefs.SetString(KatBasiAnahtari(Kat), Aletler.Metin());
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.SetString(KatBasiAnahtari(Kat), Aletler.Metin());
+        KayitDeposu.Oyun.Save();
         Debug.Log($"[KAYIT] {Kat}. katın başı kaydedildi (aletler: '{Aletler.Metin()}').");
     }
 
@@ -164,8 +164,8 @@ public static class Kayit
     // kayıt) eski tek an, o da yalnızca kaydın kaldığı kat için geçerli.
     private static string KatBasiAletleri(int kat)
     {
-        if (PlayerPrefs.HasKey(KatBasiAnahtari(kat))) return PlayerPrefs.GetString(KatBasiAnahtari(kat));
-        if (kat == Kat && PlayerPrefs.HasKey(KatBasiAletAnahtari)) return PlayerPrefs.GetString(KatBasiAletAnahtari);
+        if (KayitDeposu.Oyun.HasKey(KatBasiAnahtari(kat))) return KayitDeposu.Oyun.GetString(KatBasiAnahtari(kat));
+        if (kat == Kat && KayitDeposu.Oyun.HasKey(KatBasiAletAnahtari)) return KayitDeposu.Oyun.GetString(KatBasiAletAnahtari);
         return null;
     }
 
@@ -188,7 +188,7 @@ public static class Kayit
     /// menüdeki Katlar sayfası bu kata kadar olan katları açık gösterir.</summary>
     public static int EnYuksekKat
     {
-        get { return KatSecimi.YeniEnYuksek(PlayerPrefs.GetInt(EnYuksekAnahtari, KatSayaci.BaslangicKati), Kat); }
+        get { return KatSecimi.YeniEnYuksek(KayitDeposu.Oyun.GetInt(EnYuksekAnahtari, KatSayaci.BaslangicKati), Kat); }
     }
 
     /// <summary>
@@ -202,36 +202,36 @@ public static class Kayit
         string aletler = KatBasiAletleri(kat);   // Kat değişmeden önce oku (eski tek an kaldığı kata aittir)
         int enYuksek = EnYuksekKat;
         foreach (int k in KatSecimi.SilinecekKatlar(kat, KatSayaci.CatiKati)) { Kilitler.KatiSil(k); Parcalar.KatiSil(k); }
-        PlayerPrefs.SetString(KilitAnahtari, Kilitler.Metin());
-        PlayerPrefs.SetString(ParcaAnahtari, Parcalar.Metin());
-        PlayerPrefs.SetInt(EnYuksekAnahtari, enYuksek);   // en yüksek kat unutulmasın
+        KayitDeposu.Oyun.SetString(KilitAnahtari, Kilitler.Metin());
+        KayitDeposu.Oyun.SetString(ParcaAnahtari, Parcalar.Metin());
+        KayitDeposu.Oyun.SetInt(EnYuksekAnahtari, enYuksek);   // en yüksek kat unutulmasın
         if (kat <= KatSayaci.BaslangicKati)
         {
-            PlayerPrefs.DeleteKey(KatAnahtari);           // kayıt yok: oyun açılıştan başlar
+            KayitDeposu.Oyun.DeleteKey(KatAnahtari);           // kayıt yok: oyun açılıştan başlar
             Aletler.Bosalt();
-            PlayerPrefs.DeleteKey(NotAnahtari);           // #119: Sil() gibi; notlar kalsaydı telefon çalmazdı (#117)
+            KayitDeposu.Oyun.DeleteKey(NotAnahtari);           // #119: Sil() gibi; notlar kalsaydı telefon çalmazdı (#117)
             notlar = null;
         }
         else
         {
-            PlayerPrefs.SetInt(KatAnahtari, kat);
+            KayitDeposu.Oyun.SetInt(KatAnahtari, kat);
             if (aletler != null) Aletler.GeriYukle(aletler);
         }
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.Save();
         Debug.Log($"[KAYIT] Menüden {kat}. kat seçildi (en yüksek {enYuksek}).");
     }
 
     /// <summary>Oyuncunun ulaştığı kat; 1 = başlangıç (kayıt yok).</summary>
     public static int Kat
     {
-        get { return Mathf.Clamp(PlayerPrefs.GetInt(KatAnahtari, KatSayaci.BaslangicKati), KatSayaci.BaslangicKati, KatSayaci.CatiKati); }
+        get { return Mathf.Clamp(KayitDeposu.Oyun.GetInt(KatAnahtari, KatSayaci.BaslangicKati), KatSayaci.BaslangicKati, KatSayaci.CatiKati); }
         set
         {
             int yeni = Mathf.Clamp(value, KatSayaci.BaslangicKati, KatSayaci.CatiKati);
-            PlayerPrefs.SetInt(KatAnahtari, yeni);
+            KayitDeposu.Oyun.SetInt(KatAnahtari, yeni);
             // En yüksek kat (#85) büyüğünü tutar.
-            PlayerPrefs.SetInt(EnYuksekAnahtari, KatSecimi.YeniEnYuksek(PlayerPrefs.GetInt(EnYuksekAnahtari, KatSayaci.BaslangicKati), yeni));
-            PlayerPrefs.Save();
+            KayitDeposu.Oyun.SetInt(EnYuksekAnahtari, KatSecimi.YeniEnYuksek(KayitDeposu.Oyun.GetInt(EnYuksekAnahtari, KatSayaci.BaslangicKati), yeni));
+            KayitDeposu.Oyun.Save();
             Debug.Log($"[KAYIT] Kat {Kat} kaydedildi.");
         }
     }
@@ -246,16 +246,16 @@ public static class Kayit
     /// </summary>
     public static void Sil()
     {
-        PlayerPrefs.DeleteKey(KatAnahtari);
-        PlayerPrefs.DeleteKey(NotAnahtari);
+        KayitDeposu.Oyun.DeleteKey(KatAnahtari);
+        KayitDeposu.Oyun.DeleteKey(NotAnahtari);
         notlar = null;
-        PlayerPrefs.DeleteKey(KilitAnahtari);
-        PlayerPrefs.DeleteKey(ParcaAnahtari);
-        PlayerPrefs.DeleteKey(KatBasiAletAnahtari);
-        for (int k = KatSayaci.BaslangicKati; k <= KatSayaci.CatiKati; k++) PlayerPrefs.DeleteKey(KatBasiAnahtari(k));
+        KayitDeposu.Oyun.DeleteKey(KilitAnahtari);
+        KayitDeposu.Oyun.DeleteKey(ParcaAnahtari);
+        KayitDeposu.Oyun.DeleteKey(KatBasiAletAnahtari);
+        for (int k = KatSayaci.BaslangicKati; k <= KatSayaci.CatiKati; k++) KayitDeposu.Oyun.DeleteKey(KatBasiAnahtari(k));
         kilitler = null;
         parcalar = null;
         Aletler.Bosalt();   // yeni oyun: bulunan aletler de gider (#61)
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.Save();
     }
 }

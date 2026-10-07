@@ -22,7 +22,7 @@ using UnityEngine;
 
 public static class Dil
 {
-    // PlayerPrefs'te seçili dilin saklandığı yerin adı.
+    // Ayar dosyasında (KayitDeposu.Ayar, #122) seçili dilin saklandığı adın adı.
     private const string KayitAdi = "ayar_dil";
 
     private static MetinTablosu tablo;
@@ -67,8 +67,8 @@ public static class Dil
         if (yeni == etkin) return;   // zaten o dil: kimseyi boşuna uğraştırma
 
         etkin = yeni;
-        PlayerPrefs.SetInt(KayitAdi, (int)yeni);   // enum sayı olarak saklanır (TR=0, EN=1)
-        PlayerPrefs.Save();                        // hemen diske yaz; oyun çökse de kalsın
+        KayitDeposu.Ayar.SetInt(KayitAdi, (int)yeni);   // enum sayı olarak saklanır (TR=0, EN=1)
+        KayitDeposu.Ayar.Save();                        // hemen diske yaz; oyun çökse de kalsın
 
         // "?." : dinleyen kimse yoksa Degisti boştur (null); o zaman hiçbir şey yapma.
         Degisti?.Invoke();
@@ -98,11 +98,11 @@ public static class Dil
         // Tabloda bir yazım hatası varsa oyunu durdurmadan Console'a yaz.
         foreach (string hata in tablo.Hatalar) Debug.LogWarning("[Dil] Metinler.txt, " + hata);
 
-        if (PlayerPrefs.HasKey(KayitAdi))
+        if (KayitDeposu.Ayar.HasKey(KayitAdi))
         {
             // Clamp: değeri iki sınır arasına sıkıştırır. Saklı değer bozulmuşsa
             // (ör. ileride kaldırılmış bir dilin numarası) var olmayan bir dile düşmeyelim.
-            etkin = (DilKodu)Mathf.Clamp(PlayerPrefs.GetInt(KayitAdi), 0, MetinTablosu.DilSayisi - 1);
+            etkin = (DilKodu)Mathf.Clamp(KayitDeposu.Ayar.GetInt(KayitAdi), 0, MetinTablosu.DilSayisi - 1);
         }
         else
         {

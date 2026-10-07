@@ -1,7 +1,7 @@
 // Aletler.cs
 // Kapıcının alet çantası: sahnedeki köprü ve kayıt (#61). Kural Cekirdek/AletCantasi.cs'de.
 //
-// Cep gibi "static": her yerden Aletler.Var("tornavida") denir. Bulunan aletler PlayerPrefs'e
+// Cep gibi "static": her yerden Aletler.Var("tornavida") denir. Bulunan aletler kayıt dosyasına (KayitDeposu.Oyun, #122)
 // yazılır ("kayit_aletler"): oyun kapatılıp açılınca da kapıcıda kalır. Köşedeki simgeler
 // (EsyaGostergesi) Degisti olayını dinler.
 
@@ -16,7 +16,7 @@ public static class Aletler
     {
         get
         {
-            if (canta == null) canta = AletCantasi.Oku(PlayerPrefs.GetString(KayitAnahtari, ""));
+            if (canta == null) canta = AletCantasi.Oku(KayitDeposu.Oyun.GetString(KayitAnahtari, ""));
             return canta;
         }
     }
@@ -35,8 +35,8 @@ public static class Aletler
     public static void GeriYukle(string metin)
     {
         canta = AletCantasi.Oku(metin ?? "");
-        PlayerPrefs.SetString(KayitAnahtari, canta.Metin());
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.SetString(KayitAnahtari, canta.Metin());
+        KayitDeposu.Oyun.Save();
         Degisti?.Invoke();
     }
 
@@ -44,8 +44,8 @@ public static class Aletler
     public static void Ekle(string kimlik)
     {
         if (!Canta.Ekle(kimlik)) return;
-        PlayerPrefs.SetString(KayitAnahtari, Canta.Metin());
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.SetString(KayitAnahtari, Canta.Metin());
+        KayitDeposu.Oyun.Save();
         Debug.Log($"[ALET] '{kimlik}' kapıcının çantasına girdi.");
         Degisti?.Invoke();
     }
@@ -54,8 +54,8 @@ public static class Aletler
     public static void Bosalt()
     {
         Canta.Temizle();
-        PlayerPrefs.DeleteKey(KayitAnahtari);
-        PlayerPrefs.Save();
+        KayitDeposu.Oyun.DeleteKey(KayitAnahtari);
+        KayitDeposu.Oyun.Save();
         Degisti?.Invoke();
     }
 }
