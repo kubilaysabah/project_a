@@ -134,13 +134,20 @@ public static class AtmosferKurucu
         // RENK AYARI: ACES görüntüyü biraz karartır; pozlamayla dengeliyoruz.
         // Doygunluğu kısmak 90'lar apartmanının solgun, yorgun rengini verir.
         ColorAdjustments renk = Ekle<ColorAdjustments>(profil);
-        renk.postExposure.Override(0.6f);
-        renk.contrast.Override(12f);
+        // #126: pozlama 0,6 → 0,75 ve kontrast 12 → 0; kontrast 0,2 altını eziyordu, oda eşikten siyah okunuyordu.
+        // Karanlık yine ortam ışığının (0,006) ve fenerin işi; ölçüm: eşik görüşlerinde siyah %62 → %57, sahanlık %90 → %85.
+        renk.postExposure.Override(0.75f);
+        renk.contrast.Override(0f);
         renk.saturation.Override(-18f);
 
         // BÖLÜNMÜŞ TONLAMA (split toning): gölgelere bir renk, aydınlık yerlere
         // başka bir renk katar. Gölgeler soğuk mavi, ampulün aydınlattığı yerler
         // sıcak sarı: konseptteki "soğuk gece / sıcak ampul" zıtlığı tam olarak bu.
+        // GAMMA (#126): orta tonları ve gölgeleri hafifçe kaldırır (Lift değil: simsiyah simsiyah kalır,
+        // 0,1-0,4 arası görünür olur). ACES'in filmik eğrisi korunur.
+        LiftGammaGain gamma = Ekle<LiftGammaGain>(profil);
+        gamma.gamma.Override(new Vector4(1f, 1f, 1f, 0.15f));
+
         SplitToning tonlama = Ekle<SplitToning>(profil);
         tonlama.shadows.Override(new Color(0.30f, 0.40f, 0.60f));
         tonlama.highlights.Override(new Color(0.75f, 0.58f, 0.36f));

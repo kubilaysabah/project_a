@@ -17,7 +17,7 @@ public class AtmosferProfiliTestleri
     private const string ProfilYolu = "Settings/Atmosfer_Gece.asset";   // Assets/ altında
 
     // Profilde olması gereken efektler (AtmosferKurucu.PostProcessing ile aynı liste).
-    private static readonly string[] Efektler = { "Tonemapping", "ColorAdjustments", "SplitToning", "Vignette", "FilmGrain", "Bloom" };
+    private static readonly string[] Efektler = { "Tonemapping", "ColorAdjustments", "SplitToning", "Vignette", "FilmGrain", "Bloom", "LiftGammaGain" };
 
     private static string DosyayiOku()
     {

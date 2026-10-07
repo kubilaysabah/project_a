@@ -332,6 +332,19 @@ public static partial class GrayboxKurucu
         // taşır. Sönük ampul yine yerinde durur: "ampul değiştir" görevi (#57) ve ışık kartları
         // onu yakabilir.
         AmpulKur("Ampul", t, new Vector3(0f, DuvarYuksek - 0.30f, onZ / 2f), 8f, LambaSiddeti, yanik: false);
+        // #126: ay ışığı sızıntısı. Sahanlıkta tek ışık kaynağı yoktu (8. kat hariç); kat başından bakınca
+        // kapı 7 m'de huzme dışında kapkara kalıyordu. Ara sahanlık penceresinden sızan ayın yerine geçen,
+        // soğuk ve çok zayıf bir nokta ışık; gölgesiz (döngüde her kat aynı aydınlanmalı, #23). Her sahanlıkta
+        // (sahte katlar dahil) aynı, ki merdiven gözünden bakınca katlar farklı görünmesin.
+        GameObject ay = new GameObject("Ay_Sizintisi");
+        ay.transform.SetParent(t, false);
+        ay.transform.localPosition = new Vector3(0f, DuvarYuksek - 0.5f, onZ / 2f);
+        Light ayIsigi = ay.AddComponent<Light>();
+        ayIsigi.type = LightType.Point;
+        ayIsigi.range = 10f;
+        ayIsigi.intensity = AySizintisiSiddeti;
+        ayIsigi.color = new Color(0.55f, 0.65f, 1.0f);
+        ayIsigi.shadows = LightShadows.None;
 
         // Normal katın ses dokusu (#14). Sahte katlarda da var: komşu katların sesi
         // hafifçe duyulur ve ışınlanmada ses ortamı değişmez.
@@ -2225,6 +2238,8 @@ public static partial class GrayboxKurucu
 
     // yanik = false: ampul yerinde ama sönük; ışıklar 0 şiddette AÇIK kalır (kartlar ve görevler
     // şiddet yazarak yakabilir), camı karanlık malzemeyi kullanır.
+    public const float AySizintisiSiddeti = 1.2f;    // #126: sahanlık ay ışığı sızıntısı (ölçerek seçildi: 0,45 lamba kapalıyken %93 siyah, 1,2 %57, 2,5 fenerin işini alıyordu)
+
     static void AmpulKur(string ad, Transform ebeveyn, Vector3 konum, float menzil, float siddet, bool yanik = true)
     {
         if (!yanik) siddet = 0f;

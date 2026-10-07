@@ -427,6 +427,14 @@ public class KatYoneticisi : MonoBehaviour
         oyuncu.position = new Vector3(MekanOlculeri.OdaBaslangicX, MekanOlculeri.ZeminKot + 0.2f,
                                       MekanOlculeri.OdaBaslangicZ);
         oyuncu.rotation = Quaternion.Euler(0f, 90f, 0f);
+        // #126: ilk kare karanlık kapıya değil, odanın tek ışığına (çivideki yanık lamba) baksın: oyuncu
+        // oyunun ilk saniyesinde ne yapacağını (lambayı almayı) görsün. Yalnızca yatay dönüş.
+        CividekiLamba civi = zeminKat.GetComponentInChildren<CividekiLamba>(true);
+        if (civi != null)
+        {
+            Vector3 yon = civi.transform.position - oyuncu.position; yon.y = 0f;
+            if (yon.sqrMagnitude > 0.01f) oyuncu.rotation = Quaternion.LookRotation(yon);
+        }
         if (govde != null) govde.enabled = true;
         Physics.SyncTransforms();
     }

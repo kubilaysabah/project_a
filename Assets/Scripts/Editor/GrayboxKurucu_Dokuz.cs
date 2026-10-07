@@ -341,7 +341,7 @@ public static partial class GrayboxKurucu
             { "Doku_Zemin",   TazeMalzeme("Taze_Zemin",   "marble_mosaic_tiles", new Color(1f, 1f, 0.98f), 0.78f) },
             // Kapı kaplaması aynı ağaç, verniği yeni: daha açık ve parlak.
             { "Doku_Kapi",    TazeMalzeme("Taze_Kapi",    "sapele_veneer",       new Color(0.66f, 0.46f, 0.32f), 0.62f) },
-            { "Doku_Boya",    TazeMalzeme("Taze_Boya",    null,                  new Color(0.94f, 0.94f, 0.90f), 0.55f) },
+            { "Doku_Boya",    TazeMalzeme("Taze_Boya",    null,                  new Color(0.74f, 0.74f, 0.70f), 0.55f) },   // #126: 0,94 fenerde patlıyordu
             { "Doku_Madeni",  TazeMalzeme("Taze_Madeni",  null,                  new Color(0.86f, 0.68f, 0.30f), 0.80f, metal: 0.7f) },
             { "Doku_Demir",   TazeMalzeme("Taze_Demir",   null,                  new Color(0.10f, 0.13f, 0.11f), 0.60f) },
             { "Doku_Tirabzan", TazeMalzeme("Taze_Tirabzan", null,                new Color(0.30f, 0.16f, 0.08f), 0.65f) },

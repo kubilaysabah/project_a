@@ -80,7 +80,7 @@ public static class DokuKurucu
     static readonly Tur Parke       = new Tur("Doku_Parke", "herringbone_parquet", 1.0f, 0.35f, Color.white);
     static readonly Tur Fayans      = new Tur("Doku_Fayans", "terrazzo_tiles", 1.0f, 0.50f, Color.white);
     static readonly Tur FayansDuvar = new Tur("Doku_FayansDuvar", "long_white_tiles", 1.0f, 0.50f, Color.white);
-    static readonly Tur IcBoya      = new Tur("Doku_IcBoya", null, 1f, 0.35f, new Color(0.80f, 0.78f, 0.72f)); // oda kapıları: kirli beyaz yağlı boya
+    static readonly Tur IcBoya      = new Tur("Doku_IcBoya", null, 1f, 0.35f, new Color(0.58f, 0.56f, 0.51f)); // oda kapıları: kirli krem yağlı boya (#126: 0,80 fenerin 1 m'sinde bembeyaz patlıyordu)
 
     // Bir kutuya ne olacağı: üst, alt ve yan yüzlerin türü ve UV'nin nereden hesaplanacağı.
     struct Kural

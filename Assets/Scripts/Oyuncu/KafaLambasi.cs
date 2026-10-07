@@ -208,6 +208,10 @@ public class KafaLambasi : MonoBehaviour
     {
         GolgeyiAyarla();
         Ayarlar.Degisti += GolgeyiAyarla;
+        // #126: toz zerreleri lambaya göre solsun (kurucu değişmeden; bileşen burada eklenir).
+        Transform toz = transform.Find("Toz_Zerreleri");
+        if (toz == null) { Camera k = GetComponentInChildren<Camera>(); if (k != null) toz = k.transform.Find("Toz_Zerreleri"); }
+        if (toz != null && toz.GetComponent<TozIsigi>() == null) toz.gameObject.AddComponent<TozIsigi>();
     }
 
     private void OnDestroy()

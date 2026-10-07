@@ -134,7 +134,7 @@ public static class KirKurucu
         ana.prewarm = true;                                   // oyun başında hava zaten tozlu olsun
         ana.startLifetime = new ParticleSystem.MinMaxCurve(8f, 14f);
         ana.startSpeed = new ParticleSystem.MinMaxCurve(0f, 0.03f);
-        ana.startSize = new ParticleSystem.MinMaxCurve(0.006f, 0.016f);
+        ana.startSize = new ParticleSystem.MinMaxCurve(0.004f, 0.011f);   // #126: daha küçük, karanlıkta kar tanesi gibi okunmasın
         ana.startColor = new Color(1f, 0.97f, 0.9f, 0.7f);
         ana.gravityModifier = 0.002f;                         // çok yavaş çöker
         ana.simulationSpace = ParticleSystemSimulationSpace.World;
