@@ -51,7 +51,7 @@ public static class Kayit
 
     // ---------- OKUNAN NOTLAR (#56) ----------
     // Oyuncunun okuduğu notlar (metin anahtarıyla) ve telefon konuşmaları. Kapıcı odasının panosu
-    // onları listeler; kat sıfırlansa da kalır (fotoğraflar gibi). Biçim yine "0:anahtar".
+    // onları listeler; kat sıfırlansa da kalır, yalnızca yeni oyunda silinir (#117). Biçim yine "0:anahtar".
     private static string NotAnahtari { get { return KayitYuvasi.Anahtar("kayit_notlar"); } }
     private static KilitKaydi notlar;
     private static KilitKaydi Notlar
@@ -237,10 +237,16 @@ public static class Kayit
     /// <summary>Kayıt var mı (1. kattan ileride mi)?</summary>
     public static bool Var { get { return Kat > KatSayaci.BaslangicKati; } }
 
-    /// <summary>Kaydı siler: yeni oyun. Ulaşılan en yüksek kat (Katlar sayfası) ile fotoğraflar ve notlar kalır.</summary>
+    /// <summary>
+    /// Kaydı siler: yeni oyun. Ulaşılan en yüksek kat (Katlar sayfası) ve fotoğraflar (koleksiyon) kalır. Okunan
+    /// notlar da SİLİNİR (#117): kalsalardı ikinci oynayışta telefon hiç çalmazdı (TelefonZili okunan konuşmayı
+    /// atlar) ve kapıcı odasının panosu daha ilk gece dokuzuncu katın planıyla dolu gelirdi.
+    /// </summary>
     public static void Sil()
     {
         PlayerPrefs.DeleteKey(KatAnahtari);
+        PlayerPrefs.DeleteKey(NotAnahtari);
+        notlar = null;
         PlayerPrefs.DeleteKey(KilitAnahtari);
         PlayerPrefs.DeleteKey(ParcaAnahtari);
         PlayerPrefs.DeleteKey(KatBasiAletAnahtari);

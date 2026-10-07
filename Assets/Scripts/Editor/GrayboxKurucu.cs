@@ -1716,8 +1716,8 @@ public static partial class GrayboxKurucu
 
             for (int p = 0; p < pencereX.Length; p++)
             {
-                // 9. katın en sağdaki penceresi finalin sorusu. Önce KARANLIK: final sahnesi
-                // asansörün sesinden sonra onu yakar (#68). Işıklı malzeme FinalSahnesi'ne bağlanır.
+                // 9. katın en sağdaki penceresi finalin sorusu. Burada KARANLIK kurulur; final sahnesi dış kamera
+                // açılırken onu yakar (#117: çiviye asılan lamba) ve ding'den sonra önünde silueti gösterir.
                 Boya(Kutu($"Pencere_{kat}_{p + 1}", f, new Vector3(pencereX[p], y0 + 1.65f, -0.03f), new Vector3(1.3f, 1.5f, 0.06f)), cam);
                 Boya(Kutu($"Denizlik_{kat}_{p + 1}", f, new Vector3(pencereX[p], y0 + 0.87f, -0.08f), new Vector3(1.5f, 0.06f, 0.16f)), bant);
             }
@@ -1800,6 +1800,20 @@ public static partial class GrayboxKurucu
         Transform pencere = f.Find($"Pencere_{CepheKatSayisi}_5");
         seri.FindProperty("dokuzuncuPencere").objectReferenceValue = pencere != null ? pencere.GetComponent<MeshRenderer>() : null;
         seri.FindProperty("pencereIsigi").objectReferenceValue = isikliCam;
+        // Pencerenin önündeki siluet (#117): yanan camın 1,5 cm önünde, gövde ve baş iki simsiyah kutu (52 m'den
+        // yalnızca karartı okunur). Kapalı kurulur; FinalSahnesi ding'den sonra açar.
+        if (pencere != null)
+        {
+            GameObject siluet = new GameObject("Pencere_Silueti");
+            siluet.transform.SetParent(f, false);
+            Vector3 pk = pencere.localPosition;                        // pencere camının merkezi (cam 1,3 x 1,5)
+            Material siyah = SiluetMalzeme();
+            Boya(Kutu("Govde", siluet.transform, new Vector3(pk.x - 0.12f, pk.y - 0.30f, -0.075f), new Vector3(0.46f, 0.95f, 0.02f)), siyah);
+            Boya(Kutu("Omuz", siluet.transform, new Vector3(pk.x - 0.12f, pk.y + 0.20f, -0.075f), new Vector3(0.52f, 0.14f, 0.02f)), siyah);
+            Boya(Kutu("Bas", siluet.transform, new Vector3(pk.x - 0.12f, pk.y + 0.42f, -0.075f), new Vector3(0.22f, 0.30f, 0.02f)), siyah);
+            siluet.SetActive(false);
+            seri.FindProperty("pencereSilueti").objectReferenceValue = siluet;
+        }
         seri.FindProperty("asansorSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Asansor_Ding.wav");
         seri.ApplyModifiedPropertiesWithoutUndo();
     }
@@ -1807,6 +1821,19 @@ public static partial class GrayboxKurucu
     static void Boya(GameObject g, Material m)
     {
         g.GetComponent<MeshRenderer>().sharedMaterial = m;
+    }
+
+    // Finaldeki pencere silueti (#117): ışıktan etkilenmeyen, neredeyse siyah (şafakta da karanlık kalsın).
+    static Material SiluetMalzeme()
+    {
+        const string Yol = "Assets/Materials/Pencere_Siluet.mat";
+        Material mevcut = AssetDatabase.LoadAssetAtPath<Material>(Yol);
+        if (mevcut != null) return mevcut;
+        Material yeni = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        yeni.SetColor("_BaseColor", new Color(0.01f, 0.01f, 0.012f));
+        AssetDatabase.CreateAsset(yeni, Yol);
+        AssetDatabase.SaveAssets();
+        return yeni;
     }
 
     // 9. kattaki yanan pencere: ışıktan etkilenmeyen (Unlit), 1'in üstünde parlak

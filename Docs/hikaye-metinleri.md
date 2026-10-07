@@ -44,7 +44,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Hasan 1991-1993
 > Cemal 1993-
 >
-> Hepsi bu odada uyudu.
+> Hepsi bu odadan başladı.
 > Hepsi lambayı aynı çividen aldı.
 
 **EN**
@@ -55,7 +55,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Hasan 1991-1993
 > Cemal 1993-
 >
-> They all slept in this room.
+> They all started in this room.
 > They all took the lamp from the same nail.
 
 ### `not.telefon_kat2`
@@ -393,7 +393,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 **TR**
 
 > Bu akşam sofrayı kuruyoruz.
-> Dördümüz de geleceğiz: Rıza Efendi, Hasan, Cemal.
+> Üçü de gelecek: Rıza Efendi, Hasan, Cemal.
 > Senin yerin de hazır.
 > Misafirimiz gelince ortada durma.
 >
@@ -402,7 +402,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 **EN**
 
 > We are setting the table tonight.
-> All four of us will be there: Rıza Efendi, Hasan, Cemal.
+> All three will be there: Rıza Efendi, Hasan, Cemal.
 > Your seat is ready too.
 > When our guest arrives, don't stand in the open.
 >
@@ -415,8 +415,8 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Rıza Efendi, Hasan, Cemal ve Yönetim'den Bekir Bey.
 >
 > Arkamızda ayakta duranı kimse hatırlamıyor.
-> Her yıl aynı sofrayı kurarız;
-> herkes kendi tabağının başına oturur.
+> Sofra 1974'ten beri kaldırılmadı;
+> sırası gelen kendi tabağının başına oturur.
 >
 > Sofrada senin yerin de hazır.
 
@@ -425,8 +425,8 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Rıza Efendi, Hasan, Cemal and Bekir Bey from the Management.
 >
 > No one remembers the man standing behind us.
-> Every year we set the same table;
-> everyone sits at their own plate.
+> The table has not been cleared since 1974;
+> whoever's turn it is sits at their own plate.
 >
 > There is a seat for you at the table too.
 

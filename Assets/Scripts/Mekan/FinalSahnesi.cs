@@ -27,12 +27,15 @@ public class FinalSahnesi : MonoBehaviour
     [SerializeField] private float kameraSuresi = 16f;
     [SerializeField] private float jenerikSuresi = 16f;
 
-    // DOKUZUNCU KAT (#68, Şahan'ın seçimi "c"): dış cephede 9. katın penceresi önce karanlıktır.
-    // Kamera bütün binayı gösterince uzaktan asansörün "ding" sesi gelir ve o pencere yanar:
-    // asansör, kapıcıyı çatıya çıkaran anahtarı getirdiği kata geri dönmüştür. Graybox kurucusu bağlar.
+    // DOKUZUNCU KAT (#68 → #117): dış cephede 9. katın penceresi dış kamera açıldığı andan itibaren YANIKTIR;
+    // o ışık kapıcının çiviye yanık astığı kafa lambasıdır (#108), oyuncu onu dokuzuncu katta kendisi bıraktı.
+    // Kamera bütün binayı gösterince uzaktan asansörün "ding" sesi gelir ve pencerede bir SİLUET belirir:
+    // asansör dokuzuncu kata döndü, sofradaki kalktı, pencereye geldi. (#68'de pencere karanlık başlayıp ding ile
+    // yanıyordu; lamba çiviye asılınca bu tutarsız oldu.) Graybox kurucusu pencereyi, ışığı ve silueti bağlar.
     [Header("Dokuzuncu kat")]
     [SerializeField] private Renderer dokuzuncuPencere;
     [SerializeField] private Material pencereIsigi;
+    [SerializeField] private GameObject pencereSilueti;   // pencerenin önünde duran karanlık figür (#117); kapalı başlar
     [SerializeField] private AudioClip asansorSesi;
 
     // Kameranın başlangıç ve bitiş duruşu (bu nesneye göre yerel): önce sokakta,
@@ -163,6 +166,8 @@ public class FinalSahnesi : MonoBehaviour
         KatYoneticisi yonetici = FindAnyObjectByType<KatYoneticisi>();
         if (yonetici != null) yonetici.enabled = false;
 
+        // Dokuzuncu katın penceresi baştan yanık (#117): çiviye asılan lamba.
+        if (dokuzuncuPencere != null && pencereIsigi != null) dokuzuncuPencere.sharedMaterial = pencereIsigi;
         // Dış kamerayı ve onun sokak sesini aç.
         finalKamera.gameObject.SetActive(true);
         KamerayiYerlestir(0f);
@@ -177,7 +182,7 @@ public class FinalSahnesi : MonoBehaviour
         }
         KamerayiYerlestir(1f);
 
-        // Bina bütünüyle kadrajda: önce asansörün sesi, sonra dokuzuncu katın ışığı.
+        // Bina bütünüyle kadrajda: önce asansörün sesi, sonra yanan pencerede biri belirir.
         yield return new WaitForSeconds(1.2f);
         if (asansorSesi != null)
         {
@@ -186,8 +191,8 @@ public class FinalSahnesi : MonoBehaviour
             if (kulak != null) kulak.PlayOneShot(asansorSesi, 0.45f);
         }
         yield return new WaitForSeconds(0.9f);
-        if (dokuzuncuPencere != null && pencereIsigi != null) dokuzuncuPencere.sharedMaterial = pencereIsigi;
-        Debug.Log("[FINAL] Dokuzuncu katın penceresi yandı.");
+        if (pencereSilueti != null) pencereSilueti.SetActive(true);
+        Debug.Log("[FINAL] Dokuzuncu katın penceresinde biri durdu.");
 
         yield return new WaitForSeconds(3f);
 
