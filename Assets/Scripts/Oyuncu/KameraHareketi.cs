@@ -20,6 +20,9 @@
 //      SurekliSarsinti ile sürekli titreme (GerilimEtkisi gerilime göre ayarlar). İkisi de
 //      Perlin gürültüsüyle döndürür (aşağıda tanımı var).
 //   3. GECİKEN FENER: kafa lambasının ışığı her kare kameranın dönüşüne yumuşakça yetişir.
+//   4. TİTREYEN FENER ELİ (#136): gerilim 2. kademede ışığın yönü 7 Hz'lik Perlin gürültüsüyle ±0,5°
+//      titrer, av sürerken ±1,2° (FenerTitremeKurali). Görüş titremez, yalnız huzme; "Kafa sallanması"
+//      ayarı kapalıysa bu da kapalı.
 //
 // Ayardan kapatma: Ayarlar → "Kafa sallanması: Kapalı" (Ayarlar.Sallanma, #92) ya da testler için Kapali
 // (static) true ise sallanma ve sarsıntı yok (hareket hassasiyeti olan oyuncular için). Fenerin gecikmesi
@@ -86,7 +89,12 @@ public class KameraHareketi : MonoBehaviour
     private Vector3 sonKonumOfseti = Vector3.zero;
     private Quaternion sonDonusOfseti = Quaternion.identity;
 
-    private Quaternion fenerDonusu;                 // fenerin geçen karedeki dünya dönüşü
+    private Quaternion fenerDonusu;                 // fenerin geçen karedeki dünya dönüşü (titremesiz)
+    private float fenerTitremeGenligi;              // #136: şu anki titreme genliği (derece, yumuşatılmış)
+    private float fenerGurultuZamani;               // #136: Perlin okuma konumu
+
+    /// <summary>#136: fenerin şu anki titreme genliği (derece); test göstergesi.</summary>
+    public float FenerTitremeGenligi { get { return fenerTitremeGenligi; } }
     private bool fenerHazir;                        // fenerDonusu geçerli mi (ilk karede değil)
 
     /// <summary>
@@ -277,8 +285,28 @@ public class KameraHareketi : MonoBehaviour
                     || Quaternion.Angle(fenerDonusu, hedef) > FenerSicramaAcisi;
 
         Quaternion yeni = atla ? hedef : Quaternion.Slerp(fenerDonusu, hedef, 1f - Mathf.Exp(-FenerYetisme * dt));
-        isik.rotation = yeni;
+        isik.rotation = yeni * FenerTitremesi(dt);   // #136: titreme gecikmeye BİNER, gecikmenin hafızasına girmez
         fenerDonusu = yeni;
         fenerHazir = true;
+    }
+
+    // ---------- TİTREYEN FENER ELİ (#136) ----------
+    // Hedef genlik gerilim kademesinden (Varlik) gelir; genlik bir anda değil 1,5°/sn ile değişir. Perlin
+    // gürültüsü (Sarsinti'daki gibi) iki eksende okunur: yukarı-aşağı ve sağa-sola; yan yatma yok (ışık
+    // konisi simetrik, yatması görünmez). Kapalı (test) ya da ayar kapalıyken genlik 0'a iner.
+    private Quaternion FenerTitremesi(float dt)
+    {
+        float hedefGenlik = 0f;
+        if (!Kapali && Ayarlar.Sallanma && kontrolcu != null && kontrolcu.enabled)
+        {
+            Varlik v = Varlik.Ornek;
+            if (v != null) hedefGenlik = FenerTitremeKurali.Genlik(v.Kademe, v.AvSuruyor);
+        }
+        fenerTitremeGenligi = Mathf.MoveTowards(fenerTitremeGenligi, hedefGenlik, FenerTitremeKurali.GecisHizi * dt);
+        if (fenerTitremeGenligi <= 0.001f) return Quaternion.identity;
+        fenerGurultuZamani += dt * FenerTitremeKurali.Frekans;
+        float x = (Mathf.PerlinNoise(fenerGurultuZamani, 7.3f) - 0.5f) * 2f;
+        float y = (Mathf.PerlinNoise(31.7f, fenerGurultuZamani) - 0.5f) * 2f;
+        return Quaternion.Euler(x * fenerTitremeGenligi, y * fenerTitremeGenligi, 0f);
     }
 }

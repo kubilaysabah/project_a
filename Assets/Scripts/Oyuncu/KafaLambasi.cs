@@ -222,6 +222,8 @@ public class KafaLambasi : MonoBehaviour
         Transform toz = transform.Find("Toz_Zerreleri");
         if (toz == null) { Camera k = GetComponentInChildren<Camera>(); if (k != null) toz = k.transform.Find("Toz_Zerreleri"); }
         if (toz != null && toz.GetComponent<TozIsigi>() == null) toz.gameObject.AddComponent<TozIsigi>();
+        // #136: nefes buharı kameraya burada eklenir (kurucu değişmez; toz malzemesini kullanır).
+        if (GetComponent<NefesBuhari>() == null) gameObject.AddComponent<NefesBuhari>();
     }
 
     private void OnDestroy()
