@@ -27,10 +27,17 @@
 //   görünür olaydan sonra SESSİZLİK: uğultu, TV ve müzik 1 sn'de susar, 15-20 sn sessiz kalır, 3 sn'de döner.
 //
 // KURALLAR:
-//   - Olaylar Varlik.Gurultu ÇAĞIRMAZ (oyuncunun gürültüsü değil, cinin işi) ve GolgeImzasi ÇALMAZ (imza
-//     varlığın görünmesinin habercisi kalsın).
+//   - Olaylar Varlik.Gurultu ÇAĞIRMAZ (oyuncunun gürültüsü değil, cinin işi). GolgeImzasi yalnız bir figür
+//     GÖRÜNMEDEN hemen önce çalar (Belirme, Gecis, Kacis; CLAUDE.md: "varlığın her görünüşü imzayla başlar");
+//     sesli olaylar, kapı gözü, zil ve asansör imza çalmaz (varlık değil, "içerideki biri").
 //   - Saklanırken, av sürerken, 6. katın saklanma anı ve 7. katın kaçışı sırasında, menüde, açılışta ve
-//     dokuzuncu katta olay yok. Sahanlıkta sayaç durur (olaylar dairenin içindir).
+//     dokuzuncu katta olay yok. Saat sahanlıkta da işler (#133): daire olayları dairede; sahanlık olayları
+//     (kapı gözü, zil, asansör) yalnız oyuncu A sahanlığının zeminindeyken (#139: üst sahanlıkta, merdivende,
+//     zemin katta değil). 1. kat yalnız sesli olay alır, zemin katta olay yok (#141, CinOlayKurali.KattaIzinli).
+//   - SEÇİM TEMBEL (#141): kural torbadaki sırayla türleri tek tek sorar (Hazirla); yalnız sorulan türün yeri
+//     aranır ve bulunan yer olaya verilir. Olay yerini ikinci kez aramaz (#139: ikinci arama rastgele başarısız
+//     olunca olay sessizce yutuluyor, figür torbadan boşa çıkıyordu).
+//   - Kat yerinde baştan kurulunca (yakalanma) KatYoneticisi Sifirla()'yı çağırır (#139).
 //   - Varlik.Kapali (bot, kat denetimi) bunu da kapatır.
 //   - Kat değişince kırık parçalar silinir, süren olay durur, kural baştan kurulur.
 
@@ -62,7 +69,8 @@ public class CinOlaylari : MonoBehaviour
     private const float KarartmaSuresi = 1.3f;                        // #135: lambanın ölü kaldığı süre
     private const float YaklasmaEnAz = 1.0f, YaklasmaEnCok = 1.5f;    // #135: karanlıkta yaklaşılan mesafe
     private const float YaklasmaEnYakin = 1.2f;                       // #135: oyuncuya bundan yakına gelmez
-    private const float SessizlikEnAz = 15f, SessizlikEnCok = 20f;    // #135: korkudan sonra sessizlik süresi
+    // #141 (B4): sessizlik süresi kata göre CinOlayKurali.SessizlikAraligi'nden gelir (1. kat 15-20 sn, 8. kat 8-12 sn).
+    private const float KatDegisinceCikis = 0.8f;                     // #141: kat değişince sessizlik bu sürede biter (pat diye değil)
     private const float SessizlikInis = 1f, SessizlikCikis = 3f;      // #135: susma ve geri gelme süreleri
     private Coroutine sessizlik;                                      // #135: süren sessizlik (yoksa null)
     // #137
@@ -114,6 +122,21 @@ public class CinOlaylari : MonoBehaviour
     private readonly List<GameObject> konanlar = new List<GameObject>();   // kırık parçalar: kat değişince silinir
     private AudioClip[] kirilmaSesleri;
 
+    // #139 (A6) / #141 (B3): olay seçilirken bulunan yer burada saklanır ve olay onu kullanır.
+    private IcKapi hazirKapi;              // çarpılacak / açılacak / vurulacak kapı
+    private AcilirParca hazirParca;        // açılacak çekmece / kapak
+    private Vector3 hazirBas, hazirSon;    // kırılma noktası, belirme yeri, geçiş / kaçış / iz yolunun iki ucu
+    private Transform hazirNesne;          // kapı gözünün kapısı, zil, dönecek eşya
+    private RadyoAnonsu hazirCihaz;        // cızırdayacak radyo / TV
+    private AsansorPanosu hazirPano;       // kendi kendine geçecek asansörün panosu
+    private AsansorPanosu gecenPano;       // #139 (A2): asansör geçişi sürüyorsa panosu (yarıda kalırsa Temizle susturur)
+    // #141 (B3): Etkin() her kare sahneyi taramasın; kovalamaca / saklanma anı bileşenleri saniyede bir bulunur.
+    private KacisAni[] kacislar = new KacisAni[0];
+    private SaklanmaAni[] saklanmalar = new SaklanmaAni[0];
+    private float anTaramaSayaci = 99f;
+    // #139 (A4): dönecek eşya bir oda kapısına bundan yakınsa ya da dönünce kapladığı yer bu kadar büyüyorsa dönmez.
+    private const float KapiyaEnYakin = 1f, IzinliBuyume = 0.12f;
+
     /// <summary>Test göstergesi: son olay ve bir sonrakine kalan süre.</summary>
     public string Durum
     {
@@ -125,7 +148,11 @@ public class CinOlaylari : MonoBehaviour
     }
 
     private void Awake() { Ornek = this; }
-    private void OnDestroy() { if (Ornek == this) Ornek = null; }
+    private void OnDestroy()
+    {
+        if (Ornek == this) Ornek = null;
+        Ayarlar.Degisti -= IzleriAyarla;   // #139 (A8)
+    }
 
     private void Start()
     {
@@ -147,6 +174,9 @@ public class CinOlaylari : MonoBehaviour
         }
         if (liste.Count == 0) { AudioClip c = Resources.Load<AudioClip>("Sesler/Cam_Kirilma"); if (c != null) liste.Add(c); }
         kirilmaSesleri = liste.ToArray();
+        // #139 (A8): kalite değişince konmuş ayak izleri de açılıp kapansın. "+=" bir olaya (event) abone olmak:
+        // Ayarlar.Degisti tetiklenince IzleriAyarla çağrılır. Bileşen yok olurken "-=" ile abonelik bırakılır.
+        Ayarlar.Degisti += IzleriAyarla;
     }
 
     private void Update()
@@ -167,43 +197,75 @@ public class CinOlaylari : MonoBehaviour
         if (!kural.Ilerlet(Time.deltaTime, uygun)) return;
         if (!uygun) return;   // sayaç dolu ama şu an uygun değil: uygun olunca seçilir
 
-        bool dairede = daire != null;
-        bool[] mevcut = new bool[CinOlayKurali.OlaySayisi];
-        mevcut[(int)CinOlayi.KapiCarpma] = dairede && CarpilacakKapi() != null;
-        mevcut[(int)CinOlayi.Kirilma] = dairede && KirilmaNoktasi(out _);
-        mevcut[(int)CinOlayi.BakmayincaDegisim] = dairede && (DegisecekKapi() != null || DegisecekParca() != null);
-        mevcut[(int)CinOlayi.IceridenVurus] = dairede && VurulacakKapi() != null;
-        mevcut[(int)CinOlayi.ArkadanAdim] = dairede;
-        mevcut[(int)CinOlayi.Cihaz] = dairede && Cihaz() != null;
-        mevcut[(int)CinOlayi.Belirme] = Sablon() != null && BelirmeYeri(out _);
-        mevcut[(int)CinOlayi.Gecis] = Sablon() != null && GecisYolu(out _, out _);
-        mevcut[(int)CinOlayi.Kacis] = Sablon() != null && KacisYolu(out _, out _);
-        // #137
-        mevcut[(int)CinOlayi.AyakIzi] = dairede && IzMalzemesiVar() && AyakIziYolu(out _, out _);
-        mevcut[(int)CinOlayi.KapiGozu] = !dairede && KapiGozuAdayi() != null;
-        mevcut[(int)CinOlayi.Zil] = !dairede && zilSesi != null && zilSayisi < ZilEnCokKosu && zilKati != kat && ZilAdayi() != null;
-        mevcut[(int)CinOlayi.EsyaDonmesi] = dairede && DonecekEsya() != null;
-        mevcut[(int)CinOlayi.AsansorGecis] = !dairede && AsansorAdayi() != null;
-        CinOlayi olay = kural.Sec(mevcut);
+        // #141 (B3): kural türleri torbadaki sırayla tek tek sorar; Hazirla yalnız sorulan türün yerini arar,
+        // bulursa hazir* alanlarına yazar. "kural.Sec(Hazirla)": Hazirla metodunun ADINI veriyoruz, çağırmıyoruz
+        // (parantez yok); kural onu ne zaman ve kaç kez çağıracağına kendisi karar verir.
+        CinOlayi olay = kural.Sec(Hazirla);
         if (olay == CinOlayi.Yok) return;
         Debug.Log($"[CIN] {kat}. kat: {olay}");
         switch (olay)
         {
-            case CinOlayi.KapiCarpma: suren = StartCoroutine(KapiyiCarp()); break;
-            case CinOlayi.Kirilma: Kir(); break;
-            case CinOlayi.BakmayincaDegisim: Degistir(); break;
-            case CinOlayi.IceridenVurus: suren = StartCoroutine(IceridenVur()); break;
+            case CinOlayi.KapiCarpma: suren = StartCoroutine(KapiyiCarp(hazirKapi)); break;
+            case CinOlayi.Kirilma: Kir(hazirBas); break;
+            case CinOlayi.BakmayincaDegisim: Degistir(hazirKapi, hazirParca); break;
+            case CinOlayi.IceridenVurus: suren = StartCoroutine(IceridenVur(hazirKapi)); break;
             case CinOlayi.ArkadanAdim: suren = StartCoroutine(ArkadanYuru()); break;
-            case CinOlayi.Cihaz: Cihaz()?.KisaParazit(); break;
-            case CinOlayi.Belirme: suren = StartCoroutine(Belir()); break;
-            case CinOlayi.Gecis: suren = StartCoroutine(Gec()); break;
-            case CinOlayi.Kacis: suren = StartCoroutine(Kac()); break;
-            case CinOlayi.AyakIzi: suren = StartCoroutine(AyakIzleri()); break;
-            case CinOlayi.KapiGozu: suren = StartCoroutine(KapiGozuYan()); break;
-            case CinOlayi.Zil: ZilCal(); break;
-            case CinOlayi.EsyaDonmesi: EsyaDondur(); break;
-            case CinOlayi.AsansorGecis: suren = StartCoroutine(AsansorGec()); break;
+            case CinOlayi.Cihaz: if (hazirCihaz != null) hazirCihaz.KisaParazit(); break;
+            case CinOlayi.Belirme: suren = StartCoroutine(Belir(hazirBas)); break;
+            case CinOlayi.Gecis: suren = StartCoroutine(Gec(hazirBas, hazirSon)); break;
+            case CinOlayi.Kacis: suren = StartCoroutine(Kac(hazirBas, hazirSon)); break;
+            case CinOlayi.AyakIzi: suren = StartCoroutine(AyakIzleri(hazirBas, hazirSon)); break;
+            case CinOlayi.KapiGozu: suren = StartCoroutine(KapiGozuYan(hazirNesne)); break;
+            case CinOlayi.Zil: ZilCal(hazirNesne); break;
+            case CinOlayi.EsyaDonmesi: EsyaDondur(hazirNesne); break;
+            case CinOlayi.AsansorGecis: suren = StartCoroutine(AsansorGec(hazirPano)); break;
         }
+    }
+
+    // #141 (B3): kuralın sorduğu TEK türün şu an yapılıp yapılamayacağına bakar; yapılabiliyorsa yerini hazir*
+    // alanlarına yazar. Her çağrıda alanlar önce boşaltılır: kural "evet" alınca hemen durduğu için alanlarda
+    // kalan, seçilen türün yeridir.
+    private bool Hazirla(CinOlayi olay)
+    {
+        bool dairede = daire != null;
+        bool sahanlikta = !dairede && SahanliktaMi();   // #139 (A3)
+        hazirKapi = null; hazirParca = null; hazirNesne = null; hazirCihaz = null; hazirPano = null;
+        switch (olay)
+        {
+            case CinOlayi.KapiCarpma: return dairede && (hazirKapi = CarpilacakKapi()) != null;
+            case CinOlayi.Kirilma: return dairede && KirilmaNoktasi(out hazirBas);
+            case CinOlayi.BakmayincaDegisim:
+                if (!dairede) return false;
+                hazirKapi = DegisecekKapi();
+                hazirParca = DegisecekParca();
+                // İkisi de varsa yazı tura: biri kalır (eskiden olay anında seçiliyordu).
+                if (hazirKapi != null && hazirParca != null) { if (Random.value < 0.5f) hazirParca = null; else hazirKapi = null; }
+                return hazirKapi != null || hazirParca != null;
+            case CinOlayi.IceridenVurus: return dairede && vurusSesi != null && (hazirKapi = VurulacakKapi()) != null;
+            case CinOlayi.ArkadanAdim: return dairede;
+            case CinOlayi.Cihaz: return dairede && (hazirCihaz = Cihaz()) != null;
+            case CinOlayi.Belirme: return Sablon() != null && BelirmeYeri(out hazirBas);
+            case CinOlayi.Gecis: return Sablon() != null && GecisYolu(out hazirBas, out hazirSon);
+            case CinOlayi.Kacis: return Sablon() != null && KacisYolu(out hazirBas, out hazirSon);
+            case CinOlayi.AyakIzi: return dairede && IzMalzemesiVar() && AyakIziYolu(out hazirBas, out hazirSon);
+            case CinOlayi.KapiGozu: return sahanlikta && (hazirNesne = KapiGozuAdayi()) != null;
+            case CinOlayi.Zil: return sahanlikta && zilSesi != null && zilSayisi < ZilEnCokKosu && zilKati != kat && (hazirNesne = ZilAdayi()) != null;
+            case CinOlayi.EsyaDonmesi: return dairede && (hazirNesne = DonecekEsya()) != null;
+            case CinOlayi.AsansorGecis: return sahanlikta && (hazirPano = AsansorAdayi()) != null;
+        }
+        return false;
+    }
+
+    // #139 (A3): oyuncu A sahanlığının (şu anki katı gösteren sahanlığın) zemininde mi? Üst sahanlık (B, +3 m),
+    // ara sahanlık (+1,5 m), merdiven ve zemin kat (-3 m) değil. Sahanlık olayları (kapı gözü, zil, asansör) A'da
+    // olur; oyuncu başka yerdeyken olurlarsa görmediği yerde ışık yanar, koşunun iki zilinden biri boşa gider.
+    private bool SahanliktaMi()
+    {
+        if (kat < 1) return false;
+        Transform s = SahanlikA();
+        if (s == null) return false;
+        if (Mathf.Abs(oyuncu.position.y - s.position.y) > 0.5f) return false;
+        return yonetici.SahanlikKati(s) == kat;
     }
 
     // Kural bu karede işlesin mi? Varlik.Etkin ile aynı kapılar; saklanırken ve av sürerken de kapalı.
@@ -218,8 +280,12 @@ public class CinOlaylari : MonoBehaviour
         if (Time.timeScale <= 0f) return false;
         Varlik v = Varlik.Ornek;
         if (v != null && v.AvSuruyor) return false;
-        foreach (KacisAni k in FindObjectsByType<KacisAni>()) if (k.Basladi) return false;
-        foreach (SaklanmaAni s in FindObjectsByType<SaklanmaAni>()) if (s.Suruyor) return false;
+        // #141 (B3): kovalamaca / saklanma anı bileşenleri kat kurulurken eklenir; saniyede bir taranır (eskiden
+        // her kare bütün sahne aranıyor, her kare yeni bir dizi yaratılıyordu).
+        anTaramaSayaci += Time.deltaTime;
+        if (anTaramaSayaci >= 1f) { anTaramaSayaci = 0f; kacislar = FindObjectsByType<KacisAni>(); saklanmalar = FindObjectsByType<SaklanmaAni>(); }
+        foreach (KacisAni k in kacislar) if (k != null && k.Basladi) return false;
+        foreach (SaklanmaAni sa in saklanmalar) if (sa != null && sa.Suruyor) return false;
         return true;
     }
 
@@ -241,13 +307,27 @@ public class CinOlaylari : MonoBehaviour
     private void OnDisable()
     {
         if (golge != null) Destroy(golge); golge = null;
-        SessizligiBitir();
+        AsansoruSustur();
+        SessizligiBitir(false);
+    }
+
+    /// <summary>
+    /// #139 (A7): kat YERİNDE baştan kurulunca (av / kovalamaca / saklanma yakalaması) KatYoneticisi çağırır:
+    /// süren olay durur; izler, kırıklar, figür silinir; dönen eşyalar yerine döner; katın saati baştan kurulur
+    /// (ilk olay yine geç gelir). Kat numarası değişmediği için Update bunu kendisi fark edemez.
+    /// </summary>
+    public void Sifirla()
+    {
+        Temizle();
+        if (kural != null && kat >= 0) kural.KatAyarla(kat);
     }
 
     private void Temizle()
     {
         if (suren != null) { StopCoroutine(suren); suren = null; }
-        SessizligiBitir();
+        AsansoruSustur();          // #139 (A2): yarıda kalan asansör geçişinin uğultusu ve göstergesi
+        SessizligiBitir(true);     // #141 (B4): ses pat diye değil, 0,8 sn'de geri gelir
+        anTaramaSayaci = 99f;      // yeni katın kovalamaca / saklanma bileşenleri hemen taransın
         if (golge != null) { Destroy(golge); golge = null; }
         foreach (GameObject g in konanlar) if (g != null) Destroy(g);
         konanlar.Clear();
@@ -255,6 +335,28 @@ public class CinOlaylari : MonoBehaviour
         foreach (var d in dondurulenler) if (d.nesne != null) d.nesne.localRotation = d.donus;
         dondurulenler.Clear();
         daire = null;
+    }
+
+    // #139 (A2): asansör geçişi yarıda kaldıysa kuyu uğultusu döngüde kalmasın, gösterge eski bir kat yazmasın.
+    private void AsansoruSustur()
+    {
+        if (gecenPano == null) return;
+        gecenPano.Ugultu(false);
+        gecenPano.GostergeYaz("-");
+        gecenPano = null;
+    }
+
+    // #139 (A8): kalite oyun ortasında Düşük'e alınınca konmuş ayak izleri de söner, geri alınınca yanar
+    // (DaireLekeleri'nin duvar lekeleri için yaptığının aynısı).
+    private void IzleriAyarla()
+    {
+        bool acik = Ayarlar.Kalite != AyarKurallari.KaliteDusuk;
+        foreach (GameObject g in konanlar)
+        {
+            if (g == null) continue;
+            var p = g.GetComponent<UnityEngine.Rendering.Universal.DecalProjector>();
+            if (p != null) p.enabled = acik;
+        }
     }
 
     private bool Gorunur(Vector3 nokta, Transform haric) { return Gorus.Gorunur(kamera, oyuncu, nokta, haric); }
@@ -377,6 +479,12 @@ public class CinOlaylari : MonoBehaviour
         return secilen;
     }
 
+    /// <summary>
+    /// #140: varlığın öbür görünüşleri (av, 7. kat kovalamacası, gezen gölge, saklanma anı, ayna, duvar gölgesi)
+    /// de aynı torbadan figür çeker (VarlikGorunusu); figür yoksa eski Gölge şablonu döner.
+    /// </summary>
+    public GameObject FigurAl() { return FigurSec(); }
+
     // ---------- GÖRÜNÜR OLAYLARIN YERLERİ (#133) ----------
     // Bir noktada Gölge durabilir mi: altında oyuncunun ayak hizasında zemin var, bir insan sığar (kapsül boş).
     private bool Durulur(ref Vector3 aday)
@@ -497,9 +605,10 @@ public class CinOlaylari : MonoBehaviour
     // Kaçış (#134): imza, figür görüşte belirir ve oyuncuya bakar; 0,5-0,9 sn sonra öne eğilip sıçramalı
     // adımlarla ("koşar gibi": iskeleti yok, gövde eğik, 4 Hz'de 7 cm zıplar) uzağa koşar; her adımda zeminin
     // ayak sesi YÜKSEK çalar (Şahan: "yüksek ayak sesi çıkararak"); yolun sonunda silinir. Dokunmaz, yakalamaz.
-    private IEnumerator Kac()
+    private IEnumerator Kac(Vector3 bas, Vector3 son)
     {
-        if (KacisYolu(out Vector3 bas, out Vector3 son))
+        // #139 (A6): yol seçimde bulundu (Hazirla), burada yeniden aranmaz. Aşağıdaki süslü parantez yalnız bir
+        // "blok": değişkenlerin geçerli olduğu alanı sınırlar, koşul değildir.
         {
             GameObject sablon = FigurSec();
             if (sablon != null)
@@ -517,9 +626,10 @@ public class CinOlaylari : MonoBehaviour
                 for (float t = 0f; t < sure && golge != null; t += Time.deltaTime)
                 {
                     Vector3 taban = Vector3.Lerp(bas, son, t / sure);
-                    float zip = Mathf.Abs(Mathf.Sin(t * Mathf.PI * 4f)) * 0.07f;             // sıçrama
-                    golge.transform.position = taban + Vector3.up * zip;
-                    golge.transform.rotation = kosuDonusu * Quaternion.Euler(14f, 0f, Mathf.Sin(t * Mathf.PI * 8f) * 4f);   // öne eğik, hafif yalpa
+                    // #140: öne eğilme, sıçrama ve yalpa artık figürün kendi FigurYurumesi bileşeninde (hızdan
+                    // ölçülür; avda ve kovalamacada da aynı yürüyüş/koşu). Burada yalnız yol ve yön.
+                    golge.transform.position = taban;
+                    golge.transform.rotation = kosuDonusu;
                     adimSayaci += Time.deltaTime;
                     if (adimSayaci >= KacisAdimAraligi)
                     {
@@ -546,14 +656,29 @@ public class CinOlaylari : MonoBehaviour
     private void SessizlikBaslat()
     {
         if (sessizlik != null) StopCoroutine(sessizlik);
-        sessizlik = StartCoroutine(Sessizlik(Random.Range(SessizlikEnAz, SessizlikEnCok)));
+        CinOlayKurali.SessizlikAraligi(kat, out float enAz, out float enCok);   // #141 (B4): üst katlarda kısa
+        sessizlik = StartCoroutine(Sessizlik(Random.Range(enAz, enCok)));
     }
 
-    private void SessizligiBitir()
+    // Sessizliği bitirir. yumusak: kat değişince (#141 B4) ses 0,8 sn'de geri gelir (merdivende "pat" diye
+    // açılan uğultu kulağı tırmalıyordu); bileşen kapanırken (sahne değişimi, final) hemen.
+    private void SessizligiBitir(bool yumusak)
     {
         if (sessizlik != null) { StopCoroutine(sessizlik); sessizlik = null; }
-        OrtamSesi.Kisma = 1f;
-        ArkaMuzik.Kisma = 1f;
+        if (yumusak && isActiveAndEnabled && (OrtamSesi.Kisma < 1f || ArkaMuzik.Kisma < 1f))
+        {
+            sessizlik = StartCoroutine(SessizliktenCik(KatDegisinceCikis));
+            return;
+        }
+        Kis(1f);
+    }
+
+    private IEnumerator SessizliktenCik(float sure)
+    {
+        float bas = Mathf.Min(OrtamSesi.Kisma, ArkaMuzik.Kisma);
+        for (float t = 0f; t < sure; t += Time.deltaTime) { Kis(Mathf.Lerp(bas, 1f, t / sure)); yield return null; }
+        Kis(1f);
+        sessizlik = null;
     }
 
     private IEnumerator Sessizlik(float sure)
@@ -581,36 +706,68 @@ public class CinOlaylari : MonoBehaviour
         return ayakIziMalzemeleri != null && ayakIziMalzemeleri.Length >= 2 && ayakIziMalzemeleri[0] != null && ayakIziMalzemeleri[1] != null;
     }
 
-    // Yol: başlangıç oyuncunun arkasında (dairenin zemininde, görünmez), bitiş kapalı bir kapının önü.
+    // Yol: başlangıç oyuncunun arkasında (dairenin zemininde, görünmez), bitiş kapalı bir oda kapısının önü.
+    // #139 (A5): başlangıç masa / kanepe üstü değil ZEMİN olmalı ve yol diz hizasında (30 cm) engelsiz olmalı
+    // (eskiden duvarın öbür yanındaki kapıya düz çizgi çekiliyor, izler duvarın öte yanına düşüyordu). Bunun
+    // için görünmeyen kapalı kapılar karıştırılır ve her biri için birkaç başlangıç noktası denenir.
     private bool AyakIziYolu(out Vector3 bas, out Vector3 son)
     {
         bas = son = Vector3.zero;
         if (daire == null) return false;
-        IcKapi hedef = VurulacakKapi();
-        if (hedef == null) return false;
-        for (int deneme = 0; deneme < 8; deneme++)
+        var kapilar = new List<IcKapi>();
+        foreach (IcKapi k in DaireKapilari())
         {
-            Vector3 geri = -oyuncu.forward * IzBaslangicGeri + oyuncu.right * Random.Range(-0.8f, 0.8f);
-            Vector3 ust = oyuncu.position + geri + Vector3.up * 1.2f;
-            if (!Physics.Raycast(ust, Vector3.down, out RaycastHit h, 1.6f, ~0, QueryTriggerInteraction.Ignore)) continue;
-            if (h.collider.transform.IsChildOf(oyuncu)) continue;
-            DaireEksenleri e = h.collider.GetComponentInParent<DaireEksenleri>();
-            if (e == null || e.transform != daire) continue;
-            if (!Gorus.Arkada(kamera, h.point)) continue;
-            bas = h.point;
-            // Kapının önü: kapıdan başlangıca doğru 45 cm (kapının ÖN yüzü başlangıcın olduğu taraftadır).
-            Vector3 kapi = hedef.transform.position; kapi.y = bas.y;
-            Vector3 yon = bas - kapi; yon.y = 0f;
-            if (yon.magnitude < 1.2f) continue;
-            son = kapi + yon.normalized * 0.45f;
+            if (k.Acik) continue;
+            if (Vector3.Distance(k.transform.position, oyuncu.position) > VurusMesafesi) continue;
+            if (Gorunur(k.transform.position + Vector3.up * 1.0f, k.transform)) continue;
+            kapilar.Add(k);
+        }
+        for (int i = kapilar.Count - 1; i > 0; i--) { int j = Random.Range(0, i + 1); IcKapi g = kapilar[i]; kapilar[i] = kapilar[j]; kapilar[j] = g; }
+        foreach (IcKapi hedef in kapilar)
+        {
+            for (int deneme = 0; deneme < 4; deneme++)
+            {
+                Vector3 geri = -oyuncu.forward * IzBaslangicGeri + oyuncu.right * Random.Range(-0.8f, 0.8f);
+                Vector3 ust = oyuncu.position + geri + Vector3.up * 1.2f;
+                if (!Physics.Raycast(ust, Vector3.down, out RaycastHit h, 1.6f, ~0, QueryTriggerInteraction.Ignore)) continue;
+                if (h.collider.transform.IsChildOf(oyuncu)) continue;
+                DaireEksenleri e = h.collider.GetComponentInParent<DaireEksenleri>();
+                if (e == null || e.transform != daire) continue;
+                if (!Gorus.Arkada(kamera, h.point)) continue;
+                if (Mathf.Abs(h.point.y - oyuncu.position.y) > 0.1f) continue;   // zemin; masa / kanepe üstü değil
+                Vector3 b = h.point;
+                // Kapının önü: kapıdan başlangıca doğru 45 cm.
+                Vector3 kapi = hedef.transform.position; kapi.y = b.y;
+                Vector3 yon = b - kapi; yon.y = 0f;
+                if (yon.magnitude < 1.2f) continue;
+                Vector3 s2 = kapi + yon.normalized * 0.45f;
+                if (YolTikali(b, s2, hedef.transform)) continue;
+                bas = b; son = s2;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // #139 (A5): a'dan b'ye diz hizasında (30 cm) düz bir çizgi bir duvara / mobilyaya çarpıyor mu? Oyuncunun
+    // kendisi ve hedef kapı sayılmaz.
+    private bool YolTikali(Vector3 a, Vector3 b, Transform hedefKapi)
+    {
+        Vector3 y = Vector3.up * 0.3f;
+        Vector3 fark = b - a;
+        if (fark.sqrMagnitude < 0.0001f) return false;
+        foreach (RaycastHit h in Physics.RaycastAll(a + y, fark.normalized, fark.magnitude, ~0, QueryTriggerInteraction.Ignore))
+        {
+            Transform t = h.collider.transform;
+            if (t.IsChildOf(oyuncu) || (hedefKapi != null && t.IsChildOf(hedefKapi))) continue;
             return true;
         }
         return false;
     }
 
-    private IEnumerator AyakIzleri()
+    private IEnumerator AyakIzleri(Vector3 bas, Vector3 son)
     {
-        if (AyakIziYolu(out Vector3 bas, out Vector3 son))
+        // #139 (A6): yol seçimde bulundu (Hazirla).
         {
             Vector3 yon = son - bas; yon.y = 0f;
             int sayi = Mathf.Clamp(Mathf.RoundToInt(yon.magnitude / IzAdimi), IzEnAz, IzEnCok);
@@ -621,7 +778,9 @@ public class CinOlaylari : MonoBehaviour
                 bool sol = i % 2 == 0;
                 Vector3 nokta = Vector3.Lerp(bas, son, (i + 0.5f) / sayi) + yan * (sol ? -IzYanKayma : IzYanKayma);
                 // Zemin: noktanın üstünden aşağı; zemin yoksa (mobilya içi) iz konmaz ama ses gelir.
-                if (Physics.Raycast(nokta + Vector3.up * 1f, Vector3.down, out RaycastHit h, 1.5f, ~0, QueryTriggerInteraction.Ignore) && !h.collider.transform.IsChildOf(oyuncu))
+                // #139 (A5): yalnız başlangıçla aynı zemin hizasına (±5 cm) iz konur; halı kenarı, masa, kanepe üstüne değil.
+                if (Physics.Raycast(nokta + Vector3.up * 1f, Vector3.down, out RaycastHit h, 1.5f, ~0, QueryTriggerInteraction.Ignore)
+                    && !h.collider.transform.IsChildOf(oyuncu) && Mathf.Abs(h.point.y - bas.y) < 0.05f)
                 {
                     GameObject g = new GameObject(sol ? "Cin_Iz_Sol" : "Cin_Iz_Sag");
                     g.transform.SetParent(daire, true);
@@ -633,6 +792,7 @@ public class CinOlaylari : MonoBehaviour
                     p.pivot = Vector3.zero;
                     p.drawDistance = 25f;
                     p.fadeScale = 0.6f;
+                    p.enabled = Ayarlar.Kalite != AyarKurallari.KaliteDusuk;   // #139 (A8)
                     konanlar.Add(g);
                     nokta = h.point;
                 }
@@ -694,30 +854,32 @@ public class CinOlaylari : MonoBehaviour
         return true;
     }
 
-    private IEnumerator KapiGozuYan()
+    // #139 (A1): sahnedeki Kapi_Gozu_Isik'e dokunulmaz. 7. katın kartı onu gerçek kapının ipucu olarak açar; olay
+    // sürerken kat değişirse ışık yanık kalıyor, kartın geri alma defteri de onu "aslı yanık" diye tutuyordu.
+    // Olay onun bir KOPYASINI yakar: kopya konanlar listesindedir, kat değişince / sıfırlanınca Temizle siler.
+    private IEnumerator KapiGozuYan(Transform kapi)
     {
-        Transform kapi = KapiGozuAdayi();
-        if (kapi != null)
+        Transform asil = kapi != null ? kapi.Find("Mentese/Kapi_Gozu_Isik") : null;
+        if (asil != null)
         {
-            Transform isik = kapi.Find("Mentese/Kapi_Gozu_Isik");
-            Light l = isik.GetComponent<Light>();
-            float eskiSiddet = l != null ? l.intensity : 0f;
+            GameObject kopya = Instantiate(asil.gameObject, asil.parent);
+            kopya.name = "Cin_Kapi_Gozu";
+            kopya.transform.localPosition = asil.localPosition;
+            kopya.transform.localRotation = asil.localRotation;
+            Light l = kopya.GetComponent<Light>();
             if (l != null) l.intensity = KapiGozuSiddeti;
-            isik.gameObject.SetActive(true);
+            kopya.SetActive(true);
+            konanlar.Add(kopya);
             Debug.Log($"[CIN] kapı gözü: {kapi.name} yandı.");
             float bakis = 0f, gecen = 0f;
-            while (gecen < KapiGozuZamanAsimi && daire == null && isik != null)
+            while (gecen < KapiGozuZamanAsimi && daire == null && kopya != null)
             {
                 gecen += Time.deltaTime;
-                bakis = Bakiyor(isik.position) ? bakis + Time.deltaTime : 0f;
+                bakis = Bakiyor(kopya.transform.position) ? bakis + Time.deltaTime : 0f;
                 if (bakis >= KapiGozuBakma) break;
                 yield return null;
             }
-            if (isik != null)
-            {
-                isik.gameObject.SetActive(false);
-                if (l != null) l.intensity = eskiSiddet;
-            }
+            if (kopya != null) { konanlar.Remove(kopya); Destroy(kopya); }
             Debug.Log($"[CIN] kapı gözü: {(bakis >= KapiGozuBakma ? "bakılınca söndü" : "söndü")} ({gecen:0.0} sn).");
         }
         suren = null;
@@ -738,9 +900,8 @@ public class CinOlaylari : MonoBehaviour
         return adaylar.Count == 0 ? null : adaylar[Random.Range(0, adaylar.Count)];
     }
 
-    private void ZilCal()
+    private void ZilCal(Transform zil)
     {
-        Transform zil = ZilAdayi();
         if (zil == null || zilSesi == null) return;
         zilSayisi++; zilKati = kat;
         Cal(zilSesi, zil.position, 0.9f);
@@ -756,6 +917,8 @@ public class CinOlaylari : MonoBehaviour
     {
         if (daire == null) return null;
         var adaylar = new List<Transform>();
+        KatAni[] anlar = FindObjectsByType<KatAni>();              // #139 (A4): anların nesneleri
+        IcKapi[] kapilar = daire.GetComponentsInChildren<IcKapi>(); // #139 (A4): kapı ağızları
         foreach (Transform t in daire.GetComponentsInChildren<Transform>())
         {
             if (!t.gameObject.activeInHierarchy) continue;
@@ -767,6 +930,8 @@ public class CinOlaylari : MonoBehaviour
             if (t.parent != null && (t.parent.name.Contains("Sandalye") || t.parent.name.StartsWith("Manken"))) continue;   // parça değil, kök
             bool donmus = false; foreach (var d in dondurulenler) if (d.nesne == t) donmus = true;
             if (donmus) continue;
+            if (AninNesnesi(t, anlar)) continue;                    // #139 (A4): sallanan sandalye gibi bir anın nesnesi
+            if (!foto && !DonmeyeUygun(t, kapilar)) continue;       // #139 (A4): dönünce yolu / kapıyı kapatmasın
             Renderer r = t.GetComponentInChildren<Renderer>();
             Vector3 nokta = r != null ? r.bounds.center : t.position + Vector3.up * 0.5f;
             float m = Vector3.Distance(nokta, oyuncu.position);
@@ -776,9 +941,50 @@ public class CinOlaylari : MonoBehaviour
         return adaylar.Count == 0 ? null : adaylar[Random.Range(0, adaylar.Count)];
     }
 
-    private void EsyaDondur()
+    // #139 (A4): t bir katın anının (KatAni) nesnesi mi ya da onun içinde / dışında mı? 2. katın sallanan
+    // sandalyesi cin tarafından döndürülürse, an başlayınca kaydettiği duruşa zıplıyordu.
+    private static bool AninNesnesi(Transform t, KatAni[] anlar)
     {
-        Transform t = DonecekEsya();
+        foreach (KatAni a in anlar)
+        {
+            if (a == null || a.Hedef == null) continue;
+            if (a.Hedef == t || a.Hedef.IsChildOf(t) || t.IsChildOf(a.Hedef)) return true;
+        }
+        return false;
+    }
+
+    // #139 (A4): sandalye / manken oyuncuya dönerse yol kapanır mı? Bir oda kapısının 1 m yakınındaysa dönmez;
+    // değilse dönüş DENENİR, kapladığı yer (görünür kutusunun yatay ölçüsü) ölçülür ve dönüş geri alınır.
+    // Kutu bir eksende 12 cm'den çok büyüyorsa (uzun bir manken yana dönünce koridoru kapatır) dönmez.
+    private bool DonmeyeUygun(Transform t, IcKapi[] kapilar)
+    {
+        foreach (IcKapi k in kapilar)
+        {
+            Vector3 f = k.transform.position - t.position; f.y = 0f;
+            if (f.magnitude < KapiyaEnYakin) return false;
+        }
+        Vector3 bakis = oyuncu.position - t.position; bakis.y = 0f;
+        if (bakis.sqrMagnitude < 0.001f) return false;
+        Bounds once = GorunurKutu(t);
+        Quaternion eski = t.rotation;
+        t.rotation = Quaternion.LookRotation(bakis.normalized);
+        Bounds sonra = GorunurKutu(t);
+        t.rotation = eski;
+        return sonra.size.x - once.size.x < IzinliBuyume && sonra.size.z - once.size.z < IzinliBuyume;
+    }
+
+    // Bir nesnenin bütün çizicilerini saran dünya kutusu (Renderer.bounds dönüşten hemen sonra güncellenir).
+    private static Bounds GorunurKutu(Transform t)
+    {
+        Renderer[] rs = t.GetComponentsInChildren<Renderer>();
+        if (rs.Length == 0) return new Bounds(t.position, Vector3.zero);
+        Bounds b = rs[0].bounds;
+        for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
+        return b;
+    }
+
+    private void EsyaDondur(Transform t)
+    {
         if (t == null) return;
         dondurulenler.Add((t, t.localRotation));
         if (t.GetComponent<AileFotografi>() != null)
@@ -819,12 +1025,12 @@ public class CinOlaylari : MonoBehaviour
         return p;
     }
 
-    private IEnumerator AsansorGec()
+    private IEnumerator AsansorGec(AsansorPanosu pano)
     {
-        AsansorPanosu pano = AsansorAdayi();
         if (pano != null)
         {
             asansorKati = kat;
+            gecenPano = pano;   // #139 (A2): yarıda kalırsa Temizle uğultuyu durdurur, göstergeyi "-" yapar
             Transform a = pano.transform.parent;   // Asansor kökü
             Debug.Log($"[CIN] asansör: {kat}. katta kabin geçiyor.");
             Titresim.Vur(0.25f, 0.15f, 1.2f);
@@ -881,6 +1087,7 @@ public class CinOlaylari : MonoBehaviour
             pano.Ugultu(false);
             yield return new WaitForSeconds(0.8f);
             pano.GostergeYaz("-");
+            gecenPano = null;
             Debug.Log("[CIN] asansör: geçti, gösterge \"-\".");
         }
         suren = null;
@@ -892,10 +1099,10 @@ public class CinOlaylari : MonoBehaviour
     // düğmesi işlemez), karanlıkta yalnız gözler parlar (GozParlamasi) ve figür 1-1,5 m yaklaşır (ayakta
     // durabileceği bir nokta varsa; oyuncuya 1,2 m'den yakına asla gelmez), lamba kendiliğinden yanınca
     // titrer ve figür yok olur. Dokunmaz.
-    private IEnumerator Belir()
+    private IEnumerator Belir(Vector3 yer)
     {
         GameObject belirmeSablonu = FigurSec();
-        if (BelirmeYeri(out Vector3 yer) && belirmeSablonu != null)
+        if (belirmeSablonu != null)
         {
             GolgeImzasi.Cal(yer + Vector3.up * 1.2f);
             Vector3 bakis = oyuncu.position - yer; bakis.y = 0f;
@@ -940,10 +1147,10 @@ public class CinOlaylari : MonoBehaviour
     }
 
     // Geçiş: imza, Gölge bir uçtan öbürüne 4 m/sn ile yürür (GolgeAnimasyonu bacakları hareketten sallar), silinir.
-    private IEnumerator Gec()
+    private IEnumerator Gec(Vector3 bas, Vector3 son)
     {
         GameObject gecisSablonu = FigurSec();
-        if (GecisYolu(out Vector3 bas, out Vector3 son) && gecisSablonu != null)
+        if (gecisSablonu != null)
         {
             GolgeImzasi.Cal(bas + Vector3.up * 1.2f);
             Vector3 yon = son - bas; yon.y = 0f;
@@ -965,9 +1172,8 @@ public class CinOlaylari : MonoBehaviour
     }
 
     // ---------- OLAYLAR ----------
-    private IEnumerator KapiyiCarp()
+    private IEnumerator KapiyiCarp(IcKapi kapi)
     {
-        IcKapi kapi = CarpilacakKapi();
         if (kapi != null)
         {
             Titresim.Vur(0.6f, 0.45f, 0.35f);
@@ -977,9 +1183,8 @@ public class CinOlaylari : MonoBehaviour
         suren = null;
     }
 
-    private void Kir()
+    private void Kir(Vector3 nokta)
     {
-        if (!KirilmaNoktasi(out Vector3 nokta)) return;
         if (kirilmaSesleri != null && kirilmaSesleri.Length > 0)
             Cal(kirilmaSesleri[Random.Range(0, kirilmaSesleri.Length)], nokta + Vector3.up * 0.15f, 0.9f);
         if (kirikSablonu != null)
@@ -993,17 +1198,14 @@ public class CinOlaylari : MonoBehaviour
     }
 
     // Sessiz: oyuncu dönünce kapattığı kapıyı açık, kapalı çekmeceyi çekilmiş bulur.
-    private void Degistir()
+    private void Degistir(IcKapi k, AcilirParca p)
     {
-        IcKapi k = DegisecekKapi();
-        AcilirParca p = DegisecekParca();
-        if (k != null && (p == null || Random.value < 0.5f)) k.Ayarla(true);
+        if (k != null) k.Ayarla(true);
         else if (p != null) p.Ayarla(true);
     }
 
-    private IEnumerator IceridenVur()
+    private IEnumerator IceridenVur(IcKapi kapi)
     {
-        IcKapi kapi = VurulacakKapi();
         if (kapi != null && vurusSesi != null)
         {
             Vector3 yer = kapi.transform.position + Vector3.up * 1.2f;

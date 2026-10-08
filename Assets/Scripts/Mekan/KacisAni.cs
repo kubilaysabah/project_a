@@ -97,12 +97,8 @@ public class KacisAni : MonoBehaviour
         // bittikten sonraki karartmada da kapalıdır; o zaman durum Bitti olduğundan buraya gelinmez.
         if (Time.timeScale <= 0f || (kontrol != null && !kontrol.enabled)) return;
         gecenSure += Time.deltaTime;
-
-        // #112: not, şifre, inceleme ya da fotoğraf ekranı açıkken (kontrolcü kapalı) ve menüde kovalamaca DONAR:
-        // siluet yürümez, süre işlemez. Eskiden oyuncu ekran açıkken yakalanıyordu. Kontrolcü yalnızca kaçış
-        // bittikten sonraki karartmada da kapalıdır; o zaman durum Bitti olduğundan buraya gelinmez.
-        if (Time.timeScale <= 0f || (kontrol != null && !kontrol.enabled)) return;
-        gecenSure += Time.deltaTime;
+        // #139: bu blok (#112'de) iki kez yazılmıştı; süre her kare iki kat sayılıyor, siluet 3 sn yerine 1,5 sn
+        // sonra beliriyordu. Tek kez sayılır.
 
         // İz kaydı: oyuncunun yürüdüğü yol.
         izSayaci += Time.deltaTime;
@@ -113,7 +109,7 @@ public class KacisAni : MonoBehaviour
         {
             if (gecenSure < gecikme) return;
             if (HazirGolge != null) { golge = HazirGolge; golge.SetActive(true); }   // oturan Gölge kalkar, olduğu yerden
-            else { golge = Instantiate(sablon, izler[0], Quaternion.identity); golge.name = "Kacis_Golgesi"; }
+            else { golge = Instantiate(VarlikGorunusu.Sablon(sablon), izler[0], Quaternion.identity); golge.name = "Kacis_Golgesi"; }   // #140: figür torbası (VarlikGorunusu)
             // Siluetin çevresindeki uğultu #74'te kalktı; gelişini üst kattan adımlar haber verir.
             hedefIz = 1;
             Debug.Log("[KACIS] Siluet belirdi.");

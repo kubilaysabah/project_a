@@ -80,6 +80,8 @@ public class KatAni : MonoBehaviour
     private int kat;
     private KatAniVerisi veri;
     private Transform hedef;              // anın nesnesi (sandalye, kapı, lamba, manken...)
+    /// <summary>#139 (A4): anın nesnesi; cin olayları ona dokunmaz (yoksa an başlayınca nesne kayıtlı duruşuna zıplar).</summary>
+    public Transform Hedef { get { return hedef; } }
     private DaireEksenleri odaEksen;      // TetikOda'nın dairesinin eksenleri
     private string oda;                   // TetikOda, "B:" öneki atılmış
     private DaireEksenleri planEksen;     // U, V plan noktasının dairesinin eksenleri

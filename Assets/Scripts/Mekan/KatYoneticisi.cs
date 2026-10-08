@@ -1259,6 +1259,9 @@ public class KatYoneticisi : MonoBehaviour
             EsyaListesi.KatiUnut(kat);   // T listesi de o katı baştan saysın (#75)
         }
         OyuncuyuBasaAl();
+        // #139 (A7): kat değişmediği için cin olayları bunu kendisi fark edemez: izler, kırıklar, sahnedeki figür ve
+        // dönen eşyalar temizlensin, katın cin saati baştan başlasın.
+        if (CinOlaylari.Ornek != null) CinOlaylari.Ornek.Sifirla();
         // Sahanlıklar ve daire zorla yeniden kurulur: zincir uygulayıcısı kayda bakar, kayıtta
         // artık bu katın hiçbir kilidi yok, her şey baştan yerine konur. Eski KacisAni sökülürken
         // Gölge'yi de yok eder; yerine takılan yeni KacisAni anahtarı yine bekler.
