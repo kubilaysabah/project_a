@@ -232,6 +232,12 @@ public static partial class GrayboxKurucu
         cSeri.FindProperty("vurusSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
         cSeri.FindProperty("kirikSablonu").objectReferenceValue = camKirik;
         cSeri.FindProperty("golgeSablonu").objectReferenceValue = golge;   // #133: görünür olaylar
+        // #137: ıslak ayak izi çıkartmaları (sol/sağ) ve kapı zili kaydı.
+        Material[] izler = LekeKurucu.AyakIziMalzemeleri();
+        SerializedProperty izDizi = cSeri.FindProperty("ayakIziMalzemeleri");
+        izDizi.arraySize = izler.Length;
+        for (int i = 0; i < izler.Length; i++) izDizi.GetArrayElementAtIndex(i).objectReferenceValue = izler[i];
+        cSeri.FindProperty("zilSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Zil_DingDong.wav");
         cSeri.ApplyModifiedPropertiesWithoutUndo();
         vSeri.ApplyModifiedPropertiesWithoutUndo();
 

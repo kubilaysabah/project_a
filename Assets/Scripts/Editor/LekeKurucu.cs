@@ -81,6 +81,30 @@ public static class LekeKurucu
         Debug.Log("[LEKE] PC_Renderer'a Decal özelliği eklendi.");
     }
 
+    // Islak ayak izi malzemeleri (#137): sol ve sağ ayak (decal aynalanamaz, iki doku). Dokular
+    // Art/Dokular/scripts/ayak_izi_uret.py ile üretilir; CinOlaylari'na GrayboxKurucu_Zincir bağlar.
+    public static Material[] AyakIziMalzemeleri()
+    {
+        if (!AssetDatabase.IsValidFolder(MalzemeKlasoru.TrimEnd('/'))) AssetDatabase.CreateFolder("Assets/Materials", "Lekeler");
+        Shader sh = Shader.Find("Shader Graphs/Decal");
+        string[] adlar = { "Leke_AyakIzi_Sol", "Leke_AyakIzi_Sag" };
+        var sonuc = new Material[adlar.Length];
+        for (int i = 0; i < adlar.Length; i++)
+        {
+            string yol = MalzemeKlasoru + adlar[i] + ".mat";
+            Material m = AssetDatabase.LoadAssetAtPath<Material>(yol);
+            if (m == null) { m = new Material(sh); AssetDatabase.CreateAsset(m, yol); }
+            Texture2D doku = AssetDatabase.LoadAssetAtPath<Texture2D>(DokuKlasoru + adlar[i] + ".png");
+            if (doku == null) Debug.LogWarning($"[LEKE] {adlar[i]}.png yok (Art/Dokular/scripts/ayak_izi_uret.py).");
+            m.SetTexture("Base_Map", doku);
+            m.SetFloat("Normal_Blend", 0f);
+            EditorUtility.SetDirty(m);
+            sonuc[i] = m;
+        }
+        AssetDatabase.SaveAssets();
+        return sonuc;
+    }
+
     // Her leke dokusundan bir decal malzemesi (URP'nin "Shader Graphs/Decal" gölgelendiricisi).
     static Material[] Malzemeler()
     {

@@ -128,6 +128,18 @@ public class CinOlayKuraliTestleri
         Assert.IsTrue(tamTurGoruldu, "30 tohumda bir kez bile torba yenilenmeden boşalmadı");
     }
 
+    // #137: dört yeni tür torbada ağırlığıyla var; kural tabloları tutarlı.
+    [Test]
+    public void Yeni_olay_turleri_torbada_agirligiyla_var()
+    {
+        Assert.AreEqual(14, CinOlayKurali.OlaySayisi);
+        Assert.AreEqual(2, CinOlayKurali.Agirlik(CinOlayi.AyakIzi));
+        Assert.AreEqual(2, CinOlayKurali.Agirlik(CinOlayi.KapiGozu));
+        Assert.AreEqual(1, CinOlayKurali.Agirlik(CinOlayi.Zil));
+        Assert.AreEqual(2, CinOlayKurali.Agirlik(CinOlayi.EsyaDonmesi));
+        Assert.AreEqual(27, CinOlayKurali.TorbaBoyu);
+    }
+
     // #135: sahanlıkta yalnız görünür olaylar yapılabilir; torbanın kalanı daire olaylarıysa oyuncu
     // beklemez, torba yenilenir ve görünür bir olay gelir.
     [Test]
