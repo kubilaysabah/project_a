@@ -91,6 +91,61 @@ public class CinOlayKuraliTestleri
         Assert.AreEqual(CinOlayi.Yok, k.Sec(new bool[CinOlayKurali.OlaySayisi]));
     }
 
+    // #135: torba. Bir torba boşalana kadar çekilen olaylarda hiçbir tür ağırlığından fazla çıkamaz; torba
+    // yenilenmeden boşalan bir turda her tür TAM ağırlığı kadar çıkar (tohumlar denenir, en az biri böyle
+    // bir tur verir). Aynı tür art arda gelmez.
+    [Test]
+    public void Torba_bir_turda_hicbir_turu_agirligindan_fazla_cikarmaz_ve_tam_tur_agirliklari_verir()
+    {
+        bool tamTurGoruldu = false;
+        for (int tohum = 1; tohum <= 30; tohum++)
+        {
+            var k = new CinOlayKurali(tohum);
+            var sayim = new int[CinOlayKurali.OlaySayisi];
+            int cekilen = 0; bool yenilendi = false;
+            CinOlayi onceki = CinOlayi.Yok;
+            while (true)
+            {
+                DolanaKadar(k);
+                int onceKalan = k.TorbadaKalan;
+                CinOlayi o = k.Sec(Hepsi());
+                Assert.AreNotEqual(CinOlayi.Yok, o);
+                Assert.AreNotEqual(onceki, o, "tekrar (tohum " + tohum + "): " + o);
+                onceki = o;
+                if (cekilen > 0 && k.TorbadaKalan >= onceKalan) { yenilendi = true; break; }   // torba yenilendi
+                sayim[(int)o]++; cekilen++;
+                if (k.TorbadaKalan == 0) break;
+            }
+            for (int i = 1; i < CinOlayKurali.OlaySayisi; i++)
+                Assert.LessOrEqual(sayim[i], CinOlayKurali.Agirlik((CinOlayi)i), "tohum " + tohum + " tür " + (CinOlayi)i);
+            if (!yenilendi && cekilen == CinOlayKurali.TorbaBoyu)
+            {
+                for (int i = 1; i < CinOlayKurali.OlaySayisi; i++)
+                    Assert.AreEqual(CinOlayKurali.Agirlik((CinOlayi)i), sayim[i], "tam tur, tohum " + tohum + " tür " + (CinOlayi)i);
+                tamTurGoruldu = true;
+            }
+        }
+        Assert.IsTrue(tamTurGoruldu, "30 tohumda bir kez bile torba yenilenmeden boşalmadı");
+    }
+
+    // #135: sahanlıkta yalnız görünür olaylar yapılabilir; torbanın kalanı daire olaylarıysa oyuncu
+    // beklemez, torba yenilenir ve görünür bir olay gelir.
+    [Test]
+    public void Torbanin_kalani_yapilamiyorsa_torba_yenilenir_ve_yapilabilen_olay_gelir()
+    {
+        var k = new CinOlayKurali(4);
+        var yalnizGorunur = new bool[CinOlayKurali.OlaySayisi];
+        yalnizGorunur[(int)CinOlayi.Belirme] = true;
+        yalnizGorunur[(int)CinOlayi.Gecis] = true;
+        yalnizGorunur[(int)CinOlayi.Kacis] = true;
+        for (int i = 0; i < 40; i++)
+        {
+            DolanaKadar(k);
+            CinOlayi o = k.Sec(yalnizGorunur);
+            Assert.IsTrue(o == CinOlayi.Belirme || o == CinOlayi.Gecis || o == CinOlayi.Kacis, "çekilen: " + o);
+        }
+    }
+
     [Test]
     public void Kat_degisince_son_olay_unutulur_ve_ilk_gecikme_geri_gelir()
     {

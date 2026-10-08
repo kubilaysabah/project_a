@@ -12,6 +12,11 @@
 //   - Aralık kata göre kısalır: 1. katta 45-90 sn, 8. katta 20-50 sn (arada doğrusal).
 //   - Her katın İLK olayı IlkCarpan kadar daha geç gelir: oyuncu daireyi tanısın, sonra rahatsız edilsin.
 //   - Aynı olay üst üste gelmez (Son dışlanır); olaylar ağırlıklıdır (çarpma ve kırılma en sık).
+//   - TORBA (#135): ağırlıklı zar yerine torba. Her olay türü ağırlığı kadar kopyayla torbaya konur, torba
+//     karıştırılır, her seferinde üstten ŞU AN YAPILABİLEN ilk kopya çekilir; torba boşalınca yeniden dolar.
+//     Böylece 12 olayın 4'ü kapı çarpma olmaz (Şahan'ın test turu): bir turda her tür ağırlığı kadar gelir.
+//     Torbanın kalanı şu an yapılamıyorsa (sahanlıkta yalnız daire olayları kaldıysa) torba yenilenir;
+//     ağırlıklar o zaman yaklaşık korunur, oyuncu beklemez.
 //   - Seçilecek olay yoksa (her şey görüş içinde) kısa bir süre (BosAralik) sonra yeniden denenir.
 //
 // Rastgelelik System.Random ve tohumla: bir rapor yeniden oynatılabilir (AnomaliSecici kuralı).
@@ -32,6 +37,9 @@ public enum CinOlayi
 
 public class CinOlayKurali
 {
+    // Torba (#135): çekilecek olay türlerinin numaraları; üstten (son elemandan) çekilir.
+    private readonly System.Collections.Generic.List<int> torba = new System.Collections.Generic.List<int>();
+
     public const float EnAzAralikKat1 = 45f, EnCokAralikKat1 = 90f;   // 1. katta aralık (saniye)
     public const float EnAzAralikKat8 = 20f, EnCokAralikKat8 = 50f;   // 8. katta aralık
     public const float IlkCarpan = 1.5f;                              // katın ilk olayı bu kadar geç
@@ -49,6 +57,12 @@ public class CinOlayKurali
     private bool ilk = true;      // bu katın ilk olayı mı
 
     public CinOlayi Son { get; private set; }
+    /// <summary>Torbada çekilmeyi bekleyen kopya sayısı (testler).</summary>
+    public int TorbadaKalan { get { return torba.Count; } }
+    /// <summary>Bir olay türünün ağırlığı = bir torbadaki kopya sayısı (testler).</summary>
+    public static int Agirlik(CinOlayi olay) { return Agirliklar[(int)olay]; }
+    /// <summary>Bir torbadaki toplam kopya (testler).</summary>
+    public static int TorbaBoyu { get { int t = 0; for (int i = 1; i < OlaySayisi; i++) t += Agirliklar[i]; return t; } }
     /// <summary>Bir sonraki olaya kalan uygun saniye (test göstergesi).</summary>
     public float Kalan { get { return kalan; } }
     public int Kat { get { return kat; } }
@@ -86,30 +100,51 @@ public class CinOlayKurali
 
     /// <summary>
     /// Sayaç dolunca: mevcut[i] = i numaralı olay şu an yapılabilir mi (CinOlayi sırasıyla). Son olay
-    /// dışlanır (en az bir başka seçenek varsa), ağırlıklı seçilir, sayaç yeniden kurulur. Hiçbiri
-    /// yapılamıyorsa Yok döner ve BosAralik sonra yeniden sorulur.
+    /// dışlanır (en az bir başka seçenek varsa). Torbadan (#135) üstten, şu an yapılabilen ve son olaydan
+    /// farklı ilk kopya çekilir; torbanın kalanında öyle bir kopya yoksa torba yenilenip bir kez daha
+    /// bakılır. Sayaç yeniden kurulur. Hiçbir olay yapılamıyorsa Yok döner ve BosAralik sonra yeniden sorulur.
     /// </summary>
     public CinOlayi Sec(bool[] mevcut)
     {
         bekliyor = false;
-        int toplam = 0;
+        bool herhangi = false;
         for (int i = 1; i < OlaySayisi; i++)
-            if (Uygun(mevcut, i) && (CinOlayi)i != Son) toplam += Agirliklar[i];
-        if (toplam == 0)
+            if (Uygun(mevcut, i) && (CinOlayi)i != Son) herhangi = true;
+        if (!herhangi)
         {
             // Yalnızca son olay yapılabiliyorsa onu tekrar etmek yerine bekleriz; hiçbiri yoksa da bekleriz.
             kalan = BosAralik;
             return CinOlayi.Yok;
         }
-        int zar = rastgele.Next(toplam);
-        for (int i = 1; i < OlaySayisi; i++)
+        for (int tur = 0; tur < 2; tur++)
         {
-            if (!Uygun(mevcut, i) || (CinOlayi)i == Son) continue;
-            zar -= Agirliklar[i];
-            if (zar < 0) { Son = (CinOlayi)i; ilk = false; kalan = YeniAralik(); return Son; }
+            if (torba.Count == 0) TorbayiDoldur();
+            for (int j = torba.Count - 1; j >= 0; j--)
+            {
+                int i = torba[j];
+                if (!Uygun(mevcut, i) || (CinOlayi)i == Son) continue;
+                torba.RemoveAt(j);
+                Son = (CinOlayi)i; ilk = false; kalan = YeniAralik();
+                return Son;
+            }
+            torba.Clear();   // kalan kopyaların hiçbiri şu an yapılamıyor: yeni torba (yapılabilen bir tür var)
         }
-        kalan = BosAralik;   // buraya gelinmez; güvenlik
+        kalan = BosAralik;   // buraya gelinmez (yeni torba her türü içerir); güvenlik
         return CinOlayi.Yok;
+    }
+
+    // Torbayı doldur: her tür ağırlığı kadar kopya, sonra karıştır (Fisher-Yates: sondan başa, her elemanı
+    // kendisi ya da öncekilerden rastgele biriyle değiştir; her sıralama eşit olasılıklı çıkar).
+    private void TorbayiDoldur()
+    {
+        torba.Clear();
+        for (int i = 1; i < OlaySayisi; i++)
+            for (int k = 0; k < Agirliklar[i]; k++) torba.Add(i);
+        for (int j = torba.Count - 1; j > 0; j--)
+        {
+            int r = rastgele.Next(j + 1);
+            int gecici = torba[j]; torba[j] = torba[r]; torba[r] = gecici;
+        }
     }
 
     private static bool Uygun(bool[] mevcut, int i) { return mevcut != null && i < mevcut.Length && mevcut[i]; }

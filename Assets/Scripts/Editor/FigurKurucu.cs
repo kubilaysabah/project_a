@@ -8,6 +8,11 @@
 //
 // Çarpışma yok: figür görüş dışına kaçar, oyuncuya dokunmaz; bir kapsül eklenseydi oyuncunun yolunu keserdi.
 // Dokular FBX'in yanındaki dosyalardan ImportViaMaterialDescription ile gelir (MobilyaKurucu'daki ayar).
+//
+// GÖZLER (#135): her prefab'a GozParlamasi eklenir. Göz yerleri modelin köşe noktalarından ölçülür: figürün
+// toplam boyunun %88-95'i arasındaki band baştır; bandın en öndeki (+z) noktası yüzdür; gözler o derinlikte,
+// boyun %91,5'inde, yüzün ortasından 3,1 cm sağda ve solda. Ölçüm bir figürde yanlış çıkarsa (kukuleta,
+// öne düşen saç) GozDuzeltme tablosuna elle ölçülmüş değer yazılır; tablo ölçümü ezer.
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -16,6 +21,15 @@ public static class FigurKurucu
 {
     const string ModelKlasoru = "Assets/Models/Figurler";
     const string PrefabKlasoru = "Assets/Prefabs/Figurler";
+    const string GozMalzemesi = "Assets/Materials/Kat_Isik_Kaynagi.mat";   // URP Unlit (#116'nın kaynağı)
+    const float GozBandAlt = 0.88f, GozBandUst = 0.95f;   // başın bandı (boyun oranı)
+    const float GozYukseklik = 0.915f;                     // göz hizası (boyun oranı)
+    const float GozAraligi = 0.031f;                       // yüz ortasından her göze (metre)
+    const float GozOnPayi = 0.004f;                        // yüzün 4 mm önünde (yüzeyin içinde kalmasın)
+
+    // Elle düzeltme: figür numarası → (sol göz, sağ göz), figürün kendi eksenlerinde. Boş: ölçüm kullanılır.
+    static readonly System.Collections.Generic.Dictionary<int, (Vector3 sol, Vector3 sag)> GozDuzeltme =
+        new System.Collections.Generic.Dictionary<int, (Vector3, Vector3)>();
 
     [MenuItem("Huzur/Cin Figürlerini Kur")]
     public static void Kur()
@@ -49,6 +63,14 @@ public static class FigurKurucu
             {
                 r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;   // fenerde duvara gölgesi düşsün
             }
+            // Gözler (#135): ölç (ya da tablodan al), bileşeni ekle, malzemeyi bağla.
+            Vector3 sol, sag;
+            if (GozDuzeltme.TryGetValue(n, out var duzeltme)) { sol = duzeltme.sol; sag = duzeltme.sag; }
+            else if (!GozleriOlc(gecici, out sol, out sag)) Debug.LogWarning($"[FIGUR] Cin_{n}: göz yeri ölçülemedi.");
+            var goz = gecici.GetComponent<GozParlamasi>();
+            if (goz == null) goz = gecici.AddComponent<GozParlamasi>();
+            goz.Kur(AssetDatabase.LoadAssetAtPath<Material>(GozMalzemesi), sol, sag);
+            Debug.Log($"[FIGUR] Cin_{n} gözler: sol {sol:F3} sağ {sag:F3}");
             string yol = $"{PrefabKlasoru}/Cin_{n}.prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(gecici, yol);
             Object.DestroyImmediate(gecici);
@@ -64,5 +86,39 @@ public static class FigurKurucu
         seri.ApplyModifiedPropertiesWithoutUndo();
         GrayboxKurucu.SahneyiKaydet("FigurKurucu");
         Debug.Log($"[FIGUR] {prefablar.Count} cin figürü prefab'ı kuruldu ve CinOlaylari'na bağlandı.");
+    }
+
+    // Göz yerlerini modelin köşe noktalarından ölç (kök eksenlerinde). Editor'de içe aktarılmış bir mesh'in
+    // köşeleri okunabilir (oyun içinde Read/Write kapalı mesh'te okunamaz; bu yüzden ölçüm burada yapılır ve
+    // sonuç prefab'a yazılır).
+    static bool GozleriOlc(GameObject kok, out Vector3 sol, out Vector3 sag)
+    {
+        sol = sag = Vector3.zero;
+        var noktalar = new System.Collections.Generic.List<Vector3>();
+        float enUst = float.MinValue;
+        foreach (MeshFilter mf in kok.GetComponentsInChildren<MeshFilter>())
+        {
+            Mesh m = mf.sharedMesh;
+            if (m == null) continue;
+            foreach (Vector3 v in m.vertices)
+            {
+                Vector3 d = kok.transform.InverseTransformPoint(mf.transform.TransformPoint(v));
+                noktalar.Add(d);
+                if (d.y > enUst) enUst = d.y;
+            }
+        }
+        if (noktalar.Count == 0 || enUst <= 0f) return false;
+        float alt = enUst * GozBandAlt, ust = enUst * GozBandUst;
+        float enOn = float.MinValue;
+        foreach (Vector3 p in noktalar) if (p.y >= alt && p.y <= ust && p.z > enOn) enOn = p.z;
+        if (enOn == float.MinValue) return false;
+        // Yüzün ortası: bandın en öndeki 3 cm'lik diliminde kalan noktaların x ortalaması.
+        float xToplam = 0f; int adet = 0;
+        foreach (Vector3 p in noktalar) if (p.y >= alt && p.y <= ust && p.z > enOn - 0.03f) { xToplam += p.x; adet++; }
+        float xo = adet > 0 ? xToplam / adet : 0f;
+        float y = enUst * GozYukseklik, z = enOn + GozOnPayi;
+        sol = new Vector3(xo - GozAraligi, y, z);
+        sag = new Vector3(xo + GozAraligi, y, z);
+        return true;
     }
 }

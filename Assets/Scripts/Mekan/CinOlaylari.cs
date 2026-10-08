@@ -14,6 +14,10 @@
 //                     (nefes alır, kafasıyla oyuncuyu izler), lamba titrer, kaybolur. Yaklaşmaz, dokunmaz.
 //   Gecis (#133)      Gölge görüşün bir kenarından girip öbür kenarına 4 m/sn ile geçer, çıkınca silinir.
 //   Görünür iki olay sahanlıkta da olur (Şahan: "katta gözüksün"); öbürleri yalnızca dairede.
+//   #135 (Şahan'ın test turu): geçiş 2,5 m/sn (4'te 0,5 sn'de bitiyordu), belirme 2-5 m (fenerin menzili),
+//   belirmelerin yarısı 3. kattan itibaren KARARTMALI: figür dururken kafa lambası 1,3 sn ölür, karanlıkta
+//   yalnız gözleri (GozParlamasi) görünür ve 1-1,5 m YAKLAŞIR, lamba yanınca titrer ve figür yok olur. Her
+//   görünür olaydan sonra SESSİZLİK: uğultu, TV ve müzik 1 sn'de susar, 15-20 sn sessiz kalır, 3 sn'de döner.
 //
 // KURALLAR:
 //   - Olaylar Varlik.Gurultu ÇAĞIRMAZ (oyuncunun gürültüsü değil, cinin işi) ve GolgeImzasi ÇALMAZ (imza
@@ -42,8 +46,16 @@ public class CinOlaylari : MonoBehaviour
     private const float VurusMesafesi = 9f;
     private const int AdimSayisiEnAz = 3, AdimSayisiEnCok = 4;
     private const float AdimAraligi = 0.45f;
-    private const float BelirmeEnYakin = 2f, BelirmeEnUzak = 8f;     // #133: belirme uzaklığı (4-9 m dairede hep duvar ardına düşüyordu)
-    private const float GecisHizi = 4f;                               // #133: geçiş hızı (m/sn; oyuncu 1,8)
+    private const float BelirmeEnYakin = 2f, BelirmeEnUzak = 5f;     // #133: belirme uzaklığı; #135: 8 → 5 m (fenerin okunur menzili)
+    private const float GecisHizi = 2.5f;                             // #133: geçiş hızı (m/sn; oyuncu 1,8); #135: 4 → 2,5 (0,5 sn'lik geçiş görülmüyordu)
+    private const int KarartmaEnAzKat = 3;                            // #135: karartmalı belirme bu kattan itibaren (1-2 ders katları)
+    private const float KarartmaOlasiligi = 0.5f;                     // #135: belirmelerin yarısı karartmalı
+    private const float KarartmaSuresi = 1.3f;                        // #135: lambanın ölü kaldığı süre
+    private const float YaklasmaEnAz = 1.0f, YaklasmaEnCok = 1.5f;    // #135: karanlıkta yaklaşılan mesafe
+    private const float YaklasmaEnYakin = 1.2f;                       // #135: oyuncuya bundan yakına gelmez
+    private const float SessizlikEnAz = 15f, SessizlikEnCok = 20f;    // #135: korkudan sonra sessizlik süresi
+    private const float SessizlikInis = 1f, SessizlikCikis = 3f;      // #135: susma ve geri gelme süreleri
+    private Coroutine sessizlik;                                      // #135: süren sessizlik (yoksa null)
     private const float GecisEnYakin = 1.5f, GecisEnUzak = 6f;       // #133: geçiş uçlarının uzaklığı (odalar küçük)
     private const int YerDenemesi = 80;                               // #133: oda dar, kapı dar: çok dene
     private GameObject golge;                                         // #133: sahnedeki görünür Gölge (yoksa null)
@@ -179,11 +191,16 @@ public class CinOlaylari : MonoBehaviour
         }
     }
 
-    private void OnDisable() { if (golge != null) Destroy(golge); golge = null; }
+    private void OnDisable()
+    {
+        if (golge != null) Destroy(golge); golge = null;
+        SessizligiBitir();
+    }
 
     private void Temizle()
     {
         if (suren != null) { StopCoroutine(suren); suren = null; }
+        SessizligiBitir();
         if (golge != null) { Destroy(golge); golge = null; }
         foreach (GameObject g in konanlar) if (g != null) Destroy(g);
         konanlar.Clear();
@@ -465,13 +482,49 @@ public class CinOlaylari : MonoBehaviour
                 if (golge != null) Destroy(golge);
                 golge = null;
                 Debug.Log("[CIN] kaçış bitti: figür silindi.");
+                SessizlikBaslat();
             }
         }
         suren = null;
     }
 
+    // ---------- KORKUDAN SONRA SESSİZLİK (#135) ----------
+    // Görünür bir olay bitince bina susar: uğultu + TV (OrtamSesi.Kisma) ve müzik (ArkaMuzik.Kisma) 1 sn'de
+    // 0'a iner, 15-20 sn öyle kalır, 3 sn'de geri gelir. Sessizlik sesin kendisinden daha korkutucudur;
+    // oyuncu "bir şey oldu" duygusunu olay bittikten sonra da taşır. Kat değişince ve bileşen kapanınca
+    // çarpanlar hemen 1'e döner. Oyun saatiyle yürür (menüde durur).
+    private void SessizlikBaslat()
+    {
+        if (sessizlik != null) StopCoroutine(sessizlik);
+        sessizlik = StartCoroutine(Sessizlik(Random.Range(SessizlikEnAz, SessizlikEnCok)));
+    }
+
+    private void SessizligiBitir()
+    {
+        if (sessizlik != null) { StopCoroutine(sessizlik); sessizlik = null; }
+        OrtamSesi.Kisma = 1f;
+        ArkaMuzik.Kisma = 1f;
+    }
+
+    private IEnumerator Sessizlik(float sure)
+    {
+        Debug.Log($"[CIN] sessizlik: {sure:0} sn.");
+        for (float t = 0f; t < SessizlikInis; t += Time.deltaTime) { Kis(1f - t / SessizlikInis); yield return null; }
+        Kis(0f);
+        yield return new WaitForSeconds(sure);
+        for (float t = 0f; t < SessizlikCikis; t += Time.deltaTime) { Kis(t / SessizlikCikis); yield return null; }
+        Kis(1f);
+        sessizlik = null;
+    }
+
+    private static void Kis(float oran) { OrtamSesi.Kisma = oran; ArkaMuzik.Kisma = oran; }
+
     // ---------- GÖRÜNÜR OLAYLAR (#133) ----------
-    // Belirme: imza, Gölge görüşte belirir, oyuncuya dönük durur, lamba titrer, kaybolur. Yakalama yok.
+    // Belirme: imza, figür görüşte belirir, oyuncuya dönük durur, lamba titrer, kaybolur. Yakalama yok.
+    // #135: 3. kattan itibaren belirmelerin yarısı KARARTMALI: lamba ölür (KafaLambasi.Sondur; oyuncunun
+    // düğmesi işlemez), karanlıkta yalnız gözler parlar (GozParlamasi) ve figür 1-1,5 m yaklaşır (ayakta
+    // durabileceği bir nokta varsa; oyuncuya 1,2 m'den yakına asla gelmez), lamba kendiliğinden yanınca
+    // titrer ve figür yok olur. Dokunmaz.
     private IEnumerator Belir()
     {
         GameObject belirmeSablonu = FigurSec();
@@ -482,12 +535,39 @@ public class CinOlaylari : MonoBehaviour
             golge = Instantiate(belirmeSablonu, yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
             golge.name = "Cin_Golgesi";
             Titresim.Vur(0.3f, 0.5f, 0.3f);
-            Debug.Log($"[CIN] belirme: {belirmeSablonu.name}, {Vector3.Distance(yer, oyuncu.position):0.0} m.");
+            bool karartmali = kat >= KarartmaEnAzKat && lamba != null && lamba.IsikYaniyor && Random.value < KarartmaOlasiligi;
+            Debug.Log($"[CIN] belirme: {belirmeSablonu.name}, {Vector3.Distance(yer, oyuncu.position):0.0} m{(karartmali ? ", karartmalı" : "")}.");
             yield return new WaitForSeconds(Random.Range(1.4f, 2.2f));
+            if (karartmali && golge != null)
+            {
+                lamba.Sondur(KarartmaSuresi);
+                yield return new WaitForSeconds(0.45f);   // karanlık yerleşsin, gözler görülsün
+                // Yaklaşma: oyuncuya doğru 1-1,5 m; durulacak yer yoksa (mobilya) yerinde kalır.
+                Vector3 oyuncuya = oyuncu.position - yer; oyuncuya.y = 0f;
+                float uzaklik = oyuncuya.magnitude;
+                float adim = Mathf.Min(Random.Range(YaklasmaEnAz, YaklasmaEnCok), uzaklik - YaklasmaEnYakin);
+                if (adim > 0.2f && golge != null)
+                {
+                    Vector3 yeni = yer + oyuncuya.normalized * adim;
+                    if (Durulur(ref yeni))
+                    {
+                        golge.transform.position = yeni;
+                        Vector3 yeniBakis = oyuncu.position - yeni; yeniBakis.y = 0f;
+                        if (yeniBakis.sqrMagnitude > 0.001f) golge.transform.rotation = Quaternion.LookRotation(yeniBakis);
+                        Debug.Log($"[CIN] belirme: karanlıkta {adim:0.0} m yaklaştı ({Vector3.Distance(yeni, oyuncu.position):0.0} m).");
+                    }
+                    else Debug.Log("[CIN] belirme: karanlıkta yaklaşacak yer yok, yerinde kaldı.");
+                }
+                // Lamba kendiliğinden yanana kadar bekle (Sondur bitişi uzatılmış olabilir), sonra kısa bir an dur.
+                float bekleme = 0f;   // güvenlik: lamba 4 sn içinde yanmazsa (saklanma vb.) beklemeyi bırak
+                while (lamba != null && !lamba.IsikYaniyor && bekleme < KarartmaSuresi + 3f) { bekleme += Time.deltaTime; yield return null; }
+                yield return new WaitForSeconds(0.55f);
+            }
             if (lamba != null) lamba.Titret(0.5f);
             yield return new WaitForSeconds(0.15f);
             if (golge != null) Destroy(golge);
             golge = null;
+            SessizlikBaslat();
         }
         suren = null;
     }
@@ -512,6 +592,7 @@ public class CinOlaylari : MonoBehaviour
             }
             if (golge != null) Destroy(golge);
             golge = null;
+            SessizlikBaslat();
         }
         suren = null;
     }

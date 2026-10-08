@@ -20,6 +20,21 @@ public class ArkaMuzik : MonoBehaviour
     // static: sahnede tek bir arka müzik var; FinalSahnesi ve KatYoneticisi ona bu yolla ulaşır.
     public static ArkaMuzik Ornek { get; private set; }
 
+    // Korkudan sonra sessizlik (#135): CinOlaylari görünür bir olaydan sonra bunu 0'a indirip geri getirir;
+    // hedef seviye bu çarpanla çarpılır ve çarpan 1'in altındayken müzik hedefe HIZLI iner/çıkar (normalde
+    // iniş 5 sn sürer; sessizlik 1 sn'de gelmeli). Sahne yüklenince 1'e döner (static, #103 kuralı).
+    public static float Kisma = 1f;
+    private const float KismaHizi = 0.5f;   // saniyede ses seviyesi; 0,15'lik müzik ~0,3 sn'de susar
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void SahneYuklenince()
+    {
+        Kisma = 1f;
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= Yuklendi;
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += Yuklendi;
+    }
+    private static void Yuklendi(UnityEngine.SceneManagement.Scene s, UnityEngine.SceneManagement.LoadSceneMode m) { Kisma = 1f; }
+
     // ---- KABARMA AYARLARI ----
     private const float KabarmaGecikmesi = 0.4f;   // etkinin kendi sesi önce duyulsun
     private const float KabarmaSeviyesi = 0.42f;   // normal seviye 0,15'in yaklaşık üç katı
@@ -116,9 +131,10 @@ public class ArkaMuzik : MonoBehaviour
             kanal = Ayarlar.Muzik;
         }
         hedef *= Ayarlar.Muzik;
+        hedef *= Kisma;   // #135: sessizlik çarpanı
         // MoveTowards: değeri hedefe doğru en fazla verilen adım kadar yaklaştırır.
-        // Yükselirken hızlı, inerken yavaş: korku ani gelir, yavaş geçer.
-        float hiz = hedef > kaynak.volume ? YukselmeHizi : InmeHizi;
+        // Yükselirken hızlı, inerken yavaş: korku ani gelir, yavaş geçer. Sessizlik sürerken iki yönde hızlı.
+        float hiz = Kisma < 1f ? KismaHizi : (hedef > kaynak.volume ? YukselmeHizi : InmeHizi);
         kaynak.volume = Mathf.MoveTowards(kaynak.volume, hedef, hiz * Time.deltaTime);
     }
 }

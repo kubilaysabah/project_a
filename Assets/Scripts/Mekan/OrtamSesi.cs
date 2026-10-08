@@ -23,9 +23,35 @@ public class OrtamSesi : MonoBehaviour
 {
     private AudioSource kaynak;
 
+    // ---------- KORKUDAN SONRA SESSİZLİK (#135) ----------
+    // Görünür bir cin olayından sonra binanın sesi 15-20 sn kesilir (CinOlaylari ayarlar): uğultu ve TV
+    // bu çarpanla kısılır. Static: bütün katmanlar aynı anda susar. Her katman sahnede ayarlanan kendi
+    // seviyesini (taban) hatırlar ve çarpanı ona uygular; çarpan değişmedikçe hiçbir şey yazmaz.
+    // Static alan sahne yeniden yüklenince de kalır (#103 kuralı): yüklemede 1'e çekilir.
+    public static float Kisma = 1f;
+    private float taban = -1f;        // sahnedeki seviye (Awake'te okunur)
+    private float uygulanan = 1f;     // son uygulanan çarpan
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void SahneYuklenince()
+    {
+        Kisma = 1f;
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= Yuklendi;
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += Yuklendi;
+    }
+    private static void Yuklendi(UnityEngine.SceneManagement.Scene s, UnityEngine.SceneManagement.LoadSceneMode m) { Kisma = 1f; }
+
     private void Awake()
     {
         kaynak = GetComponent<AudioSource>();
+        if (kaynak != null) taban = kaynak.volume;
+    }
+
+    private void Update()
+    {
+        if (kaynak == null || taban < 0f || Mathf.Approximately(uygulanan, Kisma)) return;
+        uygulanan = Kisma;
+        kaynak.volume = taban * Kisma;
     }
 
     // ---------- KATA GÖRE KAYDIRMA (#39) ----------

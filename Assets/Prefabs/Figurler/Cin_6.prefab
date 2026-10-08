@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6079709371880873012}
   - component: {fileID: 4322225153845693512}
   - component: {fileID: 4138875397907379480}
+  - component: {fileID: 167024218977880732}
   m_Layer: 0
   m_Name: Cin_6
   m_TagString: Untagged
@@ -91,3 +92,19 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &167024218977880732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8980713573988261505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab09099b9946cf94c9511b92a5888751, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GozParlamasi
+  malzeme: {fileID: 2100000, guid: 68b9ffbf786e7ab4e8498970322adea2, type: 2}
+  solGoz: {x: -0.03382631, y: 1.6287001, z: 0.13593383}
+  sagGoz: {x: 0.028173689, y: 1.6287001, z: 0.13593383}
+  yaricap: 0.011
