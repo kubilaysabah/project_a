@@ -90,7 +90,7 @@ public class SaklanmaAni : MonoBehaviour
         if (durum == Durum.Uyari)
         {
             if (sayac < Uyari) return;
-            golge = Instantiate(sablon, yol[0], Quaternion.LookRotation(yol[1] - yol[0]));
+            golge = Instantiate(VarlikGorunusu.Sablon(sablon), yol[0], Quaternion.LookRotation(yol[1] - yol[0]));   // #140: figür torbası (VarlikGorunusu)
             golge.name = "Saklanma_Golgesi";
             hedef = 1;
             durum = Durum.Devriye;

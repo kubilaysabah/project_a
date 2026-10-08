@@ -56,6 +56,10 @@ public class GozParlamasi : MonoBehaviour
 
     private void Start()
     {
+        // #140: duvardaki gölge (GolgeIzi) figürü yalnız gölge olarak çizer (ShadowsOnly); o zaman göz de olmaz,
+        // yoksa duvarın önünde havada iki nokta yanardı.
+        foreach (Renderer r in GetComponentsInChildren<Renderer>())
+            if (r.shadowCastingMode == UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly) { enabled = false; return; }
         lamba = FindAnyObjectByType<KafaLambasi>();
         gozler[0] = KureKur("Goz_Sol", solGoz);
         gozler[1] = KureKur("Goz_Sag", sagGoz);
@@ -69,7 +73,11 @@ public class GozParlamasi : MonoBehaviour
         g.name = ad;
         g.layer = gameObject.layer;
         Destroy(g.GetComponent<Collider>());
-        g.transform.SetParent(transform, false);
+        // #140: gözler gövdenin ("Govde") çocuğu: FigurYurumesi gövdeyi eğince gözler de eğilir. Gövde dururken
+        // kökle aynı yerde ve aynı açıda olduğu için kök ekseninde ölçülen göz yerleri olduğu gibi geçerli.
+        Transform ebeveyn = transform.Find("Govde");
+        if (ebeveyn == null) ebeveyn = transform;
+        g.transform.SetParent(ebeveyn, false);
         g.transform.localPosition = yerel;
         g.transform.localScale = Vector3.one * (yaricap * 2f);
         var r = g.GetComponent<MeshRenderer>();
@@ -99,7 +107,9 @@ public class GozParlamasi : MonoBehaviour
     {
         if (lamba == null || !lamba.IsikYaniyor) return false;
         Transform kaynak = lamba.IsikYonu;
-        Vector3 goz = transform.TransformPoint((solGoz + sagGoz) * 0.5f);
+        // Gözlerin gerçek ortası (gövde eğilmiş olabilir); küreler yoksa ölçülen yerden.
+        Vector3 goz = gozler[0] != null && gozler[1] != null ? (gozler[0].position + gozler[1].position) * 0.5f
+                                                             : transform.TransformPoint((solGoz + sagGoz) * 0.5f);
         Vector3 fark = goz - kaynak.position;
         if (fark.magnitude > FenerMenzili) return false;
         return Vector3.Angle(kaynak.forward, fark) < KafaLambasi.DisAci * 0.5f + KoniPayi;

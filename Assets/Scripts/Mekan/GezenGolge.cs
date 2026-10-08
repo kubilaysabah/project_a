@@ -132,7 +132,7 @@ public class GezenGolge : MonoBehaviour
 
         Vector3 bakis = oyuncu.position - yer;
         bakis.y = 0f;
-        golge = Instantiate(sablon, yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
+        golge = Instantiate(VarlikGorunusu.Sablon(sablon), yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);   // #140: figür torbası (VarlikGorunusu)
         golge.name = "Gezen_Golge";
         StartCoroutine(Kovala());
         Debug.Log($"[GOLGE] {yonetici.MevcutKat}. kat: Gölge belirdi ({Vector3.Distance(yer, oyuncu.position):0.0} m).");

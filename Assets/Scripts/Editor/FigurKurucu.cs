@@ -26,6 +26,7 @@ public static class FigurKurucu
     const float GozYukseklik = 0.915f;                     // göz hizası (boyun oranı)
     const float GozAraligi = 0.031f;                       // yüz ortasından her göze (metre)
     const float GozOnPayi = 0.004f;                        // yüzün 4 mm önünde (yüzeyin içinde kalmasın)
+    const float BasYariGenislik = 0.12f;                   // #141 (B6): baş ortasından her yana bakılan genişlik (m)
 
     // Elle düzeltme: figür numarası → (sol göz, sağ göz), figürün kendi eksenlerinde. Boş: ölçüm kullanılır.
     static readonly System.Collections.Generic.Dictionary<int, (Vector3 sol, Vector3 sag)> GozDuzeltme =
@@ -55,9 +56,14 @@ public static class FigurKurucu
                 model = AssetDatabase.LoadAssetAtPath<GameObject>(fbx);
             }
 
-            GameObject gecici = (GameObject)PrefabUtility.InstantiatePrefab(model);
-            PrefabUtility.UnpackPrefabInstance(gecici, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
-            gecici.name = $"Cin_{n}";
+            // #140: kök BOŞ bir nesne, ağ onun "Govde" çocuğunda. Hareket ettiriciler kökü taşır; FigurYurumesi
+            // gövdeyi eğer ve iniş-kalkış verir (iskelet yok). SetParent(…, false): FBX'in kendi yerel konumu
+            // ve açısı korunur (ikisi de sıfır: Blender dönüşümü ağa işledi).
+            GameObject gecici = new GameObject($"Cin_{n}");
+            GameObject govde = (GameObject)PrefabUtility.InstantiatePrefab(model);
+            PrefabUtility.UnpackPrefabInstance(govde, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+            govde.name = "Govde";
+            govde.transform.SetParent(gecici.transform, false);
             foreach (Collider c in gecici.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(c);
             foreach (Renderer r in gecici.GetComponentsInChildren<Renderer>())
             {
@@ -71,6 +77,7 @@ public static class FigurKurucu
             if (goz == null) goz = gecici.AddComponent<GozParlamasi>();
             goz.Kur(AssetDatabase.LoadAssetAtPath<Material>(GozMalzemesi), sol, sag);
             Debug.Log($"[FIGUR] Cin_{n} gözler: sol {sol:F3} sağ {sag:F3}");
+            if (gecici.GetComponent<FigurYurumesi>() == null) gecici.AddComponent<FigurYurumesi>();   // #140
             string yol = $"{PrefabKlasoru}/Cin_{n}.prefab";
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(gecici, yol);
             Object.DestroyImmediate(gecici);
@@ -109,12 +116,22 @@ public static class FigurKurucu
         }
         if (noktalar.Count == 0 || enUst <= 0f) return false;
         float alt = enUst * GozBandAlt, ust = enUst * GozBandUst;
+        // #141 (B6): başın ortası, bandın x değerlerinin ORTANCASI (sıralanınca ortadaki değer). Ortalama değil:
+        // bant hizasına kalkmış bir kol ortalamayı yana çeker, ortancayı pek oynatmaz. Sonra yalnız baş
+        // genişliği içindeki (ortanca ±12 cm) noktalara bakılır; kol, el ya da kukuleta ucu yüz sanılmaz.
+        var xler = new List<float>();
+        foreach (Vector3 p in noktalar) if (p.y >= alt && p.y <= ust) xler.Add(p.x);
+        if (xler.Count == 0) return false;
+        xler.Sort();
+        float basX = xler[xler.Count / 2];
         float enOn = float.MinValue;
-        foreach (Vector3 p in noktalar) if (p.y >= alt && p.y <= ust && p.z > enOn) enOn = p.z;
+        foreach (Vector3 p in noktalar)
+            if (p.y >= alt && p.y <= ust && Mathf.Abs(p.x - basX) < BasYariGenislik && p.z > enOn) enOn = p.z;
         if (enOn == float.MinValue) return false;
-        // Yüzün ortası: bandın en öndeki 3 cm'lik diliminde kalan noktaların x ortalaması.
+        // Yüzün ortası: baş genişliği içinde, bandın en öndeki 3 cm'lik diliminde kalan noktaların x ortalaması.
         float xToplam = 0f; int adet = 0;
-        foreach (Vector3 p in noktalar) if (p.y >= alt && p.y <= ust && p.z > enOn - 0.03f) { xToplam += p.x; adet++; }
+        foreach (Vector3 p in noktalar)
+            if (p.y >= alt && p.y <= ust && Mathf.Abs(p.x - basX) < BasYariGenislik && p.z > enOn - 0.03f) { xToplam += p.x; adet++; }
         float xo = adet > 0 ? xToplam / adet : 0f;
         float y = enUst * GozYukseklik, z = enOn + GozOnPayi;
         sol = new Vector3(xo - GozAraligi, y, z);
