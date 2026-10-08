@@ -19,6 +19,8 @@
 //   Zil (sahanlıkta: görüş dışı bir kapının zili, koşuda en çok 2), EsyaDonmesi (dairede: sandalye/manken
 //   oyuncuya döner, çerçeve yüzünü duvara çevirir). Hiçbiri yakalamaz; zil ve kapı gözü imza çalmaz (varlık değil,
 //   "içerideki biri" hissi).
+//   #138: AsansorGecis (sahanlıkta, 2-7. katlar, katta bir kez): ARIZALI asansör kendi kendine çalışır, kabin
+//   durmadan geçer (uğultu, gösterge, cam yarıklarında süzülen ışık, kapı önüne vuran ışık).
 //   #135 (Şahan'ın test turu): geçiş 2,5 m/sn (4'te 0,5 sn'de bitiyordu), belirme 2-5 m (fenerin menzili),
 //   belirmelerin yarısı 3. kattan itibaren KARARTMALI: figür dururken kafa lambası 1,3 sn ölür, karanlıkta
 //   yalnız gözleri (GozParlamasi) görünür ve 1-1,5 m YAKLAŞIR, lamba yanınca titrer ve figür yok olur. Her
@@ -74,6 +76,13 @@ public class CinOlaylari : MonoBehaviour
     private static int zilSayisi;                                     // koşudaki zil sayısı (sahne yüklenince sıfır)
     private int zilKati = -1;                                         // bu katta zil çaldı mı
     private readonly List<(Transform nesne, Quaternion donus)> dondurulenler = new List<(Transform, Quaternion)>();   // eşya dönmesi: kat değişince geri
+    // #138
+    private const int AsansorEnAzKat = 2;                             // 1. katta olmaz (oyuncu binayı tanısın)
+    private const float AsansorGecisSuresi = 2.6f;                    // kabinin kattan geçme süresi (ışık alttan üste)
+    private const float AsansorCamParlakligi = 2.2f;                  // cam yarıklarındaki ışık (HDR, Unlit)
+    private const float AsansorOnIsik = 0.45f, AsansorOnMenzil = 1.8f; // kapının önüne vuran ışık (1,1 kapıyı lamba gibi parlatıyordu)
+    private int asansorKati = -1;                                     // bu katta asansör geçti mi
+    [SerializeField] private Material camIsigiMalzemesi;              // #138: Kat_Isik_Kaynagi.mat (URP Unlit); GrayboxKurucu_Zincir bağlar
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void SahneYuklenince()
@@ -174,6 +183,7 @@ public class CinOlaylari : MonoBehaviour
         mevcut[(int)CinOlayi.KapiGozu] = !dairede && KapiGozuAdayi() != null;
         mevcut[(int)CinOlayi.Zil] = !dairede && zilSesi != null && zilSayisi < ZilEnCokKosu && zilKati != kat && ZilAdayi() != null;
         mevcut[(int)CinOlayi.EsyaDonmesi] = dairede && DonecekEsya() != null;
+        mevcut[(int)CinOlayi.AsansorGecis] = !dairede && AsansorAdayi() != null;
         CinOlayi olay = kural.Sec(mevcut);
         if (olay == CinOlayi.Yok) return;
         Debug.Log($"[CIN] {kat}. kat: {olay}");
@@ -192,6 +202,7 @@ public class CinOlaylari : MonoBehaviour
             case CinOlayi.KapiGozu: suren = StartCoroutine(KapiGozuYan()); break;
             case CinOlayi.Zil: ZilCal(); break;
             case CinOlayi.EsyaDonmesi: EsyaDondur(); break;
+            case CinOlayi.AsansorGecis: suren = StartCoroutine(AsansorGec()); break;
         }
     }
 
@@ -784,6 +795,95 @@ public class CinOlaylari : MonoBehaviour
             Physics.SyncTransforms();
             Debug.Log($"[CIN] eşya dönmesi: {t.name} oyuncuya döndü.");
         }
+    }
+
+    // ---------- #138: ASANSÖR KENDİ KENDİNE GEÇER (sahanlık) ----------
+    // "ARIZALI" asansör (oyuncu notu okudu, elektriği yok) birden çalışır: kuyudan motor uğultusu yükselir,
+    // gösterge alttaki katı, sonra bu katı, sonra üsttekini yazar; kabin geçerken kapı kanatlarının cam
+    // yarıkları ışıkla dolar (alttan üste süzülen bir parıltı) ve kapının önüne, yere sıcak bir ışık vurur;
+    // kabin DURMAZ, gösterge "-"ye döner, uğultu söner. Kimse çağırmadı, kimse inmedi.
+    // 8. katta (asansör gerçekten çalışır, zincirin parçası) ve 1. katta olmaz; katta bir kez. Pano
+    // bileşeni yalnız gösterge ve uğultu için kullanılır (GostergeYaz, Ugultu); hâlini değiştirmeyiz.
+    // Cam yarıkları: Blender modelinde (asansor.py) her kanatta kanatların birleşme çizgisine 12 cm uzaklıkta,
+    // 1,45 m yükseklikte 9 × 62 cm koyu cam. Cam opak (kuyunun karanlığını gösterir); ışık, camın 3 mm
+    // önüne konan iki Unlit dörtgenle ve önüne konan gölgesiz bir nokta ışıkla "sızar".
+    private AsansorPanosu AsansorAdayi()
+    {
+        if (kat < AsansorEnAzKat || kat == KatSayaci.CatiKati || asansorKati == kat) return null;
+        Transform s = SahanlikA();
+        Transform a = s != null ? s.Find("Asansor") : null;
+        if (a == null) return null;
+        AsansorPanosu p = a.GetComponentInChildren<AsansorPanosu>();
+        if (p == null || p.Hal != AsansorPanosu.Durum.Olu) return null;
+        if (Vector3.Distance(a.position, oyuncu.position) > 12f) return null;
+        return p;
+    }
+
+    private IEnumerator AsansorGec()
+    {
+        AsansorPanosu pano = AsansorAdayi();
+        if (pano != null)
+        {
+            asansorKati = kat;
+            Transform a = pano.transform.parent;   // Asansor kökü
+            Debug.Log($"[CIN] asansör: {kat}. katta kabin geçiyor.");
+            Titresim.Vur(0.25f, 0.15f, 1.2f);
+            pano.Ugultu(true);
+            pano.GostergeYaz((kat - 1).ToString());
+            yield return new WaitForSeconds(1.6f);
+            // Kabin geçiyor: gösterge bu kat; camlar ve kapı önü alttan üste aydınlanır.
+            pano.GostergeYaz(kat.ToString());
+            Transform kanat = a.Find("Kapi_Sol");
+            Renderer kr = kanat != null ? kanat.GetComponent<Renderer>() : null;
+            float onYuz = kr != null ? kr.bounds.max.z : a.TransformPoint(new Vector3(0f, 0f, -MekanOlculeri.SahanlikDerin)).z;
+            var camlar = new List<(Renderer r, MaterialPropertyBlock b)>();
+            if (camIsigiMalzemesi != null)
+            {
+                foreach (float x in new[] { -0.12f, 0.12f })
+                {
+                    GameObject q = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                    q.name = "Cin_Asansor_Cam";
+                    Destroy(q.GetComponent<Collider>());
+                    q.transform.SetParent(a, false);
+                    Vector3 yer = a.InverseTransformPoint(new Vector3(a.position.x + x, a.position.y + 1.45f, onYuz + 0.003f));
+                    q.transform.localPosition = yer;
+                    q.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);   // Unity'nin Quad'ı -z'ye bakar; sahanlık +z'de: 180° çevrilir
+                    q.transform.localScale = new Vector3(0.09f, 0.62f, 1f);
+                    var r = q.GetComponent<MeshRenderer>();
+                    r.sharedMaterial = camIsigiMalzemesi;
+                    r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    camlar.Add((r, new MaterialPropertyBlock()));
+                    konanlar.Add(q);
+                }
+            }
+            GameObject isikNesnesi = new GameObject("Cin_Asansor_Isigi");
+            isikNesnesi.transform.SetParent(a, false);
+            Light on = isikNesnesi.AddComponent<Light>();
+            on.type = LightType.Point; on.color = new Color(1f, 0.84f, 0.6f); on.range = AsansorOnMenzil; on.shadows = LightShadows.None; on.intensity = 0f;
+            konanlar.Add(isikNesnesi);
+            for (float t = 0f; t < AsansorGecisSuresi; t += Time.deltaTime)
+            {
+                float u = t / AsansorGecisSuresi;                       // 0 → 1: kabin alttan üste
+                float parlak = Mathf.Sin(u * Mathf.PI);                 // ortada en parlak
+                foreach (var c in camlar)
+                {
+                    c.b.SetColor("_BaseColor", new Color(1f, 0.85f, 0.6f) * (AsansorCamParlakligi * parlak));
+                    c.r.SetPropertyBlock(c.b);
+                }
+                isikNesnesi.transform.position = new Vector3(a.position.x, a.position.y + Mathf.Lerp(0.2f, 2.3f, u), onYuz + 0.35f);
+                on.intensity = AsansorOnIsik * parlak;
+                yield return null;
+            }
+            foreach (var c in camlar) if (c.r != null) Destroy(c.r.gameObject);
+            Destroy(isikNesnesi);
+            pano.GostergeYaz((kat + 1).ToString());
+            yield return new WaitForSeconds(1.4f);
+            pano.Ugultu(false);
+            yield return new WaitForSeconds(0.8f);
+            pano.GostergeYaz("-");
+            Debug.Log("[CIN] asansör: geçti, gösterge \"-\".");
+        }
+        suren = null;
     }
 
     // ---------- GÖRÜNÜR OLAYLAR (#133) ----------

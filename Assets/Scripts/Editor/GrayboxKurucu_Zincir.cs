@@ -238,6 +238,7 @@ public static partial class GrayboxKurucu
         izDizi.arraySize = izler.Length;
         for (int i = 0; i < izler.Length; i++) izDizi.GetArrayElementAtIndex(i).objectReferenceValue = izler[i];
         cSeri.FindProperty("zilSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Zil_DingDong.wav");
+        cSeri.FindProperty("camIsigiMalzemesi").objectReferenceValue = IsikKaynagiMalzemesi();   // #138: asansör camlarının ışığı (URP Unlit)
         cSeri.ApplyModifiedPropertiesWithoutUndo();
         vSeri.ApplyModifiedPropertiesWithoutUndo();
 

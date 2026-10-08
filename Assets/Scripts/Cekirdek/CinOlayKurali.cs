@@ -37,6 +37,7 @@ public enum CinOlayi
     KapiGozu,          // #137 (sahanlık): bir dairenin kapı gözü yanar; oyuncu ona bakınca söner
     Zil,               // #137 (sahanlık): görüş dışındaki bir kapının zili kendi kendine çalar (koşuda en çok 2)
     EsyaDonmesi,       // #137: görüş dışındaki bir sandalye / manken oyuncuya döner, bir çerçeve yüzünü duvara çevirir
+    AsansorGecis,      // #138 (sahanlık): "ARIZALI" asansör kendi kendine çalışır, kabin DURMADAN kattan geçer
 }
 
 public class CinOlayKurali
@@ -48,11 +49,11 @@ public class CinOlayKurali
     public const float EnAzAralikKat8 = 20f, EnCokAralikKat8 = 50f;   // 8. katta aralık
     public const float IlkCarpan = 1.5f;                              // katın ilk olayı bu kadar geç
     public const float BosAralik = 10f;                               // seçilecek olay yoksa yeniden deneme
-    public const int OlaySayisi = 14;                                 // CinOlayi'nin eleman sayısı (Yok dahil)
+    public const int OlaySayisi = 15;                                 // CinOlayi'nin eleman sayısı (Yok dahil)
 
     // Ağırlıklar, CinOlayi sırasıyla (Yok 0): çarpma ve kırılma en sık, cihaz en seyrek; görünür olaylar
     // (#133) orta sıklıkta: Şahan "ara ara gözüksün" dedi, her seferinde değil.
-    private static readonly int[] Agirliklar = { 0, 3, 3, 2, 2, 2, 1, 2, 2, 3, 2, 2, 1, 2 };   // Kacis (#134) çarpma/kırılma kadar sık; #137: ayak izi 2, kapı gözü 2, zil 1, eşya 2
+    private static readonly int[] Agirliklar = { 0, 3, 3, 2, 2, 2, 1, 2, 2, 3, 2, 2, 1, 2, 2 };   // Kacis (#134) çarpma/kırılma kadar sık; #137: ayak izi 2, kapı gözü 2, zil 1, eşya 2; #138: asansör 2
 
     private readonly System.Random rastgele;
     private int kat = 1;
