@@ -10,6 +10,10 @@
 //   IceridenVurus     kapalı (varsa kilitli) bir odanın kapısına içeriden üç vuruş.
 //   ArkadanAdim       oyuncunun arkasından 3-4 adım (zeminin kendi sesi); oyuncu dönünce kesilir.
 //   Cihaz             katın radyosu/TV'si (RadyoAnonsu) bir anlığına cızırtıyla açılıp kapanır.
+//   Belirme (#133)    Gölge GÖRÜŞTE belirir: fener huzmesinin içinde, 4-9 m, oyuncuya dönük 1,4-2,2 sn durur
+//                     (nefes alır, kafasıyla oyuncuyu izler), lamba titrer, kaybolur. Yaklaşmaz, dokunmaz.
+//   Gecis (#133)      Gölge görüşün bir kenarından girip öbür kenarına 4 m/sn ile geçer, çıkınca silinir.
+//   Görünür iki olay sahanlıkta da olur (Şahan: "katta gözüksün"); öbürleri yalnızca dairede.
 //
 // KURALLAR:
 //   - Olaylar Varlik.Gurultu ÇAĞIRMAZ (oyuncunun gürültüsü değil, cinin işi) ve GolgeImzasi ÇALMAZ (imza
@@ -28,6 +32,7 @@ public class CinOlaylari : MonoBehaviour
     [SerializeField] private AudioClip carpmaSesi;       // Kapi_Carpma (kayıt, S43)
     [SerializeField] private AudioClip vurusSesi;        // Kapi_Tiklatma (kayıt, S42)
     [SerializeField] private GameObject kirikSablonu;    // Cam_Kiriklari (kavanozla aynı şablon)
+    [SerializeField] private GameObject golgeSablonu;    // Kacis_Golgesi (#133: görünür olaylar; Varlik'le aynı şablon)
 
     public static CinOlaylari Ornek { get; private set; }
 
@@ -36,6 +41,11 @@ public class CinOlaylari : MonoBehaviour
     private const float VurusMesafesi = 9f;
     private const int AdimSayisiEnAz = 3, AdimSayisiEnCok = 4;
     private const float AdimAraligi = 0.45f;
+    private const float BelirmeEnYakin = 2f, BelirmeEnUzak = 8f;     // #133: belirme uzaklığı (4-9 m dairede hep duvar ardına düşüyordu)
+    private const float GecisHizi = 4f;                               // #133: geçiş hızı (m/sn; oyuncu 1,8)
+    private const float GecisEnYakin = 1.5f, GecisEnUzak = 6f;       // #133: geçiş uçlarının uzaklığı (odalar küçük)
+    private const int YerDenemesi = 80;                               // #133: oda dar, kapı dar: çok dene
+    private GameObject golge;                                         // #133: sahnedeki görünür Gölge (yoksa null)
 
     private CinOlayKurali kural;
     private KatYoneticisi yonetici;
@@ -98,17 +108,21 @@ public class CinOlaylari : MonoBehaviour
 
         bool uygun = Etkin();
         if (uygun) DairedeMi();
-        uygun = uygun && daire != null && suren == null;
+        // #133: saat sahanlıkta da işler (görünür olaylar için); daire içi olaylar aşağıda daire ister.
+        uygun = uygun && suren == null;
         if (!kural.Ilerlet(Time.deltaTime, uygun)) return;
         if (!uygun) return;   // sayaç dolu ama şu an uygun değil: uygun olunca seçilir
 
+        bool dairede = daire != null;
         bool[] mevcut = new bool[CinOlayKurali.OlaySayisi];
-        mevcut[(int)CinOlayi.KapiCarpma] = CarpilacakKapi() != null;
-        mevcut[(int)CinOlayi.Kirilma] = KirilmaNoktasi(out _);
-        mevcut[(int)CinOlayi.BakmayincaDegisim] = DegisecekKapi() != null || DegisecekParca() != null;
-        mevcut[(int)CinOlayi.IceridenVurus] = VurulacakKapi() != null;
-        mevcut[(int)CinOlayi.ArkadanAdim] = true;
-        mevcut[(int)CinOlayi.Cihaz] = Cihaz() != null;
+        mevcut[(int)CinOlayi.KapiCarpma] = dairede && CarpilacakKapi() != null;
+        mevcut[(int)CinOlayi.Kirilma] = dairede && KirilmaNoktasi(out _);
+        mevcut[(int)CinOlayi.BakmayincaDegisim] = dairede && (DegisecekKapi() != null || DegisecekParca() != null);
+        mevcut[(int)CinOlayi.IceridenVurus] = dairede && VurulacakKapi() != null;
+        mevcut[(int)CinOlayi.ArkadanAdim] = dairede;
+        mevcut[(int)CinOlayi.Cihaz] = dairede && Cihaz() != null;
+        mevcut[(int)CinOlayi.Belirme] = golgeSablonu != null && BelirmeYeri(out _);
+        mevcut[(int)CinOlayi.Gecis] = golgeSablonu != null && GecisYolu(out _, out _);
         CinOlayi olay = kural.Sec(mevcut);
         if (olay == CinOlayi.Yok) return;
         Debug.Log($"[CIN] {kat}. kat: {olay}");
@@ -120,6 +134,8 @@ public class CinOlaylari : MonoBehaviour
             case CinOlayi.IceridenVurus: suren = StartCoroutine(IceridenVur()); break;
             case CinOlayi.ArkadanAdim: suren = StartCoroutine(ArkadanYuru()); break;
             case CinOlayi.Cihaz: Cihaz()?.KisaParazit(); break;
+            case CinOlayi.Belirme: suren = StartCoroutine(Belir()); break;
+            case CinOlayi.Gecis: suren = StartCoroutine(Gec()); break;
         }
     }
 
@@ -155,9 +171,12 @@ public class CinOlaylari : MonoBehaviour
         }
     }
 
+    private void OnDisable() { if (golge != null) Destroy(golge); golge = null; }
+
     private void Temizle()
     {
         if (suren != null) { StopCoroutine(suren); suren = null; }
+        if (golge != null) { Destroy(golge); golge = null; }
         foreach (GameObject g in konanlar) if (g != null) Destroy(g);
         konanlar.Clear();
         daire = null;
@@ -259,6 +278,136 @@ public class CinOlaylari : MonoBehaviour
         foreach (RadyoAnonsu r in daire.GetComponentsInChildren<RadyoAnonsu>())
             if (r.gameObject.activeInHierarchy && !r.Yayinda) return r;
         return null;
+    }
+
+    // ---------- GÖRÜNÜR OLAYLARIN YERLERİ (#133) ----------
+    // Bir noktada Gölge durabilir mi: altında oyuncunun ayak hizasında zemin var, bir insan sığar (kapsül boş).
+    private bool Durulur(ref Vector3 aday)
+    {
+        float ayak = oyuncu.position.y;
+        if (!Physics.Raycast(aday + Vector3.up * 1f, Vector3.down, out RaycastHit zemin, 2f, ~0, QueryTriggerInteraction.Ignore)) return false;
+        if (zemin.collider.transform.IsChildOf(oyuncu)) return false;
+        if (Mathf.Abs(zemin.point.y - ayak) > 0.3f) return false;
+        aday.y = zemin.point.y;
+        return !Physics.CheckCapsule(aday + Vector3.up * 0.35f, aday + Vector3.up * 1.6f, 0.25f, ~0, QueryTriggerInteraction.Ignore);
+    }
+
+    // Gölge'nin göğsü ekranın ortadaki %70'inde ve gözle göğsü/dizi arasında engel yok (GezenGolge kuralı).
+    private bool GozOnunde(Vector3 yer)
+    {
+        if (kamera == null) return false;
+        Vector3 e = kamera.WorldToViewportPoint(yer + Vector3.up * 1.2f);
+        if (e.z <= 0f || e.x < 0.15f || e.x > 0.85f || e.y < 0.15f || e.y > 0.85f) return false;
+        Vector3 goz = kamera.transform.position;
+        if (Physics.Linecast(goz, yer + Vector3.up * 1.3f, ~0, QueryTriggerInteraction.Ignore)) return false;
+        return !Physics.Linecast(goz, yer + Vector3.up * 0.5f, ~0, QueryTriggerInteraction.Ignore);
+    }
+
+    private Vector3 Ileri()
+    {
+        Vector3 ileri = kamera != null ? kamera.transform.forward : oyuncu.forward;
+        ileri.y = 0f;
+        if (ileri.sqrMagnitude < 0.01f) ileri = oyuncu.forward;
+        return ileri.normalized;
+    }
+
+    // Belirme yeri: bakış yönünde ±20°, 4-9 m, zeminde, görüşte.
+    private bool BelirmeYeri(out Vector3 yer)
+    {
+        yer = Vector3.zero;
+        if (oyuncu == null) return false;
+        Vector3 ileri = Ileri();
+        for (int deneme = 0; deneme < YerDenemesi; deneme++)
+        {
+            Vector3 aday = oyuncu.position + Quaternion.Euler(0f, Random.Range(-30f, 30f), 0f) * ileri * Random.Range(BelirmeEnYakin, BelirmeEnUzak);
+            if (!Durulur(ref aday) || !GozOnunde(aday)) continue;
+            yer = aday;
+            return true;
+        }
+        return false;
+    }
+
+    // Geçiş yolu (#133): önce görüşte, zeminde boş bir nokta bulunur (±35°, 1,5-6 m); sonra bakışa DİK yönde
+    // (sağ-sol) o noktadan iki yana, duvara ya da döşemenin bittiği yere kadar (en çok 2,5 m) gidilir. İki ucun
+    // toplamı 1,6 m'den kısaysa geçiş olmaz. İlk sürüm oyuncunun iki yanında rastgele uç çifti arıyordu; dairede
+    // 300 denemede 1 geçerli çıkıyordu (uçlar duvarın, mobilyanın içine düşüyor). Bu yol odanın darlığına uyar.
+    private bool GecisYolu(out Vector3 bas, out Vector3 son)
+    {
+        bas = son = Vector3.zero;
+        if (oyuncu == null) return false;
+        Vector3 ileri = Ileri();
+        Vector3 sag = Vector3.Cross(Vector3.up, ileri).normalized;
+        for (int deneme = 0; deneme < YerDenemesi; deneme++)
+        {
+            Vector3 p = oyuncu.position + Quaternion.Euler(0f, Random.Range(-35f, 35f), 0f) * ileri * Random.Range(GecisEnYakin, GecisEnUzak);
+            if (!Durulur(ref p) || !GozOnunde(p)) continue;
+            float sol = SerbestMesafe(p, -sag, 2.5f), sagMesafe = SerbestMesafe(p, sag, 2.5f);
+            if (sol + sagMesafe < 1.6f) continue;
+            bool soldan = Random.value < 0.5f;
+            bas = p + (soldan ? -sag * sol : sag * sagMesafe);
+            son = p + (soldan ? sag * sagMesafe : -sag * sol);
+            return true;
+        }
+        return false;
+    }
+
+    // p'den yon yönünde bir gövde ne kadar yürüyebilir: 25 cm adımlarla ilerlenir; her adımda altında oyuncunun
+    // ayak hizasında zemin olmalı (merdiven boşluğuna, basamaklara taşmasın) ve kapsül boş olmalı.
+    private float SerbestMesafe(Vector3 p, Vector3 yon, float enCok)
+    {
+        float ayak = oyuncu.position.y;
+        float mesafe = 0f;
+        for (float m = 0.25f; m <= enCok + 0.001f; m += 0.25f)
+        {
+            Vector3 n = p + yon * m;
+            if (!Physics.Raycast(n + Vector3.up * 1f, Vector3.down, out RaycastHit zemin, 2f, ~0, QueryTriggerInteraction.Ignore)) break;
+            if (zemin.collider.transform.IsChildOf(oyuncu) || Mathf.Abs(zemin.point.y - ayak) > 0.3f) break;
+            if (Physics.CheckCapsule(n + Vector3.up * 0.35f, n + Vector3.up * 1.6f, 0.25f, ~0, QueryTriggerInteraction.Ignore)) break;
+            mesafe = m;
+        }
+        return mesafe;
+    }
+
+    // ---------- GÖRÜNÜR OLAYLAR (#133) ----------
+    // Belirme: imza, Gölge görüşte belirir, oyuncuya dönük durur, lamba titrer, kaybolur. Yakalama yok.
+    private IEnumerator Belir()
+    {
+        if (BelirmeYeri(out Vector3 yer) && golgeSablonu != null)
+        {
+            GolgeImzasi.Cal(yer + Vector3.up * 1.2f);
+            Vector3 bakis = oyuncu.position - yer; bakis.y = 0f;
+            golge = Instantiate(golgeSablonu, yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
+            golge.name = "Cin_Golgesi";
+            Titresim.Vur(0.3f, 0.5f, 0.3f);
+            yield return new WaitForSeconds(Random.Range(1.4f, 2.2f));
+            if (lamba != null) lamba.Titret(0.5f);
+            yield return new WaitForSeconds(0.15f);
+            if (golge != null) Destroy(golge);
+            golge = null;
+        }
+        suren = null;
+    }
+
+    // Geçiş: imza, Gölge bir uçtan öbürüne 4 m/sn ile yürür (GolgeAnimasyonu bacakları hareketten sallar), silinir.
+    private IEnumerator Gec()
+    {
+        if (GecisYolu(out Vector3 bas, out Vector3 son) && golgeSablonu != null)
+        {
+            GolgeImzasi.Cal(bas + Vector3.up * 1.2f);
+            Vector3 yon = son - bas; yon.y = 0f;
+            golge = Instantiate(golgeSablonu, bas, Quaternion.LookRotation(yon.normalized));
+            golge.name = "Cin_Golgesi";
+            Titresim.Vur(0.25f, 0.45f, 0.25f);
+            float sure = yon.magnitude / GecisHizi;
+            for (float t = 0f; t < sure && golge != null; t += Time.deltaTime)
+            {
+                golge.transform.position = Vector3.Lerp(bas, son, t / sure);
+                yield return null;
+            }
+            if (golge != null) Destroy(golge);
+            golge = null;
+        }
+        suren = null;
     }
 
     // ---------- OLAYLAR ----------

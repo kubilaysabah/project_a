@@ -7,7 +7,8 @@
 // bir tabak kırılır, kilitli kapıya içeriden vurulur...). Gerilim kademeleri bunun ÜSTÜNE biner.
 //
 // KURALLAR:
-//   - Sayaç yalnızca "uygun" karelerde işler (dairede, saklanmıyor, av yok, menü kapalı); sahanlıkta durur.
+//   - Sayaç yalnızca "uygun" karelerde işler (saklanmıyor, av yok, menü kapalı). #133'ten beri sahanlıkta
+//     da işler: orada yalnızca görünür olaylar (Belirme, Gecis) yapılabilir, daire içi olaylar dairede.
 //   - Aralık kata göre kısalır: 1. katta 45-90 sn, 8. katta 20-50 sn (arada doğrusal).
 //   - Her katın İLK olayı IlkCarpan kadar daha geç gelir: oyuncu daireyi tanısın, sonra rahatsız edilsin.
 //   - Aynı olay üst üste gelmez (Son dışlanır); olaylar ağırlıklıdır (çarpma ve kırılma en sık).
@@ -24,6 +25,8 @@ public enum CinOlayi
     IceridenVurus,     // kapalı (çoğu kez kilitli) bir odanın kapısına içeriden üç vuruş
     ArkadanAdim,       // oyuncunun arkasından 3-4 adım; dönünce kesilir
     Cihaz,             // katın radyosu / TV'si bir anlığına cızırtıyla açılıp kapanır
+    Belirme,           // #133: Gölge görüşte, 4-9 m'de belirir, 1,4-2,2 sn durur, kaybolur (yakalamaz)
+    Gecis,             // #133: Gölge görüşün bir kenarından öbürüne 4 m/sn ile geçer (yakalamaz)
 }
 
 public class CinOlayKurali
@@ -32,10 +35,11 @@ public class CinOlayKurali
     public const float EnAzAralikKat8 = 20f, EnCokAralikKat8 = 50f;   // 8. katta aralık
     public const float IlkCarpan = 1.5f;                              // katın ilk olayı bu kadar geç
     public const float BosAralik = 10f;                               // seçilecek olay yoksa yeniden deneme
-    public const int OlaySayisi = 7;                                  // CinOlayi'nin eleman sayısı (Yok dahil)
+    public const int OlaySayisi = 9;                                  // CinOlayi'nin eleman sayısı (Yok dahil)
 
-    // Ağırlıklar, CinOlayi sırasıyla (Yok 0): çarpma ve kırılma en sık, cihaz en seyrek.
-    private static readonly int[] Agirliklar = { 0, 3, 3, 2, 2, 2, 1 };
+    // Ağırlıklar, CinOlayi sırasıyla (Yok 0): çarpma ve kırılma en sık, cihaz en seyrek; görünür olaylar
+    // (#133) orta sıklıkta: Şahan "ara ara gözüksün" dedi, her seferinde değil.
+    private static readonly int[] Agirliklar = { 0, 3, 3, 2, 2, 2, 1, 2, 2 };
 
     private readonly System.Random rastgele;
     private int kat = 1;

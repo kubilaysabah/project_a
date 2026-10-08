@@ -231,6 +231,7 @@ public static partial class GrayboxKurucu
         cSeri.FindProperty("carpmaSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Carpma.wav");
         cSeri.FindProperty("vurusSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
         cSeri.FindProperty("kirikSablonu").objectReferenceValue = camKirik;
+        cSeri.FindProperty("golgeSablonu").objectReferenceValue = golge;   // #133: görünür olaylar
         cSeri.ApplyModifiedPropertiesWithoutUndo();
         vSeri.ApplyModifiedPropertiesWithoutUndo();
 
