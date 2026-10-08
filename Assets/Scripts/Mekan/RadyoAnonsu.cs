@@ -60,10 +60,46 @@ public class RadyoAnonsu : MonoBehaviour
         kaynak.rolloffMode = AudioRolloffMode.Logarithmic;
     }
 
+    /// <summary>Yayın (anons) ya da kısa parazit şu an çalıyor mu (#131: cin olayı üstüne binmesin).</summary>
+    public bool Yayinda { get { return akis != null || parazitAkisi != null; } }
+    private Coroutine parazitAkisi;
+
+    /// <summary>
+    /// Cin olayı (#131): cihaz kendiliğinden bir anlığına açılır: düğme tıkı, 1,2 sn kabarıp sönen parazit,
+    /// düğme tıkı. Anonsun kendisi çalmaz; anons sürerken ya da kaynak yokken hiçbir şey yapmaz.
+    /// </summary>
+    public void KisaParazit()
+    {
+        if (kaynak == null || Yayinda) return;
+        parazitAkisi = StartCoroutine(KisaParazitAkisi());
+    }
+
+    private IEnumerator KisaParazitAkisi()
+    {
+        AudioClip parazit = Resources.Load<AudioClip>("Sesler/Radyo_Parazit");
+        AudioClip dugme = Resources.Load<AudioClip>("Sesler/Radyo_Dugme");
+        if (dugme != null) kaynak.PlayOneShot(dugme, 0.5f);
+        if (parazit != null)
+        {
+            kaynak.clip = parazit; kaynak.loop = true; kaynak.volume = 0f; kaynak.Play();
+            const float Sure = 1.2f;
+            for (float t = 0f; t < Sure; t += Time.deltaTime)
+            {
+                // Çabuk kabarır, sonunda söner (sin yarım dalgası): "açıldı, kapandı".
+                kaynak.volume = ses * ParazitSes * 1.4f * Mathf.Sin(Mathf.PI * Mathf.Clamp01(t / Sure));
+                yield return null;
+            }
+            kaynak.Stop(); kaynak.loop = false;
+        }
+        if (dugme != null) kaynak.PlayOneShot(dugme, 0.4f);
+        parazitAkisi = null;
+    }
+
     /// <summary>Kat değişince: yayın kesilir, kaynak hemen silinir (aynı karede yeniden kurulabilir).</summary>
     public void Sifirla()
     {
         if (akis != null) StopCoroutine(akis);
+        if (parazitAkisi != null) { StopCoroutine(parazitAkisi); parazitAkisi = null; }
         if (kaynak != null) DestroyImmediate(kaynak);
         if (sesKaynagi != null) DestroyImmediate(sesKaynagi);           // #119: konuşma kat değişince susar
         if (gosterilenAltyazi != null) Altyazi.Gizle(gosterilenAltyazi);  // ... ve alt yazısı kalkar

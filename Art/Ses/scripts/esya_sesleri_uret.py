@@ -768,6 +768,84 @@ def rapor():
                   f"%99'u {farklar[int(len(farklar) * 0.99)]:.4f})")
 
 
+
+# ---------- 19-21. KIRILMA: TABAK, BARDAK, VAZO (#131, cin olayları) ----------
+# Bir cisim yere düşüp kırılırken üç şey duyulur:
+#   DARBE: cismin bütünü yere çarpar; cismin kendi modları bir an titrer (tabak 400-1300 Hz, vazo daha
+#     alçak ve "boş", 180-620 Hz; bardak çok hafif, darbesi neredeyse yoktur).
+#   PARÇALANMA: cisim onlarca parçaya ayrılır; her parça küçük, sert bir cisim olarak kendi modunda "tink"
+#     der. Parçalar küçüldükçe tizleşir (cam 3-9 kHz, seramik 1,2-6 kHz). İlk 100 ms'de yoğun, sonra seyrek.
+#   YERLEŞME: büyük parçalar yerde bir iki kez daha sekip döner: 0,4-0,9 sn arasında seyrek tıklar.
+# Hepsi ekle() ile tek tampona biner, sonra küçük oda yankısı. Üç ses birbirinden ayırt edilebilsin diye
+# mod bölgeleri ve süreleri farklı; aynı kalıbı üç kez çağırmak yerine her biri kendi sayılarıyla yazıldı.
+KIRILMA_DB = ESYA_DB + 4.0   # kırılma eşya sesinden gür: bir oda öteden duyulmalı
+
+
+def _parcalar(s, bas, bit, adet, f_alt, f_ust, q, guc, tohum):
+    """bas-bit arasında adet kadar parça tınısı: başta sık, sona doğru seyrek (karesel dağılım)."""
+    random.seed(tohum)
+    for i in range(adet):
+        u = random.random() ** 2                      # 0'a yakın değerler çok: başta yoğun
+        t = bas + u * (bit - bas)
+        f = random.uniform(f_alt, f_ust)
+        tink = modlar(darbe(int(0.12 * HIZ), HIZ, 0.0004), HIZ, [(f, q, 1.0), (f * 1.9, q * 0.8, 0.35)])
+        ekle(s, tepeyi_esitle(tink), int(t * HIZ), guc * random.uniform(0.35, 1.0) * (1.0 - 0.5 * u))
+
+
+def kirilma_tabak():
+    n = int(0.95 * HIZ)
+    s = [0.0] * n
+    # Darbe: seramik tabak yere çarpar; orta modlar, kısa.
+    darbe_s = modlar(darbe(int(0.2 * HIZ), HIZ, 0.0018), HIZ, [(410, 6, 1.0), (760, 7, 0.7), (1300, 7, 0.4)])
+    ekle(s, tepeyi_esitle(darbe_s), int(0.01 * HIZ), 0.8)
+    # Çatlama: darbeyle aynı anda kısa, sert bir gürültü patlaması (parçalanma anı).
+    cat = alcak(yuksek(gurultu(int(0.06 * HIZ)), 1200, HIZ), 7000, HIZ)
+    cat = [x * (1.0 - i / len(cat)) ** 2 for i, x in enumerate(cat)]
+    ekle(s, tepeyi_esitle(cat), int(0.012 * HIZ), 0.6)
+    # Parçalar: seramik, 1,6-5,5 kHz, 34 parça.
+    _parcalar(s, 0.02, 0.55, 34, 1600, 5500, 9, 0.55, 1311)
+    # Yerleşme: üç büyük parça döner.
+    _parcalar(s, 0.55, 0.9, 5, 1200, 2600, 7, 0.3, 1312)
+    s = zarf(s, 0.002, 0.08)
+    s = kucuk_oda(s, islak=0.12)
+    yaz(SESLER, "Kirilma_Tabak", yumusak_sinirla(s, 2.2), KIRILMA_DB)
+
+
+def kirilma_bardak():
+    n = int(0.75 * HIZ)
+    s = [0.0] * n
+    # Cam bardağın darbesi hafif ve tiz; asıl ses parçalanmadır.
+    darbe_s = modlar(darbe(int(0.12 * HIZ), HIZ, 0.0008), HIZ, [(2400, 14, 1.0), (4100, 14, 0.6)])
+    ekle(s, tepeyi_esitle(darbe_s), int(0.01 * HIZ), 0.5)
+    cat = yuksek(gurultu(int(0.04 * HIZ)), 2500, HIZ)
+    cat = [x * (1.0 - i / len(cat)) ** 2 for i, x in enumerate(cat)]
+    ekle(s, tepeyi_esitle(cat), int(0.011 * HIZ), 0.5)
+    # Parçalar: cam, 3-9 kHz, çok ve ince; q yüksek (cam uzun çınlar).
+    _parcalar(s, 0.015, 0.4, 46, 3000, 9000, 18, 0.5, 1321)
+    _parcalar(s, 0.4, 0.7, 4, 2600, 5200, 14, 0.25, 1322)
+    s = zarf(s, 0.002, 0.06)
+    s = kucuk_oda(s, islak=0.14)
+    yaz(SESLER, "Kirilma_Bardak", yumusak_sinirla(s, 2.0), KIRILMA_DB - 2.0)
+
+
+def kirilma_vazo():
+    n = int(1.25 * HIZ)
+    s = [0.0] * n
+    # Darbe: ağır, boş seramik gövde; alçak modlar ve içindeki hava "pok" der.
+    darbe_s = modlar(darbe(int(0.3 * HIZ), HIZ, 0.0025), HIZ, [(180, 5, 1.0), (330, 6, 0.8), (620, 6, 0.45)])
+    ekle(s, tepeyi_esitle(darbe_s), int(0.01 * HIZ), 1.0)
+    pok = bant(darbe(int(0.25 * HIZ), HIZ, 0.004), 250, HIZ, 2.5)
+    ekle(s, tepeyi_esitle(pok), int(0.012 * HIZ), 0.6)
+    cat = alcak(yuksek(gurultu(int(0.08 * HIZ)), 900, HIZ), 6000, HIZ)
+    cat = [x * (1.0 - i / len(cat)) ** 2 for i, x in enumerate(cat)]
+    ekle(s, tepeyi_esitle(cat), int(0.014 * HIZ), 0.7)
+    # Parçalar: iri seramik, 1,2-3,5 kHz, daha az ama daha gür; uzun yerleşme.
+    _parcalar(s, 0.03, 0.7, 26, 1200, 3500, 8, 0.65, 1331)
+    _parcalar(s, 0.7, 1.15, 6, 900, 2200, 6, 0.35, 1332)
+    s = zarf(s, 0.002, 0.1)
+    s = kucuk_oda(s, islak=0.14, boyut=0.45)
+    yaz(SESLER, "Kirilma_Vazo", yumusak_sinirla(s, 2.4), KIRILMA_DB + 1.0)
+
 URETICILER = {
     "cekmece": cekmece, "kapak": kapak, "buzdolabi": buzdolabi, "metal_kapak": metal_kapak,
     "kavanoz": kavanoz, "agir_surtunme": agir_surtunme, "cekmece_kilitli": cekmece_kilitli,
@@ -775,6 +853,7 @@ URETICILER = {
     "al_kucuk": al_kucuk, "kilit_kucuk": kilit_kucuk, "dugme_bakalit": dugme_bakalit,
     "kucuk_tikirti": kucuk_tikirti, "an_surtunme": an_surtunme, "kapi_gicirti_dongu": kapi_gicirti_dongu,
     "vana_cark": vana_cark,
+    "kirilma_tabak": kirilma_tabak, "kirilma_bardak": kirilma_bardak, "kirilma_vazo": kirilma_vazo,   # #131
 }
 
 if __name__ == "__main__":

@@ -1179,6 +1179,10 @@ public class KatYoneticisi : MonoBehaviour
         // Varlığın gerilimi (#86): kademe ve 0-1 değer.
         Varlik varlik = GetComponent<Varlik>();
         string gerilim = varlik == null ? "" : $"   ·   gerilim {varlik.Gerilim:0.00} (k{varlik.Kademe}{(varlik.AvSuruyor ? " AV" : "")})";
+        // Cin olayları (#131): son olay ve bir sonrakine kalan süre.
+        CinOlaylari cin = GetComponent<CinOlaylari>();
+        string cinDurum = cin == null ? "" : "   ·   cin: " + cin.Durum;
+        gerilim += cinDurum;
 
         string alt = $"kayıt: {Kayit.Kat}. kat" + kartAdi + olay + gerilim + fps +
                      (catiModu ? "   ·   üstte çatı" : "") +

@@ -224,6 +224,14 @@ public static partial class GrayboxKurucu
         vSeri.FindProperty("sablon").objectReferenceValue = golge;
         vSeri.FindProperty("haberci").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Olay/Olay_UstKatAdimlari.wav");
         vSeri.FindProperty("tiklatma").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
+        // Cin olayları (#131): aynı nesnede; çarpma ve vuruş kayıtları, kırık parça şablonu (kavanozunki).
+        CinOlaylari cin = yonetici.GetComponent<CinOlaylari>();
+        if (cin == null) cin = yonetici.gameObject.AddComponent<CinOlaylari>();
+        var cSeri = new SerializedObject(cin);
+        cSeri.FindProperty("carpmaSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Carpma.wav");
+        cSeri.FindProperty("vurusSesi").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Anomali/Kapi_Tiklatma.wav");
+        cSeri.FindProperty("kirikSablonu").objectReferenceValue = camKirik;
+        cSeri.ApplyModifiedPropertiesWithoutUndo();
         vSeri.ApplyModifiedPropertiesWithoutUndo();
 
         // Takılınca ipucu (#98): bileşenin bağlanacak bir varlığı yok (sesi Resources'tan düşer).

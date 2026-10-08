@@ -205,6 +205,33 @@ public class IcKapi : MonoBehaviour, IEtkilesimli
     }
 
     /// <summary>Kilidi takar ya da çözer. Hep kilitli kapı (balkon) çözülmez.</summary>
+    /// <summary>
+    /// Kapıyı sert çarpar (#131, cin olayı): açık kanat 'sure' saniyede hızlanarak kapanır, çarpma sesi
+    /// kanadın yerinde çalar, kapı kapalı kalır. Oyuncu yoldaysa yalnızca ses çalar (kanat oyuncunun
+    /// içinden geçmez, #103). Süren bir hareket varsa durdurulur. Coroutine olarak beklenebilir.
+    /// </summary>
+    public IEnumerator Carp(float sure, AudioClip carpma)
+    {
+        Vector3 yer = (mentese != null ? mentese.position : transform.position) + Vector3.up * 1.0f;
+        if (!acik || KanatYoluDolu())
+        {
+            if (carpma != null) AudioSource.PlayClipAtPoint(carpma, yer, 1f);
+            yield break;
+        }
+        if (hareket != null) { StopCoroutine(hareket); hareket = null; }
+        float bas = aci;
+        sure = Mathf.Max(0.06f, sure);
+        for (float t = 0f; t < sure; t += Time.deltaTime)
+        {
+            float e = t / sure;
+            AciyiUygula(Mathf.Lerp(bas, 0f, e * e));   // hızlanarak: itilen değil, savrulan kapı
+            yield return null;
+        }
+        AciyiUygula(0f);
+        acik = false;
+        if (carpma != null) AudioSource.PlayClipAtPoint(carpma, yer, 1f);
+    }
+
     public void Kilitle(bool k)
     {
         kilitli = k || hepKilitli;
