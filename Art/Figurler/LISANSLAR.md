@@ -9,14 +9,18 @@ FBX + dokular olarak hazırlanır. İndirilen ham dosyalar depoya girmez (`.giti
 | N | Ad | Yazar | Kaynak | Lisans | Üçgen (ham) |
 |---|---|---|---|---|---|
 | 1 | Horror Ghost Character - Blood Stained Spirit | adhamAsalah | https://sketchfab.com/3d-models/horror-ghost-character-blood-stained-spirit-ed1a90be19404450935720f7abaae471 | CC BY 4.0 | 197 867 |
-| 2 | Drowned Hag - Waterlogged Horror Witch | s8819296 | https://sketchfab.com/3d-models/drowned-hag-waterlogged-horror-witch-9a4cc20c82b84c3989f5b63576eddb19 | CC BY 4.0 | 1 981 828 |
+| 2 | Drowned Hag - Waterlogged Horror Witch | Pigcraft (s8819296) | https://sketchfab.com/3d-models/drowned-hag-waterlogged-horror-witch-9a4cc20c82b84c3989f5b63576eddb19 | CC BY 4.0 | 1 981 828 |
 | 3 | Ghost Woman A-Pose | fluxium3d | https://sketchfab.com/3d-models/ghost-woman-a-pose-f4f4f2f59f124f54a787438bb3ed9ab0 | CC BY 4.0 | 49 970 |
-| 4 | A terrifying granny | (Sketchfab sayfasında) | https://sketchfab.com/3d-models/251a32e10977495a90860bdbd94d1484 | CC BY 4.0 | 373 552 |
-| 5 | Zombie woman | (Sketchfab sayfasında) | https://sketchfab.com/3d-models/b69df5d905d546a4b79cb78e0d014e71 | CC BY 4.0 | 9 978 |
-| 6 | Zombie Female 3D | (Sketchfab sayfasında) | https://sketchfab.com/3d-models/24aa8315c0ef4fbeb1c0dd183322d11a | CC BY 4.0 | 19 110 |
+| 4 | A terrifying granny | Kratoz_001 | https://sketchfab.com/3d-models/a-terrifying-granny-251a32e10977495a90860bdbd94d1484 | CC BY 4.0 | 373 552 |
+| 5 | Zombie woman | maicollgdalpiaz | https://sketchfab.com/3d-models/zombie-woman-b69df5d905d546a4b79cb78e0d014e71 | CC BY 4.0 | 9 978 |
+| 6 | Zombie Female 3D | Pachedore3D | https://sketchfab.com/3d-models/zombie-female-3d-24aa8315c0ef4fbeb1c0dd183322d11a | CC BY 4.0 | 19 110 |
 
-Yazar adı boş olanlar indirme sırasında Sketchfab sayfasından bu tabloya yazılır (jenerik satırı da aynı adı
-taşır). Hazırlanmış FBX'lerin üçgen sayısı 35-45 bin arasıdır (`figur_hazirla.py` indirger).
+Yazar adları indirilen zip'lerdeki `license.txt` dosyalarından alındı (2026-10-08); jenerik satırı aynı adları taşır.
+
+**Yapay zekâ notu (Steam beyanı, `Docs/steam-yapay-zeka-beyani.md`):** 1, 2 ve 3 numaralı modellerin doku dosya adları
+(`tripo_mat_*`, `mvadapter_*`) Tripo / MV-Adapter üretimi olduğunu gösteriyor; yani bu üç figür üçüncü kişilerce yapay zekâyla
+üretilmiş CC BY varlıklardır. 4, 5 ve 6 el yapımı görünüyor (emin olunamıyor). Beyanda "üçüncü taraf CC BY 3B figürlerin bir
+kısmı yapay zekâ ile üretilmiştir" diye geçer. Hazırlanmış FBX'lerin üçgen sayısı 35-45 bin arasıdır (`figur_hazirla.py` indirger).
 
 ## İndirme (Şahan)
 
