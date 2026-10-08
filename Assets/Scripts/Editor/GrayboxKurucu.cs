@@ -336,15 +336,20 @@ public static partial class GrayboxKurucu
         // kapı 7 m'de huzme dışında kapkara kalıyordu. Ara sahanlık penceresinden sızan ayın yerine geçen,
         // soğuk ve çok zayıf bir nokta ışık; gölgesiz (döngüde her kat aynı aydınlanmalı, #23). Her sahanlıkta
         // (sahte katlar dahil) aynı, ki merdiven gözünden bakınca katlar farklı görünmesin.
-        GameObject ay = new GameObject("Ay_Sizintisi");
-        ay.transform.SetParent(t, false);
-        ay.transform.localPosition = new Vector3(0f, DuvarYuksek - 0.5f, onZ / 2f);
-        Light ayIsigi = ay.AddComponent<Light>();
-        ayIsigi.type = LightType.Point;
-        ayIsigi.range = 10f;
-        ayIsigi.intensity = AySizintisiSiddeti;
-        ayIsigi.color = new Color(0.55f, 0.65f, 1.0f);
-        ayIsigi.shadows = LightShadows.None;
+        // #130 (Şahan'ın build testi, 2026-10-08): "bina karanlık olmalı, yalnızca kafa lambasıyla aydınlanmalı" →
+        // sızıntı KAPALI (AySizintisiSiddeti = 0). Kod duruyor: tek sayıyla geri açılır.
+        if (AySizintisiSiddeti > 0f)
+        {
+            GameObject ay = new GameObject("Ay_Sizintisi");
+            ay.transform.SetParent(t, false);
+            ay.transform.localPosition = new Vector3(0f, DuvarYuksek - 0.5f, onZ / 2f);
+            Light ayIsigi = ay.AddComponent<Light>();
+            ayIsigi.type = LightType.Point;
+            ayIsigi.range = 10f;
+            ayIsigi.intensity = AySizintisiSiddeti;
+            ayIsigi.color = new Color(0.55f, 0.65f, 1.0f);
+            ayIsigi.shadows = LightShadows.None;
+        }
 
         // Normal katın ses dokusu (#14). Sahte katlarda da var: komşu katların sesi
         // hafifçe duyulur ve ışınlanmada ses ortamı değişmez.
@@ -2259,7 +2264,7 @@ public static partial class GrayboxKurucu
 
     // yanik = false: ampul yerinde ama sönük; ışıklar 0 şiddette AÇIK kalır (kartlar ve görevler
     // şiddet yazarak yakabilir), camı karanlık malzemeyi kullanır.
-    public const float AySizintisiSiddeti = 1.2f;    // #126: sahanlık ay ışığı sızıntısı (ölçerek seçildi: 0,45 lamba kapalıyken %93 siyah, 1,2 %57, 2,5 fenerin işini alıyordu)
+    public const float AySizintisiSiddeti = 0f;      // #126 1,2 idi (lamba kapalıyken %57 siyah); #130: Şahan bina kapkaranlık istedi → 0 (ışık kurulmaz)
 
     static void AmpulKur(string ad, Transform ebeveyn, Vector3 konum, float menzil, float siddet, bool yanik = true)
     {
