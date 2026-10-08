@@ -101,6 +101,7 @@ public class CinOlayKuraliTestleri
         for (int tohum = 1; tohum <= 30; tohum++)
         {
             var k = new CinOlayKurali(tohum);
+            k.KatAyarla(3);   // #141: 1. kat yalnız sesli olay alır; torbanın bütün türleri 2. kattan itibaren
             var sayim = new int[CinOlayKurali.OlaySayisi];
             int cekilen = 0; bool yenilendi = false;
             CinOlayi onceki = CinOlayi.Yok;
@@ -147,6 +148,7 @@ public class CinOlayKuraliTestleri
     public void Torbanin_kalani_yapilamiyorsa_torba_yenilenir_ve_yapilabilen_olay_gelir()
     {
         var k = new CinOlayKurali(4);
+        k.KatAyarla(3);   // #141: görünür olaylar 1. katta yok
         var yalnizGorunur = new bool[CinOlayKurali.OlaySayisi];
         yalnizGorunur[(int)CinOlayi.Belirme] = true;
         yalnizGorunur[(int)CinOlayi.Gecis] = true;
@@ -156,6 +158,70 @@ public class CinOlayKuraliTestleri
             DolanaKadar(k);
             CinOlayi o = k.Sec(yalnizGorunur);
             Assert.IsTrue(o == CinOlayi.Belirme || o == CinOlayi.Gecis || o == CinOlayi.Kacis, "çekilen: " + o);
+        }
+    }
+
+    // #141 (B7): enum'a tür eklenip ağırlık unutulursa torba çalışırken dizi taşar; burada yakalanır.
+    [Test]
+    public void Olay_turu_sayisi_agirlik_dizisi_ve_enum_ayni_uzunlukta()
+    {
+        Assert.AreEqual(System.Enum.GetValues(typeof(CinOlayi)).Length, CinOlayKurali.OlaySayisi, "OlaySayisi enum'la aynı değil");
+        Assert.AreEqual(CinOlayKurali.OlaySayisi, CinOlayKurali.AgirlikSayisi, "ağırlık dizisi eksik/fazla");
+    }
+
+    // #141 (B2): 1. kat yalnız sesli olayları alır, zemin katta olay olmaz, 2. kattan itibaren hepsi.
+    [Test]
+    public void Birinci_kat_yalniz_sesli_olaylari_alir_zemin_katta_olay_yok()
+    {
+        var sesli = new System.Collections.Generic.HashSet<CinOlayi> { CinOlayi.KapiCarpma, CinOlayi.Kirilma, CinOlayi.BakmayincaDegisim,
+                                                                     CinOlayi.IceridenVurus, CinOlayi.ArkadanAdim, CinOlayi.Cihaz };
+        var k = new CinOlayKurali(9);   // yeni kural 1. katta başlar
+        for (int i = 0; i < 60; i++)
+        {
+            DolanaKadar(k);
+            CinOlayi o = k.Sec(Hepsi());
+            Assert.IsTrue(sesli.Contains(o), "1. katta görünür olay: " + o);
+        }
+        var z = new CinOlayKurali(9);
+        z.KatAyarla(0);
+        DolanaKadar(z, 900f);
+        Assert.AreEqual(CinOlayi.Yok, z.Sec(Hepsi()), "zemin katta olay");
+        for (int i = 1; i < CinOlayKurali.OlaySayisi; i++) Assert.IsTrue(CinOlayKurali.KattaIzinli((CinOlayi)i, 2), "2. kat: " + (CinOlayi)i);
+    }
+
+    // #141 (B3): seçim tembel; her tür bir seçimde en çok bir kez sorulur, ilk "evet"te durulur.
+    [Test]
+    public void Secim_tembel_her_tur_en_cok_bir_kez_sorulur_ve_ilk_evette_durur()
+    {
+        var k = new CinOlayKurali(5);
+        k.KatAyarla(4);
+        DolanaKadar(k);
+        var sorulan = new System.Collections.Generic.List<CinOlayi>();
+        CinOlayi o = k.Sec(t => { sorulan.Add(t); return true; });
+        Assert.AreEqual(1, sorulan.Count, "hepsi yapılabilirken tek tür sorulmalı");
+        Assert.AreEqual(sorulan[0], o);
+        DolanaKadar(k);
+        sorulan.Clear();
+        Assert.AreEqual(CinOlayi.Yok, k.Sec(t => { sorulan.Add(t); return false; }));
+        Assert.AreEqual(sorulan.Count, new System.Collections.Generic.HashSet<CinOlayi>(sorulan).Count, "bir tür iki kez soruldu");
+        Assert.IsFalse(sorulan.Contains(o), "son olay yeniden soruldu");
+    }
+
+    // #141 (B4): sessizlik üst katlarda kısalır ve hiçbir katta bir sonraki olayın en kısa aralığını aşmaz.
+    [Test]
+    public void Sessizlik_ust_katlarda_kisalir_ve_olay_araligindan_kisa()
+    {
+        CinOlayKurali.SessizlikAraligi(1, out float a1, out float b1);
+        CinOlayKurali.SessizlikAraligi(8, out float a8, out float b8);
+        Assert.AreEqual(CinOlayKurali.SessizlikKat1EnAz, a1, 1e-4f);
+        Assert.AreEqual(CinOlayKurali.SessizlikKat1EnCok, b1, 1e-4f);
+        Assert.AreEqual(CinOlayKurali.SessizlikKat8EnAz, a8, 1e-4f);
+        Assert.AreEqual(CinOlayKurali.SessizlikKat8EnCok, b8, 1e-4f);
+        for (int kat = 1; kat <= 8; kat++)
+        {
+            CinOlayKurali.AralikSiniri(kat, out float olayEnAz, out _);
+            CinOlayKurali.SessizlikAraligi(kat, out _, out float sessizlikEnCok);
+            Assert.Less(sessizlikEnCok, olayEnAz, "kat " + kat);
         }
     }
 

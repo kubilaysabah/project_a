@@ -269,3 +269,18 @@ borcu öder. Kararlar: **zorunlu** (seçim yok; bina çağırır), **bulmacasız
   penceresi yanık, siluet ve asansör sesi yok; jenerik "Dördüncü kapıcı da gitti. / Lamba çivide kaldı; pencere hâlâ
   yanık." satırlarıyla başlar (`jenerik_terk`). Kayıt yine silinir (en yüksek kat ve fotoğraflar kalır). Lamba
   asılmadan kabine girmek hiçbir şey yapmaz. Steam başarımı ("Dördüncü de gitti") Steam sayfasıyla (#12) gelir.
+
+## 17. Karanlık iki şey öğretir (#141, 2026-10-08)
+
+İki kural ilk bakışta çelişir; bilerek böyle:
+
+- **Av karanlıkta seni bulamaz (#86, #112).** 2. kattaki ilk karşılaşma bunu öğretir: lamba kendiliğinden söner,
+  Gölge karanlıkta gelir geçer, av biter. Eğilmiş ve lambası kapalı bir oyuncu iz bırakmaz; av izin sonuna gelip
+  vazgeçer. Karanlık, peşindeki şeyden **saklanmanın** yoludur.
+- **Cin karanlıkta sana yaklaşır (#135).** 3. kattan itibaren belirmelerin yarısı karartmalıdır: figür görünür,
+  lamba ölür, karanlıkta yalnız gözleri yanar ve 1-1,5 m yaklaşır, lamba dönünce gitmiştir. Dokunmaz, yakalamaz.
+
+Fark şu: av bir **tehlikedir** (yakalarsa kat başına dönersin) ve karanlık ondan korur; cin bir **tacizdir** (hiç
+dokunmaz) ve karanlık onun oyun alanıdır. Oyuncu "karanlık güvenli ama yalnız değilim" duygusunu taşır: av
+sırasında lambayı söndürmek doğru karardır, ama söndürdüğünde yanında bir şeyin durduğunu bilir. İki kuralın
+arasındaki gerilim, lambayı açıp kapamayı her seferinde küçük bir karar yapar.
