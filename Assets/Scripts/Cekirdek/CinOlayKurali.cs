@@ -27,6 +27,7 @@ public enum CinOlayi
     Cihaz,             // katın radyosu / TV'si bir anlığına cızırtıyla açılıp kapanır
     Belirme,           // #133: Gölge görüşte, 4-9 m'de belirir, 1,4-2,2 sn durur, kaybolur (yakalamaz)
     Gecis,             // #133: Gölge görüşün bir kenarından öbürüne 4 m/sn ile geçer (yakalamaz)
+    Kacis,             // #134: figür görüşte belirir, oyuncuya bakar, yüksek ayak sesiyle uzağa KAÇAR (yakalamaz)
 }
 
 public class CinOlayKurali
@@ -35,11 +36,11 @@ public class CinOlayKurali
     public const float EnAzAralikKat8 = 20f, EnCokAralikKat8 = 50f;   // 8. katta aralık
     public const float IlkCarpan = 1.5f;                              // katın ilk olayı bu kadar geç
     public const float BosAralik = 10f;                               // seçilecek olay yoksa yeniden deneme
-    public const int OlaySayisi = 9;                                  // CinOlayi'nin eleman sayısı (Yok dahil)
+    public const int OlaySayisi = 10;                                 // CinOlayi'nin eleman sayısı (Yok dahil)
 
     // Ağırlıklar, CinOlayi sırasıyla (Yok 0): çarpma ve kırılma en sık, cihaz en seyrek; görünür olaylar
     // (#133) orta sıklıkta: Şahan "ara ara gözüksün" dedi, her seferinde değil.
-    private static readonly int[] Agirliklar = { 0, 3, 3, 2, 2, 2, 1, 2, 2 };
+    private static readonly int[] Agirliklar = { 0, 3, 3, 2, 2, 2, 1, 2, 2, 3 };   // Kacis (#134) çarpma/kırılma kadar sık
 
     private readonly System.Random rastgele;
     private int kat = 1;

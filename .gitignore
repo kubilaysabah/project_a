@@ -115,3 +115,6 @@ CLAUDE.local.md
 __pycache__/
 *.pyc
 *.blend1
+
+# #134: Sketchfab'dan indirilen ham figürler (Şahan indirir, hazırlanmış FBX depoya girer)
+Art/Figurler/indirilen/

@@ -43,6 +43,9 @@ public class EsyaEskitici : AssetPostprocessor
         "Not_Kagidi", "Isim_Karti", "Golge",
     };
 
+    // #134: üç harfli figürleri (Cin_N) solgun tenlerini korusun, eskitilmez.
+    static bool HaricMi(string ad) { return Haric.Contains(ad) || ad.StartsWith("Cin_"); }
+
     // Eskitmenin ölçüleri.
     const float Soldurma = 0.30f;     // rengin %30'u griye çekilir (güneşte, yıllarla solmuş)
     const float Karartma = 0.86f;     // %14 koyulaşır (kir, is)
@@ -62,7 +65,7 @@ public class EsyaEskitici : AssetPostprocessor
     {
         if (!assetPath.StartsWith(Klasor)) return;
         string dosya = System.IO.Path.GetFileNameWithoutExtension(assetPath);
-        if (Haric.Contains(dosya)) return;
+        if (HaricMi(dosya)) return;
         // Işık saçan malzeme (emisyon açık): göstergeler, ampul camı.
         if (m.IsKeywordEnabled("_EMISSION")) return;
         Eskit(m);

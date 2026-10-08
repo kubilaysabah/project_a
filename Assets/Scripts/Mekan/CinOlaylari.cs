@@ -33,6 +33,7 @@ public class CinOlaylari : MonoBehaviour
     [SerializeField] private AudioClip vurusSesi;        // Kapi_Tiklatma (kayıt, S42)
     [SerializeField] private GameObject kirikSablonu;    // Cam_Kiriklari (kavanozla aynı şablon)
     [SerializeField] private GameObject golgeSablonu;    // Kacis_Golgesi (#133: görünür olaylar; Varlik'le aynı şablon)
+    [SerializeField] private GameObject[] figurler;      // #134: altı üç harfli figürü (FigurKurucu bağlar); boşsa Gölge şablonu
 
     public static CinOlaylari Ornek { get; private set; }
 
@@ -46,6 +47,11 @@ public class CinOlaylari : MonoBehaviour
     private const float GecisEnYakin = 1.5f, GecisEnUzak = 6f;       // #133: geçiş uçlarının uzaklığı (odalar küçük)
     private const int YerDenemesi = 80;                               // #133: oda dar, kapı dar: çok dene
     private GameObject golge;                                         // #133: sahnedeki görünür Gölge (yoksa null)
+    private const float KacisHizi = 4.5f;                             // #134: kaçış hızı (m/sn)
+    private const float KacisAdimAraligi = 0.3f;                      // #134: koşu adımları arası
+    private const float KacisBakma = 0.5f, KacisBakmaEnCok = 0.9f;    // #134: kaçmadan önce oyuncuya bakış süresi
+    private readonly List<GameObject> torba = new List<GameObject>(); // #134: figür torbası (hepsi çıkınca yeniden dolar)
+    private GameObject sonFigur;
 
     private CinOlayKurali kural;
     private KatYoneticisi yonetici;
@@ -121,8 +127,9 @@ public class CinOlaylari : MonoBehaviour
         mevcut[(int)CinOlayi.IceridenVurus] = dairede && VurulacakKapi() != null;
         mevcut[(int)CinOlayi.ArkadanAdim] = dairede;
         mevcut[(int)CinOlayi.Cihaz] = dairede && Cihaz() != null;
-        mevcut[(int)CinOlayi.Belirme] = golgeSablonu != null && BelirmeYeri(out _);
-        mevcut[(int)CinOlayi.Gecis] = golgeSablonu != null && GecisYolu(out _, out _);
+        mevcut[(int)CinOlayi.Belirme] = Sablon() != null && BelirmeYeri(out _);
+        mevcut[(int)CinOlayi.Gecis] = Sablon() != null && GecisYolu(out _, out _);
+        mevcut[(int)CinOlayi.Kacis] = Sablon() != null && KacisYolu(out _, out _);
         CinOlayi olay = kural.Sec(mevcut);
         if (olay == CinOlayi.Yok) return;
         Debug.Log($"[CIN] {kat}. kat: {olay}");
@@ -136,6 +143,7 @@ public class CinOlaylari : MonoBehaviour
             case CinOlayi.Cihaz: Cihaz()?.KisaParazit(); break;
             case CinOlayi.Belirme: suren = StartCoroutine(Belir()); break;
             case CinOlayi.Gecis: suren = StartCoroutine(Gec()); break;
+            case CinOlayi.Kacis: suren = StartCoroutine(Kac()); break;
         }
     }
 
@@ -280,6 +288,28 @@ public class CinOlaylari : MonoBehaviour
         return null;
     }
 
+    // ---------- FİGÜR HAVUZU (#134) ----------
+    // Şahan: "altı figürü farklı farklı sırayla ekle." Torba kuralı: altı figür karıştırılıp torbaya konur, her
+    // görünür olay torbadan bir tane çeker; torba boşalınca yeniden dolar; yeni torbanın ilk figürü bir önceki
+    // olayın figürüyle aynı olamaz. Prefab yoksa (henüz indirilmedi) eski Gölge şablonu kullanılır.
+    private GameObject Sablon() { return (figurler != null && figurler.Length > 0 && figurler[0] != null) ? figurler[0] : golgeSablonu; }
+
+    private GameObject FigurSec()
+    {
+        if (figurler == null || figurler.Length == 0) return golgeSablonu;
+        if (torba.Count == 0)
+        {
+            foreach (GameObject f in figurler) if (f != null) torba.Add(f);
+            for (int i = torba.Count - 1; i > 0; i--) { int j = Random.Range(0, i + 1); GameObject g = torba[i]; torba[i] = torba[j]; torba[j] = g; }
+            if (torba.Count > 1 && torba[torba.Count - 1] == sonFigur) { GameObject g = torba[0]; torba[0] = torba[torba.Count - 1]; torba[torba.Count - 1] = g; }
+        }
+        if (torba.Count == 0) return golgeSablonu;
+        GameObject secilen = torba[torba.Count - 1];
+        torba.RemoveAt(torba.Count - 1);
+        sonFigur = secilen;
+        return secilen;
+    }
+
     // ---------- GÖRÜNÜR OLAYLARIN YERLERİ (#133) ----------
     // Bir noktada Gölge durabilir mi: altında oyuncunun ayak hizasında zemin var, bir insan sığar (kapsül boş).
     private bool Durulur(ref Vector3 aday)
@@ -368,17 +398,91 @@ public class CinOlaylari : MonoBehaviour
         return mesafe;
     }
 
+    // Kaçış yolu (#134): görüşte bir belirme noktası P; oradan OYUNCUDAN UZAĞA (uzaklaşma yönü ±60°) 2,5-6 m
+    // boş bir koşu yolu. Yol oyuncuya yaklaşmaz; sonu görüş dışına düşerse daha iyi ama şart değil (figür
+    // yolun sonunda silinir).
+    private bool KacisYolu(out Vector3 bas, out Vector3 son)
+    {
+        bas = son = Vector3.zero;
+        if (oyuncu == null) return false;
+        // Odalar dar: tek bir belirme noktasından 2,5 m'lik düz koşu yolu çoğu kez çıkmaz; birkaç nokta denenir,
+        // yön oyuncudan uzağa ±90° (yana kaçış da olur), en az 1,8 m. Yol asla oyuncuya doğru gitmez.
+        for (int nokta = 0; nokta < 6; nokta++)
+        {
+            if (!BelirmeYeri(out bas)) continue;
+            Vector3 uzak = bas - oyuncu.position; uzak.y = 0f;
+            if (uzak.sqrMagnitude < 0.01f) continue;
+            uzak.Normalize();
+            float enIyi = 0f; Vector3 enIyiSon = Vector3.zero;
+            for (int deneme = 0; deneme < 12; deneme++)
+            {
+                Vector3 yon = Quaternion.Euler(0f, Random.Range(-90f, 90f), 0f) * uzak;
+                float m = SerbestMesafe(bas, yon, 6f);
+                if (m > enIyi) { enIyi = m; enIyiSon = bas + yon * m; }
+            }
+            if (enIyi < 1.8f) continue;
+            son = enIyiSon;
+            return true;
+        }
+        return false;
+    }
+
+    // Kaçış (#134): imza, figür görüşte belirir ve oyuncuya bakar; 0,5-0,9 sn sonra öne eğilip sıçramalı
+    // adımlarla ("koşar gibi": iskeleti yok, gövde eğik, 4 Hz'de 7 cm zıplar) uzağa koşar; her adımda zeminin
+    // ayak sesi YÜKSEK çalar (Şahan: "yüksek ayak sesi çıkararak"); yolun sonunda silinir. Dokunmaz, yakalamaz.
+    private IEnumerator Kac()
+    {
+        if (KacisYolu(out Vector3 bas, out Vector3 son))
+        {
+            GameObject sablon = FigurSec();
+            if (sablon != null)
+            {
+                GolgeImzasi.Cal(bas + Vector3.up * 1.2f);
+                Vector3 bakis = oyuncu.position - bas; bakis.y = 0f;
+                golge = Instantiate(sablon, bas, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
+                golge.name = "Cin_Golgesi";
+                Titresim.Vur(0.3f, 0.5f, 0.3f);
+                Debug.Log($"[CIN] kaçış: {sablon.name}, {Vector3.Distance(bas, oyuncu.position):0.0} m önde belirdi, {Vector3.Distance(bas, son):0.0} m kaçacak.");
+                yield return new WaitForSeconds(Random.Range(KacisBakma, KacisBakmaEnCok));
+                Vector3 yon = son - bas; yon.y = 0f;
+                Quaternion kosuDonusu = Quaternion.LookRotation(yon.normalized);
+                float sure = yon.magnitude / KacisHizi, adimSayaci = 0f;
+                for (float t = 0f; t < sure && golge != null; t += Time.deltaTime)
+                {
+                    Vector3 taban = Vector3.Lerp(bas, son, t / sure);
+                    float zip = Mathf.Abs(Mathf.Sin(t * Mathf.PI * 4f)) * 0.07f;             // sıçrama
+                    golge.transform.position = taban + Vector3.up * zip;
+                    golge.transform.rotation = kosuDonusu * Quaternion.Euler(14f, 0f, Mathf.Sin(t * Mathf.PI * 8f) * 4f);   // öne eğik, hafif yalpa
+                    adimSayaci += Time.deltaTime;
+                    if (adimSayaci >= KacisAdimAraligi)
+                    {
+                        adimSayaci = 0f;
+                        AudioClip klip = ZeminSesi.AdimKlibi(taban, golge.transform);
+                        if (klip != null) Cal(klip, taban + Vector3.up * 0.05f, 1.0f);
+                    }
+                    yield return null;
+                }
+                if (golge != null) Destroy(golge);
+                golge = null;
+                Debug.Log("[CIN] kaçış bitti: figür silindi.");
+            }
+        }
+        suren = null;
+    }
+
     // ---------- GÖRÜNÜR OLAYLAR (#133) ----------
     // Belirme: imza, Gölge görüşte belirir, oyuncuya dönük durur, lamba titrer, kaybolur. Yakalama yok.
     private IEnumerator Belir()
     {
-        if (BelirmeYeri(out Vector3 yer) && golgeSablonu != null)
+        GameObject belirmeSablonu = FigurSec();
+        if (BelirmeYeri(out Vector3 yer) && belirmeSablonu != null)
         {
             GolgeImzasi.Cal(yer + Vector3.up * 1.2f);
             Vector3 bakis = oyuncu.position - yer; bakis.y = 0f;
-            golge = Instantiate(golgeSablonu, yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
+            golge = Instantiate(belirmeSablonu, yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
             golge.name = "Cin_Golgesi";
             Titresim.Vur(0.3f, 0.5f, 0.3f);
+            Debug.Log($"[CIN] belirme: {belirmeSablonu.name}, {Vector3.Distance(yer, oyuncu.position):0.0} m.");
             yield return new WaitForSeconds(Random.Range(1.4f, 2.2f));
             if (lamba != null) lamba.Titret(0.5f);
             yield return new WaitForSeconds(0.15f);
@@ -391,13 +495,15 @@ public class CinOlaylari : MonoBehaviour
     // Geçiş: imza, Gölge bir uçtan öbürüne 4 m/sn ile yürür (GolgeAnimasyonu bacakları hareketten sallar), silinir.
     private IEnumerator Gec()
     {
-        if (GecisYolu(out Vector3 bas, out Vector3 son) && golgeSablonu != null)
+        GameObject gecisSablonu = FigurSec();
+        if (GecisYolu(out Vector3 bas, out Vector3 son) && gecisSablonu != null)
         {
             GolgeImzasi.Cal(bas + Vector3.up * 1.2f);
             Vector3 yon = son - bas; yon.y = 0f;
-            golge = Instantiate(golgeSablonu, bas, Quaternion.LookRotation(yon.normalized));
+            golge = Instantiate(gecisSablonu, bas, Quaternion.LookRotation(yon.normalized));
             golge.name = "Cin_Golgesi";
             Titresim.Vur(0.25f, 0.45f, 0.25f);
+            Debug.Log($"[CIN] geçiş: {gecisSablonu.name}, {yon.magnitude:0.0} m.");
             float sure = yon.magnitude / GecisHizi;
             for (float t = 0f; t < sure && golge != null; t += Time.deltaTime)
             {
