@@ -760,6 +760,27 @@ def radyo_parazit():
     ortak.kaydet(os.path.join(SESLER, "Radyo_Parazit.wav"), parazit, H, 0.6)
 
 
+def fisilti(dosya_adi, cikti_adi, klasor=None):
+    """Fısıltı kaydını (#132) oyuna hazırlar: Sesler/Fisilti_N.wav. Kafa lambası sönünce 2B çalar.
+    Bant 300-5000 Hz (hava sesi kalsın, oda uğultusu gitsin), hafif sıkıştırma (tanh 1,8: hecelerin
+    tepesi düzleşir, fısıltı "yakın" gelir), baş ve sonda 60 ms iniş-çıkış (tık olmasın), tepe 0,5."""
+    H = H44
+    girdi = os.path.abspath(dosya_adi) if os.path.isfile(dosya_adi) else dosya_adi
+    ses = oku(girdi, H)
+    for _ in range(2):
+        ses = ortak.alcak(ortak.yuksek(ses, 300, H), 5000, H)
+    ses = ortak.yumusak_sinirla(ses, 1.8)
+    k = int(0.06 * H)
+    n = len(ses)
+    for i in range(min(k, n)):
+        ses[i] *= i / k
+        ses[n - 1 - i] *= i / k
+    ad = cikti_adi[:1].upper() + cikti_adi[1:]           # fisilti_1 -> Fisilti_1 (Resources/Sesler adlandırması)
+    hedef = os.path.join(klasor or SESLER, ad + ".wav")
+    ortak.kaydet(hedef, ses, H, 0.5)
+    return hedef
+
+
 def radyo_anons(dosya_adi, cikti_adi, klasor=None):
     """Temiz bir okuma kaydını 90'lar radyo yayınına çevirir: AM bandı (250-4200 Hz, iki geçiş), hafif
     sıkıştırma, -32 dB parazit yatağı. Çıktı Konusmalar/<cikti_adi>.wav (RadyoAnonsu adıyla yükler).
@@ -793,6 +814,11 @@ if __name__ == "__main__":
             print("Kullanım: python kayit_isle.py radyo_anons <girdi> <cikti_adi>")
             sys.exit(1)
         radyo_anons(argumanlar[1], argumanlar[2])
+    elif argumanlar and argumanlar[0] == "fisilti":
+        if len(argumanlar) != 3:
+            print("Kullanım: python kayit_isle.py fisilti <girdi> fisilti_N")
+            sys.exit(1)
+        fisilti(argumanlar[1], argumanlar[2])
     elif argumanlar and argumanlar[0] == "telefon":
         # Konuşma işlemcisi argüman ister: python kayit_isle.py telefon <girdi> <cikti_adi>
         if len(argumanlar) != 3:

@@ -121,6 +121,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Gözetleme deliğinden ışık gelir.
 >
 > Bir de... asansör dokuzu gösterirse binme.
+> Üç harfli oradan iner.
 
 **EN**
 
@@ -133,6 +134,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Light comes through its peephole.
 >
 > And... if the lift shows nine, don't get in.
+> That's where the one you don't name comes down from.
 
 ### `not.telefon_kat5_kacti`
 
@@ -300,6 +302,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Kerem bu gece de uyandı. "Yukarıdaki amca camdan bakıyor" diyor.
 > Bu binada dokuzuncu kat yok ki.
 > Sabah o amcayı çizmiş; resmi kimseye göstermiyor. Nereye koydun diye sorunca güldü.
+> Annem olsa "üç harfliler" derdi; ben demiyorum.
 >
 > — Ayla
 
@@ -309,6 +312,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 > Kerem woke up again tonight. He says "the man upstairs is looking through the window".
 > There is no ninth floor in this building.
 > This morning he drew that man, and he won't show the drawing to anyone. When I asked where he put it, he laughed.
+> My mother would have said "the ones you don't name"; I won't.
 >
 > — Ayla
 
@@ -374,7 +378,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **TR**
 
-> Işıklar yanınca o da geliyor.
+> Işıklar yanınca üç harfli de geliyor. Adını ağzıma almam.
 > Gece asansörün dokuzuncu kattan indiğini duydum.
 > Benden önceki kapıcı Rıza Efendi de duymuş.
 > Yarın bırakıyorum. Anahtar burada; sen de çok kalma.
@@ -383,7 +387,7 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 
 **EN**
 
-> When the lights come on, so does he.
+> When the lights come on, the one you don't name comes too. I won't say its name.
 > At night I heard the lift coming down from the ninth floor.
 > Rıza Efendi, the janitor before me, heard it too.
 > I quit tomorrow. The key is here; don't stay long either.
@@ -577,14 +581,14 @@ Oyundaki bütün notlar, telefon konuşmaları ve fotoğrafların arkasındaki y
 **TR**
 
 > Bu katta bütün kapılar 13 oldu. Hangisi benimki, ben bile şaşırıyorum.
-> Öbür kapıları çalma. Ardından cevap veriyorlar.
+> Öbür kapıları çalma. Ardından cevap veriyorlar; üç harfliyi çağırmış olursun.
 >
 > — Cemal
 
 **EN**
 
 > Every door on this floor turned into 13. Even I mix up which one is mine.
-> Don't knock on the other doors. Something answers.
+> Don't knock on the other doors. Something answers from behind them; you'd be calling the one you don't name.
 >
 > — Cemal
 

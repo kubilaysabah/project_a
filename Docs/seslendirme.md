@@ -44,6 +44,7 @@ Parantezli son satır *(Hat kesiliyor.)* okunmaz; hattın kesilmesi sestir, keli
 > Gözetleme deliğinden ışık gelir.
 >
 > Bir de... asansör dokuzu gösterirse binme.
+> Üç harfli oradan iner.
 
 Çizgili iki satır ayrı iki replik: "Cemal sen misin?"den sonra bir nefes payı bırak, sonra "Değilsin." gelsin.
 
@@ -119,3 +120,18 @@ tango istasyonunun şarkı arasına girecek.
 | 6 | eski televizyon | Arşivden: 1974 Ekim'inde bu mahallede teslim edilen bir apartmanın açılışına yüklenici gelmedi. Gazete "dokuzuncu kattan inmedi" yazmış, düzeltmeyi ertesi gün basmıştı. | From the archive: in October 1974 the contractor failed to attend the opening of a building delivered in this district. The paper wrote "he never came down from the ninth floor" and printed a correction the next day. |
 | 7 | taburedeki portatif TV | Gece yarısı bülteni: İtfaiye, bir apartmanın çatısından gelen ışık ihbarına gitti; çatıda kimse yoktu. İhbarı yapan, "her gece aynı pencere" dedi. | Midnight bulletin: the fire brigade answered a report of a light on an apartment building's roof; no one was there. The caller said, "the same window every night." |
 | 8 | yönetimin masa radyosu | Son dakika: Belediye, iskân ruhsatı olmayan katlar için af yasasının bu gece yarısı yürürlüğe girdiğini duyurdu. Yirmi yıldır "olmayan" katlar artık kayıtlara geçecek. | Breaking: the municipality announced that the amnesty for floors without an occupancy permit takes effect at midnight tonight. Floors that "did not exist" for twenty years will now enter the records. |
+
+## 7. Fısıltılar (#132)
+
+Kafa lambası kendiliğinden sönünce (gerilim karartması, 2. katın dersi, 4. kattaki kodun parlaması) karanlıkta
+1-2 saniyelik, çok kısık bir **fısıltı** duyulur: cin (kiracıların diliyle "üç harfli") kulağın dibindedir.
+Kayıt yoksa sessizdir; dosyayı koymak yeter.
+
+Ne söylenir: anlaşılmayan, nefesli, Türkçe hecelerle 1-2 saniye. Örnekler (her biri ayrı dosya):
+`"...kapıcı..."`, `"...çık buradan..."`, `"...geldim..."`, anlamsız bir mırıltı. Kelime anlaşılmamalı; oyuncu
+"bir şey mi dedi?" demeli. Ağız mikrofona 5-10 cm, hava sesi var, oda yankısı yok.
+
+Dosya adları `fisilti_1`, `fisilti_2`, `fisilti_3` (en çok 3; lamba her sönüşte rastgele birini seçer).
+İşleme: `python Art/Ses/scripts/kayit_isle.py fisilti <girdi> fisilti_N` → `Assets/Resources/Sesler/Fisilti_N.wav`
+(300 Hz altı ve 5 kHz üstü atılır, hafif sıkıştırma, baş-son 60 ms kısılır; tepe 0,5: fısıltı asla yüksek
+değil). Oyunda 2B çalar (kafanın içinde), oda yankısından muaf.

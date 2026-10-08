@@ -134,7 +134,17 @@ public class KafaLambasi : MonoBehaviour
         kaynak = sesNesnesi.AddComponent<AudioSource>();
         kaynak.playOnAwake = false;
         kaynak.spatialBlend = 0f;             // kendi kafandaki lamba: 2B
+        kaynak.bypassListenerEffects = true;  // kafadaki ses oda yankısından muaf (#87 kuralı)
         tik = Resources.Load<AudioClip>("Sesler/Lamba_Sonme");   // eski anahtar tıkı (#25'teki ses)
+        // Fısıltılar (#132): kayıt varsa lamba sönünce karanlıkta biri kulağına fısıldar; yoksa sessiz.
+        // Şahan kaydeder (ses asla sentezlenmez); rehber Docs/seslendirme.md §7.
+        var liste = new System.Collections.Generic.List<AudioClip>();
+        for (int i = 1; i <= 3; i++)
+        {
+            AudioClip f = Resources.Load<AudioClip>("Sesler/Fisilti_" + i);
+            if (f != null) liste.Add(f);
+        }
+        fisiltilar = liste.ToArray();
 
         // Vınlama (#105): kendi kaynağı, döngülü, 2B, oda yankısından muaf (lamba kafada, odada değil).
         GameObject vinNesnesi = new GameObject("Lamba_Vinlama");
@@ -319,12 +329,21 @@ public class KafaLambasi : MonoBehaviour
         titreme = null;
     }
 
+    private AudioClip[] fisiltilar;   // #132: Resources/Sesler/Fisilti_1..3 (yoksa boş)
+    private const float FisiltiGecikme = 0.6f, FisiltiSes = 0.45f;
+
     private IEnumerator SonmeAkisi()
     {
         bool once = acik;
         acik = false;
         Uygula(false);
         if (tik != null) kaynak.PlayOneShot(tik, 0.3f);
+        // Fısıltı (#132): karanlık yerleştikten 0,6 sn sonra, sönme hâlâ sürüyorsa (oyuncu saklanmıyorsa).
+        if (fisiltilar != null && fisiltilar.Length > 0 && !SaklanmaYeri.Saklaniyor)
+        {
+            yield return new WaitForSeconds(FisiltiGecikme);
+            if (Time.time < sonmeBitis) kaynak.PlayOneShot(fisiltilar[Random.Range(0, fisiltilar.Length)], FisiltiSes);
+        }
         // Bitiş anı uzatılabilir (ikinci Sondur): sabit bir bekleme yerine saate bakılır.
         while (Time.time < sonmeBitis) yield return null;
         acik = once && !SaklanmaYeri.Saklaniyor;   // dolaptayken geri yanmaz (saklanma lambayı söndürmüştü)
