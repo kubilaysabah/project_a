@@ -190,6 +190,10 @@ public class CinOlaylari : MonoBehaviour
             Temizle();
         }
 
+        // #142 (A3): av, 7. kat kovalamacası ya da 6. kat saklanma anı başladıysa sahnedeki cin figürü gider:
+        // aynı anda iki yaratık görünmesin. (Menü/not açıkken figür olduğu yerde bekler, kesilmez.)
+        if (golge != null && TehditSuruyor()) OlayiKes("başka bir tehdit başladı");
+
         bool uygun = Etkin();
         if (uygun) DairedeMi();
         // #133: saat sahanlıkta da işler (görünür olaylar için); daire içi olaylar aşağıda daire ister.
@@ -230,23 +234,28 @@ public class CinOlaylari : MonoBehaviour
         bool dairede = daire != null;
         bool sahanlikta = !dairede && SahanliktaMi();   // #139 (A3)
         hazirKapi = null; hazirParca = null; hazirNesne = null; hazirCihaz = null; hazirPano = null;
+        // #142 (B1): 2. kattaki ilk karşılaşma dersi (Varlik, kayıtta "ilkav") oynanmadan 2. kat da 1. kat gibi
+        // yalnız sesli olay alır. Ders "karanlık seni avdan saklar" der; ondan önce cin karanlıkta yaklaşırsa
+        // oyuncu iki kuralı karıştırır (Docs/hikaye.md §17).
+        if (kat == 2 && !CinOlayKurali.KattaIzinli(olay, 1) && !Kayit.KilitCozukMu(2, Varlik.OgretiKimligi)) return false;
         switch (olay)
         {
             case CinOlayi.KapiCarpma: return dairede && (hazirKapi = CarpilacakKapi()) != null;
             case CinOlayi.Kirilma: return dairede && KirilmaNoktasi(out hazirBas);
             case CinOlayi.BakmayincaDegisim:
                 if (!dairede) return false;
-                hazirKapi = DegisecekKapi();
-                hazirParca = DegisecekParca();
-                // İkisi de varsa yazı tura: biri kalır (eskiden olay anında seçiliyordu).
-                if (hazirKapi != null && hazirParca != null) { if (Random.value < 0.5f) hazirParca = null; else hazirKapi = null; }
+                // #142 (B2): önce yazı tura (kapı mı, çekmece mi), yalnız seçilen aranır; bulunamazsa öteki.
+                // Eskiden ikisi de aranıp biri atılıyordu: çekmece araması dairedeki bütün parçalara ışın atar.
+                if (Random.value < 0.5f) { hazirKapi = DegisecekKapi(); if (hazirKapi == null) hazirParca = DegisecekParca(); }
+                else { hazirParca = DegisecekParca(); if (hazirParca == null) hazirKapi = DegisecekKapi(); }
                 return hazirKapi != null || hazirParca != null;
             case CinOlayi.IceridenVurus: return dairede && vurusSesi != null && (hazirKapi = VurulacakKapi()) != null;
             case CinOlayi.ArkadanAdim: return dairede;
             case CinOlayi.Cihaz: return dairede && (hazirCihaz = Cihaz()) != null;
-            case CinOlayi.Belirme: return Sablon() != null && BelirmeYeri(out hazirBas);
-            case CinOlayi.Gecis: return Sablon() != null && GecisYolu(out hazirBas, out hazirSon);
-            case CinOlayi.Kacis: return Sablon() != null && KacisYolu(out hazirBas, out hazirSon);
+            // #142 (A3): sahnede başka bir figür (gezen gölge, duvar gölgesi, ayna...) varken figür gösterilmez.
+            case CinOlayi.Belirme: return Sablon() != null && !FigurYurumesi.SahnedeBaskasiVar(null) && BelirmeYeri(out hazirBas);
+            case CinOlayi.Gecis: return Sablon() != null && !FigurYurumesi.SahnedeBaskasiVar(null) && GecisYolu(out hazirBas, out hazirSon);
+            case CinOlayi.Kacis: return Sablon() != null && !FigurYurumesi.SahnedeBaskasiVar(null) && KacisYolu(out hazirBas, out hazirSon);
             case CinOlayi.AyakIzi: return dairede && IzMalzemesiVar() && AyakIziYolu(out hazirBas, out hazirSon);
             case CinOlayi.KapiGozu: return sahanlikta && (hazirNesne = KapiGozuAdayi()) != null;
             case CinOlayi.Zil: return sahanlikta && zilSesi != null && zilSayisi < ZilEnCokKosu && zilKati != kat && (hazirNesne = ZilAdayi()) != null;
@@ -278,15 +287,36 @@ public class CinOlaylari : MonoBehaviour
         if (kontrol == null || !kontrol.enabled) return false;              // menü, not, şifre ekranı, saklanma
         if (SaklanmaYeri.Saklaniyor) return false;
         if (Time.timeScale <= 0f) return false;
+        return !TehditSuruyor();
+    }
+
+    // #142 (A3): binada şu an cin dışında bir tehdit var mı: av, 7. kat kovalamacası, 6. kat saklanma anı?
+    // Varsa cin saati durur ve sahnedeki cin figürü kaldırılır (Update).
+    private bool TehditSuruyor()
+    {
         Varlik v = Varlik.Ornek;
-        if (v != null && v.AvSuruyor) return false;
+        if (v != null && v.AvSuruyor) return true;
         // #141 (B3): kovalamaca / saklanma anı bileşenleri kat kurulurken eklenir; saniyede bir taranır (eskiden
         // her kare bütün sahne aranıyor, her kare yeni bir dizi yaratılıyordu).
         anTaramaSayaci += Time.deltaTime;
         if (anTaramaSayaci >= 1f) { anTaramaSayaci = 0f; kacislar = FindObjectsByType<KacisAni>(); saklanmalar = FindObjectsByType<SaklanmaAni>(); }
-        foreach (KacisAni k in kacislar) if (k != null && k.Basladi) return false;
-        foreach (SaklanmaAni sa in saklanmalar) if (sa != null && sa.Suruyor) return false;
-        return true;
+        foreach (KacisAni k in kacislar) if (k != null && k.Basladi) return true;
+        foreach (SaklanmaAni sa in saklanmalar) if (sa != null && sa.Suruyor) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// #142 (A3): süren görünür cin olayını keser: eşyordam durur, figür silinir. Av başlarken Varlik çağırır
+    /// (avın başındaki lamba titremesi figürün kayboluşunu örter); kovalamaca ve saklanma anında Update çağırır.
+    /// İzler, kırıklar ve dönen eşyalar kalır: onlar olmuş şeylerin izi, yaratık değil.
+    /// </summary>
+    public void OlayiKes(string neden)
+    {
+        if (golge == null) return;
+        if (suren != null) { StopCoroutine(suren); suren = null; }
+        Destroy(golge);
+        golge = null;
+        Debug.Log($"[CIN] görünür olay kesildi: {neden}.");
     }
 
     // Oyuncunun altındaki zemin bir dairenin parçası mı? 0,25 sn'de bir bakılır (Varlik.DairedeMi gibi).
@@ -306,6 +336,9 @@ public class CinOlaylari : MonoBehaviour
 
     private void OnDisable()
     {
+        // #142 (A5): Unity bileşen kapanınca eşyordamları kendisi durdurur ama "suren" kaydı dolu kalırdı;
+        // bileşen yeniden açılınca Update "bir olay sürüyor" sanıp saati bir daha işletmezdi.
+        suren = null;
         if (golge != null) Destroy(golge); golge = null;
         AsansoruSustur();
         SessizligiBitir(false);
@@ -341,8 +374,13 @@ public class CinOlaylari : MonoBehaviour
     private void AsansoruSustur()
     {
         if (gecenPano == null) return;
-        gecenPano.Ugultu(false);
-        gecenPano.GostergeYaz("-");
+        // #142 (A6): yalnız pano hâlâ "ölü" (arızalı) ise. 7. kattan 8'e çıkılırken geçiş yarıda kalırsa bu
+        // satır 8. katın zinciri panoyu hazırladıktan SONRAKİ karede çalışır; hazırlanmış panoya dokunmamalı.
+        if (gecenPano.Hal == AsansorPanosu.Durum.Olu)
+        {
+            gecenPano.Ugultu(false);
+            gecenPano.GostergeYaz("-");
+        }
         gecenPano = null;
     }
 
@@ -837,6 +875,9 @@ public class CinOlaylari : MonoBehaviour
             Transform isik = k.Find("Mentese/Kapi_Gozu_Isik");
             if (isik == null || isik.gameObject.activeSelf) continue;
             if (Vector3.Distance(isik.position, oyuncu.position) > 9f) continue;
+            // #142 (A4): oyuncunun baktığı kapı aday değil: ışık gözünün önünde yanıp hemen sönüyordu (olay
+            // boşa gidiyordu). Işık görüş dışında yanar; oyuncu dönünce bir kapının gözünün yandığını görür.
+            if (Gorunur(isik.position, k)) continue;
             adaylar.Add(k);
         }
         return adaylar.Count == 0 ? null : adaylar[Random.Range(0, adaylar.Count)];
@@ -1126,6 +1167,9 @@ public class CinOlaylari : MonoBehaviour
                     if (Durulur(ref yeni))
                     {
                         golge.transform.position = yeni;
+                        // #142 (A1): bu bir adım değil, karanlıkta bir anda yer değiştirme: yürüyüş saymasın.
+                        FigurYurumesi yuruyus = golge.GetComponent<FigurYurumesi>();
+                        if (yuruyus != null) yuruyus.Isinlandi();
                         Vector3 yeniBakis = oyuncu.position - yeni; yeniBakis.y = 0f;
                         if (yeniBakis.sqrMagnitude > 0.001f) golge.transform.rotation = Quaternion.LookRotation(yeniBakis);
                         Debug.Log($"[CIN] belirme: karanlıkta {adim:0.0} m yaklaştı ({Vector3.Distance(yeni, oyuncu.position):0.0} m).");

@@ -65,6 +65,7 @@ public class GezenGolge : MonoBehaviour
     public bool HaberciyleBelir()
     {
         if (golge != null || haberciCaliyor || sablon == null || oyuncu == null) return false;
+        if (FigurYurumesi.SahnedeBaskasiVar(null)) return false;   // #142 (A3): sahnede başka bir figür var
         if (!YerVarMi()) return false;
         StartCoroutine(HaberciVeBelir());
         return true;
@@ -122,6 +123,8 @@ public class GezenGolge : MonoBehaviour
     public bool Belir()
     {
         if (golge != null || sablon == null || oyuncu == null) return false;
+        // #142 (A3): adımlar çalarken bir cin figürü belirmiş olabilir: o zaman Gölge gelmez (iki yaratık olmaz).
+        if (FigurYurumesi.SahnedeBaskasiVar(null)) return false;
         Camera kamera = kontrol != null ? kontrol.GetComponentInChildren<Camera>() : null;
         if (kamera == null) return false;
         if (!YerBul(kamera.transform, out Vector3 yer)) return false;

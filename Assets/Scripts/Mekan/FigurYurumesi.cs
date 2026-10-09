@@ -21,9 +21,23 @@
 //
 // Kök değil gövde oynadığı için çarpışma, yakalama mesafesi ve ayak sesleri değişmez; gözler (GozParlamasi)
 // gövdenin çocuğudur, gövdeyle birlikte eğilir.
+//
+// #142 (A1): bir hareket ettirici figürü bilerek bir anda taşıyınca (karartmalı belirmede 1-1,5 m yaklaşma)
+// Isinlandi() çağırır: o sıçrama adım sayılmaz. Yoksa 1,5 m'lik bir karelik sıçrama ~90 m/sn hız gibi okunur,
+// gövde ve parlayan gözler ~0,4 sn koşu eğilmesiyle hoplardı (tam oyuncunun yalnız gözleri gördüğü an).
+//
+// #142 (A3): sahnedeki bütün figürler bir listede tutulur (SahnedeBaskasiVar). Bir yaratık belirmeden önce
+// sahnede başka bir figür var mı diye bakar: cin olayı, gezen gölge, duvar gölgesi, ayna, şimşek ve av aynı
+// anda iki yaratık göstermesin ("binanın tek varlığı var", #86).
+//
+// #142 (B3): DefaultExecutionOrder(-10): bu bileşenin LateUpdate'i göz parıltısınınkinden (sıra 0) ÖNCE
+// çalışır; gözün fener konisinde olup olmadığı o karenin gövde duruşuyla ölçülür, bir önceki kareninkiyle değil.
+// Unity aynı olay fonksiyonunu (LateUpdate) bileşenler arasında bu sayıya göre sıralar, küçük önce.
 
+using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(-10)]
 public class FigurYurumesi : MonoBehaviour
 {
     private const float KosuBaslangic = 2.2f, KosuTam = 4.0f;          // m/sn: bu aralıkta yürüyüşten koşuya geçilir
@@ -44,6 +58,34 @@ public class FigurYurumesi : MonoBehaviour
 
     /// <summary>Test göstergesi: ölçülen hız (m/sn).</summary>
     public float Hiz { get { return hiz; } }
+
+    // Sahnede şu an etkin olan figürler. "static": bütün figürlerin paylaştığı TEK liste (her figürün kendi
+    // listesi değil). HashSet: aynı öğeyi iki kez tutmayan, eklemesi ve silmesi hızlı bir küme.
+    private static readonly HashSet<FigurYurumesi> sahnede = new HashSet<FigurYurumesi>();
+
+    // Bir figür sahnede belirince (Instantiate ya da SetActive(true)) listeye girer, silinince ya da
+    // gizlenince çıkar. OnEnable/OnDisable bu iki anda Unity'nin kendiliğinden çağırdığı fonksiyonlardır.
+    private void OnEnable() { sahnede.Add(this); }
+    private void OnDisable() { sahnede.Remove(this); }
+
+    /// <summary>
+    /// #142 (A3): sahnede 'haric' dışında bir figür var mı? Bir yaratık belirmeden önce sorar; varsa belirmez
+    /// (ya da sesli bir yedeğe döner). 'haric': soran kendi figürünü saymasın diye (yoksa null).
+    /// </summary>
+    public static bool SahnedeBaskasiVar(GameObject haric)
+    {
+        foreach (FigurYurumesi f in sahnede)
+            if (f != null && f.gameObject != haric) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// #142 (A1): figür bilerek bir anda taşındı (yürümedi): bu karedeki yer değiştirme adım sayılmasın.
+    /// </summary>
+    public void Isinlandi()
+    {
+        sonKonum = transform.position;
+    }
 
     private void Start()
     {

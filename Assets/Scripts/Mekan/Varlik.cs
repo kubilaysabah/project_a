@@ -247,7 +247,7 @@ public class Varlik : MonoBehaviour
     // (oyuncu açamaz), karanlıkta Gölge belirir ve geçip gider, lamba geri gelir. Sonra gerilim
     // sıfırlanır ve av soğuması başlar: oyuncu nefes alır. Kayıtta "ilkav" kilidi olarak tutulur
     // (katın öbür kilitleri gibi; kat baştan alınırsa yeniden oynar).
-    private const string OgretiKimligi = "ilkav";
+    public const string OgretiKimligi = "ilkav";   // #142 (B1): CinOlaylari da okur (ders öncesi görünür olay yok)
     private const float OgretiKaranlik = 7f;
     private bool ogretiSuruyor;
 
@@ -293,6 +293,8 @@ public class Varlik : MonoBehaviour
     // ---------- AV ----------
     private IEnumerator Av()
     {
+        // #142 (A3): sahnede bir cin figürü varsa gider; aşağıdaki lamba titremesi kayboluşunu örter.
+        if (CinOlaylari.Ornek != null) CinOlaylari.Ornek.OlayiKes("av başladı");
         // İmza (#105): anahtarlık arkadan (Gölge izin gerisinden gelir), sonra üst kattan adımlar + lamba titrer.
         GolgeImzasi.Cal(oyuncu.position - oyuncu.forward * 4f + Vector3.up * 1.2f);
         if (haberci != null) AudioSource.PlayClipAtPoint(haberci, oyuncu.position + Vector3.up * 3f, 0.9f);

@@ -38,6 +38,7 @@ public class GolgeIzi : MonoBehaviour
     public static bool Goster(GameObject sablon, KafaLambasi lamba, Transform oyuncu)
     {
         if (sablon == null || lamba == null || !lamba.IsikYaniyor) return false;
+        if (FigurYurumesi.SahnedeBaskasiVar(null)) return false;   // #142 (A3): sahnede başka bir figür var: lamba titrer
         Light isik = lamba.IsikYonu.GetComponent<Light>();
         if (isik == null || isik.shadows == LightShadows.None) return false;   // gölgesiz lamba: gölge yok
 

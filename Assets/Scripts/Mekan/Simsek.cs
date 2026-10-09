@@ -352,6 +352,7 @@ public class Simsek : MonoBehaviour
         if (sablon == null || golgesizCakma < GolgeAraligi - 1) return false;   // üç çakmada en fazla bir
         if (Varlik.Ornek == null || Varlik.Ornek.Kademe < 2 || Varlik.Ornek.AvSuruyor) return false;
         if (kontrol == null || !kontrol.enabled) return false;                  // not, şifre ekranı açık
+        if (FigurYurumesi.SahnedeBaskasiVar(null)) return false;               // #142 (A3): sahnede başka bir figür var
         return true;
     }
 
@@ -443,7 +444,7 @@ public class Simsek : MonoBehaviour
 
         Vector3 bakis = oyuncu.position - enIyi;
         bakis.y = 0f;
-        golge = Instantiate(sablon, enIyi, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
+        golge = Instantiate(VarlikGorunusu.Sablon(sablon), enIyi, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);   // #142 (A2): figür torbası
         golge.name = "Simsek_Golgesi";
         golge.SetActive(false);   // ışık yanınca Uygula gösterir
         ArkaMuzik.Ornek?.Kabar();

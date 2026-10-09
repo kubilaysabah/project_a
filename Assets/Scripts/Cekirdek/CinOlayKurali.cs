@@ -8,7 +8,12 @@
 //
 // KURALLAR:
 //   - Sayaç yalnızca "uygun" karelerde işler (saklanmıyor, av yok, menü kapalı). #133'ten beri sahanlıkta
-//     da işler: orada yalnızca görünür olaylar (Belirme, Gecis) yapılabilir, daire içi olaylar dairede.
+//     da işler. Nerede ne olur: daire içi olaylar (çarpma, kırılma, bakmayınca değişim, içeriden vuruş, arkadan
+//     adım, cihaz, ayak izi, eşya dönmesi) yalnız dairede; sahanlık olayları (kapı gözü, zil, asansör) yalnız
+//     A sahanlığının zemininde; figürlü olaylar (belirme, geçiş, kaçış) ikisinde de. Yerin uygunluğunu kural
+//     değil CinOlaylari.Hazirla bilir; kural yalnız "bu tür şimdi yapılabilir mi?" diye sorar.
+//   - 2. kat, ilk karşılaşma dersi (#112, kayıtta "ilkav") oynanana kadar 1. kat gibi yalnız sesli olay alır
+//     (#142; denetimi Hazirla yapar, kayda baktığı için).
 //   - Aralık kata göre kısalır: 1. katta 45-90 sn, 8. katta 20-50 sn (arada doğrusal).
 //   - Her katın İLK olayı IlkCarpan kadar daha geç gelir: oyuncu daireyi tanısın, sonra rahatsız edilsin.
 //   - Aynı olay üst üste gelmez (Son dışlanır); olaylar ağırlıklıdır (çarpma ve kırılma en sık).

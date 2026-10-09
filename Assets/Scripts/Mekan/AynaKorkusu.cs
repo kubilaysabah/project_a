@@ -113,6 +113,7 @@ public class AynaKorkusu : MonoBehaviour
         if (sablon == null || ayna.Gizli || ayna.OyuncuKamerasi == null) return false;
         if (Varlik.Kapali || Varlik.Ornek == null) return false;          // test botu, kat denetimi
         if (Varlik.Ornek.Kademe < 1 || Varlik.Ornek.AvSuruyor) return false;
+        if (FigurYurumesi.SahnedeBaskasiVar(golge)) return false;          // #142 (A3): sahnede başka bir figür var
         if (yonetici == null || !yonetici.GolgeSayabilir) return false;   // açılış, kat kapısı açık, çatı
         if (DuraklatmaMenusu.BaslikEkraninda) return false;
         if (kontrol == null || !kontrol.enabled || Time.timeScale <= 0f) return false;   // menü, not, inceleme

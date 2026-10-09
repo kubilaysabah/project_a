@@ -450,7 +450,7 @@ public class KatAni : MonoBehaviour
 
         Vector3 yer = SiluetYeri();
         Vector3 bakis = oyuncu.position - yer; bakis.y = 0f;
-        golge = Instantiate(golgeSablonu, yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
+        golge = Instantiate(VarlikGorunusu.Sablon(golgeSablonu), yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);   // #142 (A2): figür torbası
         golge.name = "An_Golgesi";
 
         Cal(veri.Klip, hedef.position, veri.Ses, 1f);
