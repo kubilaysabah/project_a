@@ -10,6 +10,9 @@
 #      için yeter, dokular ayrıntıyı taşır).
 #   3. ÖLÇÜ + PİVOT: boy HEDEF_BOY'a ölçeklenir (Sketchfab modelleri cm, inç ya da rastgele ölçekte gelir),
 #      pivot ayakların ortasına (x, y merkez; z en alt) konur — Gölge şablonunun kuralı: kök yerde durur.
+#   3b. KOLLARI İNDİR (#142, yalnız POZ tablosundakiler): A/T pozunda gelen figürün kolları omuz çevresinde
+#      aşağı döndürülür. İskelet yok; her köşe kendi ağırlığı kadar (0-1) döner: omuzda 0, kolun geri kalanında
+#      1, arada yumuşak geçiş. Böylece omuz dikişi yırtılmaz, kol bükülür gibi iner.
 #   4. DIŞA AKTAR: ortak.kaydet_ve_disari_aktar ile aynı eksen kuralı (-Z ileri, Y yukarı, dönüşüm meshe),
 #      dokular FBX'in yanına kopyalanır (path_mode COPY, gömme yok: Unity yanındaki dosyaları okur).
 #
@@ -27,6 +30,16 @@ CIKTI = os.path.join(PROJE, "Assets", "Models", "Figurler")
 HEDEF_UCGEN = 40000
 HEDEF_BOY = {1: 1.85, 2: 1.95, 3: 1.80, 4: 1.70, 5: 1.78, 6: 1.78}   # metre; cadı ve ruh biraz uzun, nine kısa
 
+# #142 (B4): kolları indirilecek figürler. omuz: omuz ekleminin (x, yükseklik oranı); aci: indirme açısı (derece).
+#   "kapsul": kol, omuzdan ele uzanan bir çubuğun çevresindeki köşeler (r metre); A pozunda kol gövdeden ayrık
+#             dururken eteğe dokunmadan yalnız kolu seçer. el: elin (x, yükseklik oranı).
+#   "bant":   omuz yüksekliğinin üstünde (zalt oranından yukarı) ve omuzdan dışarıdaki her şey (geniş yenler dahil);
+#             T pozunda kollar yatay olduğu için bu bantta gövdeden başka yalnız kol ve yen vardır.
+POZ = {
+    3: dict(yontem="kapsul", omuz=(0.17, 0.82), el=(0.62, 0.43), r=0.11, aci=24.0),   # el: parmak uçlarının biraz ötesi
+    6: dict(yontem="bant", omuz=(0.17, 0.82), zalt=0.70, aci=62.0),
+}
+
 secilenler = [int(a) for a in sys.argv[sys.argv.index("--") + 1:]] if "--" in sys.argv else sorted(HEDEF_BOY)
 
 
@@ -36,6 +49,45 @@ def gltf_bul(n):
         if os.path.exists(yol): return yol
     adaylar = glob.glob(os.path.join(GIRDI, str(n), "**", "*.gl*"), recursive=True)
     return adaylar[0] if adaylar else None
+
+
+def yumusak(a, b, x):
+    # smoothstep: x, a'dan b'ye giderken 0'dan 1'e S biçiminde yükselir (uçlarda yavaş, ortada hızlı).
+    if b == a: return 1.0 if x >= b else 0.0
+    t = max(0.0, min(1.0, (x - a) / (b - a)))
+    return t * t * (3 - 2 * t)
+
+
+def kollari_indir(f, n, boy):
+    # #142 (B4): kolları omuz çevresinde döndürür. Ayak ortası (0, 0, 0), ön -Y, yukarı +Z (pivot işlendi).
+    p = POZ[n]
+    ox, oz = p["omuz"][0], p["omuz"][1] * boy
+    aci = math.radians(p["aci"])
+    for v in f.data.vertices:
+        x, y, z = v.co.x, v.co.y, v.co.z
+        taraf = 1.0 if x >= 0 else -1.0          # sağ kol +x, sol kol -x (ayna)
+        ax = abs(x)
+        if p["yontem"] == "kapsul":
+            # Omuzdan ele çubuk: köşenin çubuğa uzaklığı r'den küçükse kolun parçası. t: çubuk boyunca 0 (omuz) - 1 (el).
+            ex, ez = p["el"][0], p["el"][1] * boy
+            dx, dz = ex - ox, ez - oz
+            uz2 = dx * dx + dz * dz
+            t = ((ax - ox) * dx + (z - oz) * dz) / uz2
+            tk = max(0.0, min(1.0, t))
+            px, pz = ox + dx * tk, oz + dz * tk
+            uzak = math.hypot(ax - px, z - pz)
+            if uzak > p["r"] or t < -0.05: continue
+            w = yumusak(0.0, 0.22, t) * (1.0 - yumusak(p["r"] * 0.7, p["r"], uzak))
+        else:
+            w = yumusak(ox - 0.02, ox + 0.12, ax) * yumusak(p["zalt"] * boy, p["zalt"] * boy + 0.06, z)
+        if w <= 0.0: continue
+        # Omuz eklemi çevresinde, ön-arka ekseni (Y) etrafında döndürme. Sağda +açı kolu aşağı indirir
+        # (x ekseni -z'ye döner), solda ayna: -açı. Ağırlık açıyı ölçekler (açı karışımı: omuzda kıvrım yırtılmaz).
+        a = aci * w * taraf
+        rx, rz = x - ox * taraf, z - oz
+        v.co.x = ox * taraf + rx * math.cos(a) + rz * math.sin(a)
+        v.co.z = oz - rx * math.sin(a) + rz * math.cos(a)
+    print(f"POZ Cin_{n}: kollar {p['aci']:.0f} derece indirildi ({p['yontem']})")
 
 
 def hazirla(n):
@@ -83,6 +135,7 @@ def hazirla(n):
         v.co = f.matrix_world @ v.co
         v.co.x -= xo; v.co.y -= yo; v.co.z -= zmin
     f.matrix_world.identity()
+    if n in POZ: kollari_indir(f, n, HEDEF_BOY[n])   # #142 (B4)
     ortak.yumusat(f, 45)
     # Dışa aktar: kendi klasörüne, dokular yanına.
     klasor = os.path.join(CIKTI, f"Cin_{n}")
