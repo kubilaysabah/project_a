@@ -103,6 +103,20 @@ public class KayitDeposu
     /// <summary>Dosyayı ve bellekteki sözlüğü siler (test yuvasını temizlemek için).</summary>
     public void DosyayiSil()
     {
+        // #142: oyun kaydını yalnızca TEST YUVASI açıkken siler. 2026-10-09'da bir test betiği bunu yuva zaten
+        // kapatılmışken çağırdı ve Şahan'ın kayit.txt'si silindi (dosya yokken ilk okuma eski PlayerPrefs'i taşıdı,
+        // 6. kattaki kayıt 8. kata döndü). Oyun bu fonksiyonu hiç çağırmaz; yalnız testler çağırır. Ayar dosyası
+        // (ayarlar.txt) yuvaya bakmaz, onun silinmesi de istenmez.
+        if (this == Oyun && string.IsNullOrEmpty(KayitYuvasi.Ek))
+        {
+            Debug.LogWarning("[KAYIT] DosyayiSil reddedildi: test yuvası kapalı, gerçek kayıt (kayit.txt) silinmez.");
+            return;
+        }
+        if (this == Ayar)
+        {
+            Debug.LogWarning("[KAYIT] DosyayiSil reddedildi: ayar dosyası silinmez.");
+            return;
+        }
         string yol = Yol;
         try { if (File.Exists(yol)) File.Delete(yol); } catch (System.Exception e) { Debug.LogWarning($"[KAYIT] {yol} silinemedi: {e.Message}"); }
         sozluk = null; yuklenenYol = null; okunamadi = false;
