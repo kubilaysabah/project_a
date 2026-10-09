@@ -15,7 +15,7 @@ sayfasında herkese görünür, o yüzden açık ve kısa yazılır.
 | İçerik | Araç | Nasıl | Belge |
 |---|---|---|---|
 | Dairelerdeki aile fotoğrafları (9 görsel) | Stable Diffusion XL 1.0 (ComfyUI, Şahan'ın makinesinde, çevrimdışı) | Üretildi, sonra Blender betiğiyle eskitildi ve bozuldu; gerçek kişi yok | `Art/Fotograflar/LISANSLAR.md` |
-| Üç harfli figürleri (6 CC BY 4.0 Sketchfab modeli, #134) | Üçüncü kişiler; 1-3 numaralı modellerin dokuları Tripo / MV-Adapter (yapay zekâ) üretimi görünüyor | Hazır varlık olarak indirildi, Blender'da yalnızca indirgendi ve ölçeklendi; yazarlar jenerikte | `Art/Figurler/LISANSLAR.md` |
+| Üç harfli figürleri (6 CC BY 4.0 Sketchfab modeli, #134) | Üçüncü kişiler; 1-3 numaralı modellerin dokuları Tripo / MV-Adapter (yapay zekâ) üretimi görünüyor | Hazır varlık olarak indirildi, Blender'da indirgendi ve ölçeklendi; 3 ve 6'nın kolları A/T pozundan aşağı indirildi (#142); yazarlar jenerikte | `Art/Figurler/LISANSLAR.md` |
 | Oyun metinleri (notlar, telefon, radyo, menü; TR/EN) | Claude (Anthropic) ile birlikte yazıldı | Şahan karar verdi ve onayladı; Claude taslakları yazdı | `Docs/hikaye-metinleri.md` |
 | Çeviriler (DE, ES, PT-BR, RU, ZH, JA — #123) | Claude ile çevrildi | Türkçe/İngilizce asıl metinlerden; insan düzeltmesi yok (jenerikte "Çeviriler: Claude ile" satırı var) | `Assets/Resources/Metinler.txt` |
 | Kod ve Blender prop betikleri | Claude ile birlikte yazıldı | Şahan'ın tasarım kararlarıyla, Claude tarafından yazılıp Şahan'ın Editöründe doğrulandı | `CLAUDE.md` |
@@ -48,10 +48,12 @@ sayfasında herkese görünür, o yüzden açık ve kısa yazılır.
 ### Ek (#134, 2026-10-08)
 
 > Some of the third-party CC BY 3D creature models (Sketchfab) used for the entity appear to have been
-> created by their authors with AI tools (Tripo / MV-Adapter textures). We only decimated and scaled them.
+> created by their authors with AI tools (Tripo / MV-Adapter textures). We decimated and scaled them and lowered the
+> arms of two of them out of their A/T poses.
 
 > Varlık için kullanılan üçüncü taraf CC BY 3B yaratık modellerinin (Sketchfab) bir kısmı, yazarları tarafından
-> yapay zekâ araçlarıyla üretilmiş görünüyor (Tripo / MV-Adapter dokuları). Biz yalnızca indirgeyip ölçeklendirdik.
+> yapay zekâ araçlarıyla üretilmiş görünüyor (Tripo / MV-Adapter dokuları). Biz indirgeyip ölçeklendirdik, ikisinin kollarını
+> A/T pozundan aşağı indirdik.
 
 ## Jenerik
 

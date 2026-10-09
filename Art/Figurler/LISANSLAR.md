@@ -17,6 +17,10 @@ FBX + dokular olarak hazırlanır. İndirilen ham dosyalar depoya girmez (`.giti
 
 Yazar adları indirilen zip'lerdeki `license.txt` dosyalarından alındı (2026-10-08); jenerik satırı aynı adları taşır.
 
+**Değişiklikler (CC BY "değişiklikleri belirt" şartı):** hepsi indirgendi (en çok 40 bin üçgen), ölçeklendi ve pivotu ayaklara
+alındı; 3 (A pozu) ve 6 (T pozu) numaralı figürlerin kolları omuz çevresinde aşağı indirildi (#142, `figur_hazirla.py` `POZ`).
+itch test sayfası (2026-10-09) aynı künyeyi ve bu notu taşır.
+
 **Yapay zekâ notu (Steam beyanı, `Docs/steam-yapay-zeka-beyani.md`):** 1, 2 ve 3 numaralı modellerin doku dosya adları
 (`tripo_mat_*`, `mvadapter_*`) Tripo / MV-Adapter üretimi olduğunu gösteriyor; yani bu üç figür üçüncü kişilerce yapay zekâyla
 üretilmiş CC BY varlıklardır. 4, 5 ve 6 el yapımı görünüyor (emin olunamıyor). Beyanda "üçüncü taraf CC BY 3B figürlerin bir
