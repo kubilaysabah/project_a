@@ -9,7 +9,7 @@ Oyundaki bütün sesler, numarasıyla (2026-09-27, #74 için baştan sayıldı; 
 - **Seviye** 0-1 arası (1 = dosyanın tam gücü); ayarlardaki ses düzeyi hepsini birlikte ölçekler.
 - **Sentez** sesler `Art/Ses/scripts/` içindeki betiklerle üretilir; **kayıtlar** `Art/Ses/kayitlar/` içinde değiştirilmeden durur, lisansları `LISANSLAR.md`'de.
 - Eski kuralın (geri dön / ceza) ve anomali kartlarının sesleri yeni ilerlemede çalmıyor (`KatYoneticisi.eskiKural` kapalı).
-- Müzik: `ArkaMuzik` 0,15'te sürekli döner; kaçış ve Gölge anlarında 0,42'ye kabarır; çatıda susar.
+- Müzik: `ArkaMuzik` tabanı 0,28 (#143; sahnedeki kaynak değeri okunmaz), binanın gerilimiyle en çok ×1,6; kaçış ve Gölge anlarında 0,65'e kabarır; çatıda susar.
 - Dış sesler: `DisSesleri` ilk sesi 20-40 sn sonra, sonra 40-90 sn'de bir çalar; aynı tür art arda gelmez; kat olayıyla çakışmaz.
 
 ---
@@ -18,7 +18,7 @@ Oyundaki bütün sesler, numarasıyla (2026-09-27, #74 için baştan sayıldı; 
 
 | No | Dosya · süre | Ne zaman, nerede | Kaynak | Karar |
 |---|---|---|---|---|
-| S01 | `Audio/Muzik/Muzik_Gerilim.wav` · 268,5 sn | Arka plan gerilim müziği. Başlık ekranı dahil bütün oyun boyunca döner (2B, 0,15). Kaçış başlayınca ve Gölge belirince 0,42'ye kabarır, 3 sn tutar, ~5 sn'de iner. Çatı kapısı açılınca 4 sn'de susar. | Kayıt: Joth, "Ambience Pack 1 – Sci Fi Horror" (OpenGameArt, CC0), beş parça 3 sn geçişle birleştirildi | **Değişsin** → **Yeni:** Scott Elliott, "Death is Looming" (OpenGameArt, CC-BY 4.0; jenerikte), dikişsiz döngü |
+| S01 | `Audio/Muzik/Muzik_Gerilim.wav` · 268,5 sn | Arka plan gerilim müziği. Başlık ekranı dahil bütün oyun boyunca döner (2B, taban 0,28, gerilimle ×1-1,6; #143). Kaçış başlayınca ve Gölge belirince 0,65'e kabarır, 3 sn tutar, ~5 sn'de iner. Çatı kapısı açılınca 4 sn'de susar. | Kayıt: Joth, "Ambience Pack 1 – Sci Fi Horror" (OpenGameArt, CC0), beş parça 3 sn geçişle birleştirildi | **Değişsin** → **Yeni:** Scott Elliott, "Death is Looming" (OpenGameArt, CC-BY 4.0; jenerikte), dikişsiz döngü |
 
 ---
 
@@ -27,7 +27,7 @@ Oyundaki bütün sesler, numarasıyla (2026-09-27, #74 için baştan sayıldı; 
 | No | Dosya · süre | Ne zaman, nerede | Kaynak | Karar |
 |---|---|---|---|---|
 | S02 | `Audio/Ortam/Ortam_Ugultu.wav` · 30 sn | Binanın çok kısık hava uğultusu, sahanlığın ortasından (3B, 0,25, 4-9 m). Kat olayları bunun çocuğu. | Sentez: ortam_uret.py → ugultu() | Kalsın |
-| S03 | `Audio/Ortam/Ortam_TV.wav` · 85,5 sn | 2 numaranın duvarının ardında boğuk televizyon (3B, 0,5, 1,5-9 m). Her katta kaydın başka bir yeri çalar. | Kayıt: Pixabay, arunangshubanerjee "tv playing in the next room" | Kalsın |
+| S03 | `Audio/Ortam/Ortam_TV.wav` · 85,5 sn | 2 numaranın duvarının ardında boğuk televizyon (3B, 0,5, 1,5-9 m). Her katta kaydın başka bir yeri çalar. | Kayıt: Pixabay, arunangshubanerjee "tv playing in the next room" | **Kaldırıldı (#143):** Şahan 13 Ekim testinde her kattaki sürekli TV sesini gereksiz gürültü buldu; dosya depodan silindi, kayıt `Art/Ses/kayitlar/`da duruyor. |
 | S04 | `Audio/Ortam/Ortam_Boru.wav` · 16 sn | Sahanlık duvarının içinde düzensiz boru tıkırtıları (3B, 0,5, 1-8 m). | Sentez: ortam_uret.py → boru() | **Kaldırıldı** (#74) |
 | S05 | `Audio/Ortam/Ortam_Ruzgar.wav` · 12 sn | Merdiven penceresinde hafif rüzgâr (3B, 0,3, 1-6 m). | Sentez: ortam_uret.py → ruzgar() | **Kaldırıldı** (#74) |
 
@@ -81,7 +81,7 @@ Oyundaki bütün sesler, numarasıyla (2026-09-27, #74 için baştan sayıldı; 
 | S30 | `Resources/Sesler/Vida_Sokme.wav` · 0,55 sn | Her menteşe vidası sökülürken (3B). | Sentez: kapi_sesleri_uret.py → vida_sokme() | **Değişsin**: torna vida ile sökülüyor kapı ona uygun bir ses bulmamız lazım. → **Yeni:** Fwughox_Official, "Screwing into wood" (Freesound, CC0) |
 | S31 | `Resources/Sesler/KatKapisi_Gicirti.wav` · 1,8 sn | Demir kat kapısı açılırken gıcırtı; 7. katta gerçek kapı çalınınca açılırken de (3B). | Sentez: kapi_sesleri_uret.py → gicirti() | **Değişsin**: daha gerçekçi seslere bakalım. → **Yeni:** BigSoundBank #0683 "Grinding metal gate" (CC0), 6,4-8,4 sn |
 | S32 | `Resources/Sesler/KatKapisi_Kilit.wav` · 1,0 sn | Kilit açılma sesi: kat kapısına anahtar takılınca, çatı kapısında ve her çözülen kilitte (3B). | Sentez: kapi_sesleri_uret.py → kilit_acilma() | **Değişsin**: daha gerçekçi seslere bakalım. → **Yeni:** BigSoundBank #0378 "Lock and big key" (CC0), ilk çekim |
-| S33 | `Resources/Sesler/KatKapisi_Kilitli.wav` · 1,2 sn | Anahtarsız kat kapısını ya da çatı kapısını sarsınca (3B). | Sentez: kapi_sesleri_uret.py → sarsma() | **Değişsin**: daha gerçekçi seslere bakalım. → **Yeni:** launemax, "Rattling at an iron gate" (Freesound, CC0) |
+| S33 | ~~`Resources/Sesler/KatKapisi_Kilitli.wav`~~ → `IcKapi_Kilitli.wav` (S27'nin kaydı; #143) | Anahtarsız kat kapısını ya da çatı kapısını sarsınca (3B). | Sentez: kapi_sesleri_uret.py → sarsma() | **Değişsin**: daha gerçekçi seslere bakalım. → **Yeni:** launemax, "Rattling at an iron gate" (Freesound, CC0) |
 | S34 | `Resources/Sesler/Kol_Cekme.wav` · 0,9 sn | Kol çekilince (kilerdeki kol, sigorta kutusunun şalteri, 3B). | Sentez: kapi_sesleri_uret.py → kol_cekme() | **Değişsin**: daha gerçekçi seslere bakalım. → **Yeni:** kyles, "switch big breaker metal click on, off" (Freesound, CC0) |
 | S35 | `Resources/Sesler/Sigorta_Takma.wav` · 1,4 sn | Sigorta kutusuna ya da asansör panosuna sigorta takılınca (3B). | Sentez: kapi_sesleri_uret.py → sigorta_takma() | **Değişsin**: daha gerçekçi seslere bakalım. → **Yeni:** C-V "Screwing in light bulb" (CC0) + kyles şalter tıkı |
 | S36 | `Resources/Sesler/Sifre_Cark.wav` · 0,12 sn | Şifreli asma kilidin yakın ekranında her çark tıkırtısı. | Sentez: kapi_sesleri_uret.py → sifre_cark() | **Değişsin**: daha gerçekçi seslere bakalım. → **Yeni:** Group39, "SFX-Int.-Combination Lock" (Freesound, CC0) |
@@ -155,10 +155,13 @@ Hepsi `esya_sesleri_uret.py` ile gürültüden üretildi (sinüs yok, indirme yo
 | S74 | `Resources/Sesler/Kapi_Gicirti_Dongu.wav` · 2,0 sn (döngü) | Oda kapısı sürüklenirken menteşe gıcırtısı; sesi dönüş hızına göre (#100) | Sentez → kapi_gicirti_dongu | yeni |
 | S75 | `Resources/Sesler/Vana_Cark.wav` · 1,85 sn | 5. kat: salondaki vananın çarkı döndürülünce (paslı mil gıcırtısı, diş sürtünmesi, iki yeniden kavrama, kapanırken borudaki su) | Sentez → vana_cark | yeni, Şahan dinleyecek |
 | S76 | `Resources/Sesler/Anahtarlik.wav` · 2,6 sn | Gölge'nin İMZASI (#105): her belirişinden önce aynı ses, önceki kapıcının anahtarlığının üç şıkırtısı, gittikçe pes, koridor yankılı. Gezen Gölge, av, 7. kat kovalamacası, 6. kat saklanma anı, ayna, duvardaki gölge (`GolgeImzasi.Cal`, 3B, 1,5-18 m). | Kayıt: S24 anahtar kaydından (sophiehall3535, CC0) → kayit_isle.py anahtarlik | yeni (#105), Şahan dinleyecek |
-| S77 | `Resources/Sesler/Lamba_Vinlama.wav` · 3,0 sn (döngü) | Kafa lambasının elektrik vınlaması (#105): gerilim 0,25'te başlar, 0,85'te tam (en çok 0,22 ses), perdesi %8 tizleşir; lamba kapalıyken susar. 2B, oda yankısından muaf. | Sentez: oyuncu_sesleri_uret.py lamba_vinlama (100 Hz harmonikleri + 7,8 kHz ıslık + bant gürültüsü; döngü için 3 sn'ye tam periyot) | yeni (#105), Şahan dinleyecek |
+| S77 | `Resources/Sesler/Lamba_Vinlama.wav` · 3,0 sn (döngü) | **#143: kafa lambasında artık çalmıyor** (Şahan: "fener sesi gereksiz"); yalnız arızalı asansör lambası (`ArizaliLamba`, #111) kullanır. Eski kullanım — kafa lambasının elektrik vınlaması (#105): gerilim 0,25'te başlar, 0,85'te tam (en çok 0,22 ses), perdesi %8 tizleşir; lamba kapalıyken susar. 2B, oda yankısından muaf. | Sentez: oyuncu_sesleri_uret.py lamba_vinlama (100 Hz harmonikleri + 7,8 kHz ıslık + bant gürültüsü; döngü için 3 sn'ye tam periyot) | yeni (#105), Şahan dinleyecek |
 | S78 | `Resources/Sesler/Radyo_Parazit.wav` · 2,3 sn (döngü) | Radyo anonsunun (#106) önü ve arkası: bant gürültüsü ve seyrek çıtırtı. `RadyoAnonsu`: düğme tıkı (S37) → parazit 0,8 sn kabarır → seslendirme (`Konusmalar/radyo_katN`, varsa) → parazit 0,6 sn söner → tık. Her dairede bir kez, oyuncu içeri girdikten 18-35 sn sonra. | Sentez: kayit_isle.py radyo_parazit | yeni (#106); seslendirmeler Şahan'ın kaydını bekliyor |
 | S79 | `Resources/Sesler/Kirilma_Tabak.wav` · 0,95 sn | Cin olayı (#131): oyuncunun 2-4 m arkasında seramik tabak kırılır (3B); yerde `Cam_Kiriklari` parçası kalır. Üç kırılma sesinden rastgele biri. | Sentez: esya_sesleri_uret.py → kirilma_tabak | yeni (#131); Şahan'ın dinlemesini bekliyor |
 | S80 | `Resources/Sesler/Kirilma_Bardak.wav` · 0,75 sn | Cin olayı (#131): cam bardak kırılması; tiz, ince, uzun çınlayan parçalar. | Sentez: esya_sesleri_uret.py → kirilma_bardak | yeni (#131) |
 | S81 | `Resources/Sesler/Kirilma_Vazo.wav` · 1,25 sn | Cin olayı (#131): ağır, boş seramik vazo; alçak darbe, iri parçalar, uzun yerleşme. | Sentez: esya_sesleri_uret.py → kirilma_vazo | yeni (#131) |
+| S82 | `Resources/Sesler/Cin_Stinger_1.wav` · 1,9 sn | Üç harflinin belirişi (#143, madde 10): figürün yerinden (3B, 2-25 m) tırmanan uyumsuz bir küme + alt-bas darbe; iki dosyadan rastgele biri (`CinSesi.Belirdi`). Belirme, geçiş, kaçış, gezen gölge, av, 7. kat kovalamacası, 6. kat saklanma anı, ayna korkusu, dokuzuncu katta kalkış. | Sentez: cin_sesleri_uret.py → stinger (dar bant süzgeçli gürültü, kayan frekans; sinüs yok) | yeni (#143); Şahan'ın dinlemesini bekliyor |
+| S83 | `Resources/Sesler/Cin_Stinger_2.wav` · 1,9 sn | S82'nin ikinci tohumu. | Sentez: cin_sesleri_uret.py → stinger | yeni (#143) |
+| S84 | `Resources/Sesler/Cin_Ugultu.wav` · 3,5 sn | Her belirişte oyuncunun 1,2 m ARKASINDAN (3B, 0,8-6 m) alçak, titreyen uğultu; karartmalı yaklaşmada ve duvardaki gölgede vuruşsuz tek başına. Yanında varsa `Nefes_Cin_1..3` (Şahan'ın kaydı; yoksa sessiz). | Sentez: cin_sesleri_uret.py → ugultu | yeni (#143) |
 
 Değişen bağlantılar: ayna korkusu artık fayansta tek adım (`Adim_Fayans_1`), 7. kattaki ahşap daire kapısı oda kapısı gıcırtısı (`IcKapi_Acilma`), Gölge'nin adımları bastığı zemine göre (`Merdiven_Adim`, `Adim_1`, `Adim_Fayans`, `Adim_Hali`).
