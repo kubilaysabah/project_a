@@ -655,6 +655,7 @@ public class CinOlaylari : MonoBehaviour
                 Vector3 bakis = oyuncu.position - bas; bakis.y = 0f;
                 golge = Instantiate(sablon, bas, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
                 golge.name = "Cin_Golgesi";
+                CinSesi.Belirdi(golge.transform.position);   // #143: beliriş sesi
                 Titresim.Vur(0.3f, 0.5f, 0.3f);
                 Debug.Log($"[CIN] kaçış: {sablon.name}, {Vector3.Distance(bas, oyuncu.position):0.0} m önde belirdi, {Vector3.Distance(bas, son):0.0} m kaçacak.");
                 yield return new WaitForSeconds(Random.Range(KacisBakma, KacisBakmaEnCok));
@@ -1149,6 +1150,7 @@ public class CinOlaylari : MonoBehaviour
             Vector3 bakis = oyuncu.position - yer; bakis.y = 0f;
             golge = Instantiate(belirmeSablonu, yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);
             golge.name = "Cin_Golgesi";
+                CinSesi.Belirdi(golge.transform.position);   // #143: beliriş sesi
             Titresim.Vur(0.3f, 0.5f, 0.3f);
             bool karartmali = kat >= KarartmaEnAzKat && lamba != null && lamba.IsikYaniyor && Random.value < KarartmaOlasiligi;
             Debug.Log($"[CIN] belirme: {belirmeSablonu.name}, {Vector3.Distance(yer, oyuncu.position):0.0} m{(karartmali ? ", karartmalı" : "")}.");
@@ -1170,6 +1172,7 @@ public class CinOlaylari : MonoBehaviour
                         // #142 (A1): bu bir adım değil, karanlıkta bir anda yer değiştirme: yürüyüş saymasın.
                         FigurYurumesi yuruyus = golge.GetComponent<FigurYurumesi>();
                         if (yuruyus != null) yuruyus.Isinlandi();
+                        CinSesi.Belirdi(yeni, 0.7f, stingerli: false);   // #143: karanlıkta yaklaştı: arkadan uğultu ve nefes, vuruş yok
                         Vector3 yeniBakis = oyuncu.position - yeni; yeniBakis.y = 0f;
                         if (yeniBakis.sqrMagnitude > 0.001f) golge.transform.rotation = Quaternion.LookRotation(yeniBakis);
                         Debug.Log($"[CIN] belirme: karanlıkta {adim:0.0} m yaklaştı ({Vector3.Distance(yeni, oyuncu.position):0.0} m).");
@@ -1200,6 +1203,7 @@ public class CinOlaylari : MonoBehaviour
             Vector3 yon = son - bas; yon.y = 0f;
             golge = Instantiate(gecisSablonu, bas, Quaternion.LookRotation(yon.normalized));
             golge.name = "Cin_Golgesi";
+                CinSesi.Belirdi(golge.transform.position);   // #143: beliriş sesi
             Titresim.Vur(0.25f, 0.45f, 0.25f);
             Debug.Log($"[CIN] geçiş: {gecisSablonu.name}, {yon.magnitude:0.0} m.");
             float sure = yon.magnitude / GecisHizi;

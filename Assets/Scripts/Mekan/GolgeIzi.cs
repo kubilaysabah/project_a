@@ -75,6 +75,7 @@ public class GolgeIzi : MonoBehaviour
         Vector3 yan = Vector3.Cross(Vector3.up, ileri) * (Random.value < 0.5f ? 1f : -1f);
 
         GameObject g = Instantiate(VarlikGorunusu.Sablon(sablon), ayak - yan * (Yol / 2f), Quaternion.LookRotation(yan));   // #140: figür torbası (VarlikGorunusu)
+        CinSesi.Belirdi(ayak, 0.6f, stingerli: false);   // #143: duvardaki gölge vuruşsuz: yalnız arkadan uğultu (ve nefes)
         GolgeImzasi.Cal(ayak + Vector3.up * 1.2f, 0.6f);   // imza (#105): gölgeyi atan, görülmeyen yerden
         g.name = "Golge_Izi";
         // Kameraya hiç çizilmesin, yalnızca ışığın gölgesine girsin.

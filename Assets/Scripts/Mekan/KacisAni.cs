@@ -110,6 +110,7 @@ public class KacisAni : MonoBehaviour
             if (gecenSure < gecikme) return;
             if (HazirGolge != null) { golge = HazirGolge; golge.SetActive(true); }   // oturan Gölge kalkar, olduğu yerden
             else { golge = Instantiate(VarlikGorunusu.Sablon(sablon), izler[0], Quaternion.identity); golge.name = "Kacis_Golgesi"; }   // #140: figür torbası (VarlikGorunusu)
+            CinSesi.Belirdi(golge.transform.position);   // #143: siluet belirdi (hazır Gölge ya da kopya)
             // Siluetin çevresindeki uğultu #74'te kalktı; gelişini üst kattan adımlar haber verir.
             hedefIz = 1;
             Debug.Log("[KACIS] Siluet belirdi.");

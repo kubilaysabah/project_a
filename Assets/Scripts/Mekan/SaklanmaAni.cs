@@ -91,6 +91,7 @@ public class SaklanmaAni : MonoBehaviour
         {
             if (sayac < Uyari) return;
             golge = Instantiate(VarlikGorunusu.Sablon(sablon), yol[0], Quaternion.LookRotation(yol[1] - yol[0]));   // #140: figür torbası (VarlikGorunusu)
+            CinSesi.Belirdi(yol[0]);   // #143: beliriş sesi
             golge.name = "Saklanma_Golgesi";
             hedef = 1;
             durum = Durum.Devriye;

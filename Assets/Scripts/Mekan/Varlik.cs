@@ -313,6 +313,7 @@ public class Varlik : MonoBehaviour
         if (bas < 0) { izler.Clear(); izZamanlari.Clear(); izler.Add(yer); izZamanlari.Add(Time.time); bas = 0; }
         Vector3 bakis = oyuncu.position - yer; bakis.y = 0f;
         golge = Instantiate(VarlikGorunusu.Sablon(sablon), yer, bakis.sqrMagnitude > 0.001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);   // #140: figür torbası (VarlikGorunusu)
+        CinSesi.Belirdi(yer);   // #143: beliriş sesi (stinger figürden, uğultu ve nefes arkadan)
         golge.name = "Av_Golgesi";
         Titresim.Vur(0.55f, 0.25f, 0.7f);   // #124: av başladı, kol gümbürder
         Debug.Log($"[VARLIK] {kat}. kat: AV başladı ({Vector3.Distance(yer, oyuncu.position):0.0} m arkadan).");

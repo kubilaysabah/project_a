@@ -150,6 +150,7 @@ public class AynaKorkusu : MonoBehaviour
         Vector3 ayak = kontrol.transform.position;
         Vector3 bakis = ayak - yer; bakis.y = 0f;
         golge = Instantiate(VarlikGorunusu.Sablon(sablon), yer, bakis.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(bakis) : Quaternion.identity);   // #140: figür torbası (VarlikGorunusu)
+        CinSesi.Belirdi(yer, 0.8f);   // #143: beliriş sesi (aynadaki figür arkada durur: uğultu zaten arkadan)
         golge.name = "Ayna_Golgesi";
         // Bütün parçaları 30. katmana: yalnızca aynada görünsün. Gölge düşürmesin: oyuncu kamerası
         // bu katmanı çizmese de gölgesi yere düşebilirdi ve "aynada var, odada yok" bozulurdu.
