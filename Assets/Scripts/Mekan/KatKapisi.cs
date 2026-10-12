@@ -39,7 +39,9 @@ public class KatKapisi : MonoBehaviour, IEtkilesimli
     private void Awake()
     {
         if (kanat == null) kanat = transform.Find("Kanat");
-        if (kilitli == null) kilitli = Resources.Load<AudioClip>("Sesler/KatKapisi_Kilitli");
+        // #143 (madde 6): anahtarsız kapıyı sarsma sesi, dairelerin kilitli kapı kaydı (IcKapi_Kilitli, gerçek
+        // kayıt); eski KatKapisi_Kilitli sentezdi ve Şahan beğenmedi. Kilit açılma ve gıcırtı aynı kaldı.
+        if (kilitli == null) kilitli = Resources.Load<AudioClip>("Sesler/IcKapi_Kilitli");
         if (kilitAcilma == null) kilitAcilma = Resources.Load<AudioClip>("Sesler/KatKapisi_Kilit");
         if (gicirti == null) gicirti = Resources.Load<AudioClip>("Sesler/KatKapisi_Gicirti");
     }

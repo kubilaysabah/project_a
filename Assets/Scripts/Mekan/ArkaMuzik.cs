@@ -37,7 +37,13 @@ public class ArkaMuzik : MonoBehaviour
 
     // ---- KABARMA AYARLARI ----
     private const float KabarmaGecikmesi = 0.4f;   // etkinin kendi sesi önce duyulsun
-    private const float KabarmaSeviyesi = 0.42f;   // normal seviye 0,15'in yaklaşık üç katı
+    private const float KabarmaSeviyesi = 0.65f;   // olay kabarması: tabanın (0,28) iki katından fazla (#143)
+    // #143 (madde 1, Şahan: "arka planda gerilim müziği yok"): sahnedeki 0,15 tabanı genel ses 0,55 ile çarpılınca
+    // müzik uğultunun altında kalıyordu. Taban artık burada, kod sabiti olarak: sahnedeki kaynağın sesi okunmaz.
+    // Gerilim bağı: binanın gerilimi (Varlik, 0-1) yükseldikçe müzik GerilimPayi kadar kabarır; sakin dairede
+    // alçak, Gölge yaklaşırken belirgin. Dalga (MuzikDalgasi) ve olay kabarması bunun üstüne biner.
+    public const float TabanSeviyesi = 0.28f;
+    public const float GerilimPayi = 0.6f;         // gerilim 1 iken taban × 1,6
     private const float TutmaSuresi = 3f;          // tepede kalma süresi
     private const float YukselmeHizi = 0.3f;       // saniyede ses seviyesi artışı (~1 sn'de tepe)
     private const float InmeHizi = 0.055f;         // saniyede azalış (~5 sn'de eski seviye)
@@ -60,7 +66,7 @@ public class ArkaMuzik : MonoBehaviour
         kaynak = GetComponent<AudioSource>();
         // Müzik mekânda değil, kafanın içinde: odanın yankısı (OdaYankisi, #87) ona işlemesin.
         if (kaynak != null) kaynak.bypassListenerEffects = true;
-        taban = kaynak.volume;
+        taban = TabanSeviyesi;   // #143: sahnedeki değer değil, kod sabiti (sahne 0,15'te kalmış olabilir)
         dalga = new MuzikDalgasi(System.Environment.TickCount);   // her oyun farklı yerden başlar
     }
 
@@ -122,6 +128,9 @@ public class ArkaMuzik : MonoBehaviour
         bool kabarik = simdi >= kabarmaBaslangici && simdi < kabarmaBitisi;
         // Olay kabarması dalganın üstüne biner; kabarma yokken dalga ve oyuncunun yeri belirler.
         float hedef = kabarik ? KabarmaSeviyesi : taban * dalga.Carpan(Time.time) * MuzikDalgasi.KonumCarpani(Merdivende());
+        // #143: gerilim bağı. Varlık yoksa ya da testler için kapalıysa gerilim 0 sayılır (çarpan 1).
+        float gerilim = Varlik.Ornek != null && !Varlik.Kapali ? Varlik.Ornek.Gerilim : 0f;
+        if (!kabarik) hedef *= 1f + GerilimPayi * gerilim;
         // #118: müzik kanalı (0 = sessiz); genel seviye AudioListener.volume'da. #119: kanal değişince ses
         // ANINDA ölçeklenir (eskiden yeni hedefe 0,055/sn ile 3-8 saniyede iniyordu, kaydırıcı gecikmeli
         // sanılıyordu). Kanalın eski değeri bölünüp yenisi çarpılır; böylece dalga/kabarma akışı bozulmaz.

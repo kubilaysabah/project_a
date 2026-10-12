@@ -204,12 +204,12 @@ public static class AtmosferKurucu
     // bileşene BAĞLANIYOR (build yalnızca bağlanmış dosyaları paketler, #26 kuralı).
     static void MuzikVeDisSesler()
     {
-        // Arka müzik: 2B, döngüde, çok kısık. Seviye 0,15: TV (0,5) ve kat olaylarının
-        // (0,12-0,55) altında kalsın; anomali seslerini hiçbir zaman bastırmasın.
+        // Arka müzik: 2B, döngüde. Seviyeyi ArkaMuzik.TabanSeviyesi belirler (#143: sahnedeki değer okunmaz);
+        // buradaki değer yalnızca Editor'de kaynağa bakan birine doğru sayıyı göstersin diye aynı tutulur.
         AudioSource muzik = KokKaynak("Arka_Muzik");
         muzik.clip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Muzik/Muzik_Gerilim.wav");
         muzik.loop = true;
-        muzik.volume = 0.15f;
+        muzik.volume = ArkaMuzik.TabanSeviyesi;
         if (muzik.GetComponent<ArkaMuzik>() == null) muzik.gameObject.AddComponent<ArkaMuzik>();
 
         // Dış sesler: 2B, tek seferlik; ne zaman çalacağını DisSesleri seçer.

@@ -252,8 +252,8 @@ public class AnomaliButunlukTestleri
     public void Ortam_ses_katmanlari_sahanlikta_ve_dongude()
     {
         // Bebek artık döngü değil, bir kat olayı (#35); aşağıdaki testte.
-        // Boru katmanı #74'te kalktı (Şahan'ın ses kararları).
-        foreach (string yol in new[] { "Ses_Ugultu", "Kapi_2/Ses_TV" })
+        // Boru katmanı #74'te, TV katmanı #143'te kalktı (Şahan'ın ses kararları). Tek sürekli katman uğultu.
+        foreach (string yol in new[] { "Ses_Ugultu" })
         {
             Transform t = sahanlik.Find(yol);
             Assert.IsNotNull(t, $"'{yol}' ses katmanı sahanlıkta yok.");

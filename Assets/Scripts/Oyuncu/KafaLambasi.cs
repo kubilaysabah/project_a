@@ -31,7 +31,7 @@ public class KafaLambasi : MonoBehaviour
     // Şahan'ın build testi (2026-09-26): "çok güçlü ama küçük bir alanı aydınlatıyor" →
     // şiddet 6'dan 3,5'e, dış koni 44°'den 64°'ye; iç koni 26°'de kaldı ki kenar geniş bir
     // geçişle yumuşasın.
-    public const float Siddet = 3.5f;
+    public const float Siddet = 2.7f;   // #143 (madde 3, Şahan: "fener ışığı çok"): 3,5'ten indirildi
     // #120: menzil 10 → 15 m. URP spot ışığı menzile yaklaşırken yumuşakça sıfıra iner ((1-(d/r)^4)^2):
     // 10 m menzilde 7 m'deki daire kapısına ışığın yalnızca %58'i ulaşıyordu, ters kareyle birlikte %4; gece
     // post-processing'i 0,2 altını eziyor, sahanlık kapısı okunmuyordu. 15 m'de 7 m'de %91 kalır.
@@ -39,7 +39,7 @@ public class KafaLambasi : MonoBehaviour
     // #120 UZAK TELAFİSİ: huzmenin ortası uzağa vuruyorsa fener güçlenir. Gerçek fener böyle yapmaz ama
     // göz yapar (uzağa bakınca iris açılır); No70 ve Chilla's Art fenerleri 8-10 m'yi okutur. Yakın duvar
     // (UzakBaslangic altı) etkilenmez: antre, çekmece, not eskisi gibi. Çarpan 3 m'de 1, 8 m'de 1+UzakKazanc.
-    public static float UzakBaslangic = 3f, UzakTam = 8f, UzakKazanc = 1.6f;
+    public static float UzakBaslangic = 3f, UzakTam = 8f, UzakKazanc = 1.1f;   // #143: uzak kazanç 1,6 → 1,1 (en çok ×2,1)
     private const float UzakGecisHizi = 4f;         // çarpanın saniyede en çok ne kadar değiştiği (0,25 sn'de tam yol)
     public const float DisAci = 64f, IcAci = 26f;   // dış koni ve tam şiddet konisi (yumuşak kenar)
     public static readonly Color Renk = new Color(1f, 0.90f, 0.72f);   // sıcak beyaz, ampullerden biraz beyaz
@@ -54,10 +54,8 @@ public class KafaLambasi : MonoBehaviour
     // (saniyede ~0,6): av bitip gerilim sıfırlanınca lamba bir anda değil, iki saniyede toparlar.
     public static readonly Color SariRenk = new Color(1f, 0.93f, 0.45f);   // sodyum lambası sarısı
     private const float GostergeHizi = 0.6f;    // karışımın saniyede en çok ne kadar değiştiği
-    private const float VinlamaTavani = 0.22f;  // vınlamanın en yüksek ses gücü (kalp atışının altında)
     private float karisim;                      // şu anki sararma (0-1)
     private float incelemeCarpani = 1f;         // inceleme kısması: %12 (IncelemeKismasi)
-    private AudioSource vinlama;
     private bool acik = true;
     private bool takili = true;   // lamba oyuncunun kafasında mı (açılışta çividen alınana kadar değil)
     private Coroutine titreme;
@@ -145,17 +143,10 @@ public class KafaLambasi : MonoBehaviour
             if (f != null) liste.Add(f);
         }
         fisiltilar = liste.ToArray();
-
-        // Vınlama (#105): kendi kaynağı, döngülü, 2B, oda yankısından muaf (lamba kafada, odada değil).
-        GameObject vinNesnesi = new GameObject("Lamba_Vinlama");
-        vinNesnesi.transform.SetParent(transform, false);
-        vinlama = vinNesnesi.AddComponent<AudioSource>();
-        vinlama.clip = Resources.Load<AudioClip>("Sesler/Lamba_Vinlama");
-        vinlama.loop = true;
-        vinlama.playOnAwake = false;
-        vinlama.spatialBlend = 0f;
-        vinlama.bypassListenerEffects = true;
-        vinlama.volume = 0f;
+        // #143 (madde 4, Şahan: "fener sesi gereksiz"): #105'in gerilimle yükselen elektrik vınlaması kaldırıldı.
+        // Lambanın gerilim belirtisi artık yalnız görseldir (sararma ve güç düşüşü); kuralın ses eğrisi
+        // (LambaGerilimKurali.Vinlama) dosyada duruyor ama kimse çalmıyor. Lamba_Vinlama kaydı arızalı
+        // asansör lambasında (ArizaliLamba) kullanılmaya devam eder.
     }
 
     // Gerilim göstergesi her karede (#105): renk, güç ve vınlama hedefe yumuşakça yaklaşır.
@@ -171,14 +162,6 @@ public class KafaLambasi : MonoBehaviour
         // yumuşatılmış karışımdan türetilir ki renk ve güç birlikte hareket etsin).
         UzakTelafisiniGuncelle();
         isik.intensity = Siddet * TelafiCarpani * UzakCarpani * incelemeCarpani * (1f - (1f - LambaGerilimKurali.EnDusukGuc) * karisim);
-
-        if (vinlama == null || vinlama.clip == null) return;
-        // Vınlama yalnızca lamba yanarken: sesi çıkaran lambanın kendisi. Menüde (zaman durur) kısılır.
-        float vinHedef = IsikYaniyor && Time.timeScale > 0f ? LambaGerilimKurali.Vinlama(GerilimDegeri()) * VinlamaTavani : 0f;
-        vinlama.volume = Mathf.MoveTowards(vinlama.volume, vinHedef, 0.3f * Time.deltaTime);
-        vinlama.pitch = LambaGerilimKurali.VinlamaPerdesi(GerilimDegeri());
-        if (vinlama.volume > 0.001f && !vinlama.isPlaying) vinlama.Play();
-        else if (vinlama.volume <= 0.001f && vinlama.isPlaying) vinlama.Stop();
     }
 
     // Uzak telafisi (#120): huzmenin ortasındaki ilk engelin uzaklığı (oyuncunun kendi parçaları atlanır;

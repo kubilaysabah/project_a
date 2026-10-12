@@ -41,7 +41,7 @@ public class CatiKapisi : MonoBehaviour, IEtkilesimli
         if (!EtkilesimeAcik) return;
         if (!Cep.Kullan(EsyaTuru.KatAnahtari, KatSayaci.CatiKati))
         {
-            if (kilitli == null) kilitli = Resources.Load<AudioClip>("Sesler/KatKapisi_Kilitli");
+            if (kilitli == null) kilitli = Resources.Load<AudioClip>("Sesler/IcKapi_Kilitli");   // #143: kat kapısıyla aynı kayıt
             if (kilitli != null) AudioSource.PlayClipAtPoint(kilitli, transform.position, 0.8f);
             return;
         }

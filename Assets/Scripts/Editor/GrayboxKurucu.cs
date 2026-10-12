@@ -1908,9 +1908,9 @@ public static partial class GrayboxKurucu
         OrtamKaynagi("Ses_Ugultu", sahanlik, new Vector3(0f, 2.4f, -SahanlikDerin / 2f),
                      "Ortam_Ugultu", 0.25f, 4f, 9f);
 
-        // Uzak TV: 2 numaranın İÇİNDEN, holün 80 cm gerisinden.
-        OrtamKaynagi("Ses_TV", sahanlik.Find("Kapi_2"), new Vector3(sol - 0.8f, 1.2f, 0f),
-                     "Ortam_TV", 0.5f, 1.5f, 9f);
+        // #143 (madde 5, Şahan: "her katta duyulan TV sesi gereksiz gürültü"): 2 numaranın içinden gelen sürekli
+        // TV katmanı (Ses_TV, #14) kaldırıldı. Sürekli katman olarak yalnız uğultu kaldı; TV sesi ileride
+        // yalnızca bir katın kendi olayı olarak (KatZinciriVarligi.sesler) geri gelebilir.
 
         // ---- KAT OLAYLARI (#35) ----
         // Döngüde DEĞİL: her katta yalnızca biri, KatYoneticisi'nin seçtiği anlarda bir iki

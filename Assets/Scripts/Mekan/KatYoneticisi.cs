@@ -291,7 +291,7 @@ public class KatYoneticisi : MonoBehaviour
     {
         var liste = new System.Collections.Generic.List<OrtamSesi>();
         if (sahanlik == null) return liste.ToArray();
-        foreach (string yol in new[] { "Kapi_2/Ses_TV", "Ses_Boru" })
+        foreach (string yol in new[] { "Kapi_2/Ses_TV", "Ses_Boru" })   // ikisi de kalktı (#74, #143); bulunamazsa liste boş kalır
         {
             Transform t = sahanlik.Find(yol);
             OrtamSesi o = t != null ? t.GetComponent<OrtamSesi>() : null;
