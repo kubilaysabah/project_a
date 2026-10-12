@@ -42,7 +42,9 @@ public class DokuzuncuKat : MonoBehaviour
     [SerializeField] private IcKapi salonKapisi;          // lamba asılınca açılan kapı
     [SerializeField] private DaireLambalari lambalar;     // dairenin tavan lambaları (yalnızca salon yanar)
     [SerializeField] private DaireElektrigi elektrik;
-    [SerializeField] private GameObject golge;            // sofrada oturan Gölge (Kacis_Golgesi kopyası)
+    [SerializeField] private GameObject golge;            // sofrada oturan figür (#143: Cin_4_Oturan prefab kopyası; eskiden Kacis_Golgesi)
+    [SerializeField] private GameObject ayaktaFigur;      // #143: anahtar alınınca sandalyeden "kalkan" ayakta figür (Cin_4 prefabı)
+    private GameObject ayakta;                            // ayakta figürün sahnedeki kopyası (kovalayan); bölüm başa dönünce silinir
     [SerializeField] private Transform anahtarYeri;       // oyuncunun tabağı (Sofra/Yer_2)
     [SerializeField] private GameObject anahtarSablonu;   // Esya_KatAnahtari prefabı
     [SerializeField] private AudioSource radyo;           // Oda A'daki radyo (Nuri'nin istasyonu)
@@ -52,6 +54,10 @@ public class DokuzuncuKat : MonoBehaviour
     private const float KacisBeklemesi = 2.5f;   // anahtar alındıktan kaç sn sonra Gölge yürümeye başlar
     private const float KacisHizi = 2.0f;         // oyuncu 1,8 m/sn
     private const float OturmaYuksekligi = 0.47f; // sandalye minderinin üstü
+    /// <summary>#143: oturan figürün kökü (pivotu kalçanın altındaki zemin noktası) döşemeden bu kadar yukarıda durur:
+    /// bükülmüş ağda kalça 0,39 m'ye düşüyor, minder 0,47'de; kök 0,12 yukarı alınınca kalça minderin biraz üstüne
+    /// gelir, ayaklar masanın altında birkaç cm havada kalır (uzun elbise ve karanlık örter).</summary>
+    public const float OturanKokYuksekligi = 0.12f;
     private const float TerkBeklemesi = 2.5f;     // ikinci son: anahtarsız kabinde bu kadar durunca kapılar kapanır (#121)
 
     /// <summary>Sahnedeki tek dokuzuncu kat (AsansorPanosu buradan ulaşır).</summary>
@@ -255,10 +261,28 @@ public class DokuzuncuKat : MonoBehaviour
         if (golge != null)
         {
             GolgeImzasi.Cal(golge.transform.position + Vector3.up * 1.2f, 1f);
-            GolgeAnimasyonu anim = golge.GetComponent<GolgeAnimasyonu>();
-            if (anim != null) anim.Oturuyor = false;
-            Vector3 p = golge.transform.position;
-            golge.transform.position = new Vector3(p.x, golgeOturmaYeri.y - OturmaYuksekligi + KalcaYuksekligi(), p.z);
+            if (ayaktaFigur != null)
+            {
+                // #143: oturan figürün iskeleti yok, kalkamaz. Salonun ışığı aynı anda söner; karanlıkta oturan
+                // kopya gizlenir, yerine sandalyenin yanında AYAKTA kopya belirir ve kovalamaca onunla sürer.
+                // Sandalyenin arkasına (masadan uzağa) 0,35 m: masaya bakan kökün -ileri yönü.
+                Vector3 zemin = golgeOturmaYeri - Vector3.up * OturanKokYuksekligi;
+                Vector3 yer = zemin - golgeOturmaDonusu * Vector3.forward * 0.35f;
+                if (ayakta != null) Destroy(ayakta);
+                ayakta = Instantiate(ayaktaFigur, yer, golgeOturmaDonusu, golge.transform.parent);
+                ayakta.name = "Ayakta_Golge";
+                CinSesi.Belirdi(yer);   // #143: sandalyeden kalkış sesi
+                golge.SetActive(false);
+                if (kacis != null) kacis.HazirGolge = ayakta;
+            }
+            else
+            {
+                // Eski yol (kutu Gölge, GolgeAnimasyonu ile): oturuştan kalkar.
+                GolgeAnimasyonu anim = golge.GetComponent<GolgeAnimasyonu>();
+                if (anim != null) anim.Oturuyor = false;
+                Vector3 p = golge.transform.position;
+                golge.transform.position = new Vector3(p.x, golgeOturmaYeri.y - OturmaYuksekligi + KalcaYuksekligi(), p.z);
+            }
         }
         if (elektrik != null) elektrik.Ayarla(false);
         StartCoroutine(CividekiLambayiTitret());
@@ -295,6 +319,7 @@ public class DokuzuncuKat : MonoBehaviour
         StartCoroutine(KapiyaVur());
         yield return pano.KapilariOynat(1f, 0f);
         if (golge != null) golge.SetActive(false);
+        if (ayakta != null) ayakta.SetActive(false);   // #143: kapılar kapanınca kovalayan da görünmez
         pano.KalkisSesiCal();
         pano.Ugultu(true);
         KameraHareketi.Sars(0.10f, 0.7f);
@@ -403,6 +428,7 @@ public class DokuzuncuKat : MonoBehaviour
             Esya e = anahtar.GetComponent<Esya>();
             if (e != null) e.Ayarla(EsyaTuru.KatAnahtari, "cati_anahtari", KatSayaci.CatiKati);
         }
+        if (ayakta != null) { Destroy(ayakta); ayakta = null; }   // #143: kovalayan kopya gider, oturan yerine döner
         if (golge != null)
         {
             golge.SetActive(true);
@@ -420,7 +446,7 @@ public class DokuzuncuKat : MonoBehaviour
         if (kacis == null)
         {
             kacis = gameObject.AddComponent<KacisAni>();
-            kacis.HazirGolge = golge;
+            kacis.HazirGolge = golge;   // #143: anahtar alınınca ayakta kopyaya çevrilir (AnahtarAlindi)
             kacis.YakalanmaIsleyici = Yakalandi;
             kacis.KapidanKacis = false;
             kacis.Hazirla(KatSayaci.CatiKati, golge, KacisBeklemesi, KacisHizi, null, null);

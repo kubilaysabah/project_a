@@ -40,6 +40,12 @@ POZ = {
     6: dict(yontem="bant", omuz=(0.17, 0.82), zalt=0.70, aci=62.0),
 }
 
+# #143 (madde 11): OTURAN kopya. Dokuzuncu katın sofrasında oturan figür (Şahan: Cin_4). Aynı ağdan ikinci bir
+# FBX (Cin_N_Oturan.fbx, aynı klasöre: dokular paylaşılır): kalça ekleminin altındaki her şey 90° öne, dizin
+# altındaki her şey oradan 90° aşağı döndürülür (ağırlıklı, eklem çevresinde yumuşak bant). Etek de kucağa
+# yatar ve dizden sarkar: oturan bir elbise gibi okunur. Oranlar boyun yüzdesi: kalça eklemi, diz eklemi.
+OTURAN = {4: dict(kalca=0.47, diz=0.27)}
+
 secilenler = [int(a) for a in sys.argv[sys.argv.index("--") + 1:]] if "--" in sys.argv else sorted(HEDEF_BOY)
 
 
@@ -88,6 +94,40 @@ def kollari_indir(f, n, boy):
         v.co.x = ox * taraf + rx * math.cos(a) + rz * math.sin(a)
         v.co.z = oz - rx * math.sin(a) + rz * math.cos(a)
     print(f"POZ Cin_{n}: kollar {p['aci']:.0f} derece indirildi ({p['yontem']})")
+
+
+def oturt(f, boy, kalca_oran, diz_oran):
+    # Pivot ayaklarda (0, 0, 0), ön -Y, yukarı +Z. Önce kalça, sonra diz; sınıflandırma ORİJİNAL yüksekliğe göre.
+    zk, zd = kalca_oran * boy, diz_oran * boy
+    def ort_y(z0, z1):
+        ys = [v.co.y for v in f.data.vertices if z0 <= v.co.z <= z1]
+        return sum(ys) / len(ys) if ys else 0.0
+    yk = ort_y(zk - 0.03, zk + 0.03)           # kalça ekseninin ön-arka yeri (bandın ortalaması)
+    yd = ort_y(zd - 0.03, zd + 0.03)           # diz ekseni
+    # Diz pivotunun kalça dönüşünden SONRAKİ yeri (ağırlık 1 ile): (dy, dz) -> (dy + dz, -dy), dz = zd - zk < 0.
+    dy_d, dz_d = yd - yk, zd - zk
+    yd2, zd2 = yk + dy_d + dz_d, zk - dy_d
+    for v in f.data.vertices:
+        z0 = v.co.z
+        w1 = 1.0 - yumusak(zk - 0.04, zk + 0.04, z0)    # kalçanın altında 1, üstünde 0
+        w2 = 1.0 - yumusak(zd - 0.04, zd + 0.04, z0)    # dizin altında 1
+        if w1 <= 0.0: continue
+        a = math.radians(90.0) * w1
+        dy, dz = v.co.y - yk, v.co.z - zk
+        y1 = yk + dy * math.cos(a) + dz * math.sin(a)
+        z1 = zk - dy * math.sin(a) + dz * math.cos(a)
+        if w2 > 0.0:
+            b = math.radians(-90.0) * w2
+            dy, dz = y1 - yd2, z1 - zd2
+            y1 = yd2 + dy * math.cos(b) + dz * math.sin(b)
+            z1 = zd2 - dy * math.sin(b) + dz * math.cos(b)
+        v.co.y, v.co.z = y1, z1
+    # Ayaklar yere, pivot kalçanın altına: otururken kök sandalyenin önündeki zeminde, kalçanın tam altında durur.
+    zmin = min(v.co.z for v in f.data.vertices)
+    for v in f.data.vertices:
+        v.co.z -= zmin
+        v.co.y -= yk
+    print(f"POZ oturan: kalça {zk:.2f} m -> {zk - zmin:.2f} m, diz {zd:.2f}, en alt {zmin:.3f} m kaydırıldı")
 
 
 def hazirla(n):
@@ -145,6 +185,15 @@ def hazirla(n):
                              apply_scale_options="FBX_SCALE_ALL", axis_forward="-Z", axis_up="Y", bake_space_transform=True,
                              mesh_smooth_type="FACE", use_mesh_modifiers=True, add_leaf_bones=False,
                              path_mode="COPY", embed_textures=False)
+    # #143: oturan kopya (yalnız OTURAN tablosundakiler). Ayakta duran dosya yazıldıktan sonra aynı ağ bükülür ve
+    # ikinci bir FBX olarak yanına kaydedilir; dokular aynı klasöre bir daha kopyalanır (aynı dosyalar).
+    if n in OTURAN:
+        oturt(f, HEDEF_BOY[n], OTURAN[n]["kalca"], OTURAN[n]["diz"])
+        f.name = f"Cin_{n}_Oturan"
+        bpy.ops.export_scene.fbx(filepath=os.path.join(klasor, f"Cin_{n}_Oturan.fbx"), use_selection=True, apply_unit_scale=True,
+                                 apply_scale_options="FBX_SCALE_ALL", axis_forward="-Z", axis_up="Y", bake_space_transform=True,
+                                 mesh_smooth_type="FACE", use_mesh_modifiers=True, add_leaf_bones=False,
+                                 path_mode="COPY", embed_textures=False)
     ucgen2 = sum(len(p.vertices) - 2 for p in f.data.polygons)
     print(f"OLCU Cin_{n} ucgen {ucgen} -> {ucgen2} boy {boy:.2f} -> {HEDEF_BOY[n]:.2f} m, dokular {klasor}")
 

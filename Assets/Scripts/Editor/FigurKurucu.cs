@@ -82,6 +82,39 @@ public static class FigurKurucu
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(gecici, yol);
             Object.DestroyImmediate(gecici);
             prefablar.Add(prefab);
+
+            // #143 (madde 11): OTURAN kopya (figur_hazirla.py OTURAN tablosu, bugün yalnız Cin_4). Aynı kuruluş,
+            // iki fark: FigurYurumesi YOK (oturan figür yürümez; ayrıca FigurYurumesi'nin "sahnede başka figür var"
+            // kümesine girseydi dokuzuncu katın seti hep etkin olduğu için bütün oyunda hiçbir figür belirmezdi)
+            // ve torbaya (CinOlaylari.figurler) girmez: yalnız dokuzuncu katın kurucusu kullanır.
+            string oturanFbx = $"{ModelKlasoru}/Cin_{n}/Cin_{n}_Oturan.fbx";
+            GameObject oturanModel = AssetDatabase.LoadAssetAtPath<GameObject>(oturanFbx);
+            if (oturanModel != null)
+            {
+                var omi = AssetImporter.GetAtPath(oturanFbx) as ModelImporter;
+                if (omi != null && (omi.materialImportMode != ModelImporterMaterialImportMode.ImportViaMaterialDescription || omi.importAnimation))
+                {
+                    omi.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
+                    omi.importAnimation = false;
+                    omi.animationType = ModelImporterAnimationType.None;
+                    omi.SaveAndReimport();
+                    oturanModel = AssetDatabase.LoadAssetAtPath<GameObject>(oturanFbx);
+                }
+                GameObject okok = new GameObject($"Cin_{n}_Oturan");
+                GameObject ogovde = (GameObject)PrefabUtility.InstantiatePrefab(oturanModel);
+                PrefabUtility.UnpackPrefabInstance(ogovde, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+                ogovde.name = "Govde";
+                ogovde.transform.SetParent(okok.transform, false);
+                foreach (Collider c in okok.GetComponentsInChildren<Collider>()) Object.DestroyImmediate(c);
+                foreach (Renderer r in okok.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+                Vector3 osol, osag;
+                if (!GozleriOlc(okok, out osol, out osag)) Debug.LogWarning($"[FIGUR] Cin_{n}_Oturan: göz yeri ölçülemedi.");
+                var ogoz = okok.AddComponent<GozParlamasi>();
+                ogoz.Kur(AssetDatabase.LoadAssetAtPath<Material>(GozMalzemesi), osol, osag);
+                Debug.Log($"[FIGUR] Cin_{n}_Oturan gözler: sol {osol:F3} sağ {osag:F3}");
+                PrefabUtility.SaveAsPrefabAsset(okok, $"{PrefabKlasoru}/Cin_{n}_Oturan.prefab");
+                Object.DestroyImmediate(okok);
+            }
         }
 
         CinOlaylari cin = Object.FindAnyObjectByType<CinOlaylari>(FindObjectsInactive.Include);

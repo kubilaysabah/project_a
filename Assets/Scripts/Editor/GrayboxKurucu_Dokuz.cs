@@ -151,6 +151,7 @@ public static partial class GrayboxKurucu
                                 yon.Nokta(2.8f, 0f, 6.3f), sofraDonusu, carpisma: true);
         Transform anahtarYeri = null;
         GameObject golge = null;
+        GameObject ayaktaPrefab = null;   // #143: kalkınca kovalayan ayakta figürün prefabı
         if (masa != null)
         {
             // Sandalyeler: 1 Cemal (Gölge oturur, yerinde), 2 oyuncu (çekilmiş), 3 Rıza ve 4 Hasan (geri itilmiş,
@@ -192,8 +193,21 @@ public static partial class GrayboxKurucu
             }
             // Gölge'nin anahtarlığı Cemal'in tabağının önünde (#105'teki şıkırtının sahibi masada görünür).
             Model("Anahtarlik", masa.transform, "Dokuz_Askilar", "Anahtarlik", new Vector3(-0.33f, 0.758f, 0.43f), 25f, carpisma: false);
-            // Oturan Gölge: Kacis_Golgesi prefabının kopyası, Cemal'in sandalyesinde (1), yüzü masaya (sırtı kapıya).
-            GameObject golgeSablonu = Sablon("Kacis_Golgesi");
+            // #143 (madde 11, Şahan: Cin_4 otursun): oturan figür Cin_4_Oturan prefabı (FigurKurucu, bükülmüş ağ),
+            // Cemal'in sandalyesinde (1), yüzü masaya. Kökü kalçanın altındaki zemin noktası; minder 0,47'de olduğu
+            // için kök DokuzuncuKat.OturanKokYuksekligi kadar yukarı alınır. Prefab yoksa eski kutu Gölge kurulur.
+            GameObject oturanPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Figurler/Cin_4_Oturan.prefab");
+            ayaktaPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Figurler/Cin_4.prefab");
+            if (oturanPrefab != null)
+            {
+                golge = (GameObject)PrefabUtility.InstantiatePrefab(oturanPrefab, daire);
+                golge.name = "Oturan_Golge";
+                Vector3 oturak = masa.transform.TransformPoint(new Vector3(-0.35f, 0f, 0.62f));
+                golge.transform.position = new Vector3(oturak.x, oturak.y + DokuzuncuKat.OturanKokYuksekligi, oturak.z);
+                golge.transform.rotation = Quaternion.LookRotation(-masa.transform.forward);   // masaya bakar
+            }
+            // Eski yol: Kacis_Golgesi prefabının kopyası (oturan figür prefabı henüz kurulmadıysa).
+            GameObject golgeSablonu = golge == null ? Sablon("Kacis_Golgesi") : null;
             if (golgeSablonu != null)
             {
                 golge = (GameObject)PrefabUtility.InstantiatePrefab(golgeSablonu, daire);
@@ -261,6 +275,7 @@ public static partial class GrayboxKurucu
         seri.FindProperty("lambalar").objectReferenceValue = daire.GetComponent<DaireLambalari>();
         seri.FindProperty("elektrik").objectReferenceValue = daire.GetComponent<DaireElektrigi>();
         seri.FindProperty("golge").objectReferenceValue = golge;
+        seri.FindProperty("ayaktaFigur").objectReferenceValue = ayaktaPrefab;   // #143
         seri.FindProperty("anahtarYeri").objectReferenceValue = anahtarYeri;
         seri.FindProperty("anahtarSablonu").objectReferenceValue = Sablon("Esya_KatAnahtari");
         seri.FindProperty("radyo").objectReferenceValue = radyoKaynagi;
