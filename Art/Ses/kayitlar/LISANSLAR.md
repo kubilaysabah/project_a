@@ -42,6 +42,13 @@ zorunluluğu getirmez; yine de kaynakları burada kayıtlı.
 | `bigsoundbank_0683_grinding_metal_gate.wav` | S31 demir kat kapısının gıcırtısı (#74) | https://bigsoundbank.com/grinding-metal-gate-s0683.html | Joseph Sardin | CC0 1.0 |
 | `bigsoundbank_0378_lock_and_big_key.wav` | S32 anahtar-kilit; bütün kilitlerin açılışı (#74) | https://bigsoundbank.com/lock-and-big-key-s0378.html | Joseph Sardin | CC0 1.0 |
 | `bigsoundbank_1712_elevator_6_floors.wav` | S40/S41 asansör: yolculuk uğultusu, varış, kalkış (#74) | https://bigsoundbank.com/elevator-6-floors-s1712.html | Joseph Sardin | CC0 1.0 |
+| `bigsoundbank_0046_cupboard_door.wav` | #143 aday: dolap kapağı (madde 2) | https://bigsoundbank.com/cupboard-s0046.html | Joseph Sardin | CC0 1.0 |
+| `bigsoundbank_0305_creaking_closet_door.wav` | #143 aday: gıcırtılı dolap kapısı (madde 2) | https://bigsoundbank.com/creaking-closet-door-s0305.html | Joseph Sardin | CC0 1.0 |
+| `bigsoundbank_0540_old_switch.wav` | #143 aday: eski şalter (madde 7, sigorta) | https://bigsoundbank.com/old-switch-s0540.html | Joseph Sardin | CC0 1.0 |
+| `bigsoundbank_0664_toilet_bowl.wav` | #143 aday: klozet kapağı açma-kapama (madde 8) | https://bigsoundbank.com/toilet-bowl-s0664.html | Joseph Sardin | CC0 1.0 |
+| `bigsoundbank_0306_long_creaking_door.wav` | #143 aday: uzun menteşe gıcırtısı (madde 9, devrilen kapı katmanı) | https://bigsoundbank.com/long-creaking-door-s0306.html | Joseph Sardin | CC0 1.0 |
+| `724111__hamilthon__cabinet-or-door-closure-opening.wav` | #143 aday: dolap kapağı açma-kapama, gıcırtılı (madde 2) | https://freesound.org/people/Hamilthon/sounds/724111/ | Hamilthon | CC0 1.0 |
+| `637483__kyles__door-wood-cabinet-creaks-slow-open-close.flac` | #143 aday: tahta dolap kapağı, yavaş, gıcırtılı (madde 2) | https://freesound.org/people/kyles/sounds/637483/ | kyles | CC0 1.0 |
 
 **Notlar**
 - **#74 (2026-09-27):** Freesound dosyalarını Şahan kendi hesabıyla indirdi; Pixabay dosyaları herkese açık
